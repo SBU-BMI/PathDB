@@ -14,28 +14,16 @@ tac_lite_config_scheme_1:
 tac_lite_grants_scheme_1:
   anonymous:
     collections:
-      6: '6'
+      2: '2'
   authenticated:
     collections:
-      6: '6'
+      2: '2'
   administrator:
     collections:
       - '0'
   editor:
     collections:
       - '0'
-  bremer_lab:
-    collections:
-      - '0'
-  emory:
-    collections:
-      - '0'
-  prism_people:
-    collections: {  }
-  saltz_lab:
-    collections: {  }
-  diprima_lab:
-    collections: {  }
 tac_lite_config_scheme_2:
   name: Read/Write
   perms:
@@ -52,12 +40,6 @@ tac_lite_grants_scheme_2:
   administrator:
     collections: {  }
   editor:
-    collections: {  }
-  saltz_lab:
-    collections: {  }
-  prism_people:
-    collections: {  }
-  bremer_lab:
     collections: {  }
 tac_lite_config_scheme_3:
   name: Read/Write/Delete
@@ -77,22 +59,3 @@ tac_lite_grants_scheme_3:
     collections: {  }
   editor:
     collections: {  }
-  bremer_lab:
-    collections:
-      7: '7'
-      8: '8'
-      6: '6'
-      4: '4'
-      3: '3'
-  emory:
-    collections:
-      8: '8'
-      4: '4'
-  prism_people:
-    collections: {  }
-  saltz_lab:
-    collections:
-      4: '4'
-  diprima_lab:
-    collections:
-      7: '7'
