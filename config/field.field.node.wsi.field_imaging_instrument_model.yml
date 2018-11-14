@@ -1,0 +1,19 @@
+uuid: b66bf783-71a9-4627-8e90-d5ab3995feff
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_imaging_instrument_model
+    - node.type.wsi
+id: node.wsi.field_imaging_instrument_model
+field_name: field_imaging_instrument_model
+entity_type: node
+bundle: wsi
+label: 'Imaging Instrument Model'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

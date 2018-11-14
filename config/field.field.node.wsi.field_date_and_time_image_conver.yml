@@ -1,0 +1,21 @@
+uuid: 3cfbe411-36f4-4c3b-8889-8d1acfe7e479
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_date_and_time_image_conver
+    - node.type.wsi
+  module:
+    - datetime
+id: node.wsi.field_date_and_time_image_conver
+field_name: field_date_and_time_image_conver
+entity_type: node
+bundle: wsi
+label: 'Date and Time Image Converted'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

@@ -1,0 +1,9 @@
+uuid: 63c463e1-fb58-4884-8ebb-6f7583c68647
+langcode: en
+status: true
+dependencies: {  }
+name: 'Disease Types'
+vid: disease_types
+description: ''
+hierarchy: 0
+weight: 0

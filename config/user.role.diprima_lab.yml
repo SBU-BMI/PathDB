@@ -1,0 +1,9 @@
+uuid: 464a6747-2654-4a5f-b86a-3cf4b0993c35
+langcode: en
+status: true
+dependencies: {  }
+id: diprima_lab
+label: 'Diprima Lab'
+weight: -2
+is_admin: null
+permissions: {  }

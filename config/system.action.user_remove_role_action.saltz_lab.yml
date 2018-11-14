@@ -1,0 +1,14 @@
+uuid: bbff76ff-e7be-4836-8975-a126018a902a
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.saltz_lab
+  module:
+    - user
+id: user_remove_role_action.saltz_lab
+label: 'Remove the Saltz Lab role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: saltz_lab

@@ -1,0 +1,9 @@
+uuid: 71166adc-45a8-4efe-bd47-c5a99da8619b
+langcode: en
+status: true
+dependencies: {  }
+name: 'Image Color Types'
+vid: image_color_types
+description: ''
+hierarchy: 0
+weight: 0

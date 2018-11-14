@@ -1,0 +1,29 @@
+uuid: 96f40a6c-225d-408b-9e11-4ac3a7e5837d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_specimen_type
+    - node.type.wsi
+    - taxonomy.vocabulary.specimen_types
+id: node.wsi.field_specimen_type
+field_name: field_specimen_type
+entity_type: node
+bundle: wsi
+label: 'Specimen Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      specimen_types: specimen_types
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

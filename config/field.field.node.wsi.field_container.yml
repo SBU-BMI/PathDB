@@ -1,0 +1,19 @@
+uuid: 9b2c810c-c263-461c-8b16-ea43d037484b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_container
+    - node.type.wsi
+id: node.wsi.field_container
+field_name: field_container
+entity_type: node
+bundle: wsi
+label: Container
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

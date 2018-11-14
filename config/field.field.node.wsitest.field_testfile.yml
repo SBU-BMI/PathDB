@@ -1,0 +1,27 @@
+uuid: f491401f-3a02-4af6-a347-64c49054d76e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_testfile
+    - node.type.wsitest
+  module:
+    - file
+id: node.wsitest.field_testfile
+field_name: field_testfile
+entity_type: node
+bundle: wsitest
+label: testfile
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: ''
+  file_extensions: 'svs jpg'
+  max_filesize: ''
+  description_field: true
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

@@ -1,0 +1,14 @@
+uuid: 9ac5a3c7-51af-4b55-bca1-e688ea88d9b1
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.diprima_lab
+  module:
+    - user
+id: user_remove_role_action.diprima_lab
+label: 'Remove the Diprima Lab role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: diprima_lab

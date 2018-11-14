@@ -1,0 +1,23 @@
+uuid: 3106cb56-ed23-4e4d-abe2-26e126de232b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_height
+    - node.type.wsi
+id: node.wsi.field_height
+field_name: field_height
+entity_type: node
+bundle: wsi
+label: Height
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 0
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

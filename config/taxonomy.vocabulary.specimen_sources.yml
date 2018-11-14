@@ -1,0 +1,9 @@
+uuid: 5224eb86-100d-4a10-8056-f204a3df5522
+langcode: en
+status: true
+dependencies: {  }
+name: 'Specimen Sources'
+vid: specimen_sources
+description: ''
+hierarchy: 0
+weight: 0

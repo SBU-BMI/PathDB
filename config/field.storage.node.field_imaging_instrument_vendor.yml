@@ -1,0 +1,20 @@
+uuid: a8c21904-c3b9-4b13-8c8c-00b5ee234d86
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+id: node.field_imaging_instrument_vendor
+field_name: field_imaging_instrument_vendor
+entity_type: node
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,9 @@
+uuid: d3a6c631-38bc-41e3-bcc1-001580eaa7db
+langcode: en
+status: true
+dependencies: {  }
+id: bremer_lab
+label: 'Bremer Lab'
+weight: -6
+is_admin: null
+permissions: {  }

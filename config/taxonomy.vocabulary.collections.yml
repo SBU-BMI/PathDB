@@ -1,0 +1,9 @@
+uuid: 02bedb75-1658-4eae-af14-fddb01914d11
+langcode: en
+status: true
+dependencies: {  }
+name: Collections
+vid: collections
+description: ''
+hierarchy: 0
+weight: 0

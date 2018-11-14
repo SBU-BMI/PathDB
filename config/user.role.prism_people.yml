@@ -1,0 +1,9 @@
+uuid: 0124ce3c-ee54-4e28-b782-473070d0e92f
+langcode: en
+status: true
+dependencies: {  }
+id: prism_people
+label: 'Prism People'
+weight: -4
+is_admin: null
+permissions: {  }

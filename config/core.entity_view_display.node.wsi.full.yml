@@ -1,0 +1,539 @@
+uuid: 4d12d7be-9cc0-45cb-ba37-bd0b5b98f8e6
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.wsi.field_collection
+    - field.field.node.wsi.field_container
+    - field.field.node.wsi.field_date_and_time_image_captur
+    - field.field.node.wsi.field_date_and_time_image_conver
+    - field.field.node.wsi.field_disease_type
+    - field.field.node.wsi.field_height
+    - field.field.node.wsi.field_image_color_type
+    - field.field.node.wsi.field_image_compression_type
+    - field.field.node.wsi.field_image_conversion_process_w
+    - field.field.node.wsi.field_image_fileoriginal
+    - field.field.node.wsi.field_image_id
+    - field.field.node.wsi.field_imaging_instrument_model
+    - field.field.node.wsi.field_imaging_instrument_vendor
+    - field.field.node.wsi.field_imaging_instrument_version
+    - field.field.node.wsi.field_imaging_scan_software_ver
+    - field.field.node.wsi.field_imaging_scanner_software_m
+    - field.field.node.wsi.field_imaging_scanning_software_
+    - field.field.node.wsi.field_md5
+    - field.field.node.wsi.field_mpp_x
+    - field.field.node.wsi.field_mpp_y
+    - field.field.node.wsi.field_patient
+    - field.field.node.wsi.field_series
+    - field.field.node.wsi.field_specimen_date_and_time_of_
+    - field.field.node.wsi.field_specimen_date_and_time_rec
+    - field.field.node.wsi.field_specimen_embedding_id
+    - field.field.node.wsi.field_specimen_fixative_id
+    - field.field.node.wsi.field_specimen_global_id
+    - field.field.node.wsi.field_specimen_lab_id
+    - field.field.node.wsi.field_specimen_source
+    - field.field.node.wsi.field_specimen_source_id
+    - field.field.node.wsi.field_specimen_staining
+    - field.field.node.wsi.field_specimen_type
+    - field.field.node.wsi.field_study
+    - field.field.node.wsi.field_study_id
+    - field.field.node.wsi.field_subject_patient_global_id
+    - field.field.node.wsi.field_subject_patient_local_id
+    - field.field.node.wsi.field_tissue_block_id
+    - field.field.node.wsi.field_tissue_sub_block_id
+    - field.field.node.wsi.field_utarget
+    - field.field.node.wsi.field_width
+    - field.field.node.wsi.field_wsiimage
+    - node.type.wsi
+  module:
+    - datetime
+    - ds
+    - field_group
+    - taxonomy
+    - user
+third_party_settings:
+  ds:
+    layout:
+      id: ds_2col_stacked
+      library: ds/ds_2col_stacked
+      disable_css: false
+      entity_classes: all_classes
+      settings:
+        wrappers:
+          header: div
+          left: div
+          right: div
+          footer: div
+        outer_wrapper: div
+        attributes: ''
+        link_attribute: ''
+        link_custom: ''
+        classes:
+          layout_class: {  }
+    regions:
+      header:
+        - links
+        - node_title
+        - field_collection
+        - field_disease_type
+        - field_patient
+        - field_series
+        - field_study_id
+        - field_study
+        - field_height
+        - field_container
+        - field_width
+        - group_tabbers
+        - field_image_local_id
+        - field_imaging_instrument_vendor
+        - field_subject_patient_local_id
+        - field_imaging_instrument_model
+        - field_imaging_instrument_version
+        - field_subject_patient_global_id
+        - field_imaging_scanning_software_
+        - field_image_color_type
+        - group_image
+        - field_mpp_x
+        - group_subject
+        - field_specimen_source
+        - field_mpp_y
+        - group_specimen
+        - field_specimen_type
+        - field_imaging_scanner_software_m
+        - field_imaging_scan_software_ver
+        - field_specimen_source_id
+        - field_specimen_staining
+        - field_image_compression_type
+        - field_specimen_lab_id
+        - field_image_fileoriginal
+        - field_specimen_global_id
+        - field_md5
+        - field_specimen_fixative_id
+        - field_image_conversion_process_w
+        - field_specimen_embedding_id
+        - field_date_and_time_image_conver
+        - field_specimen_date_and_time_of_
+        - field_date_and_time_image_captur
+        - field_specimen_date_and_time_rec
+        - field_tissue_block_id
+        - field_tissue_sub_block_id
+    fields:
+      node_title:
+        plugin_id: node_title
+        weight: 1
+        label: hidden
+        formatter: default
+  field_group:
+    group_tabbers:
+      children:
+        - group_image
+        - group_subject
+        - group_specimen
+      parent_name: ''
+      weight: 8
+      format_type: tabs
+      format_settings:
+        id: ''
+        classes: ''
+        direction: horizontal
+      label: Tabbers
+      region: hidden
+    group_image:
+      children:
+        - field_study_id
+        - field_height
+        - field_width
+        - field_image_local_id
+        - field_imaging_instrument_vendor
+        - field_imaging_instrument_model
+        - field_imaging_instrument_version
+        - field_imaging_scanning_software_
+        - field_image_color_type
+        - field_mpp_x
+        - field_mpp_y
+        - field_imaging_scanner_software_m
+        - field_imaging_scan_software_ver
+        - field_image_compression_type
+        - field_image_fileoriginal
+        - field_md5
+        - field_image_conversion_process_w
+        - field_date_and_time_image_conver
+        - field_date_and_time_image_captur
+      parent_name: group_tabbers
+      weight: 14
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+      label: Image
+      region: hidden
+    group_specimen:
+      children:
+        - field_specimen_source
+        - field_specimen_type
+        - field_specimen_source_id
+        - field_specimen_staining
+        - field_specimen_lab_id
+        - field_specimen_global_id
+        - field_specimen_fixative_id
+        - field_specimen_embedding_id
+        - field_specimen_date_and_time_of_
+        - field_specimen_date_and_time_rec
+        - field_tissue_block_id
+        - field_tissue_sub_block_id
+      parent_name: group_tabbers
+      weight: 16
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: closed
+        description: ''
+      label: Specimen
+      region: hidden
+    group_subject:
+      children:
+        - field_subject_patient_local_id
+        - field_subject_patient_global_id
+      parent_name: group_tabbers
+      weight: 15
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: closed
+        description: ''
+      label: Subject
+      region: hidden
+id: node.wsi.full
+targetEntityType: node
+bundle: wsi
+mode: full
+content:
+  field_collection:
+    type: entity_reference_label
+    weight: 2
+    region: header
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+  field_container:
+    weight: 7
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_date_and_time_image_captur:
+    weight: 23
+    label: inline
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: header
+  field_date_and_time_image_conver:
+    weight: 22
+    label: inline
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: header
+  field_disease_type:
+    weight: 3
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_height:
+    weight: 6
+    label: inline
+    settings:
+      thousand_separator: ','
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: header
+  field_image_color_type:
+    weight: 13
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_image_compression_type:
+    weight: 18
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_image_conversion_process_w:
+    weight: 21
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_image_fileoriginal:
+    weight: 19
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_imaging_instrument_model:
+    weight: 10
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_imaging_instrument_vendor:
+    weight: 9
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_imaging_instrument_version:
+    weight: 11
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_imaging_scan_software_ver:
+    weight: 17
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_imaging_scanner_software_m:
+    weight: 16
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_imaging_scanning_software_:
+    weight: 12
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_md5:
+    weight: 20
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_mpp_x:
+    weight: 14
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 4
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  field_mpp_y:
+    weight: 15
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 4
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  field_patient:
+    weight: 4
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_series:
+    weight: 5
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_specimen_date_and_time_of_:
+    weight: 23
+    label: inline
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: header
+  field_specimen_date_and_time_rec:
+    weight: 24
+    label: inline
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: header
+  field_specimen_embedding_id:
+    weight: 22
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_specimen_fixative_id:
+    weight: 21
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_specimen_global_id:
+    weight: 20
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_specimen_lab_id:
+    weight: 19
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_specimen_source:
+    weight: 15
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    type: entity_reference_rss_category
+    region: header
+  field_specimen_source_id:
+    weight: 17
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_specimen_staining:
+    weight: 18
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_specimen_type:
+    weight: 16
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_study:
+    weight: 6
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_study_id:
+    weight: 5
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_subject_patient_global_id:
+    weight: 11
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_subject_patient_local_id:
+    weight: 10
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_tissue_block_id:
+    weight: 25
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_tissue_sub_block_id:
+    weight: 26
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_width:
+    weight: 7
+    label: inline
+    settings:
+      thousand_separator: ','
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: header
+  links:
+    weight: 0
+    region: header
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_image_id: true
+  field_utarget: true
+  field_wsiimage: true

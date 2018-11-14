@@ -1,0 +1,19 @@
+uuid: 889b50e8-f522-432f-9a70-5be855d41699
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_utarget
+    - node.type.wsi
+id: node.wsi.field_utarget
+field_name: field_utarget
+entity_type: node
+bundle: wsi
+label: utarget
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,14 @@
+uuid: afc2cad9-c116-4983-bc3c-4b0d5329d2c4
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.prism_people
+  module:
+    - user
+id: user_remove_role_action.prism_people
+label: 'Remove the Prism People role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: prism_people

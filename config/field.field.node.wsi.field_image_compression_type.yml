@@ -1,0 +1,29 @@
+uuid: 3e77683b-3a29-4a30-8782-5dd8aa98927d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_image_compression_type
+    - node.type.wsi
+    - taxonomy.vocabulary.compression_types
+id: node.wsi.field_image_compression_type
+field_name: field_image_compression_type
+entity_type: node
+bundle: wsi
+label: 'Image Compression Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      compression_types: compression_types
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

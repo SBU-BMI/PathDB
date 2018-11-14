@@ -1,0 +1,14 @@
+uuid: fc660908-1bc5-4663-8b61-0d93632d031b
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.saltz_lab
+  module:
+    - user
+id: user_add_role_action.saltz_lab
+label: 'Add the Saltz Lab role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: saltz_lab

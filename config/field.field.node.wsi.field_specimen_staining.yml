@@ -1,0 +1,29 @@
+uuid: de3b9c23-1916-46e0-bbbd-acbba3e8dce8
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_specimen_staining
+    - node.type.wsi
+    - taxonomy.vocabulary.specimen_stainings
+id: node.wsi.field_specimen_staining
+field_name: field_specimen_staining
+entity_type: node
+bundle: wsi
+label: 'Specimen Staining'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      specimen_stainings: specimen_stainings
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference
