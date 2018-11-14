@@ -1,9 +1,0 @@
-countryName         = Country Name (2 letter code)
-countryName_default     = US
-countryName_min     = 2
-countryName_max     = 2
-0.organizationName      = Organization Name (eg, company)
-0.organizationName_default  = My Company Name LTD.
-commonName          = localhost
-commonName_max      = 64
-commonName_default      = ${ENV::CN}
