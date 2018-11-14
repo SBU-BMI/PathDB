@@ -1,10 +1,8 @@
 FROM centos:7
 MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
-
-### turn off selinux
-####RUN sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-### turn off ipv6
-####RUN sed -i 's/GRUB_CMDLINE_LINUX="crashkernel=auto rhgb quiet"/GRUB_CMDLINE_LINUX="ipv6.disable=1 crashkernel=auto rhgb quiet"/g' /etc/default/grub
+#
+# QuIP - PathDB Docker Container
+#
 ### update OS
 RUN yum -y update
 RUN yum -y install wget which zip unzip
@@ -21,17 +19,23 @@ RUN yum -y install git
 RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
 RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
 RUN yum -y install initscripts
-# Define working directory.
+
+# download Drupal management tools
 WORKDIR /data
 RUN wget https://getcomposer.org/installer
 RUN php installer
 RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 
+# create initial Drupal environment
 RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
+
+# copy Drupal QuIP module over
 WORKDIR /data/quip/web/modules
-RUN git clone https://github.com/ebremer/PathDB.git
-RUN mv PathDB quip
+RUN mkdir quip
+COPY quip/ quip/
+
+# download and install extra Drupal modules
 WORKDIR /data/quip
 RUN composer require drupal/restui
 RUN composer require drupal/search_api
@@ -46,18 +50,24 @@ RUN composer require drupal/field_permissions
 RUN composer require drupal/views_taxonomy_term_name_depth
 RUN composer require drupal/ds
 RUN composer require drupal/taxonomy_unique
-
+# set permissions correctly for apache demon access
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip
+# adjust location of Drupal-supporting MySQL database files
 RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/mysql/g' /etc/my.cnf
-RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 2G/g' /etc/php.ini
-RUN sed -i 's/post_max_size = 8M/post_max_size = 512M/g' /etc/php.ini
-#RUN sed -i 's/socket=\/var\/lib\/mysql\/mysql.sock/socket=\/data\/mysql\/mysql.sock/g' /etc/my.cnf
+# increase php file upload sizes and posts
+RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 1G/g' /etc/php.ini
+RUN sed -i 's/post_max_size = 8M/post_max_size = 1G/g' /etc/php.ini
+# set up Drupal private file area
 RUN mkdir /data/dfiles
 RUN chown -R apache /data/dfiles
 RUN echo "\$settings['file_private_path'] = '/data/dfiles';" >> web/sites/default/settings.php
+
+# create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
 RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nodes -newkey rsa:2048 -keyout quip.key -out quip.crt
+
+# copy over Docker initialization scripts
 WORKDIR /data/quip
 EXPOSE 80
 COPY run.sh /root/run.sh
