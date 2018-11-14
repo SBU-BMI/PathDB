@@ -22,8 +22,8 @@ if [ ! -d /data/mysql ]; then
         /data/quip/vendor/bin/drush -y ev '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
 	/data/quip/vendor/bin/drush -y config:import --source /data/quip/pathdbconfig/
 	/data/quip/vendor/bin/drush -y php-eval 'node_access_rebuild();'
-	curl --user admin:bluecheese2018 -k -X POST https://vinculum.bmi.stonybrookmedicine.edu/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Private"}]}'
-curl --user admin:bluecheese2018 -k -X POST https://vinculum.bmi.stonybrookmedicine.edu/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Public"}]}'
+	curl --user admin:bluecheese2018 -k -X POST http://localhost/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Private"}]}'
+curl --user admin:bluecheese2018 -k -X POST https://localhost/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Public"}]}'
 	/data/quip/vendor/bin/drush -y cache-rebuild
 fi
 
