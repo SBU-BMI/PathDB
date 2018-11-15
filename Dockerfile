@@ -21,7 +21,7 @@ RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data 
 RUN yum -y install initscripts
 
 # download Drupal management tools
-WORKDIR /data
+WORKDIR /build
 RUN wget https://getcomposer.org/installer
 RUN php installer
 RUN rm -f installer
@@ -29,14 +29,16 @@ RUN mv composer.phar /usr/local/bin/composer
 
 # create initial Drupal environment
 RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
+RUN mv quip /quip
+WORKDIR /quip
 
 # copy Drupal QuIP module over
-WORKDIR /data/quip/web/modules
+WORKDIR /quip/web/modules
 RUN mkdir quip
 COPY quip/ quip/
 
 # download and install extra Drupal modules
-WORKDIR /data/quip
+WORKDIR /quip
 RUN composer require drupal/restui
 RUN composer require drupal/search_api
 RUN composer require drupal/token
@@ -54,28 +56,24 @@ RUN composer require drupal/taxonomy_unique
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip
 # adjust location of Drupal-supporting MySQL database files
-RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/mysql/g' /etc/my.cnf
+RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my.cnf
 # increase php file upload sizes and posts
 RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 1G/g' /etc/php.ini
 RUN sed -i 's/post_max_size = 8M/post_max_size = 1G/g' /etc/php.ini
 # set up Drupal private file area
-RUN mkdir /data/dfiles
-RUN chown -R apache /data/dfiles
-RUN echo "\$settings['file_private_path'] = '/data/dfiles';" >> web/sites/default/settings.php
+RUN mkdir -p /data/pathdb/files
+RUN chown -R apache /data/pathdb
+RUN echo "\$settings['file_private_path'] = '/data/pathdb/files';" >> web/sites/default/settings.php
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
 RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nodes -newkey rsa:2048 -keyout quip.key -out quip.crt
 
 # copy over Docker initialization scripts
-WORKDIR /data/quip
 EXPOSE 80
 COPY run.sh /root/run.sh
-COPY init.sh /root/init.sh
 COPY httpd.conf /etc/httpd/conf
-RUN mkdir /data/quip/pathdbconfig
-COPY config/* /data/quip/pathdbconfig/
+RUN mkdir /quip/pathdbconfig
+COPY config/* /quip/pathdbconfig/
 RUN chmod 755 /root/run.sh
-RUN chmod 755 /root/init.sh
-
 CMD ["sh", "/root/run.sh"]
