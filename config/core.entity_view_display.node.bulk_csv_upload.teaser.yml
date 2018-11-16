@@ -17,4 +17,11 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-hidden: {  }
+hidden:
+  field_csvfile: true
+  field_log: true
+  field_number_of_images: true
+  field_processed_images: true
+  field_remaining_images: true
+  field_target_collection: true
+  field_upload_status: true

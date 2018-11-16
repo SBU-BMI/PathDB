@@ -19,7 +19,7 @@ dependencies:
     - field.field.node.wsi.field_imaging_instrument_version
     - field.field.node.wsi.field_imaging_scan_software_ver
     - field.field.node.wsi.field_imaging_scanner_software_m
-    - field.field.node.wsi.field_imaging_scanning_software_
+    - field.field.node.wsi.field_imaging_scanning_sw_vendor
     - field.field.node.wsi.field_md5
     - field.field.node.wsi.field_mpp_x
     - field.field.node.wsi.field_mpp_y
@@ -166,19 +166,19 @@ content:
     type: datetime_default
     region: content
   field_disease_type:
-    weight: 4
+    weight: 42
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
   field_image_color_type:
-    weight: 24
+    weight: 37
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
   field_image_compression_type:
-    weight: 30
+    weight: 36
     settings: {  }
     third_party_settings: {  }
     type: options_select
@@ -216,10 +216,12 @@ content:
     type: string_textfield
     region: content
   field_imaging_instrument_vendor:
-    weight: 20
-    settings: {  }
+    weight: 38
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: options_select
+    type: string_textfield
     region: content
   field_imaging_instrument_version:
     weight: 26
@@ -245,11 +247,13 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_imaging_scanning_software_:
-    weight: 27
-    settings: {  }
+  field_imaging_scanning_sw_vendor:
+    weight: 39
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: options_select
+    type: string_textfield
     region: content
   field_mpp_x:
     weight: 32
@@ -326,10 +330,12 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_specimen_source:
-    weight: 10
-    settings: {  }
+    weight: 43
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: options_select
+    type: string_textfield
     region: content
   field_specimen_source_id:
     weight: 13
@@ -340,16 +346,20 @@ content:
     type: string_textfield
     region: content
   field_specimen_staining:
-    weight: 14
-    settings: {  }
+    weight: 41
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: options_select
+    type: string_textfield
     region: content
   field_specimen_type:
-    weight: 11
-    settings: {  }
+    weight: 40
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: options_select
+    type: string_textfield
     region: content
   field_study:
     weight: 8

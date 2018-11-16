@@ -20,7 +20,7 @@ dependencies:
     - field.field.node.wsi.field_imaging_instrument_version
     - field.field.node.wsi.field_imaging_scan_software_ver
     - field.field.node.wsi.field_imaging_scanner_software_m
-    - field.field.node.wsi.field_imaging_scanning_software_
+    - field.field.node.wsi.field_imaging_scanning_sw_vendor
     - field.field.node.wsi.field_md5
     - field.field.node.wsi.field_mpp_x
     - field.field.node.wsi.field_mpp_y
@@ -32,7 +32,6 @@ dependencies:
     - field.field.node.wsi.field_specimen_fixative_id
     - field.field.node.wsi.field_specimen_global_id
     - field.field.node.wsi.field_specimen_lab_id
-    - field.field.node.wsi.field_specimen_source
     - field.field.node.wsi.field_specimen_source_id
     - field.field.node.wsi.field_specimen_staining
     - field.field.node.wsi.field_specimen_type
@@ -50,7 +49,6 @@ dependencies:
     - datetime
     - ds
     - field_group
-    - taxonomy
     - user
 third_party_settings:
   ds:
@@ -247,14 +245,6 @@ content:
     third_party_settings: {  }
     type: datetime_default
     region: header
-  field_disease_type:
-    weight: 3
-    label: inline
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: header
   field_height:
     weight: 6
     label: inline
@@ -263,22 +253,6 @@ content:
       prefix_suffix: true
     third_party_settings: {  }
     type: number_integer
-    region: header
-  field_image_color_type:
-    weight: 13
-    label: inline
-    settings:
-      link: false
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: header
-  field_image_compression_type:
-    weight: 18
-    label: inline
-    settings:
-      link: false
-    third_party_settings: {  }
-    type: entity_reference_label
     region: header
   field_image_conversion_process_w:
     weight: 21
@@ -304,14 +278,6 @@ content:
     third_party_settings: {  }
     type: string
     region: header
-  field_imaging_instrument_vendor:
-    weight: 9
-    label: inline
-    settings:
-      link: false
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: header
   field_imaging_instrument_version:
     weight: 11
     label: inline
@@ -335,14 +301,6 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: header
-  field_imaging_scanning_software_:
-    weight: 12
-    label: inline
-    settings:
-      link: false
-    third_party_settings: {  }
-    type: entity_reference_label
     region: header
   field_md5:
     weight: 20
@@ -440,13 +398,6 @@ content:
     third_party_settings: {  }
     type: string
     region: header
-  field_specimen_source:
-    weight: 15
-    label: inline
-    settings: {  }
-    third_party_settings: {  }
-    type: entity_reference_rss_category
-    region: header
   field_specimen_source_id:
     weight: 17
     label: inline
@@ -454,22 +405,6 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: header
-  field_specimen_staining:
-    weight: 18
-    label: inline
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-    region: header
-  field_specimen_type:
-    weight: 16
-    label: inline
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
     region: header
   field_study:
     weight: 6
@@ -534,6 +469,13 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  field_disease_type: true
+  field_image_color_type: true
+  field_image_compression_type: true
   field_image_id: true
+  field_imaging_instrument_vendor: true
+  field_imaging_scanning_sw_vendor: true
+  field_specimen_staining: true
+  field_specimen_type: true
   field_utarget: true
   field_wsiimage: true

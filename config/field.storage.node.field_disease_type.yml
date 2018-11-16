@@ -1,17 +1,34 @@
-uuid: d15945a8-b78f-434f-b112-254461f34066
+uuid: 80037bb0-67a1-47d6-8cb3-cfec0bef2633
 langcode: en
 status: true
 dependencies:
   module:
+    - field_permissions
     - node
-    - taxonomy
+    - options
+third_party_settings:
+  field_permissions:
+    permission_type: public
 id: node.field_disease_type
 field_name: field_disease_type
 entity_type: node
-type: entity_reference
+type: list_string
 settings:
-  target_type: taxonomy_term
-module: core
+  allowed_values:
+    -
+      value: Brain
+      label: Brain
+    -
+      value: Lung
+      label: Lung
+    -
+      value: Breast
+      label: Breast
+    -
+      value: Colon
+      label: Colon
+  allowed_values_function: ''
+module: options
 locked: false
 cardinality: 1
 translatable: true

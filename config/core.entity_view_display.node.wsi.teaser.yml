@@ -20,7 +20,7 @@ dependencies:
     - field.field.node.wsi.field_imaging_instrument_version
     - field.field.node.wsi.field_imaging_scan_software_ver
     - field.field.node.wsi.field_imaging_scanner_software_m
-    - field.field.node.wsi.field_imaging_scanning_software_
+    - field.field.node.wsi.field_imaging_scanning_sw_vendor
     - field.field.node.wsi.field_md5
     - field.field.node.wsi.field_mpp_x
     - field.field.node.wsi.field_mpp_y
@@ -32,7 +32,6 @@ dependencies:
     - field.field.node.wsi.field_specimen_fixative_id
     - field.field.node.wsi.field_specimen_global_id
     - field.field.node.wsi.field_specimen_lab_id
-    - field.field.node.wsi.field_specimen_source
     - field.field.node.wsi.field_specimen_source_id
     - field.field.node.wsi.field_specimen_staining
     - field.field.node.wsi.field_specimen_type
@@ -75,7 +74,7 @@ hidden:
   field_imaging_instrument_version: true
   field_imaging_scan_software_ver: true
   field_imaging_scanner_software_m: true
-  field_imaging_scanning_software_: true
+  field_imaging_scanning_sw_vendor: true
   field_md5: true
   field_mpp_x: true
   field_mpp_y: true
@@ -87,7 +86,6 @@ hidden:
   field_specimen_fixative_id: true
   field_specimen_global_id: true
   field_specimen_lab_id: true
-  field_specimen_source: true
   field_specimen_source_id: true
   field_specimen_staining: true
   field_specimen_type: true

@@ -1,11 +1,12 @@
-uuid: d4fe5390-0256-430e-947d-24fe324cee0c
+uuid: 6c370507-2492-4fa3-a088-35182b628f95
 langcode: en
 status: true
 dependencies:
   config:
     - field.storage.node.field_disease_type
     - node.type.wsi
-    - taxonomy.vocabulary.disease_types
+  module:
+    - options
 id: node.wsi.field_disease_type
 field_name: field_disease_type
 entity_type: node
@@ -16,14 +17,5 @@ required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
-settings:
-  handler: 'default:taxonomy_term'
-  handler_settings:
-    target_bundles:
-      disease_types: disease_types
-    sort:
-      field: name
-      direction: asc
-    auto_create: false
-    auto_create_bundle: ''
-field_type: entity_reference
+settings: {  }
+field_type: list_string

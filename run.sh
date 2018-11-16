@@ -14,6 +14,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         /quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig/
         /quip/vendor/bin/drush -y php-eval 'node_access_rebuild();'
         /quip/vendor/bin/drush -y cache-rebuild
+	chown -R apache /data/pathdb
         httpd -f /etc/httpd/conf/httpd.conf
         sleep 2
 

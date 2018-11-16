@@ -1,9 +1,0 @@
-uuid: 3073827a-1206-48de-89fd-2409ecb8b344
-langcode: en
-status: true
-dependencies: {  }
-name: 'Compression Types'
-vid: compression_types
-description: ''
-hierarchy: 0
-weight: 0

@@ -1,11 +1,10 @@
-uuid: ce99958e-f065-45a7-81d4-171511fa550e
+uuid: eadffc16-46e4-4048-8b20-289e921b2341
 langcode: en
 status: true
 dependencies:
   config:
     - field.storage.node.field_imaging_instrument_vendor
     - node.type.wsi
-    - taxonomy.vocabulary.vendors
 id: node.wsi.field_imaging_instrument_vendor
 field_name: field_imaging_instrument_vendor
 entity_type: node
@@ -16,14 +15,5 @@ required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
-settings:
-  handler: 'default:taxonomy_term'
-  handler_settings:
-    target_bundles:
-      vendors: vendors
-    sort:
-      field: name
-      direction: asc
-    auto_create: false
-    auto_create_bundle: ''
-field_type: entity_reference
+settings: {  }
+field_type: string

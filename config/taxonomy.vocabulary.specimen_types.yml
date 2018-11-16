@@ -1,9 +1,0 @@
-uuid: 7378ec5f-d8e1-4b3e-a1bc-37528e7af5cf
-langcode: en
-status: true
-dependencies: {  }
-name: 'Specimen Types'
-vid: specimen_types
-description: ''
-hierarchy: 0
-weight: 0

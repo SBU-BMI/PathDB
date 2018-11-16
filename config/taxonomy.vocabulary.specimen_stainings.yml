@@ -1,9 +1,0 @@
-uuid: c943829d-a3f8-4dae-981f-13e906ca3490
-langcode: en
-status: true
-dependencies: {  }
-name: 'Specimen Stainings'
-vid: specimen_stainings
-description: ''
-hierarchy: 0
-weight: 0

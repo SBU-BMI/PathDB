@@ -1,11 +1,12 @@
-uuid: 123bde64-a1c5-445f-8ecc-42ca4c4aa24c
+uuid: 1bb98c92-c0eb-4e0e-8e69-e3368789dc8d
 langcode: en
 status: true
 dependencies:
   config:
     - field.storage.node.field_image_color_type
     - node.type.wsi
-    - taxonomy.vocabulary.image_color_types
+  module:
+    - options
 id: node.wsi.field_image_color_type
 field_name: field_image_color_type
 entity_type: node
@@ -16,14 +17,5 @@ required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
-settings:
-  handler: 'default:taxonomy_term'
-  handler_settings:
-    target_bundles:
-      image_color_types: image_color_types
-    sort:
-      field: name
-      direction: asc
-    auto_create: false
-    auto_create_bundle: ''
-field_type: entity_reference
+settings: {  }
+field_type: list_string
