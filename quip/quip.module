@@ -1,0 +1,128 @@
+<?php
+
+/**
+ * @file
+ * Contains quip.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use \Drupal\node\Entity\Node;
+use \Drupal\file\Entity\File;
+use \Drupal\jwt\Authentication\Provider\JwtAuth;
+use Drupal\jwt\JsonWebToken\JsonWebToken;
+
+/**
+ * Implements hook_help().
+ */
+function quip_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the quip module.
+    case 'help.page.quip':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('QuIP Module') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function quip_theme() {
+  return array(
+    'openseadragon_link_formatter' => array(
+      'variables' => array('url' => NULL, 'height' => NULL),
+      'template' => 'openseadragonformatter',
+    ),
+  );
+}
+
+function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
+	\Drupal::logger('quip')->notice("quip_entity_insert");
+	if (($entity->bundle() == 'bulk_upload')) {
+		\Drupal::logger('quip')->notice("bulk_upload");
+		if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
+			$nid = $entity->id();
+                        $cnid = $entity->get("field_target_collection")->target_id;
+			\Drupal::logger('quip')->notice(getcwd()."  UH NEW ".$nid." Security : ".$cnid);
+			$path = $entity->get("field_path")->getString();
+			$pd = \Drupal::service('file_system')->realpath("private://");
+			$id = \Drupal::currentUser()->id();
+			$cmd = 'java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.BulkUploader dir '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+			\Drupal::logger('quip')->notice($cmd);
+			$eww = shell_exec($cmd);
+		}
+	} else if (($entity->bundle() == 'bulk_csv_upload')) {
+                \Drupal::logger('quip')->notice("CSV UPLOAD TRIGGER");
+                if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
+                        $nid = $entity->id();
+                        $cnid = $entity->get("field_target_collection")->target_id;
+                        $path = \Drupal::service('file_system')->realpath($entity->field_csvfile->entity->getFileUri());
+                        $pd = \Drupal::service('file_system')->realpath("private://");
+			$id = \Drupal::currentUser()->id();
+                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.3.jar edu.stonybrook.bmi.quiputils.BulkUploader csv '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+                        \Drupal::logger('quip')->notice($cmd);
+                        $eww = shell_exec($cmd);
+                }
+	} else if (($entity->bundle() == 'wsi')) {
+		\Drupal::logger('quip')->notice("XILE CRAP ".$entity->field_wsiimage->uri);
+	}
+}
+
+function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+	\Drupal::logger('quip')->notice($entity->bundle(). " 2.5 is new --> ".$entity->isNew());
+	if ($entity->isNew()) {
+		\Drupal::logger('quip')->notice("New");
+		if ($entity->bundle() == 'wsi') {
+			\Drupal::logger('quip')->notice("is wsi");
+			//if (is_null($entity->field_wsiimage->entity)) {
+			//	\Drupal::logger('quip')->notice("SIGH NO IMPORT TODAY....");
+			//} else {
+				//\Drupal::logger('quip')->notice("BAMM PATH ".$entity->field_wsiimage->entity->getFileUri());
+				if (strlen($entity->get("field_utarget")->getString())!=0) {
+                       			\Drupal::logger('quip')->notice("importing file : ".$entity->get("field_utarget")->getString());
+                                	$file = File::Create([
+                               			'uri' => $entity->get("field_utarget")->getString(),
+                                	]);
+                                	$file->uid = $entity->uid;
+                                	$file->save();
+                                	$entity->set('field_wsiimage',$file);
+                                	$entity->field_wsiimage->description = '';
+                                	$entity->field_wsiimage->display = 1;
+                        	}
+				\Drupal::logger('quip')->notice("FILE UUU : ".$entity->field_wsiimage->uri);
+				$uri = $entity->field_wsiimage->entity->getFileUri();
+		 		$uri = drupal_realpath($uri);
+				 \Drupal::logger('quip')->notice("new images URI = ".$uri);
+				\Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
+				$eww = exec('java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
+				$p = json_decode($eww,true);
+				$entity->set('field_width',$p["field_width"][0]["value"]);
+				$entity->set('field_height',$p["field_height"][0]["value"]);
+				$entity->set('field_mpp_x',$p["field_mpp_x"][0]["value"]);
+				$entity->set('field_mpp_y',$p["field_mpp_y"][0]["value"]);
+				$entity->set('field_md5',$p["field_md5"][0]["value"]);
+				\Drupal::logger('quip')->notice("width : ".$p["field_width"][0]["value"]);
+			//}
+		} else if (($entity->bundle() == 'wsitest')&&(strlen($entity->get("field_utarget")->getString()))!=0) {
+                        //\Drupal::logger('quip')->notice("RAH = ".$entity->get("field_utarget")->getString());
+                        \Drupal::logger('quip')->notice(\Drupal::service('file_system')->realpath("private://"));
+                        //\Drupal::logger('quip')->notice(\Drupal::service('file_system')->realpath(file_default_scheme() . "://"));
+			$file = File::Create([
+				'uri' => $entity->get("field_utarget")->getString(),
+			]);
+			$file->uid = $entity->uid;
+			$file->save();
+			$entity->set('field_testfile',$file);
+			$entity->field_testfile->description = '';
+			$entity->field_testfile->display = 1;
+		} else if (($entity->bundle() == 'bulk_upload')&&(strlen($entity->get("field_path")->getString()))!=0) {
+			$path = $entity->get("field_path")->getString();
+			$eww = exec('java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
+			$entity->set('field_number_of_images',$eww);
+		}
+	}
+}
+
