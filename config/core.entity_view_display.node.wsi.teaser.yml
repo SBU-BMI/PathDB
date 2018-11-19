@@ -86,6 +86,7 @@ hidden:
   field_specimen_fixative_id: true
   field_specimen_global_id: true
   field_specimen_lab_id: true
+  field_specimen_source: true
   field_specimen_source_id: true
   field_specimen_staining: true
   field_specimen_type: true

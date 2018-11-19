@@ -475,6 +475,7 @@ hidden:
   field_image_id: true
   field_imaging_instrument_vendor: true
   field_imaging_scanning_sw_vendor: true
+  field_specimen_source: true
   field_specimen_staining: true
   field_specimen_type: true
   field_utarget: true

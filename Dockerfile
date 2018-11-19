@@ -37,6 +37,9 @@ WORKDIR /quip/web/modules
 RUN mkdir quip
 COPY quip/ quip/
 
+WORKDIR /quip/web
+COPY images/ images/
+
 # download and install extra Drupal modules
 WORKDIR /quip
 RUN composer require drupal/restui
@@ -62,7 +65,7 @@ RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 1G/g' /etc/php.ini
 RUN sed -i 's/post_max_size = 8M/post_max_size = 1G/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
-RUN chown -R apache /data/pathdb
+RUN chown -R apache /data/pathdb/files
 RUN echo "\$settings['file_private_path'] = '/data/pathdb/files';" >> web/sites/default/settings.php
 
 # create self-signed digital keys for JWT
@@ -75,5 +78,7 @@ COPY run.sh /root/run.sh
 COPY httpd.conf /etc/httpd/conf
 RUN mkdir /quip/pathdbconfig
 COPY config/* /quip/pathdbconfig/
+RUN mkdir /quip/content
+COPY content/* /quip/content/
 RUN chmod 755 /root/run.sh
 CMD ["sh", "/root/run.sh"]

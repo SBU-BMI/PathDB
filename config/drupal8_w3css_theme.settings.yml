@@ -15,7 +15,7 @@ instagram_url: 'https://www.instagram.com/flashwebcenter'
 youtube_url: 'https://www.youtube.com/user/flashwebcenter'
 drupal_url: 'https://www.drupal.org/u/flashwebcenter'
 rss_url: rss.xml
-copyright_text: 'Copyright 2018 - All Rights Reserved'
+copyright_text: 'U24 CA18092401A1, Tools to Analyze Morphology and Spatially Mapped Molecular Data'
 show_social_icon: 0
 show_credit_link: 0
 top_region: 1
@@ -31,7 +31,7 @@ favicon:
   use_default: 1
 website_width: ''
 equal_width: 0
-current_theme: ''
+current_theme: w3-theme-blue-grey
 color_page_wrapper: ''
 color_header: ''
 color_primary_menu: ''
