@@ -1,0 +1,19 @@
+uuid: eb2dfb22-c3ee-40b5-87cf-a6dd1ab553db
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_imaging_scanning_sw_vendor
+    - node.type.wsi
+id: node.wsi.field_imaging_scanning_sw_vendor
+field_name: field_imaging_scanning_sw_vendor
+entity_type: node
+bundle: wsi
+label: 'Imaging Scanning Software Vendor'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

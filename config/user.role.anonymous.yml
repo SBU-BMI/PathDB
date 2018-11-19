@@ -1,0 +1,16 @@
+uuid: 37521f48-1617-4d21-9ef9-d7f927d9831f
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: j5zLMOdJBqC0bMvSdth5UebkprJB8g_2FXHqhfpJzow
+id: anonymous
+label: 'Anonymous user'
+weight: -10
+is_admin: false
+permissions:
+  - 'access comments'
+  - 'access content'
+  - 'search content'
+  - 'use oauth2 server'
+  - 'use text format restricted_html'

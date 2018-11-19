@@ -1,0 +1,20 @@
+uuid: 9a8f0c63-7977-4da7-a014-3d859a4725ee
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - node
+id: node.field_specimen_date_and_time_of_
+field_name: field_specimen_date_and_time_of_
+entity_type: node
+type: datetime
+settings:
+  datetime_type: datetime
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

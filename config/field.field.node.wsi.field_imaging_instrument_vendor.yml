@@ -1,0 +1,19 @@
+uuid: eadffc16-46e4-4048-8b20-289e921b2341
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_imaging_instrument_vendor
+    - node.type.wsi
+id: node.wsi.field_imaging_instrument_vendor
+field_name: field_imaging_instrument_vendor
+entity_type: node
+bundle: wsi
+label: 'Imaging Instrument Vendor'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

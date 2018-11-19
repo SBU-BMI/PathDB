@@ -1,0 +1,33 @@
+uuid: 29ad5f9a-78bf-485e-92fa-47a84d11d10c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_collection
+    - node.type.wsi
+    - taxonomy.vocabulary.collections
+  content:
+    - 'taxonomy_term:collections:b7f8b60a-9470-42ba-8249-a6a38b8ba224'
+id: node.wsi.field_collection
+field_name: field_collection
+entity_type: node
+bundle: wsi
+label: Collection
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    target_uuid: b7f8b60a-9470-42ba-8249-a6a38b8ba224
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      collections: collections
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

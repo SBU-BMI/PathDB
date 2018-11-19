@@ -1,0 +1,19 @@
+uuid: 9492ffcc-8603-4002-b9d1-de597c867bce
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_study
+    - node.type.wsi
+id: node.wsi.field_study
+field_name: field_study
+entity_type: node
+bundle: wsi
+label: Study
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

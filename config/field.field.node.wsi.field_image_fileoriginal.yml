@@ -1,0 +1,19 @@
+uuid: bdc8b450-7930-409d-a4db-18f299beb550
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_image_fileoriginal
+    - node.type.wsi
+id: node.wsi.field_image_fileoriginal
+field_name: field_image_fileoriginal
+entity_type: node
+bundle: wsi
+label: 'Image File Original'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

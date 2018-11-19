@@ -1,0 +1,15 @@
+uuid: 803ccd21-8cd0-4c8c-af69-6946841d3437
+langcode: en
+status: true
+dependencies: {  }
+id: editor
+label: Editor
+weight: -7
+is_admin: null
+permissions:
+  - 'create collection content'
+  - 'create wsi content'
+  - 'delete own collection content'
+  - 'delete own wsi content'
+  - 'edit own collection content'
+  - 'edit own wsi content'

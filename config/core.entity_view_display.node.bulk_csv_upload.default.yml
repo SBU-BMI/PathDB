@@ -1,0 +1,85 @@
+uuid: a61bc3ff-878c-497d-a09d-73aad114c70e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.bulk_csv_upload.field_csvfile
+    - field.field.node.bulk_csv_upload.field_log
+    - field.field.node.bulk_csv_upload.field_number_of_images
+    - field.field.node.bulk_csv_upload.field_processed_images
+    - field.field.node.bulk_csv_upload.field_remaining_images
+    - field.field.node.bulk_csv_upload.field_target_collection
+    - field.field.node.bulk_csv_upload.field_upload_status
+    - node.type.bulk_csv_upload
+  module:
+    - file
+    - user
+id: node.bulk_csv_upload.default
+targetEntityType: node
+bundle: bulk_csv_upload
+mode: default
+content:
+  field_csvfile:
+    weight: 107
+    label: inline
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    type: file_default
+    region: content
+  field_log:
+    weight: 108
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_number_of_images:
+    weight: 101
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_processed_images:
+    weight: 103
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_remaining_images:
+    weight: 104
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_target_collection:
+    weight: 105
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_upload_status:
+    weight: 106
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  links:
+    weight: 100
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }
