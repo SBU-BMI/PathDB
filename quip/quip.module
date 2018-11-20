@@ -50,7 +50,7 @@ function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
 			$path = $entity->get("field_path")->getString();
 			$pd = \Drupal::service('file_system')->realpath("private://");
 			$id = \Drupal::currentUser()->id();
-			$cmd = 'java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.BulkUploader dir '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+			$cmd = 'java -cp modules/quip/QuIPUtils-1.0.4.jar edu.stonybrook.bmi.quiputils.BulkUploader dir '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
 			\Drupal::logger('quip')->notice($cmd);
 			$eww = shell_exec($cmd);
 		}
@@ -62,7 +62,7 @@ function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
                         $path = \Drupal::service('file_system')->realpath($entity->field_csvfile->entity->getFileUri());
                         $pd = \Drupal::service('file_system')->realpath("private://");
 			$id = \Drupal::currentUser()->id();
-                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.3.jar edu.stonybrook.bmi.quiputils.BulkUploader csv '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.4.jar edu.stonybrook.bmi.quiputils.BulkUploader csv '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
                         \Drupal::logger('quip')->notice($cmd);
                         $eww = shell_exec($cmd);
                 }
