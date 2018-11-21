@@ -65,7 +65,7 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                                 $uri = drupal_realpath($uri);
                                  \Drupal::logger('quip')->notice("new images URI = ".$uri);
                                 \Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
-                                $eww = exec('java -cp modules/quip/QuIPUtils-1.0.5.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
+                                $eww = exec('java -cp modules/quip/QuIPUtils-1.0.6.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
                                 $p = json_decode($eww,true);
                                 $entity->set('field_width',$p["field_width"][0]["value"]);
                                 $entity->set('field_height',$p["field_height"][0]["value"]);
@@ -88,7 +88,7 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                         $entity->field_testfile->display = 1;
                 } else if (($entity->bundle() == 'bulk_upload')&&(strlen($entity->get("field_path")->getString()))!=0) {
                         $path = $entity->get("field_path")->getString();
-                        $eww = exec('java -cp modules/quip/QuIPUtils-1.0.5.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
+                        $eww = exec('java -cp modules/quip/QuIPUtils-1.0.6.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
                         $entity->set('field_number_of_images',$eww);
                 }
         }
@@ -105,7 +105,7 @@ function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
                         $path = $entity->get("field_path")->getString();
                         $pd = \Drupal::service('file_system')->realpath("private://");
                         $id = \Drupal::currentUser()->id();
-                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.5.jar edu.stonybrook.bmi.quiputils.BulkUploader dir '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.6.jar edu.stonybrook.bmi.quiputils.BulkUploader dir '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
                         \Drupal::logger('quip')->notice($cmd);
                         $eww = shell_exec($cmd);
                 }
@@ -117,7 +117,7 @@ function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
                         $path = \Drupal::service('file_system')->realpath($entity->field_csvfile->entity->getFileUri());
                         $pd = \Drupal::service('file_system')->realpath("private://");
                         $id = \Drupal::currentUser()->id();
-                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.5.jar edu.stonybrook.bmi.quiputils.BulkUploader csv '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+                        $cmd = 'java -cp modules/quip/QuIPUtils-1.0.6.jar edu.stonybrook.bmi.quiputils.BulkUploader csv '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
                         \Drupal::logger('quip')->notice($cmd);
                         $eww = shell_exec($cmd);
                 }
