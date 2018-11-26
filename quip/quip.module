@@ -40,15 +40,11 @@ function quip_theme() {
 }
 
 function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
-        \Drupal::logger('quip')->notice($entity->bundle(). " 2.5 is new --> ".$entity->isNew());
         if ($entity->isNew()) {
-                \Drupal::logger('quip')->notice("New");
                 if ($entity->bundle() == 'wsi') {
-                        \Drupal::logger('quip')->notice("is wsi");
-                        //if (is_null($entity->field_wsiimage->entity)) {
-                        //      \Drupal::logger('quip')->notice("SIGH NO IMPORT TODAY....");
-                        //} else {
-                                //\Drupal::logger('quip')->notice("BAMM PATH ".$entity->field_wsiimage->entity->getFileUri());
+                        if (is_null($entity->field_wsiimage->entity)) {
+                              \Drupal::logger('quip')->notice("NO IMPORT TODAY....");
+                        } else {
                                 if (strlen($entity->get("field_utarget")->getString())!=0) {
                                         \Drupal::logger('quip')->notice("importing file : ".$entity->get("field_utarget")->getString());
                                         $file = File::Create([
@@ -60,10 +56,9 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                                         $entity->field_wsiimage->description = '';
                                         $entity->field_wsiimage->display = 1;
                                 }
-                                \Drupal::logger('quip')->notice("FILE UUU : ".$entity->field_wsiimage->uri);
                                 $uri = $entity->field_wsiimage->entity->getFileUri();
                                 $uri = drupal_realpath($uri);
-                                 \Drupal::logger('quip')->notice("new images URI = ".$uri);
+                                \Drupal::logger('quip')->notice("new images URI = ".$uri);
                                 \Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.0.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
                                 $eww = exec('java -cp modules/quip/QuIPUtils-1.0.7.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
                                 $p = json_decode($eww,true);
@@ -72,8 +67,7 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                                 $entity->set('field_mpp_x',$p["field_mpp_x"][0]["value"]);
                                 $entity->set('field_mpp_y',$p["field_mpp_y"][0]["value"]);
                                 $entity->set('field_md5',$p["field_md5"][0]["value"]);
-                                \Drupal::logger('quip')->notice("width : ".$p["field_width"][0]["value"]);
-                        //}
+                        }
                 } else if (($entity->bundle() == 'wsitest')&&(strlen($entity->get("field_utarget")->getString()))!=0) {
                         //\Drupal::logger('quip')->notice("RAH = ".$entity->get("field_utarget")->getString());
                         \Drupal::logger('quip')->notice(\Drupal::service('file_system')->realpath("private://"));
@@ -95,7 +89,6 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
 }
 
 function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
-        \Drupal::logger('quip')->notice("quip_entity_insert");
         if (($entity->bundle() == 'bulk_upload')) {
                 \Drupal::logger('quip')->notice("bulk_upload");
                 if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
@@ -121,8 +114,6 @@ function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
                         \Drupal::logger('quip')->notice($cmd);
                         $eww = shell_exec($cmd);
                 }
-        } else if (($entity->bundle() == 'wsi')) {
-                \Drupal::logger('quip')->notice("XILE CRAP ".$entity->field_wsiimage->uri);
         }
 }
 
