@@ -42,9 +42,9 @@ function quip_theme() {
 function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
         if ($entity->isNew()) {
                 if ($entity->bundle() == 'wsi') {
-                        if (is_null($entity->field_wsiimage->entity)) {
-                              \Drupal::logger('quip')->notice("NO IMPORT TODAY....");
-                        } else {
+                        //if (is_null($entity->field_wsiimage->entity)) {
+                        //      \Drupal::logger('quip')->notice("NO IMPORT TODAY....");
+                        //} else {
                                 if (strlen($entity->get("field_utarget")->getString())!=0) {
                                         \Drupal::logger('quip')->notice("importing file : ".$entity->get("field_utarget")->getString());
                                         $file = File::Create([
@@ -67,7 +67,7 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                                 $entity->set('field_mpp_x',$p["field_mpp_x"][0]["value"]);
                                 $entity->set('field_mpp_y',$p["field_mpp_y"][0]["value"]);
                                 $entity->set('field_md5',$p["field_md5"][0]["value"]);
-                        }
+                        //}
                 } else if (($entity->bundle() == 'wsitest')&&(strlen($entity->get("field_utarget")->getString()))!=0) {
                         //\Drupal::logger('quip')->notice("RAH = ".$entity->get("field_utarget")->getString());
                         \Drupal::logger('quip')->notice(\Drupal::service('file_system')->realpath("private://"));
