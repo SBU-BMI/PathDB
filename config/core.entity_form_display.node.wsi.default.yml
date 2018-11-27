@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.wsi.field_date_and_time_image_conver
     - field.field.node.wsi.field_disease_type
     - field.field.node.wsi.field_height
+    - field.field.node.wsi.field_iip_path
     - field.field.node.wsi.field_image_color_type
     - field.field.node.wsi.field_image_compression_type
     - field.field.node.wsi.field_image_conversion_process_w
@@ -170,6 +171,14 @@ content:
     settings: {  }
     third_party_settings: {  }
     type: options_select
+    region: content
+  field_iip_path:
+    weight: 44
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
     region: content
   field_image_color_type:
     weight: 37
