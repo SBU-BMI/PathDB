@@ -20,6 +20,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 
 # create REST API System User
 /quip/vendor/bin/drush user:create --password bluecheese2018 archon
+/quip/vendor/bin/drush user:role:add administrator archon
 
 # create private and public security taxonomy items
         curl --user admin:bluecheese2018 -k -X POST http://localhost/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Private"}]}'
