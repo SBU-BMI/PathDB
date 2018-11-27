@@ -5,7 +5,7 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 ### update OS
 RUN yum -y update
-RUN yum -y install wget which zip unzip
+RUN yum -y install wget which zip unzip telnet
 RUN yum -y install epel-release
 RUN rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
 RUN yum -y install httpd

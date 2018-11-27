@@ -18,6 +18,9 @@ if [ ! -d /data/pathdb/mysql ]; then
         httpd -f /etc/httpd/conf/httpd.conf
         sleep 2
 
+# create REST API System User
+/quip/vendor/bin/drush user:create --password bluecheese2018 archon
+
 # create private and public security taxonomy items
         curl --user admin:bluecheese2018 -k -X POST http://localhost/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Private"}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Public"}]}'
