@@ -7,11 +7,12 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 RUN yum -y update
 RUN yum -y install wget which zip unzip telnet
 RUN yum -y install epel-release
-RUN rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
+RUN yum-config-manager --enable remi-php72
 RUN yum -y install httpd
 RUN yum -y install java-1.8.0-openjdk
-RUN yum -y install mod_php72w php72w-opcache
-RUN yum -y install php72w-xml php72w-mcrypt php72w-gd php72w-devel php72w-mysql php72w-intl php72w-mbstring
+RUN yum -y install mod_php php-opcache
+RUN yum -y install php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring
 RUN yum -y install mariadb-server mariadb-client
 RUN yum -y install php-pecl-zip
 RUN yum -y install openssl mod_ssl
