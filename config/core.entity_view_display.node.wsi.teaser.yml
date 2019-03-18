@@ -64,6 +64,7 @@ hidden:
   field_date_and_time_image_conver: true
   field_disease_type: true
   field_height: true
+  field_iip_path: true
   field_image_color_type: true
   field_image_compression_type: true
   field_image_conversion_process_w: true

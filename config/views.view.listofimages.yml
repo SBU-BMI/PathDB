@@ -626,10 +626,10 @@ display:
           exclude: false
           alter:
             alter_text: true
-            text: Featurescape
+            text: caMic
             make_link: true
-            path: '/camicroscope/osdCamicroscope.php?tissueId={{nid}}'
-            absolute: false
+            path: '/apps/viewer/viewer.html?slideId={{nid}}&mode=pathdb'
+            absolute: true
             external: false
             replace_spaces: false
             path_case: none

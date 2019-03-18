@@ -41,6 +41,9 @@ tac_lite_grants_scheme_2:
     collections: {  }
   editor:
     collections: {  }
+  bremer:
+    collections:
+      3: '3'
 tac_lite_config_scheme_3:
   name: Read/Write/Delete
   perms:
