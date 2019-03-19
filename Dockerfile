@@ -27,9 +27,8 @@ RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 
 # create initial Drupal environment
-RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
-RUN mv quip /quip
 WORKDIR /quip
+RUN composer create-project drupal-composer/drupal-project:8.x-dev . --stability dev --no-interaction
 
 # copy Drupal QuIP module over
 WORKDIR /quip/web/modules
