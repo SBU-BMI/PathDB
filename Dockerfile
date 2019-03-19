@@ -11,10 +11,8 @@ RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php72
 RUN yum -y install httpd
 RUN yum -y install java-1.8.0-openjdk
-RUN yum -y install mod_php php-opcache
-RUN yum -y install php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring
+RUN yum -y install mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip
 RUN yum -y install mariadb-server mariadb-client
-RUN yum -y install php-pecl-zip
 RUN yum -y install openssl mod_ssl
 RUN yum -y install git
 RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
