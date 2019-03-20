@@ -628,7 +628,7 @@ display:
             alter_text: true
             text: caMic
             make_link: true
-            path: '/apps/viewer/viewer.html?slideId={{nid}}&mode=pathdb'
+            path: '/sup/camic.html?slideId={{nid}}&mode=pathdb'
             absolute: true
             external: false
             replace_spaces: false

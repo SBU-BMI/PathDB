@@ -38,7 +38,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 
 else
-        mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
+        #mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         httpd -f /etc/httpd/conf/httpd.conf
 fi

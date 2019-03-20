@@ -70,16 +70,16 @@ third_party_settings:
       region: content
     group_specimen:
       children:
-        - field_specimen_source
-        - field_specimen_type
         - field_specimen_lab_id
         - field_specimen_source_id
-        - field_specimen_staining
         - field_specimen_global_id
         - field_specimen_date_and_time_of_
         - field_specimen_fixative_id
         - field_specimen_embedding_id
         - field_specimen_date_and_time_rec
+        - field_specimen_type
+        - field_specimen_staining
+        - field_specimen_source
       parent_name: group_tabbers
       weight: 14
       format_type: tab
@@ -94,21 +94,19 @@ third_party_settings:
       region: content
     group_image:
       children:
-        - field_imaging_instrument_vendor
-        - field_image_local_id
         - field_imaging_instrument_model
-        - field_image_color_type
         - field_image_fileoriginal
         - field_imaging_instrument_version
-        - field_imaging_scanning_software_
         - field_imaging_scanner_software_m
         - field_imaging_scan_software_ver
-        - field_image_compression_type
         - field_image_conversion_process_w
         - field_mpp_x
         - field_mpp_y
         - field_date_and_time_image_conver
         - field_date_and_time_image_captur
+        - field_image_compression_type
+        - field_image_color_type
+        - field_imaging_instrument_vendor
       parent_name: group_tabbers
       weight: 13
       format_type: tab
@@ -421,7 +419,7 @@ content:
   field_wsiimage:
     weight: 5
     settings:
-      progress_indicator: bar
+      progress_indicator: throbber
     third_party_settings: {  }
     type: file_generic
     region: content
