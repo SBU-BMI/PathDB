@@ -75,6 +75,6 @@ COPY config/* /quip/pathdbconfig/
 RUN mkdir /quip/content
 COPY content/* /quip/content/
 RUN mkdir /quip/web/sup
-COPY sup/* /quip/web/sup
+COPY sup/* /quip/web/sup/
 RUN chmod 755 /root/run.sh
 CMD ["sh", "/root/run.sh"]
