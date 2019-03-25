@@ -23,7 +23,7 @@ RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 
 # download caMicroscope
-git clone --single-branch --branch develop https://github.com/camicroscope/caMicroscope.git
+RUN git clone --single-branch --branch develop https://github.com/camicroscope/caMicroscope.git
 
 # create initial Drupal environment
 RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
