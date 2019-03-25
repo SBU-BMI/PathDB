@@ -22,6 +22,9 @@ RUN php installer
 RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 
+# download caMicroscope
+git clone --single-branch --branch develop https://github.com/camicroscope/caMicroscope.git
+
 # create initial Drupal environment
 RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
 RUN mv quip /quip
@@ -77,5 +80,7 @@ RUN mkdir /quip/content
 COPY content/* /quip/content/
 RUN mkdir /quip/web/sup
 COPY sup/* /quip/web/sup/
+RUN mkdir /quip/web/caMicroscope
+COPY /build/caMicroscope/* /quip/web/caMicroscope
 RUN chmod 755 /root/run.sh
 CMD ["sh", "/root/run.sh"]
