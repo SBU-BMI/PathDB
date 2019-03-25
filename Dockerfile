@@ -49,13 +49,14 @@ RUN composer require drupal/field_permissions
 RUN composer require drupal/views_taxonomy_term_name_depth
 RUN composer require drupal/ds
 RUN composer require drupal/taxonomy_unique
+RUN composer require drupal/prepopulate
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip
 # adjust location of Drupal-supporting MySQL database files
 RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my.cnf
 # increase php file upload sizes and posts
-RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 1G/g' /etc/php.ini
+RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 2G/g' /etc/php.ini
 RUN sed -i 's/post_max_size = 8M/post_max_size = 1G/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
