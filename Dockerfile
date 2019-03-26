@@ -81,5 +81,6 @@ COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
 RUN git clone --single-branch --branch develop https://github.com/camicroscope/caMicroscope.git
+RUN git clone --single-branch --branch master https://github.com/SBU-BMI/FeatureMap
 RUN chmod 755 /root/run.sh
 CMD ["sh", "/root/run.sh"]
