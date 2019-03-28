@@ -57,8 +57,8 @@ RUN chgrp -R apache ../quip
 # adjust location of Drupal-supporting MySQL database files
 RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my.cnf
 # increase php file upload sizes and posts
-RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 2G/g' /etc/php.ini
-RUN sed -i 's/post_max_size = 8M/post_max_size = 1G/g' /etc/php.ini
+RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 10G/g' /etc/php.ini
+RUN sed -i 's/post_max_size = 8M/post_max_size = 10G/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
 RUN chown -R apache /data/pathdb/files
