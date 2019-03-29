@@ -59,7 +59,7 @@ third_party_settings:
         - group_image
         - group_specimen
       parent_name: ''
-      weight: 12
+      weight: 11
       format_type: tabs
       format_settings:
         label: Tabbers
@@ -145,7 +145,7 @@ content:
     type: options_select
     region: content
   field_container:
-    weight: 9
+    weight: 8
     settings:
       size: 60
       placeholder: ''
@@ -165,18 +165,10 @@ content:
     type: datetime_default
     region: content
   field_disease_type:
-    weight: 42
+    weight: 14
     settings: {  }
     third_party_settings: {  }
     type: options_select
-    region: content
-  field_iip_path:
-    weight: 44
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
     region: content
   field_image_color_type:
     weight: 37
@@ -255,7 +247,7 @@ content:
     type: string_textfield
     region: content
   field_imaging_scanning_sw_vendor:
-    weight: 39
+    weight: 13
     settings:
       size: 60
       placeholder: ''
@@ -277,7 +269,7 @@ content:
     type: number
     region: content
   field_patient:
-    weight: 6
+    weight: 5
     settings:
       size: 60
       placeholder: ''
@@ -285,7 +277,7 @@ content:
     type: string_textfield
     region: content
   field_series:
-    weight: 7
+    weight: 6
     settings:
       size: 60
       placeholder: ''
@@ -369,7 +361,7 @@ content:
     type: string_textfield
     region: content
   field_study:
-    weight: 8
+    weight: 7
     settings:
       size: 60
       placeholder: ''
@@ -401,7 +393,7 @@ content:
       placeholder: ''
     third_party_settings: {  }
   field_tissue_block_id:
-    weight: 10
+    weight: 9
     settings:
       size: 60
       placeholder: ''
@@ -409,7 +401,7 @@ content:
     type: string_textfield
     region: content
   field_tissue_sub_block_id:
-    weight: 11
+    weight: 10
     settings:
       size: 60
       placeholder: ''
@@ -417,7 +409,7 @@ content:
     type: string_textfield
     region: content
   field_wsiimage:
-    weight: 5
+    weight: 4
     settings:
       progress_indicator: throbber
     third_party_settings: {  }
@@ -425,7 +417,7 @@ content:
     region: content
   revision_log:
     type: hide_revision_field_log_widget
-    weight: 13
+    weight: 12
     region: content
     settings:
       rows: 5
@@ -446,6 +438,7 @@ content:
 hidden:
   created: true
   field_height: true
+  field_iip_path: true
   field_md5: true
   field_utarget: true
   field_width: true
