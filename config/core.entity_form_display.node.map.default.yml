@@ -1,0 +1,54 @@
+uuid: dc439ff5-8e43-46f9-8ee8-4265f5f33ecb
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.map.field_map
+    - field.field.node.map.field_map_type
+    - field.field.node.map.field_target_collection
+    - field.field.node.map.field_wsi
+    - node.type.map
+  module:
+    - file
+id: node.map.default
+targetEntityType: node
+bundle: map
+mode: default
+content:
+  field_map:
+    weight: 2
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+    type: file_generic
+    region: content
+  field_map_type:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_target_collection:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_wsi:
+    type: entity_reference_autocomplete
+    weight: 3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  path: true
+  promote: true
+  revision_log: true
+  status: true
+  sticky: true
+  title: true
+  uid: true

@@ -1,0 +1,20 @@
+uuid: 48ae88c8-2c0e-45d4-befa-9780d3aa7011
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - node.type.map
+  module:
+    - user
+id: node.map.teaser
+targetEntityType: node
+bundle: map
+mode: teaser
+content:
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }

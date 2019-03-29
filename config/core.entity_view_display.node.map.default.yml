@@ -1,0 +1,52 @@
+uuid: 2557a672-a919-4261-aa3d-b468b96c0dc6
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.map.field_map
+    - field.field.node.map.field_map_type
+    - field.field.node.map.field_target_collection
+    - field.field.node.map.field_wsi
+    - node.type.map
+  module:
+    - file
+    - options
+    - user
+id: node.map.default
+targetEntityType: node
+bundle: map
+mode: default
+content:
+  field_map:
+    weight: 1
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    type: file_default
+    region: content
+  field_map_type:
+    weight: 0
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_target_collection:
+    weight: 2
+    label: above
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_wsi:
+    type: entity_reference_label
+    weight: 3
+    region: content
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+hidden:
+  links: true
