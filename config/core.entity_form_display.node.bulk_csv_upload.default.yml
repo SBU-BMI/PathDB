@@ -34,13 +34,6 @@ content:
     third_party_settings: {  }
     type: file_generic
     region: content
-  field_mappings:
-    weight: 10
-    settings:
-      progress_indicator: throbber
-    third_party_settings: {  }
-    type: file_generic
-    region: content
   field_target_collection:
     weight: 8
     settings: {  }
@@ -105,6 +98,7 @@ content:
     third_party_settings: {  }
 hidden:
   field_log: true
+  field_mappings: true
   field_number_of_images: true
   field_processed_images: true
   field_remaining_images: true
