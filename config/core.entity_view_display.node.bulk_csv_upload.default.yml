@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.node.bulk_csv_upload.field_csvfile
     - field.field.node.bulk_csv_upload.field_log
+    - field.field.node.bulk_csv_upload.field_mappings
     - field.field.node.bulk_csv_upload.field_number_of_images
     - field.field.node.bulk_csv_upload.field_processed_images
     - field.field.node.bulk_csv_upload.field_remaining_images
@@ -33,6 +34,14 @@ content:
     settings: {  }
     third_party_settings: {  }
     type: basic_string
+    region: content
+  field_mappings:
+    weight: 109
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    type: file_default
     region: content
   field_number_of_images:
     weight: 101
