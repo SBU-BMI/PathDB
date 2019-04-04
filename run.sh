@@ -18,7 +18,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 	/data/pathdb/quip/vendor/bin/drush -y pm:uninstall toolbar
         /data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 	chown -R apache /data/pathdb/files
-        httpd -f /etc/httpd/conf/httpd.conf
+        httpd -f /config/httpd.conf
         sleep 2
 
 # create REST API System User
@@ -41,7 +41,7 @@ curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -
 else
         #mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
-        httpd -f /etc/httpd/conf/httpd.conf
+        httpd -f /config/httpd.conf
 fi
 
 while true; do sleep 1000; done

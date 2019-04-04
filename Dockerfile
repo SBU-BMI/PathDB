@@ -71,7 +71,7 @@ RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nod
 # copy over Docker initialization scripts
 EXPOSE 80
 COPY run.sh /root/run.sh
-COPY httpd.conf /etc/httpd/conf
+#COPY httpd.conf /etc/httpd/conf
 RUN mkdir /quip/pathdbconfig
 COPY config/* /quip/pathdbconfig/
 RUN mkdir /quip/content
@@ -82,5 +82,6 @@ COPY sup/* /quip/web/sup/
 WORKDIR /quip/web
 RUN git clone --single-branch --branch develop https://github.com/camicroscope/caMicroscope.git
 RUN git clone --single-branch --branch master https://github.com/SBU-BMI/FeatureMap
+RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
 CMD ["sh", "/root/run.sh"]
