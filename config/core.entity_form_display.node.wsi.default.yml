@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.wsi.field_bulk_upload
     - field.field.node.wsi.field_case_id
     - field.field.node.wsi.field_collection
     - field.field.node.wsi.field_container
@@ -141,7 +142,7 @@ bundle: wsi
 mode: default
 content:
   field_case_id:
-    weight: 45
+    weight: 16
     settings:
       size: 60
       placeholder: ''
@@ -387,7 +388,7 @@ content:
     type: string_textfield
     region: content
   field_subject_id:
-    weight: 44
+    weight: 15
     settings:
       size: 60
       placeholder: ''
@@ -455,6 +456,7 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
+  field_bulk_upload: true
   field_height: true
   field_iip_path: true
   field_md5: true

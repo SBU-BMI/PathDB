@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.wsi.field_bulk_upload
     - field.field.node.wsi.field_case_id
     - field.field.node.wsi.field_collection
     - field.field.node.wsi.field_container
@@ -100,14 +101,14 @@ third_party_settings:
         - group_tabbers
         - field_image_id
         - field_imaging_scanning_sw_vendor
-        - field_specimen_type
         - field_image_fileoriginal
+        - field_specimen_type
         - field_specimen_staining
         - field_date_and_time_image_conver
-        - field_date_and_time_image_captur
         - field_disease_type
-        - field_specimen_source
+        - field_date_and_time_image_captur
         - field_image_conversion_process_w
+        - field_specimen_source
         - field_iip_path
         - field_imaging_instrument_version
         - field_imaging_instrument_model
@@ -117,6 +118,7 @@ third_party_settings:
         - field_image_compression_type
         - field_image_color_type
         - field_imaging_instrument_vendor
+        - field_bulk_upload
       left:
         - field_specimen_global_id
       right:
@@ -163,6 +165,14 @@ targetEntityType: node
 bundle: wsi
 mode: default
 content:
+  field_bulk_upload:
+    weight: 43
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
   field_case_id:
     weight: 4
     label: inline
