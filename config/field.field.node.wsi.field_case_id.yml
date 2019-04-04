@@ -1,0 +1,19 @@
+uuid: 5fdbd90c-7ac2-43ee-bfe8-fca65438d311
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_case_id
+    - node.type.wsi
+id: node.wsi.field_case_id
+field_name: field_case_id
+entity_type: node
+bundle: wsi
+label: case_id
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

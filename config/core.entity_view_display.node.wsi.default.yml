@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.wsi.field_case_id
     - field.field.node.wsi.field_collection
     - field.field.node.wsi.field_container
     - field.field.node.wsi.field_date_and_time_image_captur
@@ -38,6 +39,7 @@ dependencies:
     - field.field.node.wsi.field_specimen_type
     - field.field.node.wsi.field_study
     - field.field.node.wsi.field_study_id
+    - field.field.node.wsi.field_subject_id
     - field.field.node.wsi.field_subject_patient_global_id
     - field.field.node.wsi.field_subject_patient_local_id
     - field.field.node.wsi.field_tissue_block_id
@@ -75,7 +77,9 @@ third_party_settings:
       header:
         - links
         - field_collection
-        - field_disease_type
+        - field_study_id
+        - field_subject_id
+        - field_case_id
         - field_md5
         - field_height
         - field_width
@@ -83,9 +87,7 @@ third_party_settings:
         - field_series
         - field_study
         - field_container
-        - field_specimen_type
         - field_specimen_source_id
-        - field_specimen_staining
         - field_specimen_lab_id
         - field_subject_patient_local_id
         - field_subject_patient_global_id
@@ -95,24 +97,27 @@ third_party_settings:
         - field_specimen_embedding_id
         - field_specimen_date_and_time_of_
         - field_specimen_date_and_time_rec
-        - field_study_id
         - group_tabbers
-        - field_image_local_id
+        - field_image_id
+        - field_imaging_scanning_sw_vendor
+        - field_specimen_type
         - field_image_fileoriginal
+        - field_specimen_staining
         - field_date_and_time_image_conver
         - field_date_and_time_image_captur
+        - field_disease_type
+        - field_specimen_source
         - field_image_conversion_process_w
-        - field_imaging_scanning_software_
-        - field_imaging_instrument_vendor
-        - field_image_color_type
+        - field_iip_path
         - field_imaging_instrument_version
         - field_imaging_instrument_model
         - field_imaging_scan_software_ver
         - field_imaging_scanner_software_m
-        - field_image_compression_type
         - group_image
+        - field_image_compression_type
+        - field_image_color_type
+        - field_imaging_instrument_vendor
       left:
-        - field_specimen_source
         - field_specimen_global_id
       right:
         - field_mpp_x
@@ -122,7 +127,7 @@ third_party_settings:
       children:
         - group_image
       parent_name: ''
-      weight: 23
+      weight: 22
       format_type: tabs
       format_settings:
         id: ''
@@ -132,19 +137,17 @@ third_party_settings:
       region: hidden
     group_image:
       children:
-        - field_image_local_id
         - field_image_fileoriginal
         - field_date_and_time_image_conver
         - field_date_and_time_image_captur
         - field_image_conversion_process_w
-        - field_imaging_scanning_software_
-        - field_imaging_instrument_vendor
-        - field_image_color_type
         - field_imaging_instrument_version
         - field_imaging_instrument_model
         - field_imaging_scan_software_ver
         - field_imaging_scanner_software_m
         - field_image_compression_type
+        - field_image_color_type
+        - field_imaging_instrument_vendor
       parent_name: group_tabbers
       weight: 38
       format_type: tab
@@ -160,6 +163,14 @@ targetEntityType: node
 bundle: wsi
 mode: default
 content:
+  field_case_id:
+    weight: 4
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
   field_collection:
     weight: 1
     label: inline
@@ -169,7 +180,7 @@ content:
     type: entity_reference_label
     region: header
   field_container:
-    weight: 9
+    weight: 11
     label: inline
     settings:
       link_to_entity: false
@@ -195,14 +206,14 @@ content:
     type: datetime_default
     region: header
   field_disease_type:
-    weight: 46
+    weight: 27
     label: above
     settings: {  }
     third_party_settings: {  }
     type: list_default
-    region: content
+    region: header
   field_height:
-    weight: 4
+    weight: 6
     label: inline
     settings:
       thousand_separator: ','
@@ -211,27 +222,27 @@ content:
     type: number_integer
     region: header
   field_iip_path:
-    weight: 48
+    weight: 29
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_image_color_type:
     weight: 41
     label: above
     settings: {  }
     third_party_settings: {  }
     type: list_default
-    region: content
+    region: header
   field_image_compression_type:
     weight: 40
     label: above
     settings: {  }
     third_party_settings: {  }
     type: list_default
-    region: content
+    region: header
   field_image_conversion_process_w:
     weight: 28
     label: inline
@@ -249,13 +260,13 @@ content:
     type: string
     region: header
   field_image_id:
-    weight: 39
+    weight: 23
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_imaging_instrument_model:
     weight: 33
     label: inline
@@ -271,7 +282,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_imaging_instrument_version:
     weight: 32
     label: inline
@@ -297,15 +308,15 @@ content:
     type: string
     region: header
   field_imaging_scanning_sw_vendor:
-    weight: 43
+    weight: 24
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_md5:
-    weight: 3
+    weight: 5
     label: inline
     settings:
       link_to_entity: false
@@ -313,7 +324,7 @@ content:
     type: string
     region: header
   field_mpp_x:
-    weight: 26
+    weight: 31
     label: inline
     settings:
       thousand_separator: ''
@@ -324,7 +335,7 @@ content:
     type: number_decimal
     region: right
   field_mpp_y:
-    weight: 27
+    weight: 32
     label: inline
     settings:
       thousand_separator: ''
@@ -335,7 +346,7 @@ content:
     type: number_decimal
     region: right
   field_patient:
-    weight: 6
+    weight: 8
     label: inline
     settings:
       link_to_entity: false
@@ -343,7 +354,7 @@ content:
     type: string
     region: header
   field_series:
-    weight: 7
+    weight: 9
     label: inline
     settings:
       link_to_entity: false
@@ -385,7 +396,7 @@ content:
     type: string
     region: header
   field_specimen_global_id:
-    weight: 25
+    weight: 30
     label: inline
     settings:
       link_to_entity: false
@@ -401,15 +412,15 @@ content:
     type: string
     region: header
   field_specimen_source:
-    weight: 47
+    weight: 28
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_specimen_source_id:
-    weight: 11
+    weight: 12
     label: inline
     settings:
       link_to_entity: false
@@ -417,23 +428,23 @@ content:
     type: string
     region: header
   field_specimen_staining:
-    weight: 45
+    weight: 26
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_specimen_type:
-    weight: 44
+    weight: 25
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_study:
-    weight: 8
+    weight: 10
     label: inline
     settings:
       link_to_entity: false
@@ -441,7 +452,15 @@ content:
     type: string
     region: header
   field_study_id:
-    weight: 22
+    weight: 2
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_subject_id:
+    weight: 3
     label: inline
     settings:
       link_to_entity: false
@@ -481,7 +500,7 @@ content:
     type: string
     region: header
   field_width:
-    weight: 5
+    weight: 7
     label: inline
     settings:
       thousand_separator: ','

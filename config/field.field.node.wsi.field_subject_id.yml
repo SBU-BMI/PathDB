@@ -1,0 +1,19 @@
+uuid: 918facb8-45f1-4bb6-bb44-cf8550fea321
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_subject_id
+    - node.type.wsi
+id: node.wsi.field_subject_id
+field_name: field_subject_id
+entity_type: node
+bundle: wsi
+label: subject_id
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
