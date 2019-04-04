@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.bulk_csv_upload.field_bu
     - field.field.node.bulk_csv_upload.field_csvfile
     - field.field.node.bulk_csv_upload.field_log
     - field.field.node.bulk_csv_upload.field_mappings
@@ -27,6 +28,15 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_bu:
+    weight: 10
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
   field_csvfile:
     weight: 9
     settings:

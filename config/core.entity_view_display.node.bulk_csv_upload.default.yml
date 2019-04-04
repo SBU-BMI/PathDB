@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.bulk_csv_upload.field_bu
     - field.field.node.bulk_csv_upload.field_csvfile
     - field.field.node.bulk_csv_upload.field_log
     - field.field.node.bulk_csv_upload.field_mappings
@@ -20,6 +21,14 @@ targetEntityType: node
 bundle: bulk_csv_upload
 mode: default
 content:
+  field_bu:
+    weight: 110
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
   field_csvfile:
     weight: 107
     label: inline

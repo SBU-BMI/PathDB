@@ -1,15 +1,14 @@
-uuid: 63955cd4-9c1f-42bd-af6e-e81ef7e3ed14
+uuid: 88a31f2b-fe55-432c-b551-70bed9844211
 langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_bulk_upload
+    - field.storage.node.field_bu
     - node.type.bulk_csv_upload
-    - node.type.map
-id: node.map.field_bulk_upload
-field_name: field_bulk_upload
+id: node.bulk_csv_upload.field_bu
+field_name: field_bu
 entity_type: node
-bundle: map
+bundle: bulk_csv_upload
 label: 'Bulk Upload'
 description: ''
 required: false

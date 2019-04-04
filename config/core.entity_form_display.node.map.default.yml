@@ -3,7 +3,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.map.field_bulk_upload
     - field.field.node.map.field_map
     - field.field.node.map.field_map_type
     - field.field.node.map.field_target_collection
@@ -46,7 +45,6 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
-  field_bulk_upload: true
   path: true
   promote: true
   revision_log: true
