@@ -1,0 +1,21 @@
+uuid: b01f5b3d-c970-4ff5-b17d-805751819ef1
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_spec_datetime_of_staining
+    - node.type.wsi
+  module:
+    - datetime
+id: node.wsi.field_spec_datetime_of_staining
+field_name: field_spec_datetime_of_staining
+entity_type: node
+bundle: wsi
+label: 'Specimen date and time of stain processing'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

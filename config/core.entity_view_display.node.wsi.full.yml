@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.full
+    - field.field.node.wsi.field_bulk_upload
     - field.field.node.wsi.field_case_id
     - field.field.node.wsi.field_collection
     - field.field.node.wsi.field_container
@@ -14,7 +15,6 @@ dependencies:
     - field.field.node.wsi.field_iip_path
     - field.field.node.wsi.field_image_color_type
     - field.field.node.wsi.field_image_compression_type
-    - field.field.node.wsi.field_image_conversion_process_w
     - field.field.node.wsi.field_image_fileoriginal
     - field.field.node.wsi.field_image_id
     - field.field.node.wsi.field_imaging_instrument_model
@@ -23,11 +23,15 @@ dependencies:
     - field.field.node.wsi.field_imaging_scan_software_ver
     - field.field.node.wsi.field_imaging_scanner_software_m
     - field.field.node.wsi.field_imaging_scanning_sw_vendor
+    - field.field.node.wsi.field_img_conv_process_workflow
+    - field.field.node.wsi.field_magnification
     - field.field.node.wsi.field_md5
     - field.field.node.wsi.field_mpp_x
     - field.field.node.wsi.field_mpp_y
+    - field.field.node.wsi.field_original_image_global_id
     - field.field.node.wsi.field_patient
     - field.field.node.wsi.field_series
+    - field.field.node.wsi.field_spec_datetime_of_staining
     - field.field.node.wsi.field_specimen_date_and_time_of_
     - field.field.node.wsi.field_specimen_date_and_time_rec
     - field.field.node.wsi.field_specimen_embedding_id
@@ -276,14 +280,6 @@ content:
     label: above
     settings: {  }
     third_party_settings: {  }
-  field_image_conversion_process_w:
-    weight: 21
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
   field_image_fileoriginal:
     weight: 19
     label: inline
@@ -523,10 +519,15 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  field_bulk_upload: true
   field_case_id: true
   field_iip_path: true
   field_image_id: true
   field_imaging_scanning_sw_vendor: true
+  field_img_conv_process_workflow: true
+  field_magnification: true
+  field_original_image_global_id: true
+  field_spec_datetime_of_staining: true
   field_subject_id: true
   field_utarget: true
   field_wsiimage: true

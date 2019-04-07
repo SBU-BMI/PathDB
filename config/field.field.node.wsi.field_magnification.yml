@@ -1,0 +1,23 @@
+uuid: f58c00a4-c21d-4d11-8753-42c7b505cfe8
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_magnification
+    - node.type.wsi
+id: node.wsi.field_magnification
+field_name: field_magnification
+entity_type: node
+bundle: wsi
+label: Magnification
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

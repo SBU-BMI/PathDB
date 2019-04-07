@@ -1,0 +1,19 @@
+uuid: eec03221-1eca-4acd-96ee-9f88f39c19b5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_component
+    - node.type.wsi
+id: node.wsi.field_component
+field_name: field_component
+entity_type: node
+bundle: wsi
+label: Component
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

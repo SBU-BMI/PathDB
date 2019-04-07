@@ -1,0 +1,19 @@
+uuid: cc9fe32e-5edf-46e8-8bca-c85edbe2c5eb
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_original_image_global_id
+    - node.type.wsi
+id: node.wsi.field_original_image_global_id
+field_name: field_original_image_global_id
+entity_type: node
+bundle: wsi
+label: 'Original image global id'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long
