@@ -1,0 +1,19 @@
+uuid: 5be0e9e2-f407-439f-a1a9-39f9e7bbc264
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_img_conv_process_workflow
+    - node.type.wsi
+id: node.wsi.field_img_conv_process_workflow
+field_name: field_img_conv_process_workflow
+entity_type: node
+bundle: wsi
+label: 'Image conversion process workflow'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
