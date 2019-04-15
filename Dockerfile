@@ -59,8 +59,8 @@ RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my
 # increase php file upload sizes and posts
 RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 30G/g' /etc/php.ini
 RUN sed -i 's/post_max_size = 8M/post_max_size = 30G/g' /etc/php.ini
-RUN mkdir /data/temp \
-    chmod a=rwx,o+t /data/tmp
+RUN mkdir /data/temp
+RUN chmod a=rwx,o+t /data/tmp
 RUN sed -i 's/;upload_tmp_dir =/upload_tmp_dir = "/data/tmp"/g' /etc/php.ini
 RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "/data/tmp"/g' /etc/php.ini
 # set up Drupal private file area
