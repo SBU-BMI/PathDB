@@ -1,3 +1,7 @@
+if [ ! -d /data/tmp ]; then
+	RUN mkdir -p /data/tmp
+	RUN chmod a=rwx,o+t /data/tmp
+fi
 if [ ! -d /data/pathdb/mysql ]; then
 	rm -rf /data/pathdb/quip
 	cp -rp /quip /data/pathdb
