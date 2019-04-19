@@ -51,6 +51,7 @@ RUN composer require drupal/ds
 RUN composer require drupal/taxonomy_unique
 RUN composer require drupal/prepopulate
 RUN composer require drupal/auto_entitylabel
+RUN composer require drupal/easy_breadcrumb
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip
