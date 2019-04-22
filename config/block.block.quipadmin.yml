@@ -1,0 +1,29 @@
+uuid: 9ea10a2c-82b3-43d8-9cd5-d79d98b8ec28
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.quip-admin
+  module:
+    - system
+  theme:
+    - drupal8_w3css_theme
+id: quipadmin
+theme: drupal8_w3css_theme
+region: sidebar_first
+weight: -6
+provider: null
+plugin: 'system_menu_block:quip-admin'
+settings:
+  id: 'system_menu_block:quip-admin'
+  label: 'QuIP Admin'
+  provider: system
+  label_display: visible
+  level: 1
+  depth: 0
+visibility:
+  request_path:
+    id: request_path
+    pages: /user/1
+    negate: false
+    context_mapping: {  }

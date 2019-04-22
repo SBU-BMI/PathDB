@@ -1,0 +1,150 @@
+uuid: e79e1ec0-9815-4b53-b5c9-3112550dac6b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_case_id
+    - field.storage.node.field_image_id
+    - field.storage.node.field_study_id
+    - field.storage.node.field_subject_id
+    - field.storage.node.field_collection
+    - search_api.server.default_server
+  module:
+    - taxonomy
+    - node
+    - search_api
+_core:
+  default_config_hash: GLmLegZGHtMF6annRqgjizJAoiAip-IT-XOsDMCZfog
+id: default_index
+name: 'Default content index'
+description: 'Default content index created by the Database Search Defaults module'
+read_only: false
+field_settings:
+  field_case_id:
+    label: case_id
+    datasource_id: 'entity:node'
+    property_path: field_case_id
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_case_id
+  field_image_id:
+    label: 'Image ID'
+    datasource_id: 'entity:node'
+    property_path: field_image_id
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_image_id
+  field_study_id:
+    label: 'Study ID'
+    datasource_id: 'entity:node'
+    property_path: field_study_id
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_study_id
+  field_subject_id:
+    label: subject_id
+    datasource_id: 'entity:node'
+    property_path: field_subject_id
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_subject_id
+  name:
+    label: 'Collection » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_collection:entity:name'
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.field_collection
+      module:
+        - taxonomy
+        - taxonomy
+  node_grants:
+    label: 'Node access information'
+    property_path: search_api_node_grants
+    type: string
+    indexed_locked: true
+    type_locked: true
+    hidden: true
+  status:
+    label: 'Publishing status'
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+  uid:
+    label: 'Author ID'
+    datasource_id: 'entity:node'
+    property_path: uid
+    type: integer
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: true
+      selected: {  }
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url:
+    weights:
+      preprocess_index: -30
+  aggregated_field:
+    weights:
+      add_properties: 20
+  content_access:
+    weights:
+      preprocess_index: -6
+      preprocess_query: -48
+  entity_status:
+    weights:
+      preprocess_index: -10
+  ignorecase:
+    all_fields: true
+    fields:
+      - field_case_id
+      - field_image_id
+      - field_study_id
+      - field_subject_id
+      - name
+    weights:
+      preprocess_index: -48
+      preprocess_query: -50
+  rendered_item:
+    weights:
+      add_properties: 0
+      pre_index_save: -10
+  tokenizer:
+    all_fields: true
+    fields:
+      - field_case_id
+      - field_image_id
+      - field_study_id
+      - field_subject_id
+      - name
+    spaces: ''
+    overlap_cjk: 1
+    minimum_word_size: '3'
+    weights:
+      preprocess_index: -46
+      preprocess_query: -49
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  cron_limit: 50
+  index_directly: true
+server: default_server

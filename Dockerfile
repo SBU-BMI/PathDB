@@ -9,11 +9,10 @@ RUN yum -y install wget which zip unzip telnet java-1.8.0-openjdk bind-utils epe
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php72
 RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip
-RUN yum -y install mariadb-server mariadb-client
-RUN yum -y install git
+RUN yum -y install mariadb-server mariadb-client git
 RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
 RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
-RUN yum -y install initscripts
+#RUN yum -y install initscripts
 
 # download Drupal management tools
 WORKDIR /build
@@ -36,22 +35,24 @@ COPY images/ images/
 
 # download and install extra Drupal modules
 WORKDIR /quip
-RUN composer require drupal/restui
-RUN composer require drupal/search_api
-RUN composer require drupal/token
-RUN composer require drupal/typed_data
-RUN composer require drupal/jwt
-RUN composer require drupal/d8w3css
-RUN composer require drupal/hide_revision_field
-RUN composer require drupal/field_group
-RUN composer require drupal/tac_lite
-RUN composer require drupal/field_permissions
-RUN composer require drupal/views_taxonomy_term_name_depth
-RUN composer require drupal/ds
-RUN composer require drupal/taxonomy_unique
-RUN composer require drupal/prepopulate
-RUN composer require drupal/auto_entitylabel
-RUN composer require drupal/easy_breadcrumb
+RUN composer require drupal/restui \
+    composer require drupal/search_api \
+    composer require drupal/token \
+    composer require drupal/typed_data \
+    composer require drupal/jwt \
+    composer require drupal/d8w3css \
+    composer require drupal/hide_revision_field \
+    composer require drupal/field_group \
+    composer require drupal/tac_lite \
+    composer require drupal/field_permissions \
+    composer require drupal/views_taxonomy_term_name_depth \
+    composer require drupal/ds \
+    composer require drupal/taxonomy_unique \
+    composer require drupal/prepopulate \
+    composer require drupal/auto_entitylabel \
+    composer require drupal/easy_breadcrumb \
+    composer require drupal/csv_serialization \
+    composer require drupal/views_data_export
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip
