@@ -35,23 +35,23 @@ COPY images/ images/
 
 # download and install extra Drupal modules
 WORKDIR /quip
-RUN composer require drupal/restui \
-    composer require drupal/search_api \
-    composer require drupal/token \
-    composer require drupal/typed_data \
-    composer require drupal/jwt \
-    composer require drupal/d8w3css \
-    composer require drupal/hide_revision_field \
-    composer require drupal/field_group \
-    composer require drupal/tac_lite \
-    composer require drupal/field_permissions \
-    composer require drupal/views_taxonomy_term_name_depth \
-    composer require drupal/ds \
-    composer require drupal/taxonomy_unique \
-    composer require drupal/prepopulate \
-    composer require drupal/auto_entitylabel \
-    composer require drupal/easy_breadcrumb \
-    composer require drupal/csv_serialization \
+RUN composer require drupal/restui &&\
+    composer require drupal/search_api &&\
+    composer require drupal/token &&\
+    composer require drupal/typed_data &&\
+    composer require drupal/jwt &&\
+    composer require drupal/d8w3css &&\
+    composer require drupal/hide_revision_field &&\
+    composer require drupal/field_group &&\
+    composer require drupal/tac_lite &&\
+    composer require drupal/field_permissions &&\
+    composer require drupal/views_taxonomy_term_name_depth &&\
+    composer require drupal/ds &&\
+    composer require drupal/taxonomy_unique &&\
+    composer require drupal/prepopulate &&\
+    composer require drupal/auto_entitylabel &&\
+    composer require drupal/easy_breadcrumb &&\
+    composer require drupal/csv_serialization &&\
     composer require drupal/views_data_export
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
