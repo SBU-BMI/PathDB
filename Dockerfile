@@ -52,7 +52,8 @@ RUN composer require drupal/restui &&\
     composer require drupal/auto_entitylabel &&\
     composer require drupal/easy_breadcrumb &&\
     composer require drupal/csv_serialization &&\
-    composer require drupal/views_data_export
+    composer require drupal/views_data_export &&\
+    composer require drupal/facets
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip
