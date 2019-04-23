@@ -46,6 +46,7 @@ module:
   quickedit: 0
   quip: 0
   rdf: 0
+  redirect_after_login: 0
   rest: 0
   restui: 0
   search_api: 0

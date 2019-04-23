@@ -91,14 +91,14 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: wsiimage
+          label: 'Image URL'
           exclude: false
           alter:
             alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
+            text: '{{ field_wsiimage }}'
+            make_link: true
+            path: '{{ field_wsiimage }}'
+            absolute: true
             external: false
             replace_spaces: false
             path_case: none
@@ -124,7 +124,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: true
+          element_label_colon: false
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -219,13 +219,49 @@ display:
       footer: {  }
       empty: {  }
       relationships: {  }
-      arguments: {  }
+      arguments:
+        field_collection_target_id:
+          id: field_collection_target_id
+          table: node__field_collection
+          field: field_collection_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          default_action: ignore
+          exception:
+            value: all
+            title_enable: false
+            title: All
+          title_enable: false
+          title: ''
+          default_argument_type: fixed
+          default_argument_options:
+            argument: ''
+          default_argument_skip_url: false
+          summary_options:
+            base_path: ''
+            count: true
+            items_per_page: 25
+            override: false
+          summary:
+            sort_order: asc
+            number_of_records: 0
+            format: default_summary
+          specify_validation: false
+          validate:
+            type: none
+            fail: 'not found'
+          validate_options: {  }
+          break_phrase: false
+          not: false
+          plugin_id: numeric
       display_extenders: {  }
     cache_metadata:
       max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - 'user.node_grants:view'
         - user.permissions
       tags:
@@ -241,8 +277,8 @@ display:
       displays:
         page_1: page_1
         default: '0'
-      path: dumpme
-      filename: blah.csv
+      path: csvdownload
+      filename: httplinks.csv
       style:
         type: data_export
         options:
@@ -273,6 +309,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - request_format
+        - url
         - 'user.node_grants:view'
         - user.permissions
       tags:
@@ -285,12 +322,13 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: download
+      path: download3
     cache_metadata:
       max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - 'user.node_grants:view'
         - user.permissions
       tags:
