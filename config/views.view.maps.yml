@@ -9,7 +9,6 @@ dependencies:
     - field.storage.node.field_study_id
     - field.storage.node.field_wsi
     - node.type.map
-    - system.menu.main
   module:
     - file
     - node
@@ -637,7 +636,7 @@ display:
       display_extenders: {  }
       path: maps
       menu:
-        type: normal
+        type: none
         title: Maps
         description: ''
         expanded: true
