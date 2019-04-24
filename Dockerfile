@@ -54,7 +54,9 @@ RUN composer require drupal/restui &&\
     composer require drupal/csv_serialization &&\
     composer require drupal/views_data_export &&\
     composer require drupal/facets &&\
-    composer require drupal/redirect_after_login
+    composer require drupal/redirect_after_login &&\
+    composer require drupal/views_base_url
+
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
 RUN chgrp -R apache ../quip

@@ -61,6 +61,7 @@ module:
   tour: 0
   update: 0
   user: 0
+  views_base_url: 0
   views_data_export: 0
   views_taxonomy_term_name_depth: 0
   views_ui: 0
