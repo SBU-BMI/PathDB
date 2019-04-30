@@ -3,11 +3,12 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.storage.node.clinicaltrialsubjectid
     - field.storage.node.field_collection
-    - field.storage.node.field_image_id
     - field.storage.node.field_map
-    - field.storage.node.field_study_id
     - field.storage.node.field_wsi
+    - field.storage.node.imageid
+    - field.storage.node.studyid
     - node.type.map
   module:
     - file
@@ -203,10 +204,10 @@ display:
           separator: ', '
           field_api_classes: false
           plugin_id: field
-        field_study_id:
-          id: field_study_id
-          table: node__field_study_id
-          field: field_study_id
+        studyid:
+          id: studyid
+          table: node__studyid
+          field: studyid
           relationship: field_wsi
           group_type: group
           admin_label: ''
@@ -266,10 +267,73 @@ display:
           separator: ', '
           field_api_classes: false
           plugin_id: field
-        field_image_id:
-          id: field_image_id
-          table: node__field_image_id
-          field: field_image_id
+        clinicaltrialsubjectid:
+          id: clinicaltrialsubjectid
+          table: node__clinicaltrialsubjectid
+          field: clinicaltrialsubjectid
+          relationship: field_wsi
+          group_type: group
+          admin_label: ''
+          label: 'Subject ID'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        imageid:
+          id: imageid
+          table: node__imageid
+          field: imageid
           relationship: field_wsi
           group_type: group
           admin_label: ''
@@ -621,11 +685,12 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       tags:
+        - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
-        - 'config:field.storage.node.field_image_id'
         - 'config:field.storage.node.field_map'
-        - 'config:field.storage.node.field_study_id'
         - 'config:field.storage.node.field_wsi'
+        - 'config:field.storage.node.imageid'
+        - 'config:field.storage.node.studyid'
         - extensions
   page_1:
     display_plugin: page
@@ -654,9 +719,10 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       tags:
+        - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
-        - 'config:field.storage.node.field_image_id'
         - 'config:field.storage.node.field_map'
-        - 'config:field.storage.node.field_study_id'
         - 'config:field.storage.node.field_wsi'
+        - 'config:field.storage.node.imageid'
+        - 'config:field.storage.node.studyid'
         - extensions

@@ -2,17 +2,16 @@ uuid: e79e1ec0-9815-4b53-b5c9-3112550dac6b
 langcode: en
 status: true
 dependencies:
-  config:
-    - field.storage.node.field_case_id
-    - field.storage.node.field_image_id
-    - field.storage.node.field_study_id
-    - field.storage.node.field_subject_id
-    - field.storage.node.field_collection
-    - search_api.server.default_server
   module:
-    - taxonomy
     - node
+    - taxonomy
     - search_api
+  config:
+    - field.storage.node.clinicaltrialsubjectid
+    - field.storage.node.field_collection
+    - field.storage.node.imageid
+    - field.storage.node.studyid
+    - search_api.server.default_server
 _core:
   default_config_hash: GLmLegZGHtMF6annRqgjizJAoiAip-IT-XOsDMCZfog
 id: default_index
@@ -20,38 +19,22 @@ name: 'Default content index'
 description: 'Default content index created by the Database Search Defaults module'
 read_only: false
 field_settings:
-  field_case_id:
-    label: case_id
+  clinicaltrialsubjectid:
+    label: 'Clinical ​Trial ​Subject ID'
     datasource_id: 'entity:node'
-    property_path: field_case_id
+    property_path: clinicaltrialsubjectid
     type: text
     dependencies:
       config:
-        - field.storage.node.field_case_id
-  field_image_id:
+        - field.storage.node.clinicaltrialsubjectid
+  imageid:
     label: 'Image ID'
     datasource_id: 'entity:node'
-    property_path: field_image_id
+    property_path: imageid
     type: text
     dependencies:
       config:
-        - field.storage.node.field_image_id
-  field_study_id:
-    label: 'Study ID'
-    datasource_id: 'entity:node'
-    property_path: field_study_id
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_study_id
-  field_subject_id:
-    label: subject_id
-    datasource_id: 'entity:node'
-    property_path: field_subject_id
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_subject_id
+        - field.storage.node.imageid
   name:
     label: 'Collection » Taxonomy term » Name'
     datasource_id: 'entity:node'
@@ -80,6 +63,14 @@ field_settings:
     dependencies:
       module:
         - node
+  studyid:
+    label: 'Study ID'
+    datasource_id: 'entity:node'
+    property_path: studyid
+    type: text
+    dependencies:
+      config:
+        - field.storage.node.studyid
   uid:
     label: 'Author ID'
     datasource_id: 'entity:node'
@@ -115,11 +106,10 @@ processor_settings:
   ignorecase:
     all_fields: true
     fields:
-      - field_case_id
-      - field_image_id
-      - field_study_id
-      - field_subject_id
+      - clinicaltrialsubjectid
+      - imageid
       - name
+      - studyid
     weights:
       preprocess_index: -48
       preprocess_query: -50
@@ -130,11 +120,10 @@ processor_settings:
   tokenizer:
     all_fields: true
     fields:
-      - field_case_id
-      - field_image_id
-      - field_study_id
-      - field_subject_id
+      - clinicaltrialsubjectid
+      - imageid
       - name
+      - studyid
     spaces: ''
     overlap_cjk: 1
     minimum_word_size: '3'

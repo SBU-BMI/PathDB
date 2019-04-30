@@ -5,52 +5,9 @@ dependencies:
   config:
     - core.entity_view_mode.node.teaser
     - field.field.node.wsi.field_bulk_upload
-    - field.field.node.wsi.field_case_id
     - field.field.node.wsi.field_collection
-    - field.field.node.wsi.field_container
-    - field.field.node.wsi.field_date_and_time_image_captur
-    - field.field.node.wsi.field_date_and_time_image_conver
-    - field.field.node.wsi.field_disease_type
-    - field.field.node.wsi.field_height
     - field.field.node.wsi.field_iip_path
-    - field.field.node.wsi.field_image_color_type
-    - field.field.node.wsi.field_image_compression_type
-    - field.field.node.wsi.field_image_fileoriginal
-    - field.field.node.wsi.field_image_id
-    - field.field.node.wsi.field_imaging_instrument_model
-    - field.field.node.wsi.field_imaging_instrument_vendor
-    - field.field.node.wsi.field_imaging_instrument_version
-    - field.field.node.wsi.field_imaging_scan_software_ver
-    - field.field.node.wsi.field_imaging_scanner_software_m
-    - field.field.node.wsi.field_imaging_scanning_sw_vendor
-    - field.field.node.wsi.field_img_conv_process_workflow
-    - field.field.node.wsi.field_magnification
-    - field.field.node.wsi.field_md5
-    - field.field.node.wsi.field_mpp_x
-    - field.field.node.wsi.field_mpp_y
-    - field.field.node.wsi.field_original_image_global_id
-    - field.field.node.wsi.field_patient
-    - field.field.node.wsi.field_series
-    - field.field.node.wsi.field_spec_datetime_of_staining
-    - field.field.node.wsi.field_specimen_date_and_time_of_
-    - field.field.node.wsi.field_specimen_date_and_time_rec
-    - field.field.node.wsi.field_specimen_embedding_id
-    - field.field.node.wsi.field_specimen_fixative_id
-    - field.field.node.wsi.field_specimen_global_id
-    - field.field.node.wsi.field_specimen_lab_id
-    - field.field.node.wsi.field_specimen_source
-    - field.field.node.wsi.field_specimen_source_id
-    - field.field.node.wsi.field_specimen_staining
-    - field.field.node.wsi.field_specimen_type
-    - field.field.node.wsi.field_study
-    - field.field.node.wsi.field_study_id
-    - field.field.node.wsi.field_subject_id
-    - field.field.node.wsi.field_subject_patient_global_id
-    - field.field.node.wsi.field_subject_patient_local_id
-    - field.field.node.wsi.field_tissue_block_id
-    - field.field.node.wsi.field_tissue_sub_block_id
     - field.field.node.wsi.field_utarget
-    - field.field.node.wsi.field_width
     - field.field.node.wsi.field_wsiimage
     - node.type.wsi
   module:
@@ -67,50 +24,7 @@ content:
     third_party_settings: {  }
 hidden:
   field_bulk_upload: true
-  field_case_id: true
   field_collection: true
-  field_container: true
-  field_date_and_time_image_captur: true
-  field_date_and_time_image_conver: true
-  field_disease_type: true
-  field_height: true
   field_iip_path: true
-  field_image_color_type: true
-  field_image_compression_type: true
-  field_image_fileoriginal: true
-  field_image_id: true
-  field_imaging_instrument_model: true
-  field_imaging_instrument_vendor: true
-  field_imaging_instrument_version: true
-  field_imaging_scan_software_ver: true
-  field_imaging_scanner_software_m: true
-  field_imaging_scanning_sw_vendor: true
-  field_img_conv_process_workflow: true
-  field_magnification: true
-  field_md5: true
-  field_mpp_x: true
-  field_mpp_y: true
-  field_original_image_global_id: true
-  field_patient: true
-  field_series: true
-  field_spec_datetime_of_staining: true
-  field_specimen_date_and_time_of_: true
-  field_specimen_date_and_time_rec: true
-  field_specimen_embedding_id: true
-  field_specimen_fixative_id: true
-  field_specimen_global_id: true
-  field_specimen_lab_id: true
-  field_specimen_source: true
-  field_specimen_source_id: true
-  field_specimen_staining: true
-  field_specimen_type: true
-  field_study: true
-  field_study_id: true
-  field_subject_id: true
-  field_subject_patient_global_id: true
-  field_subject_patient_local_id: true
-  field_tissue_block_id: true
-  field_tissue_sub_block_id: true
   field_utarget: true
-  field_width: true
   field_wsiimage: true
