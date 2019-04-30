@@ -53,10 +53,10 @@ third_party_settings:
         - links
         - node_title
         - field_collection
-        - patientid
+        - studyid
         - clinicaltrialsubjectid
         - imageid
-        - studyid
+        - patientid
         - group_tabbers
         - imagedvolumeheight
         - imagedvolumewidth
@@ -156,7 +156,7 @@ content:
     type: string
     weight: 4
     region: header
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -245,7 +245,7 @@ content:
     third_party_settings: {  }
   patientid:
     type: string
-    weight: 3
+    weight: 6
     region: header
     label: inline
     settings:
@@ -275,7 +275,7 @@ content:
     third_party_settings: {  }
   studyid:
     type: string
-    weight: 6
+    weight: 3
     region: header
     label: inline
     settings:

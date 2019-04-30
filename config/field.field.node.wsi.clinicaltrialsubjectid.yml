@@ -9,7 +9,7 @@ id: node.wsi.clinicaltrialsubjectid
 field_name: clinicaltrialsubjectid
 entity_type: node
 bundle: wsi
-label: 'Clinical ​Trial ​Subject ID'
+label: '​Subject ID'
 description: ''
 required: false
 translatable: false

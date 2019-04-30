@@ -51,52 +51,24 @@ third_party_settings:
       header:
         - links
         - field_collection
-        - field_study_id
-        - field_subject_id
-        - field_case_id
-        - field_md5
-        - field_height
-        - field_width
-        - field_patient
-        - field_series
-        - field_study
-        - field_container
-        - field_specimen_source_id
-        - field_specimen_lab_id
-        - field_subject_patient_local_id
-        - field_subject_patient_global_id
-        - field_tissue_block_id
-        - field_tissue_sub_block_id
-        - field_specimen_fixative_id
-        - field_specimen_embedding_id
-        - field_specimen_date_and_time_of_
-        - field_specimen_date_and_time_rec
         - group_tabbers
-        - field_image_id
-        - field_imaging_scanning_sw_vendor
-        - field_image_fileoriginal
-        - field_specimen_type
-        - field_specimen_staining
-        - field_date_and_time_image_conver
-        - field_disease_type
-        - field_date_and_time_image_captur
-        - field_image_conversion_process_w
-        - field_specimen_source
         - field_iip_path
-        - field_imaging_instrument_version
-        - field_imaging_instrument_model
-        - field_imaging_scan_software_ver
-        - field_imaging_scanner_software_m
         - group_image
-        - field_image_compression_type
-        - field_image_color_type
-        - field_imaging_instrument_vendor
         - field_bulk_upload
-      left:
-        - field_specimen_global_id
-      right:
-        - field_mpp_x
-        - field_mpp_y
+        - acquisitiondatetime
+        - imagedvolumeheight
+        - lossyimagecompression
+        - lossyimagecompressionratio
+        - lossyimagecompressionmethod
+        - referencepixelphysicalvaluex
+        - referencepixelphysicalvaluey
+        - imageid
+        - patientid
+        - studyid
+        - imagedvolumewidth
+        - manufacturer
+        - md5
+        - clinicaltrialsubjectid
   field_group:
     group_tabbers:
       children:
@@ -111,18 +83,7 @@ third_party_settings:
       label: Tabbers
       region: hidden
     group_image:
-      children:
-        - field_image_fileoriginal
-        - field_date_and_time_image_conver
-        - field_date_and_time_image_captur
-        - field_image_conversion_process_w
-        - field_imaging_instrument_version
-        - field_imaging_instrument_model
-        - field_imaging_scan_software_ver
-        - field_imaging_scanner_software_m
-        - field_image_compression_type
-        - field_image_color_type
-        - field_imaging_instrument_vendor
+      children: {  }
       parent_name: group_tabbers
       weight: 38
       format_type: tab
@@ -146,7 +107,7 @@ content:
       timezone_override: ''
     third_party_settings: {  }
     type: datetime_default
-    region: content
+    region: header
   clinicaltrialsubjectid:
     weight: 58
     label: above
@@ -154,7 +115,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   field_bulk_upload:
     weight: 43
     label: inline
@@ -189,7 +150,7 @@ content:
       prefix_suffix: true
     third_party_settings: {  }
     type: number_decimal
-    region: content
+    region: header
   imagedvolumewidth:
     weight: 55
     label: above
@@ -200,7 +161,7 @@ content:
       prefix_suffix: true
     third_party_settings: {  }
     type: number_decimal
-    region: content
+    region: header
   imageid:
     weight: 51
     label: above
@@ -208,7 +169,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   links:
     weight: 0
     region: header
@@ -221,7 +182,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   lossyimagecompressionmethod:
     weight: 48
     label: above
@@ -229,7 +190,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   lossyimagecompressionratio:
     weight: 47
     label: above
@@ -237,7 +198,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   manufacturer:
     weight: 56
     label: above
@@ -245,7 +206,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   md5:
     weight: 57
     label: above
@@ -253,7 +214,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   patientid:
     weight: 52
     label: above
@@ -261,7 +222,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
   referencepixelphysicalvaluex:
     weight: 49
     label: above
@@ -272,7 +233,7 @@ content:
       prefix_suffix: true
     third_party_settings: {  }
     type: number_decimal
-    region: content
+    region: header
   referencepixelphysicalvaluey:
     weight: 50
     label: above
@@ -283,7 +244,7 @@ content:
       prefix_suffix: true
     third_party_settings: {  }
     type: number_decimal
-    region: content
+    region: header
   studyid:
     weight: 54
     label: above
@@ -291,7 +252,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
+    region: header
 hidden:
   field_utarget: true
   field_wsiimage: true
