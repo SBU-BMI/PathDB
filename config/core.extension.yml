@@ -47,6 +47,7 @@ module:
   rdf: 0
   redirect_after_login: 0
   rest: 0
+  restrict_by_ip: 0
   restui: 0
   search_api: 0
   search_api_db: 0

@@ -1,9 +1,0 @@
-uuid: c16f597c-4c39-4762-923b-0af1e6a28e53
-langcode: en
-status: true
-dependencies: {  }
-id: demo
-label: 'Demo Lab'
-weight: -6
-is_admin: null
-permissions: {  }
