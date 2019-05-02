@@ -5,14 +5,13 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 ### update OS
 RUN yum -y update
-RUN yum -y install wget which zip unzip telnet java-1.8.0-openjdk bind-utils epel-release
+RUN yum -y install wget which java-1.8.0-openjdk bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
-RUN yum-config-manager --enable remi-php72
+RUN yum-config-manager --enable remi-php73
 RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip
 RUN yum -y install mariadb-server mariadb-client git
 RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
 RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
-#RUN yum -y install initscripts
 
 # download Drupal management tools
 WORKDIR /build
@@ -89,8 +88,8 @@ RUN mkdir /quip/web/sup
 COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
-RUN git clone --single-branch --branch develop https://github.com/camicroscope/caMicroscope.git
-RUN git clone --single-branch --branch master https://github.com/SBU-BMI/FeatureMap
+RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.3.0
+RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=1.0
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
 CMD ["sh", "/root/run.sh"]
