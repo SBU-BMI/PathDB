@@ -9,6 +9,7 @@ dependencies:
     - field.storage.node.imageid
     - field.storage.node.studyid
     - node.type.wsi
+    - user.role.authenticated
   module:
     - node
     - rest
@@ -31,9 +32,10 @@ display:
     position: 0
     display_options:
       access:
-        type: perm
+        type: role
         options:
-          perm: 'access content'
+          role:
+            authenticated: authenticated
       cache:
         type: tag
         options: {  }
@@ -407,7 +409,7 @@ display:
           click_sort_column: value
           type: string
           settings:
-            link_to_entity: false
+            link_to_entity: true
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -817,7 +819,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
@@ -840,7 +842,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
@@ -891,7 +893,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'

@@ -7,8 +7,10 @@ dependencies:
     - field.storage.node.imageid
     - field.storage.node.studyid
     - search_api.index.default_index
+    - user.role.authenticated
   module:
     - search_api
+    - user
 id: searchme
 label: searchme
 module: views
@@ -25,8 +27,10 @@ display:
     position: 0
     display_options:
       access:
-        type: none
-        options: {  }
+        type: role
+        options:
+          role:
+            authenticated: authenticated
       cache:
         type: tag
         options: {  }
@@ -333,7 +337,7 @@ display:
           click_sort_column: value
           type: string
           settings:
-            link_to_entity: false
+            link_to_entity: true
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -581,6 +585,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.imageid'
@@ -601,6 +606,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.imageid'

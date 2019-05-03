@@ -164,7 +164,7 @@ content:
     region: header
   imageid:
     weight: 51
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -217,7 +217,7 @@ content:
     region: header
   patientid:
     weight: 52
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -247,7 +247,7 @@ content:
     region: header
   studyid:
     weight: 54
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }

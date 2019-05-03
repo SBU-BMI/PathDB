@@ -5,7 +5,6 @@ user:
   2: 127.0.0.1/32
 role:
   administrator: ''
-  editor: ''
 dependencies:
   enforced:
     module:

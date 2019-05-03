@@ -67,8 +67,8 @@ third_party_settings:
         - group_image
         - lossyimagecompressionmethod
         - group_subject
-        - lossyimagecompressionratio
         - group_specimen
+        - lossyimagecompressionratio
         - manufacturer
         - md5
     fields:
@@ -127,7 +127,8 @@ third_party_settings:
       label: Specimen
       region: hidden
     group_subject:
-      children: {  }
+      children:
+        - patientid
       parent_name: group_tabbers
       weight: 15
       format_type: tab

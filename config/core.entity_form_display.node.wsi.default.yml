@@ -31,11 +31,11 @@ third_party_settings:
   field_group:
     group_tabbers:
       children:
-        - group_subject
         - group_image
+        - group_subject
         - group_specimen
       parent_name: ''
-      weight: 7
+      weight: 6
       format_type: tabs
       format_settings:
         label: Tabbers
@@ -47,7 +47,7 @@ third_party_settings:
     group_specimen:
       children: {  }
       parent_name: group_tabbers
-      weight: 15
+      weight: 10
       format_type: tab
       format_settings:
         label: Specimen
@@ -68,7 +68,7 @@ third_party_settings:
         - lossyimagecompressionmethod
         - manufacturer
       parent_name: group_tabbers
-      weight: 13
+      weight: 8
       format_type: tab
       format_settings:
         id: ''
@@ -79,9 +79,10 @@ third_party_settings:
       label: Image
       region: content
     group_subject:
-      children: {  }
+      children:
+        - patientid
       parent_name: group_tabbers
-      weight: 12
+      weight: 9
       format_type: tab
       format_settings:
         id: ''
@@ -105,7 +106,7 @@ content:
   clinicaltrialsubjectid:
     weight: 4
     settings:
-      size: 60
+      size: 64
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
@@ -126,7 +127,7 @@ content:
   imageid:
     weight: 5
     settings:
-      size: 60
+      size: 16
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
@@ -188,7 +189,7 @@ content:
   studyid:
     weight: 3
     settings:
-      size: 60
+      size: 16
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
