@@ -6,8 +6,6 @@ dependencies:
     - field.storage.node.field_collection
     - node.type.wsi
     - taxonomy.vocabulary.collections
-  content:
-    - 'taxonomy_term:collections:2d4b9fba-b9e0-42f0-81ef-b5d28543bf30'
 id: node.wsi.field_collection
 field_name: field_collection
 entity_type: node
@@ -16,9 +14,7 @@ label: Collection
 description: ''
 required: true
 translatable: false
-default_value:
-  -
-    target_uuid: 2d4b9fba-b9e0-42f0-81ef-b5d28543bf30
+default_value: {  }
 default_value_callback: ''
 settings:
   handler: 'default:taxonomy_term'

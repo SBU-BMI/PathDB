@@ -1,0 +1,7 @@
+login_redirection:
+  anonymous: null
+  authenticated: /collections
+  administrator: /collections
+  editor: /collections
+  demo: /collections
+exclude_urls: ''

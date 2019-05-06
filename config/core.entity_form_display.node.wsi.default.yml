@@ -3,63 +3,39 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.wsi.acquisitiondatetime
+    - field.field.node.wsi.clinicaltrialsubjectid
+    - field.field.node.wsi.field_bulk_upload
     - field.field.node.wsi.field_collection
-    - field.field.node.wsi.field_container
-    - field.field.node.wsi.field_date_and_time_image_captur
-    - field.field.node.wsi.field_date_and_time_image_conver
-    - field.field.node.wsi.field_disease_type
-    - field.field.node.wsi.field_height
     - field.field.node.wsi.field_iip_path
-    - field.field.node.wsi.field_image_color_type
-    - field.field.node.wsi.field_image_compression_type
-    - field.field.node.wsi.field_image_conversion_process_w
-    - field.field.node.wsi.field_image_fileoriginal
-    - field.field.node.wsi.field_image_id
-    - field.field.node.wsi.field_imaging_instrument_model
-    - field.field.node.wsi.field_imaging_instrument_vendor
-    - field.field.node.wsi.field_imaging_instrument_version
-    - field.field.node.wsi.field_imaging_scan_software_ver
-    - field.field.node.wsi.field_imaging_scanner_software_m
-    - field.field.node.wsi.field_imaging_scanning_sw_vendor
-    - field.field.node.wsi.field_md5
-    - field.field.node.wsi.field_mpp_x
-    - field.field.node.wsi.field_mpp_y
-    - field.field.node.wsi.field_patient
-    - field.field.node.wsi.field_series
-    - field.field.node.wsi.field_specimen_date_and_time_of_
-    - field.field.node.wsi.field_specimen_date_and_time_rec
-    - field.field.node.wsi.field_specimen_embedding_id
-    - field.field.node.wsi.field_specimen_fixative_id
-    - field.field.node.wsi.field_specimen_global_id
-    - field.field.node.wsi.field_specimen_lab_id
-    - field.field.node.wsi.field_specimen_source
-    - field.field.node.wsi.field_specimen_source_id
-    - field.field.node.wsi.field_specimen_staining
-    - field.field.node.wsi.field_specimen_type
-    - field.field.node.wsi.field_study
-    - field.field.node.wsi.field_study_id
-    - field.field.node.wsi.field_subject_patient_global_id
-    - field.field.node.wsi.field_subject_patient_local_id
-    - field.field.node.wsi.field_tissue_block_id
-    - field.field.node.wsi.field_tissue_sub_block_id
     - field.field.node.wsi.field_utarget
-    - field.field.node.wsi.field_width
     - field.field.node.wsi.field_wsiimage
+    - field.field.node.wsi.imagedvolumeheight
+    - field.field.node.wsi.imagedvolumewidth
+    - field.field.node.wsi.imageid
+    - field.field.node.wsi.lossyimagecompression
+    - field.field.node.wsi.lossyimagecompressionmethod
+    - field.field.node.wsi.lossyimagecompressionratio
+    - field.field.node.wsi.manufacturer
+    - field.field.node.wsi.md5
+    - field.field.node.wsi.patientid
+    - field.field.node.wsi.referencepixelphysicalvaluex
+    - field.field.node.wsi.referencepixelphysicalvaluey
+    - field.field.node.wsi.studyid
     - node.type.wsi
   module:
     - datetime
     - field_group
     - file
-    - hide_revision_field
 third_party_settings:
   field_group:
     group_tabbers:
       children:
-        - group_subject
         - group_image
+        - group_subject
         - group_specimen
       parent_name: ''
-      weight: 11
+      weight: 6
       format_type: tabs
       format_settings:
         label: Tabbers
@@ -69,19 +45,9 @@ third_party_settings:
       label: Tabbers
       region: content
     group_specimen:
-      children:
-        - field_specimen_lab_id
-        - field_specimen_source_id
-        - field_specimen_global_id
-        - field_specimen_date_and_time_of_
-        - field_specimen_fixative_id
-        - field_specimen_embedding_id
-        - field_specimen_date_and_time_rec
-        - field_specimen_type
-        - field_specimen_staining
-        - field_specimen_source
+      children: {  }
       parent_name: group_tabbers
-      weight: 14
+      weight: 10
       format_type: tab
       format_settings:
         label: Specimen
@@ -94,21 +60,15 @@ third_party_settings:
       region: content
     group_image:
       children:
-        - field_imaging_instrument_model
-        - field_image_fileoriginal
-        - field_imaging_instrument_version
-        - field_imaging_scanner_software_m
-        - field_imaging_scan_software_ver
-        - field_image_conversion_process_w
-        - field_mpp_x
-        - field_mpp_y
-        - field_date_and_time_image_conver
-        - field_date_and_time_image_captur
-        - field_image_compression_type
-        - field_image_color_type
-        - field_imaging_instrument_vendor
+        - acquisitiondatetime
+        - referencepixelphysicalvaluex
+        - referencepixelphysicalvaluey
+        - lossyimagecompression
+        - lossyimagecompressionratio
+        - lossyimagecompressionmethod
+        - manufacturer
       parent_name: group_tabbers
-      weight: 13
+      weight: 8
       format_type: tab
       format_settings:
         id: ''
@@ -120,10 +80,9 @@ third_party_settings:
       region: content
     group_subject:
       children:
-        - field_subject_patient_global_id
-        - field_subject_patient_local_id
+        - patientid
       parent_name: group_tabbers
-      weight: 12
+      weight: 9
       format_type: tab
       format_settings:
         id: ''
@@ -138,145 +97,74 @@ targetEntityType: node
 bundle: wsi
 mode: default
 content:
+  acquisitiondatetime:
+    weight: 15
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  clinicaltrialsubjectid:
+    weight: 4
+    settings:
+      size: 64
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
   field_collection:
     weight: 1
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
-  field_container:
-    weight: 8
+  field_wsiimage:
+    weight: 2
     settings:
-      size: 60
-      placeholder: ''
+      progress_indicator: throbber
     third_party_settings: {  }
-    type: string_textfield
+    type: file_generic
     region: content
-  field_date_and_time_image_captur:
-    weight: 35
-    settings: {  }
-    third_party_settings: {  }
-    type: datetime_default
-    region: content
-  field_date_and_time_image_conver:
-    weight: 34
-    settings: {  }
-    third_party_settings: {  }
-    type: datetime_default
-    region: content
-  field_disease_type:
-    weight: 14
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
-    region: content
-  field_image_color_type:
-    weight: 37
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
-    region: content
-  field_image_compression_type:
-    weight: 36
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
-    region: content
-  field_image_conversion_process_w:
-    weight: 31
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_image_fileoriginal:
-    weight: 25
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_image_id:
-    weight: 3
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_imaging_instrument_model:
-    weight: 23
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_imaging_instrument_vendor:
-    weight: 38
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_imaging_instrument_version:
-    weight: 26
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_imaging_scan_software_ver:
-    weight: 29
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_imaging_scanner_software_m:
-    weight: 28
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_imaging_scanning_sw_vendor:
-    weight: 13
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_mpp_x:
-    weight: 32
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_mpp_y:
-    weight: 33
-    settings:
-      placeholder: ''
-    third_party_settings: {  }
-    type: number
-    region: content
-  field_patient:
+  imageid:
     weight: 5
     settings:
+      size: 16
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  lossyimagecompression:
+    weight: 18
+    settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_series:
+  lossyimagecompressionmethod:
+    weight: 20
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  lossyimagecompressionratio:
+    weight: 19
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  manufacturer:
+    weight: 21
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  patientid:
     weight: 6
     settings:
       size: 60
@@ -284,149 +172,28 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_specimen_date_and_time_of_:
-    type: datetime_default
+  referencepixelphysicalvaluex:
     weight: 16
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_specimen_date_and_time_rec:
-    type: datetime_default
-    weight: 19
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_specimen_embedding_id:
-    type: string_textfield
-    weight: 18
-    region: content
     settings:
-      size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_specimen_fixative_id:
-    type: string_textfield
+    type: number
+    region: content
+  referencepixelphysicalvaluey:
     weight: 17
-    region: content
     settings:
-      size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_specimen_global_id:
-    type: string_textfield
-    weight: 15
+    type: number
     region: content
+  studyid:
+    weight: 3
     settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_specimen_lab_id:
-    type: string_textfield
-    weight: 12
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_specimen_source:
-    weight: 43
-    settings:
-      size: 60
+      size: 16
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
     region: content
-  field_specimen_source_id:
-    weight: 13
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_specimen_staining:
-    weight: 41
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_specimen_type:
-    weight: 40
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_study:
-    weight: 7
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_study_id:
-    weight: 2
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_subject_patient_global_id:
-    type: string_textfield
-    weight: 11
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_subject_patient_local_id:
-    type: string_textfield
-    weight: 12
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_tissue_block_id:
-    weight: 9
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_tissue_sub_block_id:
-    weight: 10
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  field_wsiimage:
-    weight: 4
-    settings:
-      progress_indicator: throbber
-    third_party_settings: {  }
-    type: file_generic
-    region: content
-  revision_log:
-    type: hide_revision_field_log_widget
-    weight: 12
-    region: content
-    settings:
-      rows: 5
-      placeholder: ''
-      permission_based: true
-      default: ''
-      show: false
-      allow_user_settings: false
-    third_party_settings: {  }
   title:
     type: string_textfield
     weight: 0
@@ -437,13 +204,15 @@ content:
     third_party_settings: {  }
 hidden:
   created: true
-  field_height: true
+  field_bulk_upload: true
   field_iip_path: true
-  field_md5: true
   field_utarget: true
-  field_width: true
+  imagedvolumeheight: true
+  imagedvolumewidth: true
+  md5: true
   path: true
   promote: true
+  revision_log: true
   status: true
   sticky: true
   uid: true

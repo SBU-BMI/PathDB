@@ -3,54 +3,30 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.wsi.acquisitiondatetime
+    - field.field.node.wsi.clinicaltrialsubjectid
+    - field.field.node.wsi.field_bulk_upload
     - field.field.node.wsi.field_collection
-    - field.field.node.wsi.field_container
-    - field.field.node.wsi.field_date_and_time_image_captur
-    - field.field.node.wsi.field_date_and_time_image_conver
-    - field.field.node.wsi.field_disease_type
-    - field.field.node.wsi.field_height
     - field.field.node.wsi.field_iip_path
-    - field.field.node.wsi.field_image_color_type
-    - field.field.node.wsi.field_image_compression_type
-    - field.field.node.wsi.field_image_conversion_process_w
-    - field.field.node.wsi.field_image_fileoriginal
-    - field.field.node.wsi.field_image_id
-    - field.field.node.wsi.field_imaging_instrument_model
-    - field.field.node.wsi.field_imaging_instrument_vendor
-    - field.field.node.wsi.field_imaging_instrument_version
-    - field.field.node.wsi.field_imaging_scan_software_ver
-    - field.field.node.wsi.field_imaging_scanner_software_m
-    - field.field.node.wsi.field_imaging_scanning_sw_vendor
-    - field.field.node.wsi.field_md5
-    - field.field.node.wsi.field_mpp_x
-    - field.field.node.wsi.field_mpp_y
-    - field.field.node.wsi.field_patient
-    - field.field.node.wsi.field_series
-    - field.field.node.wsi.field_specimen_date_and_time_of_
-    - field.field.node.wsi.field_specimen_date_and_time_rec
-    - field.field.node.wsi.field_specimen_embedding_id
-    - field.field.node.wsi.field_specimen_fixative_id
-    - field.field.node.wsi.field_specimen_global_id
-    - field.field.node.wsi.field_specimen_lab_id
-    - field.field.node.wsi.field_specimen_source
-    - field.field.node.wsi.field_specimen_source_id
-    - field.field.node.wsi.field_specimen_staining
-    - field.field.node.wsi.field_specimen_type
-    - field.field.node.wsi.field_study
-    - field.field.node.wsi.field_study_id
-    - field.field.node.wsi.field_subject_patient_global_id
-    - field.field.node.wsi.field_subject_patient_local_id
-    - field.field.node.wsi.field_tissue_block_id
-    - field.field.node.wsi.field_tissue_sub_block_id
     - field.field.node.wsi.field_utarget
-    - field.field.node.wsi.field_width
     - field.field.node.wsi.field_wsiimage
+    - field.field.node.wsi.imagedvolumeheight
+    - field.field.node.wsi.imagedvolumewidth
+    - field.field.node.wsi.imageid
+    - field.field.node.wsi.lossyimagecompression
+    - field.field.node.wsi.lossyimagecompressionmethod
+    - field.field.node.wsi.lossyimagecompressionratio
+    - field.field.node.wsi.manufacturer
+    - field.field.node.wsi.md5
+    - field.field.node.wsi.patientid
+    - field.field.node.wsi.referencepixelphysicalvaluex
+    - field.field.node.wsi.referencepixelphysicalvaluey
+    - field.field.node.wsi.studyid
     - node.type.wsi
   module:
     - datetime
     - ds
     - field_group
-    - options
     - user
 third_party_settings:
   ds:
@@ -75,54 +51,30 @@ third_party_settings:
       header:
         - links
         - field_collection
-        - field_disease_type
-        - field_md5
-        - field_height
-        - field_width
-        - field_patient
-        - field_series
-        - field_study
-        - field_container
-        - field_specimen_type
-        - field_specimen_source_id
-        - field_specimen_staining
-        - field_specimen_lab_id
-        - field_subject_patient_local_id
-        - field_subject_patient_global_id
-        - field_tissue_block_id
-        - field_tissue_sub_block_id
-        - field_specimen_fixative_id
-        - field_specimen_embedding_id
-        - field_specimen_date_and_time_of_
-        - field_specimen_date_and_time_rec
-        - field_study_id
         - group_tabbers
-        - field_image_local_id
-        - field_image_fileoriginal
-        - field_date_and_time_image_conver
-        - field_date_and_time_image_captur
-        - field_image_conversion_process_w
-        - field_imaging_scanning_software_
-        - field_imaging_instrument_vendor
-        - field_image_color_type
-        - field_imaging_instrument_version
-        - field_imaging_instrument_model
-        - field_imaging_scan_software_ver
-        - field_imaging_scanner_software_m
-        - field_image_compression_type
+        - field_iip_path
         - group_image
-      left:
-        - field_specimen_source
-        - field_specimen_global_id
-      right:
-        - field_mpp_x
-        - field_mpp_y
+        - field_bulk_upload
+        - acquisitiondatetime
+        - imagedvolumeheight
+        - lossyimagecompression
+        - lossyimagecompressionratio
+        - lossyimagecompressionmethod
+        - referencepixelphysicalvaluex
+        - referencepixelphysicalvaluey
+        - imageid
+        - patientid
+        - studyid
+        - imagedvolumewidth
+        - manufacturer
+        - md5
+        - clinicaltrialsubjectid
   field_group:
     group_tabbers:
       children:
         - group_image
       parent_name: ''
-      weight: 23
+      weight: 22
       format_type: tabs
       format_settings:
         id: ''
@@ -131,20 +83,7 @@ third_party_settings:
       label: Tabbers
       region: hidden
     group_image:
-      children:
-        - field_image_local_id
-        - field_image_fileoriginal
-        - field_date_and_time_image_conver
-        - field_date_and_time_image_captur
-        - field_image_conversion_process_w
-        - field_imaging_scanning_software_
-        - field_imaging_instrument_vendor
-        - field_image_color_type
-        - field_imaging_instrument_version
-        - field_imaging_instrument_model
-        - field_imaging_scan_software_ver
-        - field_imaging_scanner_software_m
-        - field_image_compression_type
+      children: {  }
       parent_name: group_tabbers
       weight: 38
       format_type: tab
@@ -160,6 +99,31 @@ targetEntityType: node
 bundle: wsi
 mode: default
 content:
+  acquisitiondatetime:
+    weight: 44
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: header
+  clinicaltrialsubjectid:
+    weight: 58
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  field_bulk_upload:
+    weight: 43
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
   field_collection:
     weight: 1
     label: inline
@@ -168,332 +132,127 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
     region: header
-  field_container:
-    weight: 9
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_date_and_time_image_captur:
-    weight: 27
-    label: inline
-    settings:
-      format_type: medium
-      timezone_override: ''
-    third_party_settings: {  }
-    type: datetime_default
-    region: header
-  field_date_and_time_image_conver:
-    weight: 26
-    label: inline
-    settings:
-      format_type: medium
-      timezone_override: ''
-    third_party_settings: {  }
-    type: datetime_default
-    region: header
-  field_disease_type:
-    weight: 46
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: list_default
-    region: content
-  field_height:
-    weight: 4
-    label: inline
-    settings:
-      thousand_separator: ','
-      prefix_suffix: true
-    third_party_settings: {  }
-    type: number_integer
-    region: header
   field_iip_path:
-    weight: 48
+    weight: 29
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-    region: content
-  field_image_color_type:
-    weight: 41
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: list_default
-    region: content
-  field_image_compression_type:
-    weight: 40
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    type: list_default
-    region: content
-  field_image_conversion_process_w:
-    weight: 28
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
     region: header
-  field_image_fileoriginal:
-    weight: 25
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_image_id:
-    weight: 39
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_imaging_instrument_model:
-    weight: 33
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_imaging_instrument_vendor:
-    weight: 42
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_imaging_instrument_version:
-    weight: 32
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_imaging_scan_software_ver:
-    weight: 34
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_imaging_scanner_software_m:
-    weight: 35
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_imaging_scanning_sw_vendor:
-    weight: 43
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_md5:
-    weight: 3
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_mpp_x:
-    weight: 26
-    label: inline
-    settings:
-      thousand_separator: ''
-      decimal_separator: .
-      scale: 3
-      prefix_suffix: true
-    third_party_settings: {  }
-    type: number_decimal
-    region: right
-  field_mpp_y:
-    weight: 27
-    label: inline
-    settings:
-      thousand_separator: ''
-      decimal_separator: .
-      scale: 3
-      prefix_suffix: true
-    third_party_settings: {  }
-    type: number_decimal
-    region: right
-  field_patient:
-    weight: 6
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_series:
-    weight: 7
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_specimen_date_and_time_of_:
-    weight: 20
-    label: inline
-    settings:
-      format_type: medium
-      timezone_override: ''
-    third_party_settings: {  }
-    type: datetime_default
-    region: header
-  field_specimen_date_and_time_rec:
-    weight: 21
-    label: inline
-    settings:
-      format_type: medium
-      timezone_override: ''
-    third_party_settings: {  }
-    type: datetime_default
-    region: header
-  field_specimen_embedding_id:
-    weight: 19
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_specimen_fixative_id:
-    weight: 18
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_specimen_global_id:
-    weight: 25
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: left
-  field_specimen_lab_id:
-    weight: 13
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_specimen_source:
-    weight: 47
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_specimen_source_id:
-    weight: 11
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_specimen_staining:
+  imagedvolumeheight:
     weight: 45
     label: above
     settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_specimen_type:
-    weight: 44
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
-  field_study:
-    weight: 8
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_study_id:
-    weight: 22
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_subject_patient_global_id:
-    weight: 15
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_subject_patient_local_id:
-    weight: 14
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_tissue_block_id:
-    weight: 16
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_tissue_sub_block_id:
-    weight: 17
-    label: inline
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: header
-  field_width:
-    weight: 5
-    label: inline
-    settings:
-      thousand_separator: ','
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
       prefix_suffix: true
     third_party_settings: {  }
-    type: number_integer
+    type: number_decimal
+    region: header
+  imagedvolumewidth:
+    weight: 55
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  imageid:
+    weight: 51
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
     region: header
   links:
     weight: 0
     region: header
     settings: {  }
     third_party_settings: {  }
+  lossyimagecompression:
+    weight: 46
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  lossyimagecompressionmethod:
+    weight: 48
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  lossyimagecompressionratio:
+    weight: 47
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  manufacturer:
+    weight: 56
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  md5:
+    weight: 57
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  patientid:
+    weight: 52
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  referencepixelphysicalvaluex:
+    weight: 49
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  referencepixelphysicalvaluey:
+    weight: 50
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  studyid:
+    weight: 54
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
 hidden:
   field_utarget: true
   field_wsiimage: true

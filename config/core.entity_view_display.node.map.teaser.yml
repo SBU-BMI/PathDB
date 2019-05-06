@@ -17,4 +17,8 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-hidden: {  }
+hidden:
+  field_map: true
+  field_map_type: true
+  field_target_collection: true
+  field_wsi: true
