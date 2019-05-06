@@ -3,8 +3,7 @@ error_page: ''
 login_range: ''
 user:
   2: 127.0.0.1/32
-role:
-  administrator: ''
+role: {  }
 dependencies:
   enforced:
     module:
