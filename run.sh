@@ -20,6 +20,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         /data/pathdb/quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig/
         /data/pathdb/quip/vendor/bin/drush -y php-eval 'node_access_rebuild();'
 	/data/pathdb/quip/vendor/bin/drush -y pm:uninstall toolbar
+        /data/pathdb/quip/vendor/bin/drush -y pm:uninstall hide_revision_field
         /data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 	chown -R apache /data/pathdb/files
         httpd -f /config/httpd.conf
