@@ -18,6 +18,9 @@ settings:
     -
       value: TIL
       label: TIL
+    -
+      value: Pyradiomics
+      label: Pyradiomics
   allowed_values_function: ''
 module: options
 locked: false

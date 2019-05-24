@@ -175,7 +175,7 @@ display:
           field: field_collection
           relationship: none
           group_type: group
-          admin_label: ''
+          admin_label: Collection
           label: Collection
           exclude: false
           alter:
@@ -687,7 +687,7 @@ display:
           entity_type: node
           entity_field: created
           plugin_id: date
-      title: listofimages
+      title: 'List of Images'
       header: {  }
       footer: {  }
       empty: {  }
@@ -732,84 +732,6 @@ display:
           use_taxonomy_term_path: false
           entity_type: node
           plugin_id: taxonomy_index_name_depth
-        field_study_id_value:
-          id: field_study_id_value
-          table: node__field_study_id
-          field: field_study_id_value
-          relationship: none
-          group_type: group
-          admin_label: ''
-          default_action: ignore
-          exception:
-            value: all
-            title_enable: false
-            title: All
-          title_enable: false
-          title: ''
-          default_argument_type: fixed
-          default_argument_options:
-            argument: ''
-          default_argument_skip_url: false
-          summary_options:
-            base_path: ''
-            count: true
-            items_per_page: 25
-            override: false
-          summary:
-            sort_order: asc
-            number_of_records: 0
-            format: default_summary
-          specify_validation: false
-          validate:
-            type: none
-            fail: 'not found'
-          validate_options: {  }
-          glossary: false
-          limit: 0
-          case: none
-          path_case: none
-          transform_dash: false
-          break_phrase: false
-          plugin_id: string
-        field_image_id_value:
-          id: field_image_id_value
-          table: node__field_image_id
-          field: field_image_id_value
-          relationship: none
-          group_type: group
-          admin_label: ''
-          default_action: ignore
-          exception:
-            value: all
-            title_enable: false
-            title: All
-          title_enable: false
-          title: ''
-          default_argument_type: fixed
-          default_argument_options:
-            argument: ''
-          default_argument_skip_url: false
-          summary_options:
-            base_path: ''
-            count: true
-            items_per_page: 25
-            override: false
-          summary:
-            sort_order: asc
-            number_of_records: 0
-            format: default_summary
-          specify_validation: false
-          validate:
-            type: none
-            fail: 'not found'
-          validate_options: {  }
-          glossary: false
-          limit: 0
-          case: none
-          path_case: none
-          transform_dash: false
-          break_phrase: false
-          plugin_id: string
       display_extenders: {  }
     cache_metadata:
       max-age: -1
