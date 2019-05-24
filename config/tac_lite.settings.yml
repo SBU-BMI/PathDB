@@ -21,6 +21,9 @@ tac_lite_grants_scheme_1:
   administrator:
     collections:
       - '0'
+  seervtrpdac:
+    collections:
+      2: '2'
 tac_lite_config_scheme_2:
   name: Read/Write
   perms:
