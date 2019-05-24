@@ -39,6 +39,16 @@ function quip_theme() {
   );
 }
 
+function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+        if(($form_id=="node_wsi_form")||($form_id=="node_map_form")||($form_id=="node_bulk_csv_upload_form")) {
+        	//dpm($form);
+        	$form['actions']['preview']['#access'] = FALSE;
+//        	$form['meta'] = FALSE;
+        	$form['revision_log'] = FALSE;
+	}
+}
+
+
 function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
         if ($entity->isNew()) {
                 if ($entity->bundle() == 'wsi') {
