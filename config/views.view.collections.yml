@@ -7,6 +7,8 @@ dependencies:
     - user.role.authenticated
   module:
     - ds
+    - rest
+    - serialization
     - taxonomy
     - user
 id: collections
@@ -357,5 +359,21 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user.roles
+      tags: {  }
+  rest_export_1:
+    display_plugin: rest_export
+    id: rest_export_1
+    display_title: 'REST export'
+    position: 2
+    display_options:
+      display_extenders: {  }
+      path: collections
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - request_format
         - user.roles
       tags: {  }
