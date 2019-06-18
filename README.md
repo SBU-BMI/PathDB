@@ -34,3 +34,8 @@ failed JWT and Http auth yields 403 with: json response
 {"message": "Internal Server Error"}
 
 success yields 200 response code and json payload containing the metadata for node.
+
+Interfaces:
+http://yourhost.com/idlookup/CollectionName/studyid/subjectid/imageid  ==> returns singular entry
+http://yourhost.com/idmap/CollectionName ==> returns all CollectionName/studyid/subjectid/imageid and corresponding PathDBIds for a particular collection
+
