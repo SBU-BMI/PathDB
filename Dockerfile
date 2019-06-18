@@ -55,7 +55,8 @@ RUN composer require drupal/restui &&\
     composer require drupal/facets &&\
     composer require drupal/redirect_after_login &&\
     composer require drupal/views_base_url &&\
-    composer require 'drupal/restrict_by_ip:4.x-dev'
+    composer require 'drupal/restrict_by_ip:4.x-dev' &&\
+    composer require drupal/ldap
 
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip
