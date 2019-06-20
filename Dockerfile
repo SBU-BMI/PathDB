@@ -41,7 +41,7 @@ RUN composer require drupal/restui &&\
     composer require drupal/jwt &&\
     composer require drupal/d8w3css &&\
     composer require drupal/hide_revision_field &&\
-    composer require drupal/field_group &&\
+    composer require 'drupal/field_group:^3.0'
     composer require drupal/tac_lite &&\
     composer require drupal/field_permissions &&\
     composer require drupal/views_taxonomy_term_name_depth &&\
