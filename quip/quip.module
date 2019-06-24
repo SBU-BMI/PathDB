@@ -103,13 +103,15 @@ function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
         if (($entity->bundle() == 'bulk_upload')) {
                 \Drupal::logger('quip')->notice("bulk_upload");
                 if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
+			$uid = "archon";
+			$pw = "bluecheese2018";
                         $nid = $entity->id();
                         $cnid = $entity->get("field_target_collection")->target_id;
                         \Drupal::logger('quip')->notice(getcwd()."  UH NEW ".$nid." Security : ".$cnid);
                         $path = $entity->get("field_path")->getString();
                         $pd = \Drupal::service('file_system')->realpath("private://");
                         $id = \Drupal::currentUser()->id();
-                        $cmd = 'java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.BulkUploader dir http://localhost '.$pd." ".$path." ".$nid." ".$cnid." ".$id." >/dev/null 2>&1 &";
+                        $cmd = 'java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.BulkUploader dir http://localhost '.$pd." ".$path." ".$nid." ".$cnid." ".$id." ".$uid." ".$pw." >/dev/null 2>&1 &";
                         \Drupal::logger('quip')->notice($cmd);
                         $eww = shell_exec($cmd);
                 }
