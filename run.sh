@@ -14,6 +14,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         cd /data/pathdb/quip
         /data/pathdb/quip/vendor/bin/drush -y si standard --db-url=mysql://root:@localhost/QuIP
         /data/pathdb/quip/vendor/bin/drush -y upwd admin bluecheese2018
+        /data/pathdb/quip/vendor/bin/drush -y user-add-role administrator admin
         /data/pathdb/quip/vendor/bin/drush -y pm:enable rest serialization
         /data/pathdb/quip/vendor/bin/drush -y cset system.site uuid 533fc7cc-82dd-46b2-8d63-160785138977
         /data/pathdb/quip/vendor/bin/drush -y ev '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
