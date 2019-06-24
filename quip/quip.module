@@ -100,11 +100,11 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
 }
 
 function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
+        $uid = "archon";
+        $pw = "bluecheese2018";
         if (($entity->bundle() == 'bulk_upload')) {
                 \Drupal::logger('quip')->notice("bulk_upload");
                 if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
-			$uid = "archon";
-			$pw = "bluecheese2018";
                         $nid = $entity->id();
                         $cnid = $entity->get("field_target_collection")->target_id;
                         \Drupal::logger('quip')->notice(getcwd()."  UH NEW ".$nid." Security : ".$cnid);
