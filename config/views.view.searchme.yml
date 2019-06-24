@@ -452,7 +452,7 @@ display:
             alter_text: true
             text: Maps
             make_link: true
-            path: '/maps/{{ nid_2 }}'
+            path: '/maps/{{ nid_1 }}'
             absolute: false
             external: false
             replace_spaces: false

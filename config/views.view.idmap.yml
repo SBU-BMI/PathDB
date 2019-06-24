@@ -1,23 +1,22 @@
-uuid: 44f5c971-5cc1-40f8-95e5-1d38e76c3fa7
+uuid: 4b70baf2-139c-4706-8340-3581f36971dd
 langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.node.teaser
     - field.storage.node.clinicaltrialsubjectid
     - field.storage.node.field_collection
     - field.storage.node.imageid
     - field.storage.node.studyid
     - node.type.wsi
-    - user.role.authenticated
   module:
     - node
     - rest
     - serialization
     - user
+    - views_data_export
     - views_taxonomy_term_name_depth
-id: listofimages
-label: listofimages
+id: idmap
+label: IDMap
 module: views
 description: ''
 tag: ''
@@ -32,10 +31,9 @@ display:
     position: 0
     display_options:
       access:
-        type: role
+        type: perm
         options:
-          role:
-            authenticated: authenticated
+          perm: 'access content'
       cache:
         type: tag
         options: {  }
@@ -60,13 +58,13 @@ display:
       pager:
         type: full
         options:
-          items_per_page: 20
+          items_per_page: 10
           offset: 0
           id: 0
           total_pages: null
           tags:
-            previous: ‹‹
-            next: ››
+            previous: '‹ Previous'
+            next: 'Next ›'
             first: '« First'
             last: 'Last »'
           expose:
@@ -90,9 +88,41 @@ display:
           summary: ''
           description: ''
           columns:
-            title: title
+            nid: nid
+            studyid: studyid
+            clinicaltrialsubjectid: clinicaltrialsubjectid
+            imageid: imageid
+            tid: tid
           info:
-            title:
+            nid:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            studyid:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            clinicaltrialsubjectid:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            imageid:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            tid:
               sortable: false
               default_sort_order: asc
               align: ''
@@ -102,81 +132,16 @@ display:
           default: '-1'
           empty_table: false
       row:
-        type: 'entity:node'
-        options:
-          view_mode: teaser
+        type: fields
       fields:
-        field_collection_1:
-          id: field_collection_1
-          table: node__field_collection
-          field: field_collection
+        nid:
+          id: nid
+          table: node_field_data
+          field: nid
           relationship: none
           group_type: group
           admin_label: ''
-          label: CollectionID
-          exclude: true
-          alter:
-            alter_text: true
-            text: '{{ field_collection_1__target_id }}'
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: target_id
-          type: entity_reference_label
-          settings:
-            link: false
-          group_column: target_id
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-          plugin_id: field
-        field_collection:
-          id: field_collection
-          table: node__field_collection
-          field: field_collection
-          relationship: none
-          group_type: group
-          admin_label: Collection
-          label: Collection
+          label: ID
           exclude: false
           alter:
             alter_text: false
@@ -217,11 +182,12 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          click_sort_column: target_id
-          type: entity_reference_label
+          click_sort_column: value
+          type: number_integer
           settings:
-            link: false
-          group_column: target_id
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
           group_columns: {  }
           group_rows: true
           delta_limit: 0
@@ -231,6 +197,8 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
+          entity_type: node
+          entity_field: nid
           plugin_id: field
         studyid:
           id: studyid
@@ -302,7 +270,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Subject ID'
+          label: '​Subject ID'
           exclude: false
           alter:
             alter_text: false
@@ -409,7 +377,7 @@ display:
           click_sort_column: value
           type: string
           settings:
-            link_to_entity: true
+            link_to_entity: false
           group_column: value
           group_columns: {  }
           group_rows: true
@@ -421,152 +389,20 @@ display:
           separator: ', '
           field_api_classes: false
           plugin_id: field
-        nid:
-          id: nid
-          table: node_field_data
-          field: nid
+        field_collection:
+          id: field_collection
+          table: node__field_collection
+          field: field_collection
           relationship: none
           group_type: group
           admin_label: ''
-          label: View
+          label: Collection
           exclude: false
           alter:
-            alter_text: true
-            text: caMic
-            make_link: true
-            path: '/caMicroscope/apps/viewer/viewer.html?slideId={{nid}}&mode=pathdb'
-            absolute: true
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: number_integer
-          settings:
-            thousand_separator: ''
-            prefix_suffix: true
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-          entity_type: node
-          entity_field: nid
-          plugin_id: field
-        nid_1:
-          id: nid_1
-          table: node_field_data
-          field: nid
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: Map
-          exclude: true
-          alter:
-            alter_text: true
-            text: 'Add Map'
-            make_link: true
-            path: '/node/add/map?edit[field_wsi][widget][0][target_id]={{nid_1}}'
-            absolute: true
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: number_integer
-          settings:
-            thousand_separator: ''
-            prefix_suffix: true
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-          entity_type: node
-          entity_field: nid
-          plugin_id: field
-        nid_2:
-          id: nid_2
-          table: node_field_data
-          field: nid
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: Maps
-          exclude: false
-          alter:
-            alter_text: true
-            text: Maps
-            make_link: true
-            path: '/maps/{{ nid_2 }}'
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
             absolute: false
             external: false
             replace_spaces: false
@@ -601,12 +437,11 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          click_sort_column: value
-          type: number_integer
+          click_sort_column: target_id
+          type: entity_reference_label
           settings:
-            thousand_separator: ''
-            prefix_suffix: true
-          group_column: value
+            link: false
+          group_column: target_id
           group_columns: {  }
           group_rows: true
           delta_limit: 0
@@ -616,8 +451,68 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          entity_type: node
-          entity_field: nid
+          plugin_id: field
+        field_collection_1:
+          id: field_collection_1
+          table: node__field_collection
+          field: field_collection
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: ''
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: target_id
+          type: entity_reference_entity_id
+          settings: {  }
+          group_column: target_id
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
           plugin_id: field
       filters:
         status:
@@ -672,10 +567,10 @@ display:
           entity_field: type
           plugin_id: bundle
       sorts:
-        created:
-          id: created
-          table: node_field_data
-          field: created
+        field_collection_target_id:
+          id: field_collection_target_id
+          table: node__field_collection
+          field: field_collection_target_id
           relationship: none
           group_type: group
           admin_label: ''
@@ -683,11 +578,8 @@ display:
           exposed: false
           expose:
             label: ''
-          granularity: second
-          entity_type: node
-          entity_field: created
-          plugin_id: date
-      title: 'List of Images'
+          plugin_id: standard
+      title: IDMap
       header: {  }
       footer: {  }
       empty: {  }
@@ -741,7 +633,85 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
-        - user.roles
+        - user.permissions
+      tags:
+        - 'config:field.storage.node.clinicaltrialsubjectid'
+        - 'config:field.storage.node.field_collection'
+        - 'config:field.storage.node.imageid'
+        - 'config:field.storage.node.studyid'
+        - extensions
+  data_export_1:
+    display_plugin: data_export
+    id: data_export_1
+    display_title: 'Data export'
+    position: 2
+    display_options:
+      display_extenders: {  }
+      style:
+        type: data_export
+        options:
+          formats:
+            json: json
+          csv_settings:
+            delimiter: ','
+            enclosure: '"'
+            escape_char: \
+            strip_tags: true
+            trim: true
+            encoding: utf8
+          xls_settings:
+            xls_format: Excel2007
+            metadata:
+              creator: ''
+              last_modified_by: ''
+              title: ''
+              description: ''
+              subject: ''
+              keywords: ''
+              category: ''
+              manager: ''
+              company: ''
+      path: idmap
+      filename: ''
+      pager:
+        type: none
+        options:
+          offset: 0
+      row:
+        type: data_field
+        options:
+          field_options:
+            nid:
+              alias: PathDBID
+              raw_output: false
+            studyid:
+              alias: ''
+              raw_output: false
+            clinicaltrialsubjectid:
+              alias: ''
+              raw_output: false
+            imageid:
+              alias: ''
+              raw_output: false
+            field_collection:
+              alias: CollectionName
+              raw_output: false
+            field_collection_1:
+              alias: CollectionID
+              raw_output: false
+      auth:
+        - basic_auth
+        - jwt_auth
+        - cookie
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - request_format
+        - url
+        - 'user.node_grants:view'
+        - user.permissions
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
@@ -755,7 +725,7 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: listofimages
+      path: idmap2
     cache_metadata:
       max-age: -1
       contexts:
@@ -764,58 +734,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
-        - user.roles
-      tags:
-        - 'config:field.storage.node.clinicaltrialsubjectid'
-        - 'config:field.storage.node.field_collection'
-        - 'config:field.storage.node.imageid'
-        - 'config:field.storage.node.studyid'
-        - extensions
-  rest_export_1:
-    display_plugin: rest_export
-    id: rest_export_1
-    display_title: 'REST export'
-    position: 2
-    display_options:
-      display_extenders: {  }
-      style:
-        type: serializer
-        options:
-          uses_fields: true
-          formats:
-            json: json
-      path: listofimages
-      pager:
-        type: full
-        options:
-          items_per_page: 100
-          offset: 0
-          id: 0
-          total_pages: null
-          tags:
-            previous: '‹ Previous'
-            next: 'Next ›'
-            first: '« First'
-            last: 'Last »'
-          expose:
-            items_per_page: false
-            items_per_page_label: 'Items per page'
-            items_per_page_options: '5, 10, 25, 50'
-            items_per_page_options_all: false
-            items_per_page_options_all_label: '- All -'
-            offset: false
-            offset_label: Offset
-          quantity: 9
-    cache_metadata:
-      max-age: -1
-      contexts:
-        - 'languages:language_content'
-        - 'languages:language_interface'
-        - request_format
-        - url
-        - url.query_args
-        - 'user.node_grants:view'
-        - user.roles
+        - user.permissions
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'

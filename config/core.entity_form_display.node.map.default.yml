@@ -47,7 +47,6 @@ hidden:
   created: true
   path: true
   promote: true
-  revision_log: true
   status: true
   sticky: true
   title: true

@@ -8,7 +8,7 @@ RUN yum -y update
 RUN yum -y install wget which zip unzip java-1.8.0-openjdk bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73
-RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip
+RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip php-ldap
 RUN yum -y install mariadb-server mariadb-client git
 RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
 RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
@@ -41,7 +41,7 @@ RUN composer require drupal/restui &&\
     composer require drupal/jwt &&\
     composer require drupal/d8w3css &&\
     composer require drupal/hide_revision_field &&\
-    composer require drupal/field_group &&\
+    composer require 'drupal/field_group:^3.0' &&\
     composer require drupal/tac_lite &&\
     composer require drupal/field_permissions &&\
     composer require drupal/views_taxonomy_term_name_depth &&\
@@ -55,7 +55,8 @@ RUN composer require drupal/restui &&\
     composer require drupal/facets &&\
     composer require drupal/redirect_after_login &&\
     composer require drupal/views_base_url &&\
-    composer require 'drupal/restrict_by_ip:4.x-dev'
+    composer require 'drupal/restrict_by_ip:4.x-dev' &&\
+    composer require drupal/ldap
 
 # set permissions correctly for apache demon access
 RUN chown -R apache ../quip

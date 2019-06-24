@@ -6,6 +6,7 @@ dependencies:
     - system.menu.quip-admin
   module:
     - system
+    - user
   theme:
     - drupal8_w3css_theme
 id: quipadmin
@@ -23,8 +24,10 @@ settings:
   depth: 0
   expand_all_items: false
 visibility:
-  request_path:
-    id: request_path
-    pages: /user/1
+  user_role:
+    id: user_role
+    roles:
+      administrator: administrator
     negate: false
-    context_mapping: {  }
+    context_mapping:
+      user: '@user.current_user_context:current_user'

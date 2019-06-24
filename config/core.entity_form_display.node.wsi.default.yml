@@ -212,7 +212,6 @@ hidden:
   md5: true
   path: true
   promote: true
-  revision_log: true
   status: true
   sticky: true
   uid: true
