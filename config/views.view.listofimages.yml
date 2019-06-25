@@ -806,6 +806,10 @@ display:
             offset: false
             offset_label: Offset
           quantity: 9
+      auth:
+        - basic_auth
+        - jwt_auth
+        - cookie
     cache_metadata:
       max-age: -1
       contexts:

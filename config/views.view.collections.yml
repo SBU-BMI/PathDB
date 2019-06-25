@@ -369,6 +369,10 @@ display:
     display_options:
       display_extenders: {  }
       path: collections
+      auth:
+        - basic_auth
+        - jwt_auth
+        - cookie
     cache_metadata:
       max-age: -1
       contexts:
