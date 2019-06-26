@@ -606,6 +606,10 @@ display:
           uses_fields: false
           formats:
             json: json
+      auth:
+        - basic_auth
+        - jwt_auth
+        - cookie
     cache_metadata:
       max-age: -1
       contexts:

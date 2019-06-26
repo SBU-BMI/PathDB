@@ -24,17 +24,22 @@ if [ ! -d /data/pathdb/mysql ]; then
         /data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 	chown -R apache /data/pathdb/files
         httpd -f /config/httpd.conf
-        sleep 2
+        wget --spider --quiet http://localhost
+        while [ "$?" != 0 ]
+        do
+		sleep 1
+		wget --spider --quiet http://localhost
+	done
 
-# create REST API System User
-/data/pathdb/quip/vendor/bin/drush user:create --password bluecheese2018 archon
-/data/pathdb/quip/vendor/bin/drush user:role:add administrator archon
-/data/pathdb/quip/vendor/bin/drush user:role:add administrator admin
+	# create REST API System User
+	/data/pathdb/quip/vendor/bin/drush user:create --password bluecheese2018 archon
+	/data/pathdb/quip/vendor/bin/drush user:role:add administrator archon
+	/data/pathdb/quip/vendor/bin/drush user:role:add administrator admin
 
-# create private and public security taxonomy items
+	# create private and public security taxonomy items
         curl --user admin:bluecheese2018 -k -X POST http://localhost/taxonomy/term?_format=json -H "Content-Type: application/json" -d '{"vid": [{"target_id": "collections","target_type": "taxonomy_vocabulary"}],"name": [{"value": "Public"}]}'
 
-# create PathDB menu items
+	# create PathDB menu items
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Images"}],"description": [],"menu_name": [{"value": "main"}],"link": [{"uri": "internal:/listofimages","title": "","options": []}],"weight": [{"value": 4}],"expanded": [{"value": true}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Search"}],"description": [],"menu_name": [{"value": "main"}],"link": [{"uri": "internal:/imagesearch","title": "","options": []}],"weight": [{"value": 4}],"expanded": [{"value": true}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Maps"}],"description": [],"menu_name": [{"value": "main"}],"link": [{"uri": "internal:/maps","title": "","options": []}],"weight": [{"value": 4}],"expanded": [{"value": true}]}'
@@ -43,7 +48,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "About"}],"description": [],"menu_name": [{"value": "account"}],"link": [{"uri": "https://sbu-bmi.github.io/quip_distro/","title": "","options": []}],"weight": [{"value": 0}],"expanded": [{"value": true}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Feedback"}],"description": [],"menu_name": [{"value": "account"}],"link": [{"uri": "https://docs.google.com/forms/d/e/1FAIpQLSdSt7xU4-j2m-JpFRb5nNkOEuBz212i1--svMHyuHKErNkFvA/viewform","title": "","options": []}],"weight": [{"value": 1}],"expanded": [{"value": true}]}'
 
-# create PathDB admin menu
+	# create PathDB admin menu
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Access Control"}],"description": [],"menu_name": [{"value": "quip-admin"}],"link": [{"uri": "internal:/admin/config/people/tac_lite","title": "","options": []}],"weight": [{"value": 4}],"expanded": [{"value": true}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Add Collection"}],"description": [],"menu_name": [{"value": "quip-admin"}],"link": [{"uri": "internal:/admin/structure/taxonomy/manage/collections/add","title": "","options": []}],"weight": [{"value": 4}],"expanded": [{"value": true}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "List Collections"}],"description": [],"menu_name": [{"value": "quip-admin"}],"link": [{"uri": "internal:/admin/structure/taxonomy/manage/collections/overview","title": "","options": []}],"weight": [{"value": 4}],"expanded": [{"value": true}]}'
@@ -51,11 +56,9 @@ if [ ! -d /data/pathdb/mysql ]; then
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Bulk Upload Images"}],"description": [],"menu_name": [{"value": "quip-admin"}],"link": [{"uri": "internal:/node/add/bulk_csv_upload","title": "","options": []}],"weight": [{"value": 5}],"expanded": [{"value": true}]}'
         curl --user admin:bluecheese2018 -k -X POST http://localhost/entity/menu_link_content?_format=json -H "Content-Type: application/json" -d '{"bundle": [{"value": "menu_link_content"}],"enabled": [{"value": true}],"title": [{"value": "Bulk Upload Template"}],"description": [],"menu_name": [{"value": "quip-admin"}],"link": [{"uri": "internal:/sup/TemplateBulkUpload.csv","title": "","options": []}],"weight": [{"value": 6}],"expanded": [{"value": true}]}'
 
-# create core content
-curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
-
+	# create core content
+	curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 else
-        #mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         httpd -f /config/httpd.conf
 fi
