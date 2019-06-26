@@ -24,9 +24,12 @@ if [ ! -d /data/pathdb/mysql ]; then
         /data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 	chown -R apache /data/pathdb/files
         httpd -f /config/httpd.conf
+	counter=0;
         wget --spider --quiet http://localhost
         while [ "$?" != 0 ]
         do
+		counter=$((counter+1))
+		echo "Checked $counter time(s)"
 		sleep 1
 		wget --spider --quiet http://localhost
 	done
