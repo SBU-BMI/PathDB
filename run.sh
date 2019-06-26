@@ -23,6 +23,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         /data/pathdb/quip/vendor/bin/drush -y pm:uninstall hide_revision_field
         /data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 	chown -R apache /data/pathdb/files
+	rm -f /var/run/httpd/httpd.pid
         httpd -f /config/httpd.conf
 	counter=0;
         wget --spider --quiet http://localhost
