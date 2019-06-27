@@ -4,7 +4,6 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 # QuIP - PathDB Docker Container
 #
 ### update OS
-RUN yum -y update
 RUN yum -y install wget which zip unzip java-1.8.0-openjdk bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73
@@ -93,4 +92,5 @@ RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.4.0
 RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=1.04
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
+RUN yum update -y && yum clean all
 CMD ["sh", "/root/run.sh"]
