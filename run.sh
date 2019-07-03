@@ -2,6 +2,10 @@ if [ ! -d /data/tmp ]; then
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
+
+# clear any stale httpd.pid files
+rm -f /var/run/httpd/httpd.pid
+
 if [ ! -d /data/pathdb/mysql ]; then
 	rm -rf /data/pathdb/quip
 	cp -rp /quip /data/pathdb
@@ -24,9 +28,12 @@ if [ ! -d /data/pathdb/mysql ]; then
         /data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 	chown -R apache /data/pathdb/files
         httpd -f /config/httpd.conf
+	counter=0;
         wget --spider --quiet http://localhost
         while [ "$?" != 0 ]
         do
+		counter=$((counter+1))
+		echo "Checked $counter time(s)"
 		sleep 1
 		wget --spider --quiet http://localhost
 	done
