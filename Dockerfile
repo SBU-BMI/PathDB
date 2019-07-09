@@ -20,7 +20,7 @@ RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 
 # create initial Drupal environment
-composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
+RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
 RUN mv quip /quip
 
 # copy Drupal QuIP module over
