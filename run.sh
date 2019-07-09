@@ -4,7 +4,13 @@ if [ ! -d /data/tmp ]; then
 fi
 
 # clear any stale httpd.pid files
-rm -f /var/run/httpd/httpd.pid
+FILE=/var/run/httpd/httpd.pid
+if [ -f "$FILE" ]; then
+    echo "$FILE exists"
+    rm -f $FILE
+fi
+# clear out other stale processes
+rm -rf /run/httpd/* 
 
 if [ ! -d /data/pathdb/mysql ]; then
 	rm -rf /data/pathdb/quip
