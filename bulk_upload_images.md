@@ -30,3 +30,5 @@ Identify the target collection (note that the collection needs to be created bef
 Select the manifest file that you've just created.
 
 Hit Save.
+
+Refresh the screen to view the upload status.
