@@ -4,7 +4,13 @@ if [ ! -d /data/tmp ]; then
 fi
 
 # clear any stale httpd.pid files
-rm -f /var/run/httpd/httpd.pid
+FILE=/var/run/httpd/httpd.pid
+if [ -f "$FILE" ]; then
+    echo "$FILE exists"
+    rm -f $FILE
+fi
+# clear out other stale processes
+rm -rf /run/httpd/* 
 
 if [ ! -d /data/pathdb/mysql ]; then
 	rm -rf /data/pathdb/quip
@@ -15,7 +21,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         sleep 10
         mysql -u root -e "create database QuIP"
-        cd /data/pathdb/quip
+        cd /data/pathdb/quip/web
         /data/pathdb/quip/vendor/bin/drush -y si standard --db-url=mysql://root:@localhost/QuIP
         /data/pathdb/quip/vendor/bin/drush -y upwd admin bluecheese2018
         /data/pathdb/quip/vendor/bin/drush -y pm:enable rest serialization
@@ -37,6 +43,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 		sleep 1
 		wget --spider --quiet http://localhost
 	done
+	/data/pathdb/quip/vendor/bin/drush -y cache-rebuild
 
 	# create REST API System User
 	/data/pathdb/quip/vendor/bin/drush user:create --password bluecheese2018 archon
