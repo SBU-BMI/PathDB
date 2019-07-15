@@ -287,3 +287,4 @@ hidden:
   field_iip_path: true
   field_utarget: true
   field_wsiimage: true
+  search_api_excerpt: true

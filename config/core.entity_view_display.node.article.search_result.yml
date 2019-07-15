@@ -46,3 +46,4 @@ content:
 hidden:
   comment: true
   field_tags: true
+  search_api_excerpt: true

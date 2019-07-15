@@ -28,3 +28,4 @@ content:
 hidden:
   field_collection: true
   member_for: true
+  search_api_excerpt: true
