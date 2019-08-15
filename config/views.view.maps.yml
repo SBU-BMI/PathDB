@@ -16,6 +16,8 @@ dependencies:
     - file
     - node
     - options
+    - rest
+    - serialization
     - user
 id: maps
 label: maps
@@ -783,6 +785,40 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'user.node_grants:view'
+        - user.roles
+      tags:
+        - 'config:field.storage.node.clinicaltrialsubjectid'
+        - 'config:field.storage.node.field_collection'
+        - 'config:field.storage.node.field_map'
+        - 'config:field.storage.node.field_map_type'
+        - 'config:field.storage.node.field_wsi'
+        - 'config:field.storage.node.imageid'
+        - 'config:field.storage.node.studyid'
+        - extensions
+  rest_export_1:
+    display_plugin: rest_export
+    id: rest_export_1
+    display_title: 'REST export'
+    position: 2
+    display_options:
+      display_extenders: {  }
+      path: maps
+      auth:
+        - basic_auth
+        - jwt_auth
+        - cookie
+      pager:
+        type: none
+        options:
+          offset: 0
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - request_format
+        - url
         - 'user.node_grants:view'
         - user.roles
       tags:
