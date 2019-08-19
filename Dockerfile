@@ -70,7 +70,21 @@ RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
 RUN chown -R apache /data/pathdb/files
-RUN echo "\$settings['file_private_path'] = '/data/pathdb/files';" >> web/sites/default/settings.php
+RUN echo "\
+\$settings['file_private_path'] = '/data/pathdb/files';\
+\$databases['default']['default'] = array (\
+  'database' => 'QuIP',\
+  'username' => 'root',\
+  'password' => '',\
+  'prefix' => '',\
+  'host' => 'localhost',\
+  'port' => '',\
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',\
+  'driver' => 'mysql',\
+);\
+\$settings['hash_salt'] = '`uuidgen`';\
+" >> web/sites/default/settings.php
+
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
@@ -79,7 +93,7 @@ RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nod
 # copy over Docker initialization scripts
 EXPOSE 80
 COPY run.sh /root/run.sh
-#COPY httpd.conf /etc/httpd/conf
+COPY mysql.tgz /build
 RUN mkdir /quip/pathdbconfig
 COPY config/* /quip/pathdbconfig/
 RUN mkdir /quip/content
@@ -88,7 +102,7 @@ RUN mkdir /quip/web/sup
 COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
-RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.4.1
+RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.4.2
 RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
