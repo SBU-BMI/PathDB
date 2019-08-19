@@ -22,6 +22,7 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	tar xvfz mysql.tgz
 	chown -R mysql mysql
 	rm mysql.tgz
+	cd /quip/web
 	/quip/vendor/bin/drush -y cache-rebuild
 fi
 if [ ! -d /data/pathdb/mysql ]; then
@@ -84,6 +85,8 @@ if [ ! -d /data/pathdb/mysql ]; then
 else
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         httpd -f /config/httpd.conf
+	cd /quip/web
+	/quip/vendor/bin/drush -y cache-rebuild	
 fi
 
 while true; do sleep 1000; done
