@@ -21,7 +21,8 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	cp -cp  /build/mysql.tgz .
 	tar xvfz mysql.tgz
 	chown -R mysql mysql
-	rm mysql.tgz	
+	rm mysql.tgz
+	/quip/vendor/bin/drush -y cache-rebuild
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
