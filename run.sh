@@ -1,8 +1,8 @@
+#create tmp directory if missing
 if [ ! -d /data/tmp ]; then
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
-
 # clear any stale httpd.pid files
 FILE=/var/run/httpd/httpd.pid
 if [ -f "$FILE" ]; then
@@ -11,16 +11,17 @@ if [ -f "$FILE" ]; then
 fi
 # clear out other stale processes
 rm -rf /run/httpd/* 
-#make sure permissions of pathdb folder are correct
+# make sure permissions of pathdb folder are correct
 chown -R apache /quip/web/sites/default
 chgrp -R apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
 
 if [ ! -d /data/pathdb/files ]; then
 	mkdir -p /data/pathdb/files
-	chown -R apache /data/pathdb/files
-	chgrp -R apache /data/pathdb/files
-	chmod -R 770 /data/pathdb/files
+	cd /data/pathdb/files
+	chown -R apache files
+	chgrp -R apache files
+	chmod -R 770 files
 fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	cd /data/pathdb
