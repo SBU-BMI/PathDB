@@ -91,6 +91,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 	curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 else
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
+	sleep 3
         httpd -f /config/httpd.conf
 	cd /quip/web
 	/quip/vendor/bin/drush -y updatedb
