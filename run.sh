@@ -16,6 +16,12 @@ chown -R apache /quip/web/sites/default
 chgrp -R apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
 
+if [ ! -d /data/pathdb/files ]; then
+	mkdir -p /data/pathdb/files
+	chown -R apache /data/pathdb/files
+	chgrp -R apache /data/pathdb/files
+	chmod -R 770 /data/pathdb/files
+fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	cd /data/pathdb
 	cp -cp  /build/mysql.tgz .
@@ -42,7 +48,6 @@ if [ ! -d /data/pathdb/mysql ]; then
 	/quip/vendor/bin/drush -y pm:uninstall toolbar
         /quip/vendor/bin/drush -y pm:uninstall hide_revision_field
         /quip/vendor/bin/drush -y cache-rebuild
-	chown -R apache /data/pathdb/files
         httpd -f /config/httpd.conf
 	counter=0;
         wget --spider --quiet http://localhost
