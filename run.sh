@@ -96,6 +96,7 @@ else
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         httpd -f /config/httpd.conf
 	cd /quip/web
+	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi
 while true; do sleep 1000; done
