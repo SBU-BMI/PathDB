@@ -690,7 +690,7 @@ display:
           entity_type: node
           entity_field: nid
           plugin_id: standard
-      title: maps
+      title: 'Feature Maps'
       header: {  }
       footer: {  }
       empty: {  }
