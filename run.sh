@@ -15,7 +15,13 @@ rm -rf /run/httpd/*
 chown -R apache /quip/web/sites/default
 chgrp -R apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
-
+# make sure sync folder exists and set permissions
+if [ ! -d /data/pathdb/config/sync ]; then
+	mkdir -p /data/pathdb/config/sync
+	chown -R apache /data/pathdb/config/sync
+	chgrp -R apache /data/pathdb/config/sync
+	chmod -R 770 /data/pathdb/config/sync
+fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	cd /data/pathdb
 	cp -cp  /build/mysql.tgz .
