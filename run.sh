@@ -16,19 +16,17 @@ chown -R apache /quip/web/sites/default
 chgrp -R apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
 
-if [ ! -d /data/pathdb/files ]; then
-	mkdir -p /data/pathdb/files
-	cd /data/pathdb/files
-	chown -R apache files
-	chgrp -R apache files
-	chmod -R 770 files
-fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	cd /data/pathdb
 	cp -cp  /build/mysql.tgz .
 	tar xvfz mysql.tgz
 	chown -R mysql mysql
 	rm mysql.tgz
+	# since database is being rebuilt, make sure permissions are okay on files folder
+        chown -R apache /data/pathdb/files
+        chgrp -R apache /data/pathdb/files
+        chmod -R 770 /data/pathdb/files
+	# rebuild cache
 	cd /quip/web
 	/quip/vendor/bin/drush -y cache-rebuild
 fi
