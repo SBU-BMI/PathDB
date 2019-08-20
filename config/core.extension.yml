@@ -60,7 +60,6 @@ module:
   taxonomy_unique: 0
   text: 0
   token: 0
-  toolbar: 0
   tour: 0
   update: 0
   user: 0
