@@ -70,7 +70,10 @@ RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
 RUN chown -R apache /data/pathdb/files
+RUN chgrp -R apache /data/pathdb/files
+RUN chmod -R 770 /data/pathdb/files
 RUN echo "\
+\$config_directories['sync'] = '/data/pathdb/config/sync';\
 \$settings['file_private_path'] = '/data/pathdb/files';\
 \$databases['default']['default'] = array (\
   'database' => 'QuIP',\
@@ -84,7 +87,6 @@ RUN echo "\
 );\
 \$settings['hash_salt'] = '`uuidgen`';\
 " >> web/sites/default/settings.php
-
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf

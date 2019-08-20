@@ -1,8 +1,8 @@
+#create tmp directory if missing
 if [ ! -d /data/tmp ]; then
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
-
 # clear any stale httpd.pid files
 FILE=/var/run/httpd/httpd.pid
 if [ -f "$FILE" ]; then
@@ -11,17 +11,30 @@ if [ -f "$FILE" ]; then
 fi
 # clear out other stale processes
 rm -rf /run/httpd/* 
-#make sure permissions of pathdb folder are correct
+# make sure permissions of pathdb folder are correct
 chown -R apache /quip/web/sites/default
 chgrp -R apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
-
+# make sure sync folder exists and set permissions
+if [ ! -d /data/pathdb/config/sync ]; then
+	mkdir -p /data/pathdb/config/sync
+	chown -R apache /data/pathdb/config/sync
+	chgrp -R apache /data/pathdb/config/sync
+	chmod -R 770 /data/pathdb/config/sync
+fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	cd /data/pathdb
 	cp -cp  /build/mysql.tgz .
 	tar xvfz mysql.tgz
 	chown -R mysql mysql
-	rm mysql.tgz	
+	rm mysql.tgz
+	# since database is being rebuilt, make sure permissions are okay on files folder
+        chown -R apache /data/pathdb/files
+        chgrp -R apache /data/pathdb/files
+        chmod -R 770 /data/pathdb/files
+	# rebuild cache
+	cd /quip/web
+	/quip/vendor/bin/drush -y cache-rebuild
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
@@ -29,7 +42,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         sleep 10
         mysql -u root -e "create database QuIP"
-        cd /data/pathdb/quip/web
+        cd /quip/web
         /quip/vendor/bin/drush -y si standard --db-url=mysql://root:@localhost/QuIP
         /quip/vendor/bin/drush -y upwd admin bluecheese2018
         /quip/vendor/bin/drush -y pm:enable rest serialization
@@ -40,7 +53,6 @@ if [ ! -d /data/pathdb/mysql ]; then
 	/quip/vendor/bin/drush -y pm:uninstall toolbar
         /quip/vendor/bin/drush -y pm:uninstall hide_revision_field
         /quip/vendor/bin/drush -y cache-rebuild
-	chown -R apache /data/pathdb/files
         httpd -f /config/httpd.conf
 	counter=0;
         wget --spider --quiet http://localhost
@@ -83,7 +95,9 @@ if [ ! -d /data/pathdb/mysql ]; then
 else
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         httpd -f /config/httpd.conf
+	cd /quip/web
+	/quip/vendor/bin/drush -y updatedb
+	/quip/vendor/bin/drush -y cache-rebuild	
 fi
-
 while true; do sleep 1000; done
 
