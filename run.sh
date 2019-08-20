@@ -31,7 +31,7 @@ if [ ! -d /data/pathdb/mysql ]; then
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
         sleep 10
         mysql -u root -e "create database QuIP"
-        cd /data/pathdb/quip/web
+        cd /quip/web
         /quip/vendor/bin/drush -y si standard --db-url=mysql://root:@localhost/QuIP
         /quip/vendor/bin/drush -y upwd admin bluecheese2018
         /quip/vendor/bin/drush -y pm:enable rest serialization
@@ -88,6 +88,5 @@ else
 	cd /quip/web
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi
-
 while true; do sleep 1000; done
 
