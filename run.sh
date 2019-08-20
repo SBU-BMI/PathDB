@@ -32,9 +32,6 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
         chown -R apache /data/pathdb/files
         chgrp -R apache /data/pathdb/files
         chmod -R 770 /data/pathdb/files
-	# rebuild cache
-	cd /quip/web
-	/quip/vendor/bin/drush -y cache-rebuild
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
