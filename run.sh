@@ -31,10 +31,7 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	# since database is being rebuilt, make sure permissions are okay on files folder
         chown -R apache /data/pathdb/files
         chgrp -R apache /data/pathdb/files
-        chmod -R 770 /data/pathdb/files
-	# rebuild cache
-	cd /quip/web
-	/quip/vendor/bin/drush -y cache-rebuild
+        chmod -R 775 /data/pathdb/files
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
@@ -94,6 +91,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 	curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 else
         /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
+	sleep 3
         httpd -f /config/httpd.conf
 	cd /quip/web
 	/quip/vendor/bin/drush -y updatedb

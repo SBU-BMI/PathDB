@@ -71,7 +71,7 @@ RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN mkdir -p /data/pathdb/files
 RUN chown -R apache /data/pathdb/files
 RUN chgrp -R apache /data/pathdb/files
-RUN chmod -R 770 /data/pathdb/files
+RUN chmod -R 775 /data/pathdb/files
 RUN echo "\
 \$config_directories['sync'] = '/data/pathdb/config/sync';\
 \$settings['file_private_path'] = '/data/pathdb/files';\
