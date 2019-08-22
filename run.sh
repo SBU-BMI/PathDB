@@ -10,7 +10,7 @@ if [ -f "$FILE" ]; then
     rm -f $FILE
 fi
 # check to see of PathDB MySQL defaults file exists
-if [ -f "/config/pathdbmysql.cnf" ]; then
+if [ ! -f "/config/pathdbmysql.cnf" ]; then
 	cp /build/pathdbmysql.cnf /config/pathdbmysql.cnf
 fi
 # clear out other stale processes
