@@ -16,14 +16,12 @@ fi
 # clear out other stale processes
 rm -rf /run/httpd/* 
 # make sure permissions of pathdb folder are correct
-chown -R apache /quip/web/sites/default
-chgrp -R apache /quip/web/sites/default
+chown -R apache:apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
 # make sure sync folder exists and set permissions
 if [ ! -d /data/pathdb/config/sync ]; then
 	mkdir -p /data/pathdb/config/sync
-	chown -R apache /data/pathdb/config/sync
-	chgrp -R apache /data/pathdb/config/sync
+	chown -R apache:apache /data/pathdb/config/sync
 	chmod -R 770 /data/pathdb/config/sync
 fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
@@ -33,8 +31,7 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	chown -R mysql mysql
 	rm mysql.tgz
 	# since database is being rebuilt, make sure permissions are okay on files folder
-        chown -R apache /data/pathdb/files
-        chgrp -R apache /data/pathdb/files
+        chown -R apache:apache /data/pathdb/files
         chmod -R 775 /data/pathdb/files
 fi
 if [ ! -d /data/pathdb/mysql ]; then

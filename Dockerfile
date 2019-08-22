@@ -59,8 +59,7 @@ RUN composer require drupal/restui &&\
     composer require drupal/ldap
 
 # set permissions correctly for apache demon access
-RUN chown -R apache ../quip
-RUN chgrp -R apache ../quip
+RUN chown -R apache:apache ../quip
 # adjust location of Drupal-supporting MySQL database files
 RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my.cnf
 # increase php file upload sizes and posts
@@ -70,8 +69,7 @@ RUN sed -i 's/;upload_tmp_dir =/upload_tmp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
-RUN chown -R apache /data/pathdb/files
-RUN chgrp -R apache /data/pathdb/files
+RUN chown -R apache:apache /data/pathdb/files
 RUN chmod -R 775 /data/pathdb/files
 RUN echo "\
 \$config_directories['sync'] = '/data/pathdb/config/sync';\
