@@ -9,6 +9,10 @@ if [ -f "$FILE" ]; then
     echo "$FILE exists"
     rm -f $FILE
 fi
+# check to see of PathDB MySQL defaults file exists
+if [ -f "/config/pathdbmysql.cnf" ]; then
+	cp /build/pathdbmysql.cnf /config/pathdbmysql.cnf
+fi
 # clear out other stale processes
 rm -rf /run/httpd/* 
 # make sure permissions of pathdb folder are correct

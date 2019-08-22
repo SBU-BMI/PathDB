@@ -18,6 +18,7 @@ RUN wget https://getcomposer.org/installer
 RUN php installer
 RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
+COPY pathdbmysql.cnf pathdbmysql.cnf
 
 # create initial Drupal environment
 RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
