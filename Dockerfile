@@ -21,8 +21,8 @@ RUN mv composer.phar /usr/local/bin/composer
 COPY pathdbmysql.cnf pathdbmysql.cnf
 
 # create initial Drupal environment
+WORKDIR /
 RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
-RUN mv quip /quip
 
 # copy Drupal QuIP module over
 WORKDIR /quip/web/modules
