@@ -36,7 +36,7 @@ fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
         mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
-        /usr/bin/mysqld_safe --defaults-file=/data/pathdb/mysql &
+        /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
         sleep 10
         mysql -u root -e "create database QuIP"
         cd /quip/web
@@ -90,7 +90,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 	# create core content
 	curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 else
-        /usr/bin/mysqld_safe --defaults-file=/data/pathdb/mysql &
+        /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
 	until mysqladmin status
 	do
         	sleep 3
