@@ -15,6 +15,11 @@ if [ ! -f "/config/pathdbmysql.cnf" ]; then
 fi
 # clear out other stale processes
 rm -rf /run/httpd/* 
+# make sure default drupal settings.php file is there
+if [ ! -f /quip/web/sites/default/settings.php ]; then
+	cp /build/settings.php /quip/web/sites/default
+	echo "\$settings['hash_salt'] = '`uuidgen`';" >> /quip/web/sites/default/settings.php
+fi
 # make sure permissions of pathdb folder are correct
 chown -R apache:apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
