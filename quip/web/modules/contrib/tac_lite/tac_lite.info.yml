@@ -1,0 +1,15 @@
+name: Taxonomy Access Control Lite
+description: Simple access control based on categories.
+package: Access control
+configure: tac_lite.administration
+type: module
+# core: 8.x
+
+dependencies:
+  - taxonomy
+
+# Information added by Drupal.org packaging script on 2017-11-06
+version: '8.x-1.4'
+core: '8.x'
+project: 'tac_lite'
+datestamp: 1509970390

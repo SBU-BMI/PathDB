@@ -1,0 +1,31 @@
+{
+  "name": "drupal/taxonomy_unique",
+  "type": "drupal-module",
+  "description": "Checks for duplicate occurrences of term names.",
+  "keywords": ["drupal", "ui", "taxonomy"],
+  "minimum-stability": "stable",
+  "license": "GPL-2.0+",
+  "authors": [
+    {
+      "name": "Rafael Schally",
+      "email": "rafael.schally@gmail.com"
+    }
+  ],
+  "prefer-stable": true,
+  "require-dev": {
+    "squizlabs/php_codesniffer": "2.8.0",
+    "drupal/coder": "8.2.8"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "./vendor/bin/phpcs --config-set installed_paths ../../drupal/coder/coder_sniffer",
+      "./vendor/bin/phpcs --config-set show_progress 1"
+    ],
+    "post-update-cmd": [
+      "./vendor/bin/phpcs --config-set installed_paths ../../drupal/coder/coder_sniffer",
+      "./vendor/bin/phpcs --config-set show_progress 1"
+    ],
+    "phpcs": "./vendor/bin/phpcs --standard=Drupal,DrupalPractice ./ --ignore=./vendor",
+    "phpcbf": "./vendor/bin/phpcbf --standard=Drupal,DrupalPractice ./ --ignore=./vendor"
+  }
+}

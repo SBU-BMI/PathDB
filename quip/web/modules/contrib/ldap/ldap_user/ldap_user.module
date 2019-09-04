@@ -1,0 +1,401 @@
+<?php
+
+/**
+ * @file
+ * Module for the LDAP User Entity.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\ldap_servers\Helper\CredentialsStorage;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
+use Drupal\ldap_user\Helper\LdapConfiguration;
+use Drupal\ldap_user\Processor\DrupalUserProcessor;
+use Drupal\ldap_user\Processor\LdapUserProcessor;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+/**
+ * Implements hook_cron().
+ */
+function ldap_user_cron() {
+  $check_orphans = \Drupal::config('ldap_user.settings')->get('orphanedDrupalAcctBehavior');
+  if ($check_orphans != 'ldap_user_orphan_do_not_check') {
+    $processor = \Drupal::service('ldap_user.orphan_processor');
+    $processor->checkOrphans();
+  }
+
+  $ldapUpdateQuery = \Drupal::config('ldap_user.settings')->get('userUpdateCronQuery');
+  if (\Drupal::moduleHandler()->moduleExists('ldap_query') && $ldapUpdateQuery != NULL && $ldapUpdateQuery != 'none') {
+    $processor = \Drupal::service('ldap_user.group_user_update_processor');
+    if ($processor->updateDue()) {
+      $processor->runQuery($ldapUpdateQuery);
+    }
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function ldap_user_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'orphaned_accounts':
+      $message['subject'] = \Drupal::config('system.site')->get('name') . ' ' . t('Orphaned LDAP Users');
+      $message['body'][] = t('The following %count Drupal users no longer have corresponding LDAP entries. They probably have been removed from the directory and might need to be removed from your site.',
+          ['%count' => count($params['accounts'])]
+        );
+      $message['body'][] .= "\n" . t('Username,Mail,Link') . "\n" . implode("\n", $params['accounts']);
+      break;
+  }
+}
+
+/**
+ * Implements hook_ldap_attributes_needed_alter().
+ */
+function ldap_user_ldap_attributes_needed_alter(&$attributes, $params) {
+  $processor = new DrupalUserProcessor();
+  $attributes = $processor->alterUserAttributes($attributes, $params);
+}
+
+/**
+ * Implements hook_ldap_user_attrs_list_alter().
+ */
+function ldap_user_ldap_user_attrs_list_alter(&$available_user_attrs, &$params) {
+  $processor = new DrupalUserProcessor();
+  list($available_user_attrs, $params) = $processor->alterLdapUserAttributes($available_user_attrs, $params);
+}
+
+/**
+ * Implements hook_help().
+ */
+function ldap_user_help($route_name, RouteMatchInterface $route_match) {
+  $ldap_user_help = t('LDAP user configuration determines how and when
+     Drupal accounts are created based on LDAP data and which user fields
+     are derived and synced to and from LDAP.');
+
+  switch ($route_name) {
+    case 'help.page.ldap_user':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . $ldap_user_help . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function ldap_user_module_implements_alter(&$implementations, $hook) {
+  // We are moving authorization to the end because its user saving causes
+  // issues.
+  if ($hook == 'user_login' && isset($implementations['authorization'])) {
+    $group = $implementations['authorization'];
+    unset($implementations['authorization']);
+    $implementations['authorization'] = $group;
+  }
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function ldap_user_user_login($account) {
+  $processor = new DrupalUserProcessor();
+  $processor->drupalUserLogsIn($account);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function ldap_user_user_insert($account) {
+  $processor = new DrupalUserProcessor();
+  $processor->newDrupalUserCreated($account);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function ldap_user_user_update($account) {
+  $processor = new DrupalUserProcessor();
+  $processor->drupalUserUpdated($account);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function ldap_user_user_delete($account) {
+  $processor = new DrupalUserProcessor();
+  $processor->drupalUserDeleted($account);
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function ldap_user_entity_base_field_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'user') {
+    $fields = [];
+
+    $fields['ldap_user_puid_sid'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('LDAP server ID'))
+      ->setDescription(t('Server ID  that PUID was derived from. NULL if PUID is independent of server configuration instance.'));
+
+    $fields['ldap_user_puid'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Permanent unique ID'))
+      ->setDescription(t("The user's permanent unique ID should never change for a given LDAP identified user."));
+
+    $fields['ldap_user_puid_property'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('PUID base property'))
+      ->setDescription(t('The LDAP property used for the PUID, for example "dn".'));
+
+    $fields['ldap_user_current_dn'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('LDAP DN'))
+      ->setDescription(t("The user's LDAP DN. May change when user's DN changes."));
+
+    $fields['ldap_user_prov_entries'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Provisioned LDAP entries'))
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+
+    $fields['ldap_user_last_checked'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Last LDAP comparison'))
+      ->setDescription(t('Unix timestamp of when Drupal user was compared to LDAP entry. This could be for purposes of syncing, deleteing Drupal account, etc.'));
+
+    $fields['ldap_user_ldap_exclude'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Exclude from LDAP'))
+      ->setDescription(t('Whether to exclude the user from LDAP functionality.'));
+
+    return $fields;
+  }
+}
+
+/* Below are form hooks which cannot be easily moved. */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Relevant for user_login_block.
+ */
+function ldap_user_form_user_login_block_alter(&$form, &$form_state) {
+  array_unshift($form['#validate'], 'ldap_user_grab_password_validate');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Relevant for user_login_form.
+ */
+function ldap_user_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  array_unshift($form['#validate'], 'ldap_user_grab_password_validate');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Relevant for user profile form.
+ */
+function ldap_user_form_user_form_alter(&$form, $form_state) {
+  array_unshift($form['#validate'], 'ldap_user_grab_password_validate');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Relevant for password_policy_password_tab.
+ */
+function ldap_user_form_password_policy_password_tab_alter(&$form, &$form_state) {
+  array_unshift($form['#validate'], 'ldap_user_grab_password_validate');
+}
+
+/**
+ * Alter password form through validation.
+ *
+ * Store password from logon forms in ldap_user_ldap_provision_pwd static
+ * variable for use in provisioning to LDAP.
+ */
+function ldap_user_grab_password_validate($form, FormState &$form_state) {
+  // This is not a login form but profile form and user is inserting password
+  // to update email.
+  if (!empty($form_state->getValue('current_pass_required_values'))) {
+    if (!empty($form_state->getValue('current_pass')) && empty($form_state->getValue('pass'))) {
+      CredentialsStorage::storeUserPassword($form_state->getValue('current_pass'));
+    }
+  }
+  // Otherwise a logon form.
+  elseif (!empty($form_state->getValue('pass'))) {
+    CredentialsStorage::storeUserPassword($form_state->getValue('pass'));
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * For user_register_form.
+ */
+function ldap_user_form_user_register_form_alter(&$form, $form_state) {
+
+  array_unshift($form['#submit'], 'ldap_user_grab_password_validate');
+
+  if (!\Drupal::currentUser()->hasPermission('administer users')) {
+    return;
+  }
+
+  if (\Drupal::config('ldap_user.settings')->get('disableAdminPasswordField') == TRUE) {
+    $form['account']['pass']['#type'] = 'value';
+    $form['account']['pass']['#value'] = user_password(40);
+    $form['account']['pass_disabled']['#type'] = 'fieldset';
+    $form['account']['pass_disabled']['#title'] = t('Password');
+    $form['account']['pass_disabled'][]['#markup'] = t('LDAP has disabled the password field and generated a random password.');
+  }
+
+  $form['ldap_user_fields']['#type'] = 'fieldset';
+  $form['ldap_user_fields']['#title'] = t('LDAP Options');
+  $form['ldap_user_fields']['#description'] = t('By enabling options in the LDAP user configuration, you can allow the creation of LDAP accounts and define the conflict resolution for associated accounts.');
+  $form['ldap_user_fields']['#collapsible'] = TRUE;
+  $form['ldap_user_fields']['#collapsed'] = FALSE;
+
+  $form['ldap_user_fields']['ldap_user_association'] = [
+    '#type' => 'radios',
+    '#options' => [
+      LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_LDAP_ASSOCIATE => t('Associate account'),
+      LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_NO_LDAP_ASSOCIATE => t('Do not associated account'),
+    ],
+    '#description' => t('If you choose associated account and an LDAP account cannot be found, a validation error will appear and the account will not be created.'),
+    '#title' => t('LDAP Entry Association.'),
+  ];
+
+  if (LdapConfiguration::provisionAvailableToLdap(LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_UPDATE_CREATE)) {
+    $form['ldap_user_fields']['ldap_user_association']['#access'] = FALSE;
+  }
+  elseif (\Drupal::config('ldap_user.settings')->get('manualAccountConflict') != LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_SHOW_OPTION_ON_FORM) {
+    $form['ldap_user_fields']['ldap_user_association']['#access'] = FALSE;
+  }
+  else {
+    $form['ldap_user_fields']['ldap_user_association']['#default_value'] = LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_LDAP_ASSOCIATE;
+  }
+
+  $form['ldap_user_fields']['ldap_user_create_ldap_acct'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Create corresponding LDAP entry.'),
+  ];
+  if (!LdapConfiguration::provisionAvailableToLdap(LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_ON_MANUAL_CREATION)) {
+    $form['ldap_user_fields']['ldap_user_create_ldap_acct']['#access'] = FALSE;
+  }
+
+  $form['#validate'][] = 'ldap_user_form_register_form_validate';
+  foreach (array_keys($form['actions']) as $action) {
+    if (isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] == 'submit') {
+      $form['actions'][$action]['#submit'][] = 'ldap_user_form_register_form_submit2';
+    }
+  }
+
+}
+
+/**
+ * Implements hook_form_validate().
+ */
+function ldap_user_form_register_form_validate($form, FormStateInterface &$form_state) {
+  $config = \Drupal::config('ldap_user.settings');
+
+  if (empty($form_state->getValue('ldap_user_association'))) {
+    $form_state->setValue('ldap_user_association', $config->get('manualAccountConflict'));
+  }
+
+  if ($form_state->getValue('ldap_user_association') == LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_NO_LDAP_ASSOCIATE) {
+    $form_state->set('ldap_user_ldap_exclude', 1);
+  }
+
+  $factory = \Drupal::service('ldap.servers');
+
+  // If the corresponding LDAP account does not exist and provision not
+  // selected and make LDAP associated is selected, throw error.
+  if (!$form_state->getValue('ldap_user_create_ldap_acct') &&
+    $form_state->getValue('ldap_user_association') == LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_LDAP_ASSOCIATE) {
+    if (empty($config->get('drupalAcctProvisionServer'))) {
+      $form_state->setErrorByName('ldap_user_missing_', t('The provisioning server is not set up correctly.'));
+      \Drupal::logger('ldap_user')
+        ->error('No server available for provisioning to Drupal.');
+    }
+  }
+
+  // If trying to provision an LDAP account and one already exists, throw error.
+  if ($form_state->getValue('ldap_user_create_ldap_acct')) {
+    if (empty($config->get('ldapEntryProvisionServer'))) {
+      $form_state->setErrorByName('ldap_user_missing_', t('The provisioning server is not set up correctly.'));
+      \Drupal::logger('ldap_user')
+        ->error('No server available for provisioning to LDAP.');
+    }
+    else {
+      $ldap_user = $factory->getUserDataFromServerByIdentifier($form_state->getValue('name'), $config->get('ldapEntryProvisionServer'), 'ldap_user_prov_to_ldap');
+      if ($ldap_user) {
+        $form_state->setErrorByName(
+          'ldap_user_create_ldap_acct', t(
+            'User %name already has a corresponding LDAP Entry (%dn). Uncheck "Create corresponding LDAP entry" to allow this Drupal user to be created. Select "Make this an LDAP associated account" to associate this account with the LDAP entry.',
+            [
+              '%dn' => $ldap_user['dn'],
+              '%name' => $form_state->getValue('name'),
+            ])
+        );
+      }
+    }
+  }
+
+  // If a conflict with an LDAP account exists (no association), throw error.
+  if ($form_state->getValue('ldap_user_association') == LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_REJECT) {
+    $ldap_user = $factory->getUserDataFromServerByIdentifier($form_state->getValue('name'), $config->get('drupalAcctProvisionServer'));
+    if ($ldap_user) {
+      $form_state->setErrorByName(
+        'name', t(
+          'User %name conflicts with an LDAP Entry (%dn). Creation blocked per your configuration.',
+          ['%dn' => $ldap_user['dn'], '%name' => $form_state->getValue('name')])
+      );
+    }
+  }
+}
+
+/**
+ * Called after user_register_form_submit.
+ */
+function ldap_user_form_register_form_submit2(&$form, FormState $form_state) {
+  // It's only called when a user who can create a new user does so using the
+  // register form.
+  $values = $form_state->getValues();
+  $ldap_user_association_set = FALSE;
+
+  // Create LDAP account.
+  if ($values['ldap_user_create_ldap_acct']) {
+    if ($account = user_load_by_name($values['name'])) {
+      $ldapProcessor = new LdapUserProcessor();
+      // We check that the entry does not exist, validation should prevent this
+      // in nearly all cases.
+      $ldap_provision_entry = $ldapProcessor->getProvisionRelatedLdapEntry($account);
+      if (!$ldap_provision_entry) {
+        $provision_result = $ldapProcessor->provisionLdapEntry($account);
+        if ($provision_result['status'] == 'fail') {
+          drupal_set_message(t('An error occurred while creating your LDAP entry, please see the log for details.'), 'error');
+        }
+      }
+      else {
+        // Fallback for collisions in registration process.
+        $ldap_user_association_set = TRUE;
+      }
+    }
+  }
+
+  $userProcessor = new DrupalUserProcessor();
+  if ($values['ldap_user_association'] == LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_NO_LDAP_ASSOCIATE) {
+    $userProcessor->ldapExcludeDrupalAccount($values['name']);
+  }
+  elseif ($ldap_user_association_set ||
+    $values['ldap_user_association'] == LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_LDAP_ASSOCIATE) {
+    // Either LDAP provision (above) has said "associate" or the person creating
+    // the account has said "associate" or the LDAP user settings says
+    // "Associate manually created Drupal accounts with related LDAP Account
+    // if one exists.".
+    $association = $userProcessor->ldapAssociateDrupalAccount($values['name']);
+
+    if (!$association) {
+      drupal_set_message(t('Account created but no LDAP account found to associate with.'), 'warning');
+    }
+  }
+
+}

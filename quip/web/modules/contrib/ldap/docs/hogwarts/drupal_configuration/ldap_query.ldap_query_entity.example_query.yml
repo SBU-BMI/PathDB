@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+id: example_query
+label: 'Example query'
+server_id: hogwarts
+base_dn: 'ou=people,dc=hogwarts,dc=edu'
+filter: (objectClass=person)
+attributes: ''
+size_limit: 0
+time_limit: 0
+dereference: 0
+scope: 3

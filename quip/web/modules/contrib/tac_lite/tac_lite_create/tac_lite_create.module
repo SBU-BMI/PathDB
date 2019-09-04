@@ -1,0 +1,101 @@
+<?php
+/**
+ * @file
+ * Control term visibility in node edit form.
+ *
+ * Use tac_lite to control which terms can be used when creating new
+ * content.  Unlike tac_lite.module, which relies on Drupal's node_access
+ * features, this module uses hook_form_alter to change which terms are
+ * presented by the taxonomy module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\tac_lite\Form\SchemeForm;
+use Drupal\taxonomy\Entity\Vocabulary;
+
+/**
+ * Implements hook_form_alter().
+ */
+function tac_lite_create_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $build_info = $form_state->getBuildInfo();
+  $base_form = isset($build_info['base_form_id']) ? $build_info['base_form_id'] : NULL;
+  if ($form_id == 'tac_lite_admin_scheme_form') {
+    $config = $form['#tac_lite_config'];
+    $scheme = isset($build_info['args'][0]) ? $build_info['args'][0] : NULL;
+    if (!empty($form['tac_lite_config_scheme_' . $scheme])) {
+      $form['tac_lite_config_scheme_' . $scheme]['tac_lite_create'] = [
+        '#type' => 'checkbox',
+        '#title' => 'Visibility on create and edit forms',
+        '#default_value' => isset($config['tac_lite_create']) ? $config['tac_lite_create'] : FALSE,
+        '#description' => t('Show terms when creating content.  This <strong>does not</strong> control which users can create a given content type. This <strong>does</strong> control which terms appear on the node edit forms.  <br/>Note that schemes granting <em>update</em> permission (above) imply <em>visibility on forms</em> as well.'),
+      ];
+    }
+  }
+  elseif ($base_form == 'node_form') {
+    $account = \Drupal::currentUser();
+    $widgets = ['select', 'radios', 'checkboxes'];
+    if (\Drupal::currentUser()->hasPermission('administer tac_lite')) {
+      return;
+    }
+    $settings = \Drupal::config('tac_lite.settings');
+    $vids = $settings->get('tac_lite_categories');
+    $tids = $term_fields = [];
+    $schemes = $settings->get('tac_lite_schemes');
+    for ($i = 1; $i <= $schemes; $i++) {
+      $config = SchemeForm::tacLiteConfig($i);
+      if ((isset($config['tac_lite_create']) && $config['tac_lite_create']) ||
+        in_array('grant_update', $config['perms'])) {
+        $tids = array_merge($tids, _tac_lite_user_tids($account, $i, $config));
+      }
+    }
+    // Go through all of the fields in the system to find the ones we want use.
+    $storage = $form_state->getStorage();
+    $form_display = $storage['form_display'] ?: NULL;
+    $bundle = $form_display ? $form_display->get('bundle') : NULL;
+    $fields = \Drupal::entityManager()->getFieldDefinitions('node', $bundle);
+    foreach ($fields as $field_name => $field) {
+      $field_type = method_exists($field, 'getType') ? $field->getType() : NULL;
+      $target_type = method_exists($field, 'getSetting') ? $field->getSetting('target_type') : NULL;
+      // Get all terms, regardless of language, associated with the node.
+      if ($field_type == 'entity_reference' && $target_type == 'taxonomy_term') {
+        // Add an entry to our term_fields in the form of field
+        // name => vocabulary machine name.
+        $field_settings = $field->getSettings();
+        $vocabs = $field_settings['handler_settings']['target_bundles'];
+        $term_fields[$field->getName()] = reset($vocabs);
+      }
+    }
+    // Now that we have the names of the fields,
+    // go through each one in the form.
+    foreach ($term_fields as $field_name => $vocab_name) {
+      // Skip auto complete fields as they are not supported.
+      if (isset($form[$field_name]['widget']['#type']) && in_array($form[$field_name]['widget']['#type'], $widgets)) {
+        // Get the vocabulary info so we can get the vid.
+        $v = Vocabulary::load($vocab_name);
+        // We only want to act on this field if it is tied to a
+        // vocabulary we are set to control.
+        if (!in_array($v->id(), $vids)) {
+          continue;
+        }
+        // Go through each option for this field.
+        foreach ($form[$field_name]['widget']['#options'] as $term_id => $term_name) {
+          // Skip the "<none>" option (or anything like it).
+          if (!is_numeric($term_id)) {
+            continue;
+          }
+
+          // Is this option not in the list of terms this user can create with?
+          if (!in_array($term_id, $tids)) {
+            // The term is not the default value, and user is not
+            // allowed to create with it.
+            // HELP: What if it IS the default value? Do we not unset it?
+            if ($term_id != $form[$field_name]['widget']['#default_value']) {
+              // Unset the option to it doesn't appear.
+              unset($form[$field_name]['widget']['#options'][$term_id]);
+            }
+          }
+        }
+      }
+    }
+  }
+}

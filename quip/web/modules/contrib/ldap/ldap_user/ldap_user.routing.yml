@@ -1,0 +1,14 @@
+ldap_user.admin_form:
+  path: /admin/config/people/ldap/user
+  defaults:
+    _title: 'User Mappings'
+    _form: \Drupal\ldap_user\Form\LdapUserAdminForm
+  requirements:
+    _permission: 'administer ldap'
+ldap_user.test_form:
+  path: /admin/config/people/ldap/user/test
+  defaults:
+    _title: 'Test LDAP User Functionality for a given user.'
+    _form: \Drupal\ldap_user\Form\LdapUserTestForm
+  requirements:
+    _permission: 'administer ldap'

@@ -1,0 +1,13 @@
+name: 'Hide Revision Field'
+type: module
+description: 'Controls visibility of the revision field on content add/edit forms.'
+package: Forms
+# core: 8.x
+dependencies:
+  - drupal:user
+
+# Information added by Drupal.org packaging script on 2018-09-20
+version: '8.x-2.1'
+core: '8.x'
+project: 'hide_revision_field'
+datestamp: 1537427287

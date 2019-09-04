@@ -1,0 +1,259 @@
+<?php
+/**
+ * @file
+ * Control access to site content based on taxonomy, roles and users.
+ */
+
+use Drupal\node\NodeInterface;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Core\Url;
+use Drupal\tac_lite\Form\SchemeForm;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function tac_lite_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the block module.
+    case 'help.page.tac_lite':
+      $admin_taclite = Url::fromRoute('tac_lite.administration');
+      $admin_tac_lite_url = \Drupal::l(t('administer -> people -> access control by taxonomy'), $admin_taclite);
+      $output = '<p>' . t('Taxonomy Access Control Lite allows you to restrict access to site content. It uses a simple scheme based on Taxonomy, Users and Roles.') . '</p>';
+      $output .= '<p>' . t("This module leverages Drupal's node_access table allows this module to grant permission to view, update, and delete nodes.  To control which users can <em>create</em> new nodes, use Drupal's role based permissions.") . '</p>';
+      $output .= '<p>' . t("It is important to understand that this module <em>grants</em> privileges, as opposed to <em>revoking</em> privileges.  So, use Drupal's built-in permissions to hide content from certain roles, then use this module to show the content.  This module cannot hide content that the user is allowed to see based on their existing privileges.") . '</p>';
+      $output .= '<p>' . t('There are several steps required to set up Taxonomy Access Control Lite.') . '</p>';
+      $output .= '<ol>';
+      $output .= '<li>' . t("Define one or more vocabularies whose terms will control which users have access. For example, you could define a vocabulary called 'Privacy' with terms 'Public' and 'Private'.") . '</li>';
+      $output .= '<li>' . t('Tell this module which vocabularies control privacy :url', [
+        ':url' => $admin_tac_lite_url,
+      ]) . '</li>';
+      $output .= '<li>' . t('Configure one or more <em>schemes</em>.   simple site may need only one scheme which grants view permission.  A more complex site might require additional schemes for update and delete.  Each scheme associates roles and terms.  Users will be granted priviliges based on their role and the terms with which nodes are tagged.') . '</li>';
+      $output .= '<li>' . t('When settings are correct, <a href=:url>rebuild node_access permissions</a>.', [
+        ':url' => \Drupal::url('node.configure_rebuild_confirm'),
+      ]) . '</li>';
+      $output .= '<li>' . t('Optionally, grant access to individual users. (See the <em>access by taxonomy</em> tab, under user -> edit.)') . '</li>';
+      $output .= '</ol>';
+      $output .= '<p>' . t('Troubleshooting:.') . '<ul>';
+      $output .= '<li>' . t('Try rebuilding node_access permissions.') . '</li>';
+      $output .= '<li>' . t('Try disabling tac_lite.module, rebuilding permissions.  With the module disabled, users should not have the privileges you are attempting to grant with this module.') . '</li>';
+      $output .= '<li>' . t("The devel_node_access.module (part of <a href=:url>devel</a>) helps to see exactly what Drupal's node_access table is doing.", [
+        ':url' => 'http://drupal.org/project/devel',
+      ]) . '</li>';
+      $output .= '</ul></p>';
+      return $output;
+  }
+}
+/**
+ * Implements hook_node_access_records().
+ */
+function tac_lite_node_access_records(NodeInterface $node) {
+  $tids = _tac_lite_get_terms($node);
+  if (count($tids)) {
+    // If we're here, the node has terms associated with it which restrict
+    // access to the node.
+    $grants = [];
+    $settings = \Drupal::config('tac_lite.settings');
+    $schemes = $settings->get('tac_lite_schemes');
+    for ($i = 1; $i <= $schemes; $i++) {
+      $config = SchemeForm::tacLiteConfig($i);
+      // Only apply grants to published nodes, or unpublished nodes
+      // if requested in the scheme.
+      if ($node->isPublished() || $config['unpublished']) {
+        foreach ($tids as $tid) {
+          $grant = [
+            'realm' => $config['realm'],
+            // Use term id as grant id.
+            'gid' => $tid,
+            'grant_view' => 0,
+            'grant_update' => 0,
+            'grant_delete' => 0,
+            'priority' => 0,
+          ];
+          foreach ($config['perms'] as $perm) {
+            $grant[$perm] = 1;
+          }
+          $grants[] = $grant;
+        }
+      }
+    }
+    return $grants;
+  }
+}
+/**
+ * Gets terms from a node that belong to vocabularies selected.
+ */
+function _tac_lite_get_terms($node) {
+  $tids = [];
+  // Get the vids that tac_lite cares about.
+  $config = \Drupal::config('tac_lite.settings');
+  $vids = $config->get('tac_lite_categories') ? array_keys($config->get('tac_lite_categories')) : NULL;
+  if ($vids) {
+
+    // Load all terms found in term reference fields.
+    // This logic should work for all nodes (published or not).
+    $terms_by_vid = tac_lite_node_get_terms($node);
+    if (!empty($terms_by_vid)) {
+      foreach ($vids as $vid) {
+        if (!empty($terms_by_vid[$vid])) {
+          foreach ($terms_by_vid[$vid] as $tid => $term) {
+            $tids[$tid] = $tid;
+          }
+        }
+      }
+    }
+  }
+  elseif (\Drupal::currentUser()->hasPermission('administer tac_lite')) {
+    drupal_set_message(t('tac_lite.module enabled, but not <a href=:admin_url>configured</a>. No tac_lite terms associated with :title.', [
+      ':admin_url' => \Drupal::url('tac_lite.administration'),
+      ':title' => $node->getTitle(),
+    ]
+    ));
+  }
+  return $tids;
+}
+/**
+ * We organize our data structure by vid and tid.
+ */
+function tac_lite_node_get_terms($node) {
+  $terms = &drupal_static(__FUNCTION__);
+  $nid = $node->id();
+  if (!isset($terms[$nid])) {
+    // Get fields of all node.
+    $fields = \Drupal::entityManager()->getFieldDefinitions('node', $node->getType());
+    // Get tids from all taxonomy_term_reference fields.
+    foreach ($fields as $field_name => $field) {
+      $field_type = method_exists($field, 'getType') ? $field->getType() : NULL;
+      $target_type = method_exists($field, 'getSetting') ? $field->getSetting('target_type') : NULL;
+      // Get all terms, regardless of language, associated with the node.
+      if ($field_type == 'entity_reference' && $target_type == 'taxonomy_term') {
+        $field_name = $field->get('field_name');
+        if ($items = $node->get($field_name)->getValue()) {
+          foreach ($items as $item) {
+            // We need to term to determine the vocabulary id.
+            if (!empty($item['target_id'])) {
+              $term = Term::load($item['target_id']);
+            }
+            if ($term) {
+              $terms[$node->id()][$term->getVocabularyId()][$term->id()] = $term;
+            }
+          }
+        }
+      }
+    }
+  }
+  return isset($terms[$node->id()]) ? $terms[$node->id()] : FALSE;
+}
+/**
+ * Implements hook_node_grants().
+ *
+ * Returns any grants which may give the user permission to perform the
+ * requested op.
+ */
+function tac_lite_node_grants(AccountInterface $account, $op) {
+  $grants = [];
+  $settings = \Drupal::config('tac_lite.settings');
+  $schemes = $settings->get('tac_lite_schemes');
+  for ($i = 1; $i <= $schemes; $i++) {
+    $config = SchemeForm::tacLiteConfig($i);
+    if (in_array('grant_' . $op, $config['perms'])) {
+      $grants[$config['realm']] = _tac_lite_user_tids($account, $i, $config);
+    }
+  }
+  if (count($grants)) {
+    return $grants;
+  }
+}
+/**
+ * Return the term ids of terms this user is allowed to access.
+ *
+ * Users are granted access to terms either because of who they are,
+ * or because of the roles they have.
+ */
+function _tac_lite_user_tids($account, $scheme, $config) {
+  // Grant id 0 is reserved for nodes which were not given a grant id
+  // when they were created. By adding 0 to the grant id, we let the
+  // user view those nodes.
+  $grants = [0];
+  $config = \Drupal::config('tac_lite.settings');
+  $schemes = $config->get('tac_lite_schemes');
+  for ($i = 1; $i <= $schemes; $i++) {
+    $data = \Drupal::service('user.data')->get('tac_lite', $account->id(), 'tac_lite_scheme_' . $i) ?: [];
+    if (count($data)) {
+      foreach ($data as $tids) {
+        if (count($tids)) {
+          $grants = array_merge($grants, $tids);
+        }
+      }
+    }
+  }
+
+  // Add per-role grants in addition to per-user grants.
+  $settings = \Drupal::config('tac_lite.settings');
+  $defaults = $settings->get('tac_lite_grants_scheme_' . $scheme);
+  $defaults = $defaults ? $defaults : [];
+  $roles = $account->getRoles();
+  foreach ($roles as $rid) {
+    if (isset($defaults[$rid]) && count($defaults[$rid])) {
+      foreach ($defaults[$rid] as $tids) {
+        if (count($tids)) {
+          $grants = array_merge($grants, $tids);
+        }
+      }
+    }
+  }
+
+  // Because of some flakiness in the form API and the form we insert under
+  // user settings, we may have a bogus entry with vid set
+  // to ''. Here we make sure not to return that.
+  unset($grants['']);
+  return $grants;
+}
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function tac_lite_query_term_access_alter(AlterableInterface $query) {
+  $account = \Drupal::currentUser();
+  // If this user has administer rights, don't filter.
+  if (\Drupal::currentUser()->hasPermission('administer tac_lite')) {
+    return;
+  }
+  // Get our vocabularies and schemes from variables. Return if we have none.
+  $settings = \Drupal::config('tac_lite.settings');
+  $vids = $settings->get('tac_lite_categories');
+  $schemes = $settings->get('tac_lite_schemes');
+  if (!$vids || !count($vids) || !$schemes) {
+    return;
+  }
+  // The terms this user is allowed to see.
+  $term_visibility = FALSE;
+  $tids = [];
+  for ($i = 1; $i <= $schemes; $i++) {
+    $config = SchemeForm::tacLiteConfig($i);
+    if ($config['term_visibility']) {
+      $tids = array_merge($tids, _tac_lite_user_tids($account, $i, $config));
+      $term_visibility = TRUE;
+    }
+  }
+
+  if ($term_visibility) {
+    // HELP: What is the proper way to find the alias of the primary table here?
+    $primary_table = '';
+    $t = $query->getTables();
+    foreach ($t as $info) {
+      if (!$info['join type']) {
+        $primary_table = $info['alias'];
+      }
+    }
+
+    // Prevent query from finding terms the current user does
+    // not have permission to see.
+    $query->leftJoin('taxonomy_term_field_data', 'tac_td', $primary_table . '.tid = tac_td.tid');
+    $or = db_or();
+    $or->condition($primary_table . '.tid', $tids, 'IN');
+    $or->condition('tac_td.vid', $vids, 'NOT IN');
+    $query->condition($or);
+  }
+}

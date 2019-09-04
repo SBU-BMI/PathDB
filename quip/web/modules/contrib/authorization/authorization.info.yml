@@ -1,0 +1,7 @@
+name: Authorization
+type: module
+description: Authorization API connects up providers (for example LDAP) with consumers (for example Organic Groups or Drupal roles).
+core: 8.x
+package: Other
+dependencies:
+  - externalauth:externalauth

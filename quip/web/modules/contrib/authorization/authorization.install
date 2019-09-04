@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Contains installation and update hooks.
+ */
+
+use Drupal\authorization\Entity\AuthorizationProfile;
+
+/**
+ * Schema corrections.
+ */
+function authorization_update_8001() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('authorization.settings');
+  $config->set('authorization_message', $config->get('authorization_message'));
+  $config->clear('authorization_message');
+  $config->save();
+
+  $result = \Drupal::entityQuery('authorization_profile')->execute();
+  $profiles = AuthorizationProfile::loadMultiple($result);
+  foreach ($profiles as $profile) {
+    $profile->save();
+  }
+
+  return t('Your authorization configuration and profiles have been updated, please review.');
+}

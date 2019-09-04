@@ -1,0 +1,4 @@
+administer tac_lite:
+  title: Adminster Tac Lite
+  description: Access the Tac Lite administration pages
+  restrict access: true

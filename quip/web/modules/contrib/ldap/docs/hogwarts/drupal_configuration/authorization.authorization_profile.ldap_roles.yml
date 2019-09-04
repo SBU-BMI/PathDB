@@ -1,0 +1,47 @@
+langcode: en
+status: true
+dependencies: {  }
+id: ldap_roles
+label: 'LDAP Roles'
+provider: ldap_provider
+provider_config:
+  status:
+    server: hogwarts
+    only_ldap_authenticated: 1
+  filter_and_mappings:
+    use_first_attr_as_groupid: 0
+provider_mappings:
+  -
+    query: 'cn=users,ou=groups,dc=hogwarts,dc=edu'
+    is_regex: 0
+  -
+    query: 'cn=gryffindor,ou=groups,dc=example,dc=org'
+    is_regex: 0
+  -
+    query: ''
+    is_regex: 0
+  -
+    query: ''
+    is_regex: 0
+  -
+    query: ''
+    is_regex: 0
+consumer: authorization_drupal_roles
+consumer_config: {  }
+consumer_mappings:
+  -
+    role: student
+  -
+    role: wizard
+  -
+    role: none
+  -
+    role: none
+  -
+    role: none
+synchronization_modes:
+  user_logon: user_logon
+synchronization_actions:
+  revoke_provider_provisioned: revoke_provider_provisioned
+  regrant_provider_provisioned: regrant_provider_provisioned
+  create_consumers: 0

@@ -1,0 +1,20 @@
+sids:
+  hogwarts: hogwarts
+authenticationMode: 1
+loginUIUsernameTxt: 'Username LDAP notice text'
+loginUIPasswordTxt: 'Password LDAP notice text'
+ldapUserHelpLinkUrl: 'http://www.example.com/'
+ldapUserHelpLinkText: 'LDAP help link description text'
+emailOption: 3
+emailUpdate: 1
+passwordOption: 2
+allowOnlyIfTextInDn: {  }
+excludeIfTextInDn: {  }
+excludeIfNoAuthorizations: 0
+emailTemplateHandling: if_empty
+emailTemplate: '@username@example.com'
+emailTemplateUsageResolveConflict: true
+emailTemplateUsageNeverUpdate: true
+emailTemplateUsagePromptUser: true
+emailTemplateUsageRedirectOnLogin: false
+emailTemplateUsagePromptRegex: '.*@hogwarts\.edu'

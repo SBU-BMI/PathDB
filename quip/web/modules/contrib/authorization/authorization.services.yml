@@ -1,0 +1,28 @@
+services:
+  plugin.manager.authorization.provider:
+    class: Drupal\authorization\Provider\ProviderPluginManager
+    parent: default_plugin_manager
+  plugin.manager.authorization.consumer:
+    class: Drupal\authorization\Consumer\ConsumerPluginManager
+    parent: default_plugin_manager
+  authorization_register_subscriber:
+    class: Drupal\authorization\EventSubscriber\RegisterSubscriber
+    arguments: ['@current_user']
+    tags:
+      - { name: event_subscriber }
+  authorization_login_subscriber:
+    class: Drupal\authorization\EventSubscriber\LoginSubscriber
+    arguments: ['@current_user']
+    tags:
+      - { name: event_subscriber }
+  authorization_authmap_subscriber:
+    class: Drupal\authorization\EventSubscriber\AuthmapAlterSubscriber
+    arguments: ['@current_user']
+    tags:
+      - { name: event_subscriber }
+  authorization.manager:
+    class: Drupal\authorization\AuthorizationController
+    arguments: ['@entity_type.manager', '@logger.channel.authorization']
+  logger.channel.authorization:
+      parent: logger.channel_base
+      arguments: ['authorization']

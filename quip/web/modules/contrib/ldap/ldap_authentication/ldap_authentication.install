@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the LDAP authentication module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function ldap_authentication_requirements($phase) {
+
+  $requirements = [];
+  if ($phase != "install" && db_table_exists('ldapauth')) {
+    $requirements['ldap_authentication_ldap_integration'] = [
+      'title' => t('LDAP Integration LDAP Auth Upgrade Concern'),
+      'severity' => REQUIREMENT_WARNING,
+      'value' => NULL,
+      'description' => t('Upgrade from Drupal 6 LDAP Auth to Drupal 7
+      LDAP Authentication is not automatic.  LDAP Authentication will need to be configured by hand.
+      Some harmless data will remain in the user.data field in the user table.  Records in
+      the authmap table will cause conflicts and should be removed or changed to ldap_authentication
+      as the module (see http://drupal.org/node/1183192).
+      See http://drupal.org/node/1023016, http://drupal.org/node/1183192.
+      This message will go away when the ldapauth database table is removed.'),
+    ];
+  }
+  return $requirements;
+}
+
+/**
+ * Adds missing email template fields.
+ */
+function ldap_authentication_update_8001() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_authentication.settings');
+  $config->set('emailTemplateHandling', 'none');
+  $config->set('emailTemplate', '@username@example.com');
+  $config->set('emailTemplateUsageResolveConflict', FALSE);
+  $config->set('emailTemplateUsageNeverUpdate', FALSE);
+  $config->set('emailTemplateUsagePromptUser', FALSE);
+  $config->set('emailTemplateUsageRedirectOnLogin', FALSE);
+  $config->set('emailTemplateUsagePromptRegex', '.*@example\\.com');
+  $config->save(TRUE);
+}
+
+/**
+ * Removes the ldap_authentication_conf prefix.
+ */
+function ldap_authentication_update_8304() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_authentication.settings');
+  $data = $config->get('ldap_authentication_conf');
+  if ($data) {
+    $config->clear('ldap_authentication_conf');
+    $config->setData($data);
+    $config->save(TRUE);
+  }
+}

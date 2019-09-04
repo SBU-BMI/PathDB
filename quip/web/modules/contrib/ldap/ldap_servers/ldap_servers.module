@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * @file
+ * The ldap_servers module file.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ldap_servers_help($route_name, RouteMatchInterface $route_match) {
+
+  switch ($route_name) {
+    case 'help.page.ldap_servers':
+      $output = '<p>' . t('<em>LDAP Servers</em> stores LDAP server configurations so other modules can connect to them and leverage their data <em>LDAP Authentication</em> and <em>LDAP Authorization</em> are two such modules. Generally, only one LDAP Server configuration is needed.') . '</p>';
+      $output .= '<p>' . t('When multiple LDAP server configurations are needed, each is not necessarily a separate physical LDAP server; they may have different binding users or some other configuration difference.') . ' </p>';
+      return $output;
+
+    case 'entity.ldap_server.collection':
+      $output = '<p>' . t('More than one LDAP server configuration can exist for a physical LDAP server. Multiple configurations for the same physical LDAP server are useful in cases such as either different base DN for authentication and authorization or service accounts with different privileges for different purposes.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_ldap_attributes_needed_alter().
+ */
+function ldap_servers_ldap_attributes_needed_alter(&$attributes, $params) {
+  $factory = \Drupal::service('ldap.servers');
+  $attributes = $factory->alterLdapAttributes($attributes, $params);
+}
+
+/**
+ * Implements hook_ldap_user_attrs_list_alter().
+ */
+function ldap_servers_ldap_user_attrs_list_alter(&$available_user_attrs, &$params) {
+  $factory = \Drupal::service('ldap.servers');
+  list($params, $available_user_attrs) = $factory->alterLdapUserAttributesList($available_user_attrs, $params);
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function ldap_servers_user_logout($account) {
+  // When the user logs out clear the LDAP cached data.
+  /** @var \Drupal\Core\Session\AccountInterface $account */
+  $cache_key = 'ldap_servers:user_data:' . $account->getAccountName();
+  if (\Drupal::cache()->get($cache_key)) {
+    \Drupal::cache()->delete($cache_key);
+  }
+}

@@ -1,0 +1,22 @@
+field.widget.settings.hide_revision_field_log_widget:
+  type: mapping
+  label: 'Revision Log Widget settings.'
+  mapping:
+    rows:
+      type: integer
+      label: 'Rows'
+    placeholder:
+      type: label
+      label: 'Placeholder'
+    show:
+      type: boolean
+      label: 'Show/hide the revision log widget.'
+    default:
+      type: label
+      label: 'Default value'
+    permission_based:
+      type: boolean
+      label: 'Show field based on permissions.'
+    allow_user_settings:
+      type: boolean
+      label: 'Allow users to alter their own settings for field.'

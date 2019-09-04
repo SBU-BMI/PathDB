@@ -1,0 +1,5 @@
+entity.ldap_server.collection:
+  route_name: entity.ldap_server.collection
+  title: 'Servers'
+  weight: 20
+  base_route: entity.ldap_server.collection

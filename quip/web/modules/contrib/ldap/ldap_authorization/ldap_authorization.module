@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains ldap_authorization.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ldap_authorization_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the ldap_authorization module.
+    case 'help.page.ldap_authorization':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t("Provider to the Authorization API, also see authorization's README.md for further information.") . '</p>';
+      return $output;
+
+    default:
+  }
+}

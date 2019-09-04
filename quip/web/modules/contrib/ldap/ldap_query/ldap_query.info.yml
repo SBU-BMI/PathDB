@@ -1,0 +1,16 @@
+name: 'LDAP Query'
+description: 'LDAP Query Builder and Storage for queries used by other LDAP modules such as LDAP feeds, LDAP provision, etc'
+type: module
+# core: 8.x
+package: 'Lightweight Directory Access Protocol'
+dependencies:
+  - ldap:ldap_servers
+  - views
+
+configure: entity.ldap_query_entity.collection
+
+# Information added by Drupal.org packaging script on 2019-05-31
+version: '8.x-3.0-beta7'
+core: '8.x'
+project: 'ldap'
+datestamp: 1559320103

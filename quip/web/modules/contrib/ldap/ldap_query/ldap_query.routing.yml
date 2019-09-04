@@ -1,0 +1,9 @@
+entity.ldap_query_entity.test:
+  path: '/admin/config/people/ldap/query/{ldap_query_entity}/test'
+  defaults:
+    _title: 'Test results for query'
+    _form: \Drupal\ldap_query\Form\QueryTestForm
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'administer ldap'

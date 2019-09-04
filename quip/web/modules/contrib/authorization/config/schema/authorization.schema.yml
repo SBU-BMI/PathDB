@@ -1,0 +1,7 @@
+authorization.settings:
+  type: config_object
+  label: 'Suthorization settings'
+  mapping:
+    authorization_message:
+      type: boolean
+      label: 'Show authorization and notification messages to the user.'

@@ -1,0 +1,51 @@
+{#
+/**
+ * @file
+ * Theme override to display a single Drupal page while offline.
+ *
+ * All available variables are mirrored in page.html.twig.
+ * Some may be blank but they are provided for consistency.
+ *
+ * @see template_preprocess_maintenance_page()
+ */
+#}
+<div class="w3-content">
+  <main class="w3-container w3-black w3-margin w3-section w3-border w3-card-4 w3-padding-64" role="main">
+    <header class="w3-row-padding w3-dark-grey" role="banner">
+      {% if logo %}
+        <div class="w3-left w3-left-align w3-padding-24">
+          <a href="{{ front_page }}" title="{{ 'Home'|t }}" rel="home">
+            <img src="{{ logo }}" alt="{{ 'Home'|t }}"/>
+          </a>
+        </div>
+      {% endif %}
+      {% if site_name or site_slogan %}
+        <div class="w3-left w3-left-align w3-padding-24">
+          {% if site_name %}
+           <div class="w3-block w3-left-align w3-padding-medium">
+             <a href="{{ front_page }}" title="{{ 'Home'|t }}" rel="home">{{ site_name }}</a>
+           </div>
+          {% endif %}
+          {% if site_slogan %}
+            <div class="w3-block w3-padding-medium">{{ site_slogan }}</div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </header>
+      {% if title %}
+    <div class="w3-block w3-padding-24 w3-grey">
+        <h1 class="w3-padding w3-center w3-text-shadow w3-jumbo w3-opacity w3-hover-opacity-off">{{ title }}</h1>
+    </div>
+       {% endif %}
+      {% if title %}
+    <div class="w3-container w3-padding-24 w3-left-align w3-light-grey">
+       {{ page.highlighted }}
+    </div>
+      {% endif %}
+    {% if title %}
+    <div class="w3-container w3-padding-24 w3-left-align w3-blue-grey">
+       {{ page.content }}
+    </div>
+      {% endif %}
+  </main>
+</div>

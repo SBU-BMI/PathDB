@@ -1,0 +1,37 @@
+# Schema for the views base url field plugins.
+
+views.field.base_url:
+  type: views_field
+  label: 'Base url'
+  mapping:
+    show_link:
+      type: boolean
+      label: 'Display as link'
+    show_link_options:
+      type: mapping
+      label: 'Show link options'
+      mapping:
+        link_path:
+          type: string
+          label: 'Link path'
+        link_text:
+          type: string
+          label: 'Link text'
+        link_class:
+          type: string
+          label: 'Link class'
+        link_title:
+          type: label
+          label: 'Link title'
+        link_rel:
+          type: string
+          label: 'Link rel'
+        link_fragment:
+          type: string
+          label: 'Fragment'
+        link_query:
+          type: string
+          label: 'Link query'
+        link_target:
+          type: string
+          label: 'Link target'

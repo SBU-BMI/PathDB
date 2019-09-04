@@ -1,0 +1,4 @@
+administer ldap:
+  title: 'Administer LDAP settings'
+  description: 'Manage the configuration and behaviour of all LDAP modules.'
+  restrict access: TRUE

@@ -1,0 +1,5 @@
+ldap_authentication.settings:
+  title: 'LDAP Authentication'
+  base_route_name: ldap_authentication.admin_form
+  names:
+    - ldap_authentication.settings

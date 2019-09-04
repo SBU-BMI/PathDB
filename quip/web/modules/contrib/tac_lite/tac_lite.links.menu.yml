@@ -1,0 +1,5 @@
+tac_lite.configuration:
+  title: 'Access by Taxonomy'
+  description: 'Taxonomy-based permissions by tac_lite'
+  parent: user.admin_index
+  route_name: tac_lite.administration

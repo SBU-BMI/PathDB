@@ -1,0 +1,10 @@
+{
+    "name": "drupal/views_base_url",
+    "description": "Global views field that provides site's base url",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/views_base_url",
+    "require": {
+        "drupal/core": "~8"
+    },
+    "license": "GPL-2.0+"
+}

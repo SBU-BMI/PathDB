@@ -9,17 +9,24 @@ if [ -f "$FILE" ]; then
     echo "$FILE exists"
     rm -f $FILE
 fi
+# check to see of PathDB MySQL defaults file exists
+if [ ! -f "/config/pathdbmysql.cnf" ]; then
+	cp /build/pathdbmysql.cnf /config/pathdbmysql.cnf
+fi
 # clear out other stale processes
 rm -rf /run/httpd/* 
+# make sure default drupal settings.php file is there
+if [ ! -f /quip/web/sites/default/settings.php ]; then
+	cp /build/settings.php /quip/web/sites/default
+	echo "\$settings['hash_salt'] = '`uuidgen`';" >> /quip/web/sites/default/settings.php
+fi
 # make sure permissions of pathdb folder are correct
-chown -R apache /quip/web/sites/default
-chgrp -R apache /quip/web/sites/default
+chown -R apache:apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
 # make sure sync folder exists and set permissions
 if [ ! -d /data/pathdb/config/sync ]; then
 	mkdir -p /data/pathdb/config/sync
-	chown -R apache /data/pathdb/config/sync
-	chgrp -R apache /data/pathdb/config/sync
+	chown -R apache:apache /data/pathdb/config/sync
 	chmod -R 770 /data/pathdb/config/sync
 fi
 if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
@@ -29,14 +36,13 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	chown -R mysql mysql
 	rm mysql.tgz
 	# since database is being rebuilt, make sure permissions are okay on files folder
-        chown -R apache /data/pathdb/files
-        chgrp -R apache /data/pathdb/files
+        chown -R apache:apache /data/pathdb/files
         chmod -R 775 /data/pathdb/files
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
         mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
-        /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
+        /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
         sleep 10
         mysql -u root -e "create database QuIP"
         cd /quip/web
@@ -90,8 +96,11 @@ if [ ! -d /data/pathdb/mysql ]; then
 	# create core content
 	curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 else
-        /usr/bin/mysqld_safe --datadir='/data/pathdb/mysql' &
-	sleep 3
+        /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
+	until mysqladmin status
+	do
+        	sleep 3
+	done
         httpd -f /config/httpd.conf
 	cd /quip/web
 	/quip/vendor/bin/drush -y updatedb

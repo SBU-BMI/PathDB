@@ -1,0 +1,39 @@
+ldap_query.ldap_query_entity.*:
+  type: config_entity
+  label: 'LDAP Queries config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    server_id:
+      type: string
+      label: 'Server ID'
+    status:
+      type: boolean
+      label: 'Enabled'
+    base_dn:
+      type: string
+      label: 'Base DNs to search in query'
+    filter:
+      type: string
+      label: 'Filter'
+    attributes:
+      type: string
+      label: 'Attributes to return'
+    size_limit:
+      type: integer
+      label: 'Size limit of returned data'
+    time_limit:
+      type: integer
+      label: 'Time limit for query in seconds'
+    dereference:
+      type: integer
+      label: 'How aliases should be handled'
+    scope:
+      type: integer
+      label: 'Scope of search'

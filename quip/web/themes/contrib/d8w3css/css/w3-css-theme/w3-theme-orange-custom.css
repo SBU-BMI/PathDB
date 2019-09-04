@@ -1,0 +1,7 @@
+/* custom work */
+.w3-button:hover {
+  /* w3-theme-l4 background color */
+  background-color: #ffebcc !important;
+  /* w3-theme-d5 background color */
+  color: #804d00 !important;
+}

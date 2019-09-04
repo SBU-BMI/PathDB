@@ -1,0 +1,10 @@
+entity.ldap_query_entity.add_form:
+  route_name: 'entity.ldap_query_entity.add_form'
+  title: 'Add LDAP Queries'
+  appears_on:
+    - entity.ldap_query_entity.collection
+entity.ldap_query_entity.back_to_collection:
+  route_name: 'entity.ldap_query_entity.collection'
+  title: 'Back to overview'
+  appears_on:
+    - entity.ldap_query_entity.test

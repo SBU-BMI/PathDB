@@ -18,48 +18,16 @@ RUN wget https://getcomposer.org/installer
 RUN php installer
 RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
+COPY pathdbmysql.cnf pathdbmysql.cnf
 
 # create initial Drupal environment
-RUN composer create-project drupal-composer/drupal-project:8.x-dev quip --stability dev --no-interaction
-RUN mv quip /quip
-
-# copy Drupal QuIP module over
-WORKDIR /quip/web/modules
-RUN mkdir quip
+WORKDIR /
 COPY quip/ quip/
-
-WORKDIR /quip/web
-COPY images/ images/
-
-# download and install extra Drupal modules
-WORKDIR /quip
-RUN composer require drupal/restui &&\
-    composer require drupal/search_api &&\
-    composer require drupal/token &&\
-    composer require drupal/typed_data &&\
-    composer require drupal/jwt &&\
-    composer require drupal/d8w3css &&\
-    composer require drupal/hide_revision_field &&\
-    composer require 'drupal/field_group:^3.0' &&\
-    composer require drupal/tac_lite &&\
-    composer require drupal/field_permissions &&\
-    composer require drupal/views_taxonomy_term_name_depth &&\
-    composer require drupal/ds &&\
-    composer require drupal/taxonomy_unique &&\
-    composer require drupal/prepopulate &&\
-    composer require drupal/auto_entitylabel &&\
-    composer require drupal/easy_breadcrumb &&\
-    composer require drupal/csv_serialization &&\
-    composer require drupal/views_data_export &&\
-    composer require drupal/facets &&\
-    composer require drupal/redirect_after_login &&\
-    composer require drupal/views_base_url &&\
-    composer require 'drupal/restrict_by_ip:4.x-dev' &&\
-    composer require drupal/ldap
-
+COPY modules/quip/ /quip/modules/quip/
+COPY images/ /quip/web/images/
+COPY settings.php /build
 # set permissions correctly for apache demon access
-RUN chown -R apache ../quip
-RUN chgrp -R apache ../quip
+RUN chown -R apache:apache /quip
 # adjust location of Drupal-supporting MySQL database files
 RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my.cnf
 # increase php file upload sizes and posts
@@ -69,24 +37,8 @@ RUN sed -i 's/;upload_tmp_dir =/upload_tmp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
-RUN chown -R apache /data/pathdb/files
-RUN chgrp -R apache /data/pathdb/files
+RUN chown -R apache:apache /data/pathdb/files
 RUN chmod -R 775 /data/pathdb/files
-RUN echo "\
-\$config_directories['sync'] = '/data/pathdb/config/sync';\
-\$settings['file_private_path'] = '/data/pathdb/files';\
-\$databases['default']['default'] = array (\
-  'database' => 'QuIP',\
-  'username' => 'root',\
-  'password' => '',\
-  'prefix' => '',\
-  'host' => 'localhost',\
-  'port' => '',\
-  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',\
-  'driver' => 'mysql',\
-);\
-\$settings['hash_salt'] = '`uuidgen`';\
-" >> web/sites/default/settings.php
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
@@ -98,7 +50,6 @@ COPY run.sh /root/run.sh
 COPY mysql.tgz /build
 RUN mkdir /quip/pathdbconfig
 COPY config/* /quip/pathdbconfig/
-RUN mkdir /quip/content
 COPY content/* /quip/content/
 RUN mkdir /quip/web/sup
 COPY sup/* /quip/web/sup/

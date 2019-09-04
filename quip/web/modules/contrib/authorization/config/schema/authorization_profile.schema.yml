@@ -1,0 +1,57 @@
+authorization.authorization_profile.*:
+  type: config_entity
+  label: 'Authorization profile config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    provider:
+      type: string
+      label: 'Provider Plugin ID'
+    provider_config:
+      type: authorization.provider.plugin.[%parent.provider]
+      label: 'Provider configuration'
+    provider_mappings:
+      type: sequence
+      label: 'Provider mappings'
+      sequence:
+        type: authorization.provider_mappings.plugin.[%parent.%parent.provider]
+        label: Provider map
+    consumer:
+      type: string
+      label: 'Consumer Plugin ID'
+    consumer_config:
+      type: authorization.consumer.plugin.[%parent.consumer]
+      label: 'Consumer configuration'
+    consumer_mappings:
+      type: sequence
+      label: 'Consumer mappings'
+      sequence:
+        type: authorization.consumer_mappings.plugin.[%parent.%parent.consumer]
+        label: 'Consumer map'
+    status:
+      type: boolean
+      label: 'Enabled'
+    # TODO: Restructure as booleans.
+    synchronization_modes:
+      type: sequence
+      label: 'When should roles be granted/revoked from user?'
+      sequence:
+        user_logon:
+        type: string
+        label: 'When a user logs in via the configured provider.'
+    synchronization_actions:
+      type: mapping
+      label: 'What actions would you like performed when roles are granted/revoked from user?'
+      mapping:
+        create_consumers:
+          type: string
+          label: 'Create consumers'
+        revoke_provider_provisioned:
+          type: string
+          label: 'Revoke action'

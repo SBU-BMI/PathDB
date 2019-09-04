@@ -1,0 +1,120 @@
+ldap_user.settings:
+  type: config_object
+  mapping:
+    drupalAcctProvisionServer:
+      label: 'LDAP server providing provisioning data'
+      type: string
+    ldapEntryProvisionServer:
+      label: 'LDAP server to provision LDAP entries on'
+      type: string
+    drupalAcctProvisionTriggers:
+      label: 'drupalAcctProvisionTriggers'
+      type: sequence
+      sequence:
+        type: string
+    ldapEntryProvisionTriggers:
+      label: 'ldapEntryProvisionTriggers'
+      type: sequence
+      sequence:
+        type: string
+    orphanedDrupalAcctBehavior:
+      label: 'orphanedDrupalAcctBehavior'
+      type: string
+    orphanedCheckQty:
+      label: 'orphanedCheckQty'
+      type: integer
+    orphanedAccountCheckInterval:
+      label: 'Orphaned account checking interval'
+      type: string
+    userConflictResolve:
+      label: 'userConflictResolve'
+      type: string
+    manualAccountConflict:
+      label: 'manualAccountConflict'
+      type: string
+    acctCreation:
+      label: 'Application of Drupal account settings to LDAP authenticated users'
+      type: string
+    disableAdminPasswordField:
+      label: 'Disable the password field and auto-generate the password.'
+      type: boolean
+    userUpdateCronQuery:
+      label: 'The LDAP query to use for fetching and updating users periodically.'
+      type: string
+    userUpdateCronInterval:
+      label: 'The interval to use for fetching and updating users periodically.'
+      type: string
+    ldapUserSyncMappings:
+      type: config_object
+      label: 'Configured sync mappings'
+      mapping:
+        drupal:
+          label: 'To Drupal sync mappings'
+          type: sequence
+          sequence:
+            type: mapping
+            mapping:
+              ldap_attr:
+                type: string
+                label: 'Ldap attribute'
+              user_attr:
+                type: string
+                label: 'User attribute'
+              convert:
+                type: boolean
+                label: 'Convert from binary'
+              direction:
+                type: string
+                label: 'Provisioning direction'
+              user_tokens:
+                type: string
+                label: 'User entered tokens'
+              config_module:
+                type: string
+                label: 'Module configuring mapping'
+              prov_module:
+                type: string
+                label: 'Module provisioning mapping'
+              enabled:
+                type: boolean
+                label: 'Enabled'
+              prov_events:
+                type: sequence
+                label: 'Configured provisioning events'
+                sequence:
+                  type: string
+        ldap:
+          label: 'To LDAP sync mappings'
+          type: sequence
+          sequence:
+            type: mapping
+            mapping:
+              ldap_attr:
+                type: string
+                label: 'Ldap attribute'
+              user_attr:
+                type: string
+                label: 'User attribute'
+              convert:
+                type: boolean
+                label: 'Convert from binary'
+              direction:
+                type: string
+                label: 'Provisioning direction'
+              user_tokens:
+                type: string
+                label: 'User entered tokens'
+              config_module:
+                type: string
+                label: 'Module configuring mapping'
+              prov_module:
+                type: string
+                label: 'Module provisioning mapping'
+              enabled:
+                type: boolean
+                label: 'Enabled'
+              prov_events:
+                type: sequence
+                label: 'Configured provisioning events'
+                sequence:
+                  type: string

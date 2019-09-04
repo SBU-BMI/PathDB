@@ -1,0 +1,386 @@
+.w3-highway-brown {
+  color: #fff!important;
+  background-color: #633517!important;
+}
+.w3-highway-red {
+  color: #fff!important;
+  background-color: #a6001a!important;
+}
+.w3-highway-orange {
+  color: #fff!important;
+  background-color: #e06000!important;
+}
+.w3-highway-schoolbus {
+  color: #fff!important;
+  background-color: #ee9600!important;
+}
+.w3-highway-yellow {
+  color: #fff!important;
+  background-color: #ffab00!important;
+}
+.w3-highway-green {
+  color: #fff!important;
+  background-color: #004d33!important;
+}
+.w3-highway-blue {
+  color: #fff!important;
+  background-color: #00477e!important;
+}
+.w3-safety-red {
+  color: #fff!important;
+  background-color: #bd1e24!important;
+}
+.w3-safety-orange {
+  color: #fff!important;
+  background-color: #e97600!important;
+}
+.w3-safety-yellow {
+  color: #fff!important;
+  background-color: #f6c700!important;
+}
+.w3-safety-green {
+  color: #fff!important;
+  background-color: #007256!important;
+}
+.w3-safety-blue {
+  color: #fff!important;
+  background-color: #0067a7!important;
+}
+.w3-safety-purple {
+  color: #fff!important;
+  background-color: #964f8e!important;
+}
+.w3-camo-brown {
+  color: #fff!important;
+  background-color: #594d45!important;
+}
+.w3-camo-red {
+  color: #fff!important;
+  background-color: #79533d!important;
+}
+.w3-camo-olive {
+  color: #fff!important;
+  background-color: #595142!important;
+}
+.w3-camo-field {
+  color: #fff!important;
+  background-color: #745d46!important;
+}
+.w3-camo-earth {
+  color: #fff!important;
+  background-color: #ac7e54!important;
+}
+.w3-camo-sand {
+  color: #fff!important;
+  background-color: #a9947b!important;
+}
+.w3-camo-tan {
+  color: #fff!important;
+  background-color: #b49d80!important;
+}
+.w3-camo-sandstone {
+  color: #fff!important;
+  background-color: #bcab90!important;
+}
+.w3-camo-dark-green {
+  color: #fff!important;
+  background-color: #535640!important;
+}
+.w3-camo-forest {
+  color: #fff!important;
+  background-color: #54504b!important;
+}
+.w3-camo-light-green {
+  color: #fff!important;
+  background-color: #63613e!important;
+}
+.w3-camo-green {
+  color: #fff!important;
+  background-color: #4a5444!important;
+}
+.w3-camo-dark-gray,
+.w3-camo-dark-grey {
+  color: #fff!important;
+  background-color: #5c5c5b!important;
+}
+.w3-camo-gray,
+.w3-camo-grey {
+  color: #fff!important;
+  background-color: #9495a5!important;
+}
+.w3-camo-black {
+  color: #fff!important;
+  background-color: #373538!important;
+}
+.w3-vivid-pink {
+  color: #fff!important;
+  background-color: #ffb5ba!important;
+}
+.w3-vivid-red {
+  color: #fff!important;
+  background-color: #be0032!important;
+}
+.w3-vivid-orange {
+  color: #fff!important;
+  background-color: #f38400!important;
+}
+.w3-vivid-yellow {
+  color: #fff!important;
+  background-color: #f3c300!important;
+}
+.w3-vivid-green {
+  color: #fff!important;
+  background-color: #008856!important;
+}
+.w3-vivid-blue {
+  color: #fff!important;
+  background-color: #00a1c2!important;
+}
+.w3-vivid-black {
+  color: #fff!important;
+  background-color: #000!important;
+}
+.w3-vivid-white {
+  color: #000!important;
+  background-color: #fff!important;
+}
+.w3-vivid-purple {
+  color: #fff!important;
+  background-color: #9a4eae!important;
+}
+.w3-vivid-purple {
+  color: #fff!important;
+  background-color: #9a4eae!important;
+}
+.w3-vivid-yellowish-pink {
+  color: #fff!important;
+  background-color: #ffb7a5!important;
+}
+.w3-vivid-reddish-orange {
+  color: #fff!important;
+  background-color: #e25822!important;
+}
+.w3-vivid-orange-yellow {
+  color: #fff!important;
+  background-color: #f6a600!important;
+}
+.w3-vivid-greenish-yellow {
+  color: #fff!important;
+  background-color: #dcd300!important;
+}
+.w3-vivid-yellow-green {
+  color: #fff!important;
+  background-color: #8db600!important;
+}
+.w3-vivid-yellowish-green {
+  color: #fff!important;
+  background-color: #27a64c!important;
+}
+.w3-vivid-bluish-green {
+  color: #fff!important;
+  background-color: #008882!important;
+}
+.w3-vivid-greenish-blue {
+  color: #fff!important;
+  background-color: #0085a1!important;
+}
+.w3-vivid-purplish-blue {
+  color: #fff!important;
+  background-color: #30267a!important;
+}
+.w3-vivid-reddish-purple {
+  color: #fff!important;
+  background-color: #870074!important;
+}
+.w3-vivid-purplish-red {
+  color: #fff!important;
+  background-color: #ce4676!important;
+}
+.w3-signal-yellow {
+  color: #fff!important;
+  background-color: #f7ba0b!important;
+}
+.w3-signal-orange {
+  color: #fff!important;
+  background-color: #d4652f!important;
+}
+.w3-signal-red {
+  color: #fff!important;
+  background-color: #a02128!important;
+}
+.w3-signal-violet {
+  color: #fff!important;
+  background-color: #904684!important;
+}
+.w3-signal-blue {
+  color: #fff!important;
+  background-color: #154889!important;
+}
+.w3-signal-green {
+  color: #fff!important;
+  background-color: #317f43!important;
+}
+.w3-signal-grey {
+  color: #fff!important;
+  background-color: #9b9b9b!important;
+}
+.w3-signal-brown {
+  color: #fff!important;
+  background-color: #7b5141!important;
+}
+.w3-signal-white {
+  color: #000!important;
+  background-color: #f4f4f4!important;
+}
+.w3-signal-black {
+  color: #fff!important;
+  background-color: #282828!important;
+}
+.w3-food-apple {
+  color: #000!important;
+  background-color: #76cd26!important;
+}
+.w3-food-aspargus {
+  color: #fff!important;
+  background-color: #77ab56!important;
+}
+.w3-food-apricot {
+  color: #fff!important;
+  background-color: #ffb16d!important;
+}
+.w3-food-aubergine {
+  color: #fff!important;
+  background-color: #3d0734!important;
+}
+.w3-food-avocado {
+  color: #fff!important;
+  background-color: #87a922!important;
+}
+.w3-food-banana {
+  color: #000!important;
+  background-color: #fafe4b!important;
+}
+.w3-food-butter {
+  color: #000!important;
+  background-color: #ffff81!important;
+}
+.w3-food-blueberry {
+  color: #fff!important;
+  background-color: #464196!important;
+}
+.w3-food-cherry {
+  color: #fff!important;
+  background-color: #cf0234!important;
+}
+.w3-food-chocolate {
+  color: #fff!important;
+  background-color: #411900!important;
+}
+.w3-food-cranberry {
+  color: #fff!important;
+  background-color: #9e003a!important;
+}
+.w3-food-coffee {
+  color: #fff!important;
+  background-color: #a6814c!important;
+}
+.w3-food-egg {
+  color: #000!important;
+  background-color: #fffcc4!important;
+}
+.w3-food-grape {
+  color: #fff!important;
+  background-color: #6c3461!important;
+}
+.w3-food-kiwi {
+  color: #000!important;
+  background-color: #8ee53f!important;
+}
+.w3-food-lemon {
+  color: #000!important;
+  background-color: #fdff52!important;
+}
+.w3-food-lime {
+  color: #000!important;
+  background-color: #bffe28!important;
+}
+.w3-food-mango {
+  color: #fff!important;
+  background-color: #ffa62b!important;
+}
+.w3-food-mushroom {
+  color: #fff!important;
+  background-color: #ba9e88!important;
+}
+.w3-food-mustard {
+  color: #fff!important;
+  background-color: #ceb301!important;
+}
+.w3-food-mint {
+  color: #000!important;
+  background-color: #c0fa8b!important;
+}
+.w3-food-olive {
+  color: #fff!important;
+  background-color: #6e750e!important;
+}
+.w3-food-orange {
+  color: #fff!important;
+  background-color: #f97306!important;
+}
+.w3-food-pea {
+  color: #fff!important;
+  background-color: #a4bf20!important;
+}
+.w3-food-peach {
+  color: #fff!important;
+  background-color: #ffb07c!important;
+}
+.w3-food-pear {
+  color: #000!important;
+  background-color: #cbf85f!important;
+}
+.w3-food-pistachio {
+  color: #000!important;
+  background-color: #c0fa8b!important;
+}
+.w3-food-plum {
+  color: #fff!important;
+  background-color: #3f012c!important;
+}
+.w3-food-raspberry {
+  color: #fff!important;
+  background-color: #b00149!important;
+}
+.w3-food-saffron {
+  color: #fff!important;
+  background-color: #feb209!important;
+}
+.w3-food-salmon {
+  color: #fff!important;
+  background-color: #ff796c!important;
+}
+.w3-food-spearmint {
+  color: #000!important;
+  background-color: #1ef876!important;
+}
+.w3-food-squash {
+  color: #fff!important;
+  background-color: #f2ab15!important;
+}
+.w3-food-strawberry {
+  color: #fff!important;
+  background-color: #fb2943!important;
+}
+.w3-food-tomato {
+  color: #fff!important;
+  background-color: #ec2d01!important;
+}
+.w3-food-wheat {
+  color: #000!important;
+  background-color: #fbdd7e!important;
+}
+.w3-food-wine {
+  color: #fff!important;
+  background-color: #80013f!important;
+}

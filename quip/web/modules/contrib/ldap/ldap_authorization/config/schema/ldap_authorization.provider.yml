@@ -1,0 +1,21 @@
+authorization.provider.plugin.ldap_provider:
+  type: mapping
+  label: 'LDAP Authorization settings'
+  mapping:
+    status:
+      type: mapping
+      label: 'LDAP values group'
+      mapping:
+        server:
+          type: string
+          label: 'Machine name for the server to use'
+        only_ldap_authenticated:
+          label: 'Only apply the role configuration to users authenticated via LDAP'
+          type: boolean
+    filter_and_mappings:
+      type: mapping
+      label: 'LDAP filters group'
+      mapping:
+        use_first_attr_as_groupid:
+          type: boolean
+          label: 'Convert full DN to value of first attribute before mapping'

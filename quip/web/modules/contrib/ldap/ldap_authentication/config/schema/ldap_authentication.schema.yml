@@ -1,0 +1,52 @@
+ldap_authentication.settings:
+  type: config_object
+  mapping:
+    sids:
+     type: sequence
+     sequence:
+       type: string
+    authenticationMode:
+      type: integer
+      label: 'Authentication mode'
+    loginUIUsernameTxt:
+      type: text
+      label: 'Username Description Text'
+    loginUIPasswordTxt:
+      type: text
+      label: 'Password Description Text'
+    ldapUserHelpLinkUrl:
+      type: text
+      label: 'LDAP Account User Help URL'
+    ldapUserHelpLinkText:
+      type: text
+      label: 'LDAP Account User Help Link Text'
+    emailOption:
+      type: integer
+    emailUpdate:
+      type: integer
+    emailTemplateHandling:
+      type: string
+    emailTemplate:
+      type: string
+    emailTemplateUsageResolveConflict:
+      type: boolean
+    emailTemplateUsageNeverUpdate:
+      type: boolean
+    emailTemplateUsagePromptUser:
+      type: boolean
+    emailTemplateUsageRedirectOnLogin:
+      type: boolean
+    emailTemplateUsagePromptRegex:
+      type: string
+    passwordOption:
+      type: integer
+    allowOnlyIfTextInDn:
+      type: sequence
+      sequence:
+        type: string
+    excludeIfTextInDn:
+      type: sequence
+      sequence:
+        type: string
+    excludeIfNoAuthorizations:
+      type: integer

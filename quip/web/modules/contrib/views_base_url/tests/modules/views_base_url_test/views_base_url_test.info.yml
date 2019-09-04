@@ -1,0 +1,13 @@
+name: 'Views base url test'
+description: 'Test cases for views base url module'
+# core: 8.x
+type: module
+dependencies:
+  - drupal:views_base_url
+hidden: true
+
+# Information added by Drupal.org packaging script on 2017-09-21
+version: '8.x-1.0'
+core: '8.x'
+project: 'views_base_url'
+datestamp: 1505975351

@@ -1,0 +1,7 @@
+# LDAP Queries menu items definition
+entity.ldap_query_entity.collection:
+  title: 'LDAP Queries'
+  route_name: entity.ldap_query_entity.collection
+  description: 'List LDAP Queries (bundles)'
+  parent: user.admin_index
+  weight: 99

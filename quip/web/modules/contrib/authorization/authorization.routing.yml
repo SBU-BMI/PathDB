@@ -1,0 +1,49 @@
+
+# AuthorizationProfile routing definition
+entity.authorization_profile.collection:
+  path: '/admin/config/people/authorization/profile'
+  defaults:
+    _entity_list: 'authorization_profile'
+    _title: 'Authorization profile'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+entity.authorization_profile.add_form:
+  path: '/admin/config/people/authorization/profile/add'
+  defaults:
+    _entity_form: 'authorization_profile.add'
+    _title: 'Add Authorization profile'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+entity.authorization_profile.edit_form:
+  path: '/admin/config/people/authorization/profile/{authorization_profile}'
+  defaults:
+    _entity_form: 'authorization_profile.edit'
+    _title: 'Edit Authorization profile'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+entity.authorization_profile.delete_form:
+  path: '/admin/config/people/authorization/profile/{authorization_profile}/delete'
+  defaults:
+    _entity_form: 'authorization_profile.delete'
+    _title: 'Delete Authorization profile'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+entity.authorization_profile.configuration_form:
+  path: '/admin/config/people/authorization/profile/settings'
+  defaults:
+    _form: '\Drupal\authorization\Form\AuthorizationSettingsForm'
+    _title: 'Authorization settings'
+  requirements:
+    _permission: 'administer site configuration'
