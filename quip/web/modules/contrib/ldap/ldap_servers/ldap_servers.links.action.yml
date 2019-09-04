@@ -1,0 +1,7 @@
+# All action links for this module
+
+entity.ldap_server.add_form:
+  route_name: 'entity.ldap_server.add_form'
+  title: 'Add Server'
+  appears_on:
+    - entity.ldap_server.collection

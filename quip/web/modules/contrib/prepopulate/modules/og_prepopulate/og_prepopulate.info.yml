@@ -1,0 +1,13 @@
+type: module
+name: Organic Groups Prepopulate
+description: Allows prepopulation of og reference fields.
+# core: 8.x
+dependencies:
+  - prepopulate:prepopulate
+  - og:og
+
+# Information added by Drupal.org packaging script on 2019-03-06
+version: '8.x-2.2'
+core: '8.x'
+project: 'prepopulate'
+datestamp: 1551903187

@@ -1,0 +1,25 @@
+# Default features.
+features:
+  comment_user_picture: true
+  comment_user_verification: true
+  favicon: true
+  logo: true
+  name: true
+  node_user_picture: true
+  slogan: true
+facebook_url: 'https://www.facebook.com/flashwebcenter'
+twitter_url: 'https://twitter.com/flashwebcenter'
+pinterest_url: 'https://www.pinterest.com/alaahaddad'
+google_plus_url: 'https://plus.google.com/+Flashwebcenter'
+linkedin_url: 'http://www.linkedin.com/company/flash-web-center'
+instagram_url: 'https://www.instagram.com/flashwebcenter'
+youtube_url: 'https://www.youtube.com/user/flashwebcenter'
+drupal_url: 'https://www.drupal.org/u/flashwebcenter'
+rss_url: 'rss.xml'
+copyright_text: 'Copyright 2018 - All Rights Reserved'
+show_social_icon: 1
+show_credit_link: 1
+top_region: 1
+main_region: 1
+bottom_region: 1
+footer_region: 1

@@ -1,0 +1,11 @@
+name: Views Taxonomy Term Name Depth
+type: module
+description: The module provides the Views plugin for Contextual filter with Taxonomy Term Name Depth.
+# core: 8.x
+package: Views
+
+# Information added by Drupal.org packaging script on 2018-01-23
+version: '8.x-3.3'
+core: '8.x'
+project: 'views_taxonomy_term_name_depth'
+datestamp: 1516708987

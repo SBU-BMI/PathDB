@@ -1,0 +1,302 @@
+/**
+ * @file
+ * Custom w3 css classes.
+ */
+/* Global Classes */
+.w3-animate-opacity {
+  animation: opac 3s;
+}
+.w3-card {
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0,0,0,0.12);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0,0,0,0.12);
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.12);
+}
+.w3-padding-0 {
+  padding: 0!important;
+}
+.w3-margin-0 {
+  margin: 0!important;
+}
+.w3-box-shadow-0 {
+  box-shadow: none!important;
+}
+.w3-border-0 {
+  border: none!important;
+}
+.w3-round-0 {
+  border-radius: 0!important;
+}
+/* Link Text Color Classes */
+.w3-link-red a {
+  color: #f44336!important;
+}
+.w3-link-green a {
+  color: #4caf50!important;
+}
+.w3-link-blue a {
+  color: #2196f3!important;
+}
+.w3-link-yellow a {
+  color: #ffeb3b!important;
+}
+.w3-link-white a {
+  color: #fff!important;
+}
+.w3-link-black a {
+  color: #000!important;
+}
+.w3-link-grey a,
+.w3-link-gray a {
+  color: #757575!important;
+}
+.w3-link-amber a {
+  color: #ffc107!important;
+}
+.w3-link-aqua a {
+  color: #00ffff!important;
+}
+.w3-link-light-blue a {
+  color: #87ceeb!important;
+}
+.w3-link-brown a {
+  color: #795548!important;
+}
+.w3-link-cyan a {
+  color: #00bcd4!important;
+}
+.w3-link-blue-grey a,
+.w3-link-blue-gray a {
+  color: #607d8b!important;
+}
+.w3-link-light-green a {
+  color: #8bc34a!important;
+}
+.w3-link-indigo a {
+  color: #3f51b5!important;
+}
+.w3-link-khaki a {
+  color: #b4aa50!important;
+}
+.w3-link-lime a {
+  color: #cddc39!important;
+}
+.w3-link-orange a {
+  color: #ff9800!important;
+}
+.w3-link-deep-orange a {
+  color: #ff5722!important;
+}
+.w3-link-pink a {
+  color: #e91e63!important;
+}
+.w3-link-purple a {
+  color: #9c27b0!important;
+}
+.w3-link-deep-purple a {
+  color: #673ab7!important;
+}
+.w3-link-sand a {
+  color: #fdf5e6!important;
+}
+.w3-link-teal a {
+  color: #009688!important;
+}
+.w3-link-light-gray a,
+.w3-link-light-grey a {
+  color: #f1f1f1!important;
+}
+.w3-link-dark-gray a,
+.w3-link-dark-grey a {
+  color: #3a3a3a!important;
+}
+/* Link Background Color Classes Hover */
+.w3-link-bg-red a {
+  background-color: #f44336!important;
+}
+.w3-link-bg-green a {
+  background-color: #4caf50!important;
+}
+.w3-link-bg-blue a {
+  background-color: #2196f3!important;
+}
+.w3-link-bg-yellow a {
+  background-color: #ffeb3b!important;
+}
+.w3-link-bg-white a {
+  background-color: #fff!important;
+}
+.w3-link-bg-black a {
+  background-color: #000!important;
+}
+.w3-link-bg-grey a,
+.w3-link-bg-gray a {
+  background-color: #757575!important;
+}
+.w3-link-bg-amber a {
+  background-color: #ffc107!important;
+}
+.w3-link-bg-aqua a {
+  background-color: #00ffff!important;
+}
+.w3-link-bg-light-blue a {
+  background-color: #87ceeb!important;
+}
+.w3-link-bg-brown a {
+  background-color: #795548!important;
+}
+.w3-link-bg-cyan a {
+  background-color: #00bcd4!important;
+}
+.w3-link-bg-blue-grey a,
+.w3-link-bg-blue-gray a {
+  background-color: #607d8b!important;
+}
+.w3-link-bg-light-green a {
+  background-color: #8bc34a!important;
+}
+.w3-link-bg-indigo a {
+  background-color: #3f51b5!important;
+}
+.w3-link-bg-khaki a {
+  background-color: #b4aa50!important;
+}
+.w3-link-bg-lime a {
+  background-color: #cddc39!important;
+}
+.w3-link-bg-orange a {
+  background-color: #ff9800!important;
+}
+.w3-link-bg-deep-orange a {
+  background-color: #ff5722!important;
+}
+.w3-link-bg-pink a {
+  background-color: #e91e63!important;
+}
+.w3-link-bg-purple a {
+  background-color: #9c27b0!important;
+}
+.w3-link-bg-deep-purple a {
+  background-color: #673ab7!important;
+}
+.w3-link-bg-sand a {
+  background-color: #fdf5e6!important;
+}
+.w3-link-bg-teal a {
+  background-color: #009688!important;
+}
+.w3-link-bg-light-gray a,
+.w3-link-bg-light-grey a {
+  background-color: #f1f1f1!important;
+}
+.w3-link-bg-dark-gray a,
+.w3-link-bg-dark-grey a {
+  background-color: #3a3a3a!important;
+}
+/* Link Color Classes Hover */
+.w3-link-red-hover a:hover {
+  color: #fff!important;
+  background-color: #f44336!important;
+}
+.w3-link-green-hover a:hover {
+  color: #fff!important;
+  background-color: #4caf50!important;
+}
+.w3-link-blue-hover a:hover {
+  color: #fff!important;
+  background-color: #2196f3!important;
+}
+.w3-link-yellow-hover a:hover {
+  color: #000!important;
+  background-color: #ffeb3b!important;
+}
+.w3-link-white-hover a:hover {
+  color: #000!important;
+  background-color: #fff!important;
+}
+.w3-link-black-hover a:hover {
+  color: #fff!important;
+  background-color: #000!important;
+}
+.w3-link-grey-hover a:hover,
+.w3-link-gray-hover a:hover {
+  background-color: #757575!important;
+}
+.w3-link-amber-hover a:hover {
+  color: #000!important;
+  background-color: #ffc107!important;
+}
+.w3-link-aqua-hover a:hover {
+  color: #000!important;
+  background-color: #00ffff!important;
+}
+.w3-link-light-blue-hover a:hover {
+  color: #000!important;
+  background-color: #87ceeb!important;
+}
+.w3-link-brown-hover a:hover {
+  color: #fff!important;
+  background-color: #795548!important;
+}
+.w3-link-cyan-hover a:hover {
+  color: #000!important;
+  background-color: #00bcd4!important;
+}
+.w3-link-blue-grey-hover a:hover,
+.w3-link-blue-gray-hover a:hover {
+  color: #fff!important;
+  background-color: #607d8b!important;
+}
+.w3-link-light-green-hover a:hover {
+  color: #000!important;
+  background-color: #8bc34a!important;
+}
+.w3-link-indigo-hover a:hover {
+  color: #fff!important;
+  background-color: #3f51b5!important;
+}
+.w3-link-khaki-hover a:hover {
+  color: #000!important;
+  background-color: #b4aa50!important;
+}
+.w3-link-lime-hover a:hover {
+  color: #000!important;
+  background-color: #cddc39!important;
+}
+.w3-link-orange-hover a:hover {
+  color: #000!important;
+  background-color: #ff9800!important;
+}
+.w3-link-deep-orange-hover a:hover {
+  color: #fff!important;
+  background-color: #ff5722!important;
+}
+.w3-link-pink-hover a:hover {
+  color: #fff!important;
+  background-color: #e91e63!important;
+}
+.w3-link-purple-hover a:hover {
+  color: #fff!important;
+  background-color: #9c27b0!important;
+}
+.w3-link-deep-purple-hover a:hover {
+  color: #fff!important;
+  background-color: #673ab7!important;
+}
+.w3-link-sand-hover a:hover {
+  color: #000!important;
+  background-color: #fdf5e6!important;
+}
+.w3-link-teal-hover a:hover {
+  color: #fff!important;
+  background-color: #009688!important;
+}
+.w3-link-light-gray-hover a:hover,
+.w3-link-light-grey-hover a:hover {
+  color: #000!important;
+  background-color: #f1f1f1!important;
+}
+.w3-link-dark-gray-hover a:hover,
+.w3-link-dark-grey-hover a:hover {
+  color: #fff!important;
+  background-color: #3a3a3a!important;
+}

@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Module file for ldap_query.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ldap_query_help($route_name, RouteMatchInterface $route_match) {
+
+  $help = '<h3>' . t('LDAP Query Module') . '</h3><p>' .
+    t('This module does nothing in and of itself.  It should only be
+    enabled and configured if another module requires it.') . '</p>';
+
+  switch ($route_name) {
+    case 'ldap_query.admin_form':
+      $output = '<p>' . $help . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function ldap_query_entity_operation(EntityInterface $entity) {
+  $operations = [];
+  if (\Drupal::currentUser()->hasPermission('administer ldap')) {
+    if ($entity->getEntityType()->id() == 'ldap_query_entity') {
+      $operations['query_test'] = [
+        'title' => t('Test'),
+        'weight' => 10,
+        'url' => $entity->toUrl('test'),
+      ];
+    }
+  }
+  return $operations;
+}

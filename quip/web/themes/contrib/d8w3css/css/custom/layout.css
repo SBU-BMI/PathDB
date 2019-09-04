@@ -1,0 +1,91 @@
+/* The default website size. */
+.header-inner,
+.main-navigation-inner-h,
+.welcome-text-inner,
+.highlighted-inner,
+.top-container-inner,
+.page-title-inner,
+.main-container-inner,
+.bottom-container-inner,
+.footer-container-inner,
+.footer-menu-inner,
+.copyright-inner {
+  max-width: 1600px;
+  margin: 0 auto!important;
+}
+.top-container-inner .first-top,
+.top-container-inner .second-top,
+.top-container-inner .third-top,
+.main-container-inner .first-sidebar,
+.main-container-inner .w3css-content,
+.main-container-inner .second-sidebar,
+.bottom-container-inner .first-bottom,
+.bottom-container-inner .second-bottom,
+.bottom-container-inner .third-bottom,
+.bottom-container-inner .forth-bottom,
+.footer-container-inner .first-footer,
+.footer-container-inner .second-footer,
+.footer-container-inner .third-footer {
+  float: left;
+}
+.top-container-inner .first-top > div,
+.top-container-inner .second-top > div,
+.top-container-inner .third-top > div,
+.main-container-inner .first-sidebar > div,
+.main-container-inner .w3css-content > div,
+.main-container-inner .second-sidebar > div,
+.bottom-container-inner .first-bottom > div,
+.bottom-container-inner .second-bottom > div,
+.bottom-container-inner .third-bottom > div,
+.bottom-container-inner .forth-bottom > div,
+.footer-container-inner .first-footer > div,
+.footer-container-inner .second-footer > div,
+.footer-container-inner .third-footer > div {
+  float: left;
+  height: 100%;
+  width: 100%!important;
+  padding: 12px!important;
+}
+.top-container-inner .first-top,
+.top-container-inner .second-top,
+.top-container-inner .third-top,
+.bottom-container-inner .first-bottom,
+.bottom-container-inner .second-bottom,
+.bottom-container-inner .third-bottom,
+.bottom-container-inner .forth-bottom,
+.footer-container-inner .first-footer,
+.footer-container-inner .second-footer,
+.footer-container-inner .third-footer {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+.main-container-inner .first-sidebar,
+.main-container-inner .w3css-content,
+.main-container-inner .second-sidebar {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+.w3-width-100-percent {
+  max-width: 100%!important;
+}
+.w3-width-2560 {
+  max-width: 2560px!important;
+}
+.w3-width-1920 {
+  max-width: 1920px!important;
+}
+.w3-width-1600 {
+  max-width: 1600px!important;
+}
+.w3-width-1360 {
+  max-width: 1360px!important;
+}
+.w3-width-1280 {
+  max-width: 1280px!important;
+}
+.w3-width-1024 {
+  max-width: 1024px!important;
+}
+.w3-width-800 {
+  max-width: 800px!important;
+}

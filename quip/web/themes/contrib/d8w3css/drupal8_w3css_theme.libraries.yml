@@ -1,0 +1,187 @@
+w3-css:
+  remote: https://www.w3schools.com/w3css/
+  version: 4
+  license:
+    name: MIT
+    url: https://www.w3schools.com/w3css/w3css_downloads.asp
+    gpl-compatible: true
+  css:
+    theme:
+      https://www.w3schools.com/w3css/4/w3.css: { type: external, minified: true }
+      css/w3-css/w3css-color-libraries.css: {}
+font-awesome:
+  remote: https://fortawesome.github.io/Font-Awesome/
+  version: 4.7.0
+  license:
+    name: MIT
+    url: https://fortawesome.github.io/Font-Awesome/license/
+    gpl-compatible: true
+  css:
+    theme:
+      https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css: { type: external, minified: true }
+global-components:
+  Version: VERSION
+  css:
+    theme:
+      'https://fonts.googleapis.com/css?family=Montserrat': { type: external, minified: true }
+      css/custom/base.css: {}
+      css/custom/w3-custom-classes.css: {}
+      css/custom/layout.css: {}
+      css/custom/components.css: {}
+      css/custom/theme.css: {}
+      css/custom/responsive.css: {}
+  js:
+    js/jquery.matchHeight.js: {}
+    js/custom.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal.ajax
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once
+w3-css-theme-custom:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-custom.css: {}
+w3-css-theme-amber:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-amber.css: {}
+      css/w3-css-theme/w3-theme-amber-custom.css: {}
+w3-css-theme-black:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-black.css: {}
+w3-css-theme-blue:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-blue.css: {}
+      css/w3-css-theme/w3-theme-blue-custom.css: {}
+w3-css-theme-blue-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-blue-grey.css: {}
+      css/w3-css-theme/w3-theme-blue-grey-custom.css: {}
+w3-css-theme-brown:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-brown.css: {}
+      css/w3-css-theme/w3-theme-brown-custom.css: {}
+w3-css-theme-cyan:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-cyan.css: {}
+      css/w3-css-theme/w3-theme-cyan-custom.css: {}
+w3-css-theme-dark-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-dark-grey.css: {}
+w3-css-theme-deep-orange:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-deep-orange.css: {}
+      css/w3-css-theme/w3-theme-deep-orange-custom.css: {}
+w3-css-theme-deep-purple:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-deep-purple.css: {}
+      css/w3-css-theme/w3-theme-deep-purple-custom.css: {}
+w3-css-theme-green:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-green.css: {}
+      css/w3-css-theme/w3-theme-green-custom.css: {}
+w3-css-theme-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-grey.css: {}
+w3-css-theme-indigo:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-indigo.css: {}
+      css/w3-css-theme/w3-theme-indigo-custom.css: {}
+w3-css-theme-blue:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-blue.css: {}
+      css/w3-css-theme/w3-theme-blue-csutom.css: {}
+w3-css-theme-khaki:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-khaki.css: {}
+      css/w3-css-theme/w3-theme-khaki-custom.css: {}
+w3-css-theme-light-blue:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-light-blue.css: {}
+      css/w3-css-theme/w3-theme-light-blue-csutom.css: {}
+w3-css-theme-light-green:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-light-green.css: {}
+      css/w3-css-theme/w3-theme-light-green-custom.css: {}
+w3-css-theme-lime:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-lime.css: {}
+      css/w3-css-theme/w3-theme-lime-custom.css: {}
+w3-css-theme-orange:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-orange.css: {}
+      css/w3-css-theme/w3-theme-orange-custom.css: {}
+w3-css-theme-blue:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-blue.css: {}
+      css/w3-css-theme/w3-theme-blue-custom.css: {}
+w3-css-theme-pink:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-pink.css: {}
+      css/w3-css-theme/w3-theme-pink-custom.css: {}
+w3-css-theme-purple:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-purple.css: {}
+      css/w3-css-theme/w3-theme-purple-custom.css: {}
+w3-css-theme-red:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-red.css: {}
+      css/w3-css-theme/w3-theme-red-custom.css: {}
+w3-css-theme-teal:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-teal.css: {}
+      css/w3-css-theme/w3-theme-teal-custom.css: {}
+w3-css-theme-yellow:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-yellow.css: {}
+      css/w3-css-theme/w3-theme-yellow-custom.css: {}

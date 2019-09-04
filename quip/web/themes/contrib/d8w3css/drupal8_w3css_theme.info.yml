@@ -1,0 +1,41 @@
+name: Drupal 8 W3CSS Theme
+type: theme
+description: 'W3.CSS is a modern CSS framework with built-in responsiveness. It is Smaller, faster, easier to learn and easier to use than other CSS frameworks. Supports modern responsive design (mobile first) by default and provides CSS equality for all browsers (Chrome, Firefox, IE, Safari, and more) and devices (PC, laptop, tablet, and mobile.)<br/> Developed & Designed by <strong><a href=http://www.FlashWebCenter.com>Flash Web Center, LLC</a></strong><br/> For theme <a href=https://www.drupal.org/node/2866181>documnetation</a><br/> To view a <a href=http://www.drupal8-w3css-theme.flashwebcenter.com>live demo</a><br/> To view the <a href=http://www.drupal8-w3css-theme.flashwebcenter.com/screenshots>22 color themes</a><br/>For theme issues please <a href=https://www.drupal.org/project/issues/d8w3css>create issue on drupal</a><br/>Contact us for Drupal Design & Development via our <a href=http://www.flashwebcenter.com/contact>contact form</a>'
+package: core
+# core: 8.x
+#Libraries
+libraries:
+  - drupal8_w3css_theme/w3-css
+  - drupal8_w3css_theme/font-awesome
+  - drupal8_w3css_theme/global-components
+#Regions
+regions:
+  header: 'Header'
+  primary_menu_vertical: 'Primary Menu Vertical'
+  primary_menu: 'Primary Menu'
+  welcome_text: 'Welcome Text'
+  top_first: 'Top First Container'
+  top_second: 'Top Second Container'
+  top_third: 'Top Third Container'
+  highlighted: 'Highlighted'
+  page_title: 'Page Title'
+  breadcrumb: 'Breadcrumb'
+  content: 'Content'
+  sidebar_first: 'Left Sidebar'
+  sidebar_second: 'Right Sidebar'
+  bottom_first: 'Bottom First Container'
+  bottom_second: 'Bottom Second Container'
+  bottom_third: 'Bottom Third Container'
+  bottom_forth: 'Bottom Forth Container'
+  footer_first: 'Footer First Container'
+  footer_second: 'Footer Second Container'
+  footer_third: 'Footer Third Container'
+  footer_menu: 'Footer Menu Container'
+  auto_hidden_block: 'Auto Hidden Blocks'
+# core: '8.x'
+
+# Information added by Drupal.org packaging script on 2019-03-06
+version: '8.x-1.15'
+core: '8.x'
+project: 'd8w3css'
+datestamp: 1551854886

@@ -1,0 +1,8 @@
+global-components:
+  version: VERSION
+  css:
+    theme:
+      css/styles.css: {}
+
+  js:
+    js/script.js: {}

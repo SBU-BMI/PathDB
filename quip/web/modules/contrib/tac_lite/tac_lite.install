@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Installation functions for Tac Lite module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tac_lite_install() {
+  module_set_weight('tac_lite', 100);
+}

@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * LDAP Help Install File.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function ldap_help_uninstall() {
+  \Drupal::service('config.factory')->getEditable('ldap_help')->delete();
+}
+
+/**
+ * Corrects a configuration field type.
+ */
+function ldap_help_update_8301() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_help.settings');
+  $data = $config->get('watchdog_detail');
+  if ($data) {
+    $config->set('watchdog_detail', TRUE);
+  } {
+  $config->set('watchdog_detail', FALSE);
+  }
+  $config->save(TRUE);
+}

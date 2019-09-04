@@ -1,0 +1,5 @@
+ldap_help.debug_settings:
+  route_name: ldap_help.debug_settings
+  title: 'Debugging'
+  weight: 90
+  base_route: entity.ldap_server.collection

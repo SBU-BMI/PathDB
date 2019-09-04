@@ -1,0 +1,352 @@
+{#
+/**
+ * @file
+ * Theme override to display a single page.
+ *
+ * The doctype, html, head and body tags are not in this template. Instead they
+ * can be found in the html.html.twig template in this directory.
+ *
+ * Available variables:
+ *
+ * General utility variables:
+ * - base_path: The base URL path of the Drupal installation. Will usually be
+ *   "/" unless you have installed Drupal in a sub-directory.
+ * - is_front: A flag indicating if the current page is the front page.
+ * - logged_in: A flag indicating if the user is registered and signed in.
+ * - is_admin: A flag indicating if the user has permission to access
+ *   administration pages.
+ *
+ * Site identity:
+ * - front_page: The URL of the front page. Use this instead of base_path when
+ *   linking to the front page. This includes the language domain or prefix.
+ *
+ * Page content (in order of occurrence in the default page.html.twig):
+ * - node: Fully loaded node, if there is an automatically-loaded node
+ *   associated with the page and the node ID is the second argument in the
+ *   page's path (e.g. node/12345 and node/12345/revisions, but not
+ *   comment/reply/12345).
+ *
+ * Regions:
+ * - page.primary_menu_vertical: Items for the Side Navigation region.
+ * - page.header: Items for the header region.
+ * - page.primary_menu: Items for the Navigation region.
+ * - page.welcome_text: Items for welcome message.
+ * - page.top_first: Items for top first region.
+ * - page.top_second: Items for top second region.
+ * - page.top_third: Items for top third region.
+ * - page.highlighted: Items for the highlighted region.
+ * - page.page_title: Used by Current page Title.
+ * - page.breadcrumb: Item for the Breadcrumb region.
+ * - page.content: The main content of the current page.
+ * - page.sidebar_first: Items for the first sidebar.
+ * - page.sidebar_second: Items for the second sidebar.
+ * - page.bottom_first: Items for the bottom first region.
+ * - page.bottom_second: Items for the bottom Second region.
+ * - page.bottom_third: Items for the bottom third region.
+ * - page.bottom_forth: Items for the bottom forth region.
+ * - page.footer_first: Items for the footer first region.
+ * - page.footer_second: Items for the footer Second region.
+ * - page.footer_third: Items for the footer third region.
+ * - page.footer_menu: Items for the footer bottom region.
+ * - page.auto_hidden_block: Hide items in this region.
+ *
+ * @see template_preprocess_page()
+ * @see html.html.twig
+ */
+#}
+  {% if page.primary_menu_vertical %}
+  <!-- Start: Main Navigation - Vertical -->
+  <div id="main-navigation-v" class="main-navigation-wrapper w3-sidebar w3-bar-block w3-animate-left w3-card w3-theme {{ color_primary_menu }}" role="navigation" aria-label="{{ 'Main Navigation'|t }}" >
+    <div id="main-navigation-inner-v" class="main-navigation-inner-v">
+      <i id="close-nav" class="close-nav fa fa-bars w3-button w3-bar-block w3-xlarge w3-theme {{ color_primary_menu }}"></i>
+        {{ page.primary_menu_vertical }}
+    </div>
+  </div>
+  <!-- End: Main Navigation - Vertical -->
+{% endif %}
+<!-- Start: Page Wrapper -->
+<div class="page-wrapper w3-col w3-clear w3-animate-opacity w3-text-theme {{ color_page_wrapper }} ">
+  <!-- Start: Header -->
+  <header id="header" class="w3-col w3-clear w3-theme-l4 {{ color_header }}" role="banner" aria-label="{{ 'Site header'|t }}">
+    <div id="header-inner" class="d8-fade w3-container header-inner {{ website_width }}">
+      {% if page.primary_menu_vertical %}
+        <div id="open-nav-inner" class="open-nav-inner w3-opacity w3-hover-opacity-off w3-left fa fa-bars w3-button w3-left-align w3-xxlarge w3-theme {{ color_primary_menu }}"></div>
+      {% endif %}
+      {% if page.header %}
+        {{ page.header }}
+      {% endif %}
+    </div>
+  </header>
+  <!-- End: Header -->
+  {% if page.primary_menu %}
+  <!-- Start: Main Navigation - Horizontal -->
+  <div id="main-navigation-h" class="w3-col w3-clear main-navigation-wrapper w3-card w3-theme {{ color_primary_menu }}" role="navigation" aria-label="{{ 'Main Navigation'|t }}" >
+    <div id="main-navigation-inner-h" class="d8-fade w3-row main-navigation-inner-h {{ website_width }}">
+        <i class="mobile-nav fa fa-bars w3-hide-large w3-button w3-block w3-right-align w3-xxlarge w3-theme {{ color_primary_menu }}"></i>
+        {{ page.primary_menu }}
+    </div>
+  </div>
+  <!-- End: Main Navigation - Horizontal -->
+  {% endif %}
+  {% if is_front and page.welcome_text %}
+    <!-- Start: Welcome Text -->
+    <div id="welcome-text" class="w3-col w3-clear w3-theme-l5 {{ color_welcome_text }}">
+      <div id="welcome-text-inner" class="d8-fade w3-row welcome-text-inner {{ website_width }}">
+        {{ page.welcome_text }}
+      </div>
+    </div>
+    <!-- End: Welcome Text -->
+  {% endif %}
+  {% if page.highlighted %}
+    <!-- Start: Highlighted -->
+    <div id="highlighted" class="w3-col w3-clear w3-theme-l2 {{ color_highlighted}}">
+      <div id="highlighted-inner" class="d8-fade w3-row highlighted-inner {{ website_width }}">
+        {{ page.highlighted }}
+      </div>
+    </div>
+    <!-- End: Highlighted -->
+  {% endif %}
+  {% if is_front %}
+    {% if page.top_first or page.top_second or page.top_third %}
+      <!-- Start: Top Container -->
+      <div id="top-container" class="w3-col w3-clear w3-theme-l4 {{ color_top_container }}">
+        <div id="top-container-inner" class="w3-row-padding w3-padding-large top-container-inner {{ website_width }}">
+          {% if page.top_first %}
+            <!-- Start: Top container first region -->
+            <div class="{{ top_w3css }} {{ top_region ? 'top-region' }} first-top" >
+              <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l5 {{ color_top_first}}">
+               {{ page.top_first }}
+              </div>
+            </div>
+            <!-- End: Top Container First -->
+          {% endif %}
+          {% if page.top_second %}
+            <!-- Start: Top Container Second  -->
+            <div class="{{ top_w3css }} {{ top_region ? 'top-region' }} second-top">
+              <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l5 {{ color_top_second }}">
+               {{ page.top_second }}
+              </div>
+            </div>
+            <!-- End: Top Container Second -->
+          {% endif %}
+          {% if page.top_third %}
+          <!-- Start: Top Container Third -->
+          <div class="{{ top_w3css }} {{ top_region ? 'top-region' }} third-top">
+            <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l5 {{ color_top_third }}">
+              {{ page.top_third }}
+            </div>
+          </div>
+          <!-- End: Top Container Third -->
+          {% endif %}
+        </div>
+      </div>
+      <!-- End: Top container -->
+    {% endif %}
+  {% endif %}
+  {% if page.page_title and not is_front %}
+    <!-- Start: Page Title -->
+    <div id="page-title" class="w3-col w3-clear w3-theme-d5 {{ color_page_title }}">
+      <div id="page-title-inner" class="d8-fade w3-row page-title-inner {{ website_width }}">
+        {{ page.page_title }}
+      </div>
+    </div>
+    <!-- End: Page Title -- >
+  {% endif %}
+  <!-- Start: Main -->
+  <div id="main-container" class="w3-col w3-clear w3-theme-l5 {{ color_main }}">
+    <div id="main-container-inner" class="w3-container main-container-inner {{ website_width }}">
+      {% if page.breadcrumb %}
+        <!-- Breadcrumb -->
+        <div class="{{ color_breadcrumb }}">
+          {{ page.breadcrumb }}
+        </div>
+        <!-- End: Breadcrumb -->
+      {% endif %}
+      <!-- Start Main Container  -->
+      <div class="w3-col w3-clear w3-row-padding">
+        {% if page.sidebar_first %}
+          <!-- Start Left SideBar -->
+          <div class ="{{ sidebarfirst }} {{ main_region ? 'main-region' }} first-sidebar">
+            <div class="d8-fade w3-card w3-round w3-sidebar-first w3-mobile {{ color_sidebar_first }}">
+              {{ page.sidebar_first }}
+            </div>
+          </div>
+          <!-- End: Left SideBar -->
+        {% endif %}
+        {% if page.content %}
+          <!-- Start: Main Content -->
+          <div class="{{ content_w3css }} {{ main_region ? 'main-region' }} w3css-content">
+            <div class="d8-fade w3-card w3-round w3-mobile  {{ color_content }}">
+              {{ page.content }}
+            </div>
+          </div>
+          <!-- End: Main Content -->
+        {% endif %}
+        {% if page.sidebar_second %}
+          <!-- Start: Right SideBar -->
+          <div class="{{ sidebarsecond }} {{ main_region ? 'main-region' }} second-sidebar">
+            <div class="d8-fade w3-card w3-round w3-sidebar-second w3-mobile {{ color_sidebar_second }}">
+              {{ page.sidebar_second }}
+            </div>
+          </div>
+          <!-- End: Right SideBar -->
+        {% endif %}
+      </div>
+      <!-- Endn: Main Container  -->
+    </div>
+  </div>
+  <!-- End: Main -->
+  {% if is_front %}
+    {% if page.bottom_first or page.bottom_second or page.bottom_third or page.bottom_forth %}
+      <!-- Start: Bottom -->
+      <div id="bottom-container" class="w3-col w3-clear w3-theme-l2 {{ color_bottom_container }}">
+        <div id="bottom-container-inner" class="w3-row-padding w3-padding-large bottom-container-inner {{ website_width }}">
+            {% if page.bottom_first %}
+              <!-- Start: Bottom First -->
+              <div class="{{ bottom_w3css }} {{ bottom_region ? 'bottom-region' }} first-bottom">
+                <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l4 {{ color_bottom_first }}">
+                  {{ page.bottom_first }}
+                </div>
+              </div>
+              <!-- End: Bottom First -->
+            {% endif %}
+            {% if page.bottom_second %}
+              <!-- Start: Bottom Second -->
+              <div class="{{ bottom_w3css }} {{ bottom_region ? 'bottom-region' }} second-bottom">
+                <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l4 {{ color_bottom_second }}">
+                  {{ page.bottom_second }}
+                </div>
+              </div>
+              <!-- End: Bottom Second -->
+            {% endif %}
+            {% if page.bottom_third %}
+              <!-- Start: Bottom Third  -->
+              <div class="{{ bottom_w3css }} {{ bottom_region ? 'bottom-region' }} third-bottom">
+                <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l4 {{ color_bottom_third }}">
+                  {{ page.bottom_third }}
+                </div>
+              </div>
+              <!-- End: Bottom Third -->
+            {% endif %}
+            {% if page.bottom_forth %}
+              <!-- Start: Bottom Forth  -->
+              <div class ="{{ bottom_w3css }} {{ bottom_region ? 'bottom-region' }} forth-bottom">
+                <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l4 {{ color_bottom_forth }}">
+                  {{ page.bottom_forth }}
+                </div>
+              </div>
+              <!-- End: Bottom Forth -->
+            {% endif %}
+        </div>
+      </div>
+      <!-- End: Bottom -->
+    {% endif %}
+  {% endif %}
+  {% if page.footer_first or page.footer_second or page.footer_third %}
+    <!-- start: Footer -->
+    <div id="footer-container" class="w3-col w3-clear w3-theme-d3 {{ color_footer_container }}">
+      <div id="footer-container-inner" class="w3-row-padding w3-padding-large footer-container-inner {{ website_width }}">
+
+        {% if page.footer_first %}
+          <!-- Start: Footer First  -->
+          <div class="{{ footer_w3css }} {{ footer_region ? 'footer-region' }} first-footer">
+            <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l4 {{ color_footer_first }}">
+              {{ page.footer_first }}
+            </div>
+          </div>
+          <!-- End: Footer First -->
+        {% endif %}
+        {% if page.footer_second %}
+          <!-- Start: Footer Second Region -->
+          <div class="{{ footer_w3css }} {{ footer_region ? 'footer-region' }} second-footer">
+            <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l5 {{ color_footer_second }}">
+              {{ page.footer_second }}
+            </div>
+          </div>
+        <!-- End: Footer Second -->
+        {% endif %}
+        {% if page.footer_third %}
+          <!-- Start: Footer Third -->
+          <div class="{{ footer_w3css }} {{ footer_region ? 'footer-region' }} third-footer">
+            <div class="d8-fade w3-card w3-round w3-mobile w3-theme-l4 {{ color_footer_third }}">
+              {{ page.footer_third }}
+            </div>
+          </div>
+          <!-- End: Footer Third -->
+        {% endif %}
+      </div>
+    </div>
+    <!-- End: Footer -->
+  {% endif %}
+  {% if page.footer_menu or show_social_icon %}
+    <!-- Start: Footer Menu -->
+    <div id="footer-menu" class="w3-col w3-clear w3-card w3-theme-d4 {{ color_footer_menu }}">
+      <div id="footer-menu-inner" class="w3-row footer-menu-inner {{ website_width }}">
+        {% if show_social_icon %}
+          <!-- Start: Social Media -->
+          <div class="d8-fade w3-center w3-container w3-mobile social-media">
+            {% if facebook_url %}
+              <a href="{{ facebook_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-blue w3-show-inline-block w3-xxlarge w3-padding" target="_blank" ><i class="fa fa-facebook"></i></a>
+            {% endif %}
+            {% if twitter_url %}
+              <a href="{{ twitter_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-blue w3-show-inline-block w3-xxlarge w3-padding" target="_blank" ><i class="fa fa-twitter"></i></a>
+            {% endif %}
+            {% if pinterest_url %}
+              <a href="{{ pinterest_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-red w3-show-inline-block w3-xxlarge w3-padding" target="_blank"><i class="fa fa-pinterest"></i></a>
+            {% endif %}
+            {% if google_plus_url %}
+              <a href="{{ google_plus_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-red w3-show-inline-block w3-xxlarge w3-padding" target="_blank" ><i class="fa fa-google-plus"></i></a>
+            {% endif %}
+            {% if linkedin_url %}
+              <a href="{{ linkedin_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-blue w3-show-inline-block w3-xxlarge w3-padding" target="_blank"><i class="fa fa-linkedin"></i></a>
+            {% endif %}
+            {% if instagram_url %}
+              <a href="{{ instagram_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-red w3-show-inline-block w3-xxlarge w3-padding" target="_blank"><i class="fa fa-instagram"></i></a>
+            {% endif %}
+            {% if youtube_url %}
+              <a href="{{ youtube_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-red w3-show-inline-block w3-xxlarge w3-padding" target="_blank"><i class="fa fa-youtube"></i></a>
+            {% endif %}
+            {% if drupal_url %}
+              <a href="{{ drupal_url }}" class="w3-opacity w3-hover-opacity-off w3-hover-text-blue w3-show-inline-block w3-xxlarge w3-padding-large" target="_blank" ><i class="fa fa-drupal"></i></a>
+            {% endif %}
+            {% if rss_url %}
+              <a href="{{ rss_url }}" class="w3-opacity w3-hover-opacity w3-hover-text-red w3-show-inline-block w3-xxlarge w3-padding-large" target="_blank" ><i class="fa fa-rss"></i></a>
+            {% endif %}
+          </div>
+          <!-- End: Social Media -->
+        {% endif %}
+        <!-- Start: Bottom Menu -->
+        {% if page.footer_menu %}
+          <div class="d8-fade w3-container w3-center w3-mobile">
+            {{ page.footer_menu }}
+          </div>
+          <!-- End: Bottom Menu -->
+        {% endif %}
+      </div>
+    </div>
+    <!-- End: Footer Menu -->
+  {% endif %}
+  {% if copyright_text or show_credit_link %}
+    <!-- Start: Copyright -->
+    <div id="copyright" class="w3-col w3-clear w3-theme-d5 {{ color_copyright }}">
+      <div id="copyright-inner" class="w3-row copyright-inner {{ website_width }}">
+        {% if copyright_text %}
+          <!-- Start: Copyright -->
+          <div class="w3-half w3-container w3-mobile">
+            <p class="w3-section w3-left-align w3-opacity w3-hover-opacity-off">{{copyright_text}}</p>
+          </div>
+          <!-- End: Copyright -->
+        {% endif %}
+        {% if show_credit_link %}
+          <!-- Start: Credit Link -->
+          <div class="w3-half w3-container w3-mobile">
+            <p class="w3-section w3-right-align w3-opacity w3-hover-opacity-off">Designed by: <a href="http://www.flashwebcenter.com" title="Flash Web Center LLC" target="_blank">Flash Web Center LLC</a></p>
+          </div>
+          <!-- End: Credit Link -->
+        {% endif %}
+      </div>
+    </div>
+    <!-- End: Copyright -->
+  {% endif %}
+</div>
+<!-- End: Page Wrapper -->

@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Manage hiding revision log field on revisionable entity edit/create forms.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add the personalizable settings to an individual user's account page.
+ */
+function hide_revision_field_form_user_form_alter(&$form, FormStateInterface $form_state) {
+  // Ensure user has necessary permission.
+  if (!\Drupal::currentUser()->hasPermission('administer revision field personalization')) {
+    return;
+  }
+  /** @var \Drupal\user\UserInterface $user */
+  $user = $form_state->getFormObject()->getEntity();
+  if (!$user->hasPermission('administer revision field personalization')) {
+    return;
+  }
+  $settings = unserialize($user->get('revision_log_settings')->value);
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  /** @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface $bundle_manager */
+  $bundle_manager = \Drupal::service('entity_type.bundle.info');
+  $config = [];
+  foreach ($entity_type_manager->getDefinitions() as $entity_type) {
+    // Check that entity has revision_log_message field.
+    $keys = $entity_type->get('revision_metadata_keys');
+    if (!isset($keys['revision_log_message'])) {
+      continue;
+    }
+    $type_id = $entity_type->id();
+    $entity = [];
+    foreach ($bundle_manager->getBundleInfo($type_id) as $bundle_id => $bundle) {
+      /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
+      $form_display = $entity_type_manager->getStorage('entity_form_display')
+        ->load("{$type_id}.{$bundle_id}.default");
+      $log = $form_display->getComponent($keys['revision_log_message']);
+      if (!empty($log['settings']['allow_user_settings'])) {
+
+        $entity[$bundle_id] = [
+          '#type' => 'checkbox',
+          '#title' => t('Show Revision Log Field on "%bundle" forms', [
+            '%bundle' => $bundle['label'],
+          ]),
+          '#default_value' => isset($settings[$type_id][$bundle_id]) ? $settings[$type_id][$bundle_id] : $log['settings']['show'],
+        ];
+      }
+    }
+    if ($entity) {
+      $config[$type_id] = [
+        '#title' => $entity_type->getLabel(),
+        '#type' => 'details',
+        '#open' => TRUE,
+      ];
+      $config[$type_id] += $entity;
+    }
+  }
+  if ($config) {
+    $form['hide_revision_field'] = [
+      '#type' => 'details',
+      '#title' => t('Revision Field Settings'),
+      '#tree' => TRUE,
+      '#open' => FALSE,
+      '#weight' => 10,
+    ];
+    $form['hide_revision_field'] += $config;
+  }
+
+  $form['revision_log_settings'] = [
+    '#type' => 'hidden',
+    '#value' => $user->get('revision_log_settings')->value,
+  ];
+  $form['actions']['submit']['#validate'][] = 'hide_revision_field_user_profile_form_submit';
+  $form['actions']['submit']['#validate'][] = '::validateForm';
+}
+
+/**
+ * Submit callback for the user profile form to save the settings.
+ */
+function hide_revision_field_user_profile_form_submit($form, FormStateInterface $form_state) {
+  $form_state->setValue('revision_log_settings', serialize($form_state->getValue('hide_revision_field')));
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * Sets the revision field to use our custom formatter and to be configurable.
+ */
+function hide_revision_field_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  $revision_fields = $entity_type->get('revision_metadata_keys');
+  if (isset($revision_fields['revision_log_message'])) {
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field */
+    $field = &$fields[$revision_fields['revision_log_message']];
+    $field->setDisplayConfigurable('form', TRUE)
+      ->setDisplayOptions('form', [
+        'type' => 'hide_revision_field_log_widget',
+        'weight' => 80,
+      ]);
+  }
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function hide_revision_field_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ($entity_type->id() === 'user') {
+    $fields['revision_log_settings'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Revision Log Settings'))
+      ->setDescription(t('User customization for revision log settings.'));
+  }
+  return $fields;
+}

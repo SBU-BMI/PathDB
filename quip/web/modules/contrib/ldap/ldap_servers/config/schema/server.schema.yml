@@ -1,0 +1,117 @@
+ldap_servers.server.*:
+  type: config_entity
+  label: 'Server config'
+  mapping:
+    id:
+      type: string
+      label: 'Machine name for this server configuration'
+    label:
+      type: label
+      label: 'Name'
+    uuid:
+      type: string
+    status:
+      type: boolean
+      label: 'Enabled'
+    type:
+      type: string
+      label: 'LDAP Server type'
+    address:
+      type: string
+      label: 'LDAP Server address'
+    port:
+      type: integer
+      label: 'LDAP Server port'
+    timeout:
+      type: integer
+      label: 'Network timeout'
+    tls:
+      type: boolean
+      label: 'Use Start-TLS'
+    followrefs:
+      type: boolean
+      label: 'Follow LDAP Referrals'
+    weight:
+      type: integer
+      label: 'Weight'
+    bind_method:
+      type: string
+      label: 'Binding Method for Searches (such as finding user object or their group memberships)'
+    binddn:
+      type: string
+      label: 'DN for non-anonymous search'
+    bindpw:
+      type: string
+      label: 'Password for non-anonymous search'
+    basedn:
+      type: string
+      label: 'Base DNs for LDAP users, groups, and other entries.'
+    user_attr:
+      type: string
+      label: 'AuthName attribute'
+    account_name_attr:
+      type: string
+      label: 'AccountName attribute'
+    mail_attr:
+      type: string
+      label: 'Email attribute'
+    mail_template:
+      type: string
+      label: 'Email template'
+    picture_attr:
+      type: string
+      label: 'Thumbnail attribute'
+    unique_persistent_attr:
+      type: string
+      label: 'Persistent and Unique User ID Attribute'
+    unique_persistent_attr_binary:
+      type: boolean
+      label: 'Does PUID hold a binary value?'
+    user_dn_expression:
+      type: string
+      label: 'Expression for user DN. Required when "Bind with Users Credentials" method selected.'
+    testing_drupal_username:
+      type: string
+      label: 'Testing Drupal Username'
+    testing_drupal_user_dn:
+      type: string
+      label: 'DN of testing username, e.g. cn=hpotter,ou=people,dc=hogwarts,dc=edu'
+    grp_unused:
+      type: boolean
+      label: 'Groups are not relevant to this Drupal site.  This is generally true if LDAP Groups and LDAP Authorization are not in use.'
+    grp_object_cat:
+      type: string
+      label: 'Name of Group Object Class'
+    grp_nested:
+      type: boolean
+      label: 'Nested groups are used in my LDAP'
+    grp_user_memb_attr_exists:
+      type: boolean
+      label: 'Attribute in User Entry Containing Groups'
+    grp_user_memb_attr:
+      type: string
+      label: 'Attribute in User Entry Containing Groups'
+    grp_memb_attr:
+      type: string
+      label: "LDAP Group Entry Attribute Holding User's DN, CN, etc."
+    grp_memb_attr_match_user_attr:
+      type: string
+      label: 'User attribute held in "LDAP Group Entry Attribute Holding..."'
+    grp_derive_from_dn:
+      type: string
+      label: "Groups are derived from user's LDAP entry DN."
+    grp_derive_from_dn_attr:
+      type: string
+      label: "Attribute of the User's LDAP Entry DN which contains the group"
+    grp_test_grp_dn:
+      type: string
+      label: 'Testing LDAP Group DN'
+    grp_test_grp_dn_writeable:
+      type: string
+      label: 'Testing LDAP Group DN that is writable.  WARNING the test script for the server will create, delete, and add members to this group!'
+    search_pagination:
+      type: boolean
+      label: 'Use LDAP Pagination.'
+    search_page_size:
+      type: integer
+      label: 'Pagination size limit.'

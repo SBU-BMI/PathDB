@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Drupal help information for ldap_help.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ldap_help_help($route_name, RouteMatchInterface $route_match) {
+
+  $help = '<h3>' . t('LDAP Help Module') . '</h3>';
+  $help .= '<p>' . t('This module assists Drupal admins in configuring, debugging, sharing, and submitting support and bug request related to LDAP modules.');
+  $help .= '<strong><em> ' . t('LDAP Help Module should be disabled unless you are debugging or configuring LDAP problems.') . ' </em></strong>';
+  $help .= t('It adds no functionality to the LDAP modules.') . '</p>';
+
+  switch ($route_name) {
+    case 'admin/config/people/ldap/help':
+    case 'admin/help#ldap_help':
+      return '<p>' . $help . '</p>';
+  }
+}

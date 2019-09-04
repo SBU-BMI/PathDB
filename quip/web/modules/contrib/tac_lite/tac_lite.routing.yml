@@ -1,0 +1,18 @@
+tac_lite.administration:
+  path: '/admin/config/people/tac_lite'
+  defaults:
+    _form: '\Drupal\tac_lite\Form\ConfigForm'
+    _title: 'Access by Taxonomy'
+  requirements:
+    _permission: 'administer tac_lite'
+
+tac_lite.user_access:
+  path: '/user/{user}/tac_lite'
+  defaults:
+    _form: '\Drupal\tac_lite\Form\UserAccessForm'
+    _title: 'Access by Taxonomy'
+  requirements:
+    _permission: 'administer tac_lite'
+
+route_callbacks:
+  - '\Drupal\tac_lite\Routing\TacLiteSchemes::routes'

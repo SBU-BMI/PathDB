@@ -1,0 +1,281 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the LDAP User module.
+ */
+
+use Drupal\Core\Url;
+use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Utility\UpdateException;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
+
+/**
+ * Implements hook_module_preinstall().
+ */
+function ldap_user_module_preinstall($module) {
+  if ($module == 'ldap_user') {
+    $type = \Drupal::entityTypeManager()->getDefinition('user');
+    $fields = ldap_user_entity_base_field_info($type);
+    foreach ($fields as $name => $data) {
+      \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($name, 'user', 'ldap_user', $data);
+    }
+  }
+}
+
+/**
+ * Convert ldap_user_identities table to authmap.
+ */
+function ldap_user_update_8301(&$sandbox) {
+  // Check for externalauth module (which has been a dependency for ages).
+  if (!\Drupal::moduleHandler()->moduleExists('externalauth')) {
+    $external_link = Url::fromUri('https://drupal.org/project/externalauth');
+    $message = t('Please install the 8301 %external_link module.', ['%external_link' => \Drupal::l('External Auth', $external_link)]);
+    drupal_set_message($message, "error");
+    throw new UpdateException($message);
+  }
+
+  if (empty($sandbox)) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_id'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT aid) FROM {ldap_user_identities}')->fetchField();
+  }
+  $limit = 25;
+
+  $result = db_select('ldap_user_identities')
+    ->fields('ldap_user_identities', ['aid', 'uid', 'identifier'])
+    ->condition('aid', $sandbox['current_id'], '>')
+    ->orderBy('aid')
+    ->range(0, $limit)
+    ->execute();
+
+  // Iterate over the old table and create entries in the new table.
+  foreach ($result as $identity) {
+    // Load the user as the service expects an account.
+    $account = user_load($identity->uid);
+    $authmap = \Drupal::service('externalauth.authmap');
+    $authmap->save($account, 'ldap_user', $identity->identifier);
+
+    // Delete the row if successful.
+    db_query("DELETE FROM {ldap_user_identities} WHERE aid = :aid", [':aid' => $identity->aid]);
+
+    $sandbox['results'][] = $identity->aid . ' : ' . SafeMarkup::checkPlain($identity->identifier);
+    $sandbox['progress']++;
+    $sandbox['current_id'] = $identity->aid;
+    $sandbox['message'] = SafeMarkup::checkPlain($identity->identifier);
+  }
+  if ($sandbox['progress'] != $sandbox['max']) {
+    $sandbox['#finished'] = $sandbox['progress'] / $sandbox['max'];
+  }
+}
+
+/**
+ * Drop ldap_user_identities table.
+ */
+function ldap_user_update_8302(&$sandbox) {
+  // Check for externalauth module (which has been a dependency for ages).
+  if (!\Drupal::moduleHandler()->moduleExists('externalauth')) {
+    $external_link = Url::fromUri('https://drupal.org/project/externalauth');
+    $message = t('Please install the 8301 %external_link module.', ['%external_link' => \Drupal::l('External Auth', $external_link)]);
+    drupal_set_message($message, "error");
+    throw new UpdateException($message);
+  }
+  // Drop the table if it exists.
+  try {
+    db_query("DROP TABLE {ldap_user_identities}");
+  }
+  catch (Exception $e) {
+    drupal_set_message(t("Couldn't drop the table 'ldap_user_identities'. Maybe it's been dropped already?"), "warning");
+  }
+}
+
+/**
+ * Updates the ldapUserSyncMappings name.
+ */
+function ldap_user_update_8303() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_user.settings');
+  $existing_value = $config->get('ldap_user_conf.ldapUserSynchMappings');
+  if ($existing_value) {
+    $config->set('ldap_user_conf.ldapUserSyncMappings', $existing_value);
+    $config->clear('ldap_user_conf.ldapUserSynchMappings');
+    $config->save(TRUE);
+  }
+}
+
+/**
+ * Removes the ldap_user_conf prefix.
+ */
+function ldap_user_update_8304() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_user.settings');
+  $data = $config->get('ldap_user_conf');
+  if ($data) {
+    $config->clear('ldap_user_conf');
+    $config->setData($data);
+    $config->save(TRUE);
+  }
+}
+
+/**
+ * Converts unreadable integers to strings for LDAP direction.
+ */
+function ldap_user_update_8305() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_user.settings');
+  $mappings = $config->get('ldapUserSyncMappings');
+  foreach ($mappings as $direction => $fields) {
+    foreach ($fields as $key => $field) {
+      if (isset($field['direction'])) {
+        if ($field['direction'] == 1 || $field['direction'] == '1') {
+          $mappings[$direction][$key]['direction'] = LdapUserAttributesInterface::PROVISION_TO_DRUPAL;
+        }
+        else {
+          $mappings[$direction][$key]['direction'] = LdapUserAttributesInterface::PROVISION_TO_LDAP;
+        }
+      }
+    }
+  }
+
+  $keyedMappings[LdapUserAttributesInterface::PROVISION_TO_DRUPAL] = $mappings[1];
+  $keyedMappings[LdapUserAttributesInterface::PROVISION_TO_LDAP] = $mappings[2];
+  $config->set('ldapUserSyncMappings', $keyedMappings);
+  $config->save();
+}
+
+/**
+ * Converts unreadable integers to strings for LDAP provision triggers.
+ */
+function ldap_user_update_8306() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_user.settings');
+  $existingDrupalTriggers = $config->get('drupalAcctProvisionTriggers');
+  $newDrupalTriggers = [];
+  foreach ($existingDrupalTriggers as $index => $trigger) {
+    switch ($index) {
+      case 1:
+        $newDrupalTriggers[LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_UPDATE_CREATE] = $trigger ?
+          LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_UPDATE_CREATE : '0';
+        break;
+
+      case 2:
+        $newDrupalTriggers[LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_AUTHENTICATION] = $trigger ?
+          LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_AUTHENTICATION : '0';
+        break;
+
+      case 3:
+        $newDrupalTriggers[LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_ON_MANUAL_CREATION] = $trigger ?
+          LdapUserAttributesInterface::PROVISION_DRUPAL_USER_ON_USER_ON_MANUAL_CREATION : '0';
+        break;
+    }
+  }
+  $config->set('drupalAcctProvisionTriggers', $newDrupalTriggers);
+
+  $existingLdapTriggers = $config->get('ldapEntryProvisionTriggers');
+  $newLdapTriggers = [];
+  foreach ($existingLdapTriggers as $index => $trigger) {
+    switch ($index) {
+      case 6:
+        $newLdapTriggers[LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE] = $trigger ?
+          LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE : '0';
+        break;
+
+      case 7:
+        $newLdapTriggers[LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION] = $trigger ?
+          LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION : '0';
+        break;
+
+      case 8:
+        $newLdapTriggers[LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE] = $trigger ?
+          LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE : '0';
+        break;
+    }
+  }
+  $config->set('ldapEntryProvisionTriggers', $newLdapTriggers);
+
+  $config->save();
+}
+
+/**
+ * Converts unreadable integers to strings for LDAP provision triggers.
+ */
+function ldap_user_update_8307() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_user.settings');
+  switch ($config->get('acctCreation')) {
+    case 1:
+      $value = LdapUserAttributesInterface::ACCOUNT_CREATION_USER_SETTINGS_FOR_LDAP;
+      break;
+
+    default:
+    case 4:
+      $value = LdapUserAttributesInterface::ACCOUNT_CREATION_LDAP_BEHAVIOUR;
+      break;
+  }
+  $config->set('acctCreation', $value);
+
+  switch ($config->get('userConflictResolve')) {
+    case 1:
+      $value = LdapUserAttributesInterface::USER_CONFLICT_LOG;
+      break;
+
+    default:
+    case 2:
+      $value = LdapUserAttributesInterface::USER_CONFLICT_ATTEMPT_RESOLVE;
+      break;
+  }
+  $config->set('userConflictResolve', $value);
+
+  switch ($config->get('manualAccountConflict')) {
+    case 1:
+      $value = LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_REJECT;
+      break;
+
+    case 2:
+      $value = LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_LDAP_ASSOCIATE;
+      break;
+
+    case 3:
+      $value = LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_SHOW_OPTION_ON_FORM;
+      break;
+
+    default:
+    case 4:
+      $value = LdapUserAttributesInterface::MANUAL_ACCOUNT_CONFLICT_NO_LDAP_ASSOCIATE;
+      break;
+  }
+  $config->set('manualAccountConflict', $value);
+
+  $syncMappings = $config->get('ldapUserSyncMappings');
+  foreach ($syncMappings as $direction => $data) {
+    foreach ($data as $key => $mapping) {
+      $events = [];
+      foreach ($mapping['prov_events'] as $provEvent) {
+        switch ($provEvent) {
+          case 1:
+            $events[] = LdapUserAttributesInterface::EVENT_CREATE_DRUPAL_USER;
+            break;
+
+          case 2:
+            $events[] = LdapUserAttributesInterface::EVENT_SYNC_TO_DRUPAL_USER;
+            break;
+
+          case 3:
+            $events[] = LdapUserAttributesInterface::EVENT_CREATE_LDAP_ENTRY;
+            break;
+
+          case 4:
+            $events[] = LdapUserAttributesInterface::EVENT_SYNC_TO_LDAP_ENTRY;
+            break;
+
+          case 5:
+            $events[] = LdapUserAttributesInterface::EVENT_LDAP_ASSOCIATE_DRUPAL_USER;
+            break;
+        }
+      }
+      $syncMappings[$direction][$key]['prov_events'] = $events;
+    }
+  }
+  $config->set('ldapUserSyncMappings', $syncMappings);
+  $config->save();
+}

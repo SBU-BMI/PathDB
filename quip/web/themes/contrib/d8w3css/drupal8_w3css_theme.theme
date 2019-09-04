@@ -1,0 +1,263 @@
+<?php
+
+/**
+ * @file
+ * Drupal8 W3CSS Theme.theme.
+ *
+ * Filename:     drupal8_w3css_theme.theme
+ * Website:      http://www.flashwebcenter.com
+ * Description:  template
+ * Author:       Alaa Haddad http://www.alaahaddad.com.
+ */
+
+/**
+ * Implements hook_preprocess_page() for page templates.
+ */
+function drupal8_w3css_theme_preprocess_page(&$variables) {
+  // Top regions variables.
+  $has_top_first = !empty($variables['page']['top_first']);
+  $has_top_second = !empty($variables['page']['top_second']);
+  $has_top_third = !empty($variables['page']['top_third']);
+  // Main regions variables.
+  $has_sidebar_first = !empty($variables['page']['sidebar_first']);
+  $has_sidebar_second = !empty($variables['page']['sidebar_second']);
+  // Bottom regions variables.
+  $has_bottom_first = !empty($variables['page']['bottom_first']);
+  $has_bottom_second = !empty($variables['page']['bottom_second']);
+  $has_bottom_third = !empty($variables['page']['bottom_third']);
+  $has_bottom_forth = !empty($variables['page']['bottom_forth']);
+  // Footer regions variables.
+  $has_footer_first = !empty($variables['page']['footer_first']);
+  $has_footer_second = !empty($variables['page']['footer_second']);
+  $has_footer_third = !empty($variables['page']['footer_third']);
+  // Add W3.CSS Responsive classes to Top Container.
+  if ($has_top_first && $has_top_second && $has_top_third) {
+    $variables['top_w3css'] = 'w3-third';
+  }
+  elseif (($has_top_first && $has_top_second)  ||
+           ($has_top_first && $has_top_third)  ||
+           ($has_top_second && $has_top_third)) {
+    $variables['top_w3css'] = 'w3-half';
+  }
+  else {
+    $variables['top_w3css'] = 'w3-col';
+  }
+  // Add W3.CSS Responsive classes to left and right side bar.
+  if ($has_sidebar_first && $has_sidebar_second) {
+    $variables['content_w3css'] = 'w3-half';
+    $variables['sidebarfirst'] = 'w3-quarter';
+    $variables['sidebarsecond'] = 'w3-quarter';
+  }
+  elseif ($has_sidebar_first) {
+    $variables['content_w3css'] = 'w3-threequarter';
+    $variables['sidebarfirst'] = 'w3-quarter';
+  }
+  elseif ($has_sidebar_second) {
+    $variables['content_w3css'] = 'w3-threequarter';
+    $variables['sidebarsecond'] = 'w3-quarter';
+  }
+  else {
+    $variables['content_w3css'] = 'w3-col';
+  }
+
+  // Add 3col stacked equal width.
+  $variables['equal_width'] = theme_get_setting('equal_width');
+  if ($variables['equal_width'] != NULL) {
+    if ($has_sidebar_first && $has_sidebar_second) {
+      $variables['content_w3css'] = 'w3-third';
+      $variables['sidebarfirst'] = 'w3-third';
+      $variables['sidebarsecond'] = 'w3-third';
+    }
+    elseif ($has_sidebar_first) {
+      $variables['content_w3css'] = 'w3-twothird';
+      $variables['sidebarfirst'] = 'w3-third';
+    }
+    elseif ($has_sidebar_second) {
+      $variables['content_w3css'] = 'w3-twothird';
+      $variables['sidebarsecond'] = 'w3-third';
+    }
+    else {
+      $variables['content_w3css'] = 'w3-col';
+    }
+  }
+  // Add W3.CSS Responsive classes to Bottom Container.
+  if ($has_bottom_first && $has_bottom_second && $has_bottom_third && $has_bottom_forth) {
+    $variables['bottom_w3css'] = 'w3-quarter';
+  }
+  elseif (($has_bottom_first && $has_bottom_second && $has_bottom_third)   ||
+           ($has_bottom_first && $has_bottom_third && $has_bottom_forth)   ||
+           ($has_bottom_first && $has_bottom_second && $has_bottom_forth)  ||
+           ($has_bottom_second && $has_bottom_third && $has_bottom_forth)) {
+    $variables['bottom_w3css'] = 'w3-third';
+  }
+  elseif (($has_bottom_first && $has_bottom_second)  ||
+           ($has_bottom_first && $has_bottom_third)  ||
+           ($has_bottom_first && $has_bottom_forth)  ||
+           ($has_bottom_second && $has_bottom_forth) ||
+           ($has_bottom_second && $has_bottom_third) ||
+           ($has_bottom_third && $has_bottom_forth)) {
+    $variables['bottom_w3css'] = 'w3-half';
+  }
+  else {
+    $variables['bottom_w3css'] = 'w3-col';
+  }
+
+  // Add W3.CSS Responsive classes to Footer Container.
+  if ($has_footer_first && $has_footer_second && $has_footer_third) {
+    $variables['footer_w3css'] = 'w3-third';
+  }
+  elseif (($has_footer_first && $has_footer_second)  ||
+           ($has_footer_first && $has_footer_third)  ||
+           ($has_footer_second && $has_footer_third)) {
+    $variables['footer_w3css'] = 'w3-half';
+  }
+  else {
+    $variables['footer_w3css'] = 'w3-col';
+  }
+  // Mix variables.
+  $mvar = [
+    'top_region',
+    'main_region',
+    'bottom_region',
+    'footer_region',
+    'website_width',
+  ];
+  foreach ($mvar as $value) {
+    $variables[$value] = theme_get_setting($value);
+  }
+  // Social Mdia's $variables.
+  $svar = [
+    'show_social_icon',
+    'facebook_url',
+    'twitter_url',
+    'pinterest_url',
+    'google_plus_url',
+    'linkedin_url',
+    'instagram_url',
+    'youtube_url',
+    'drupal_url',
+    'rss_url',
+    'copyright_text',
+    'show_credit_link',
+  ];
+  foreach ($svar as $value) {
+    $variables[$value] = theme_get_setting($value);
+  }
+
+  // Color's variables.
+  $cvar = [
+    'color_page_wrapper',
+    'color_header',
+    'color_primary_menu',
+    'color_welcome_text',
+    'color_highlighted',
+    'color_top_container',
+    'color_top_first',
+    'color_top_second',
+    'color_top_third',
+    'color_page_title',
+    'color_main',
+    'color_breadcrumb',
+    'color_sidebar_first',
+    'color_sidebar_second',
+    'color_content',
+    'color_bottom_container',
+    'color_bottom_first',
+    'color_bottom_second',
+    'color_bottom_third',
+    'color_bottom_forth',
+    'color_footer_container',
+    'color_footer_first',
+    'color_footer_second',
+    'color_footer_third',
+    'color_footer_menu',
+    'color_copyright',
+  ];
+  foreach ($cvar as $value) {
+    $variables[$value] = theme_get_setting($value);
+  }
+
+  // W3CSS Predefined Themes
+  // https://www.w3schools.com/w3css/w3css_color_themes.asp
+  $my_current_theme = ($variables['current_theme'] = theme_get_setting('current_theme'));
+  $predefined_theme_filename = 'drupal8_w3css_theme/' . str_replace('w3-theme-', 'w3-css-theme-', $my_current_theme);
+  $variables['#attached']['library'][] = $predefined_theme_filename;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form templates.
+ */
+function drupal8_w3css_theme_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+  // Suggest the name for the search block.
+  if ($variables['element']['#form_id'] == 'search_block_form') {
+    $suggestions[] = 'form__search_block_form';
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function drupal8_w3css_theme_form_search_block_form_alter(&$form, &$form_state) {
+  $form['keys']['#attributes']['placeholder'][] = t('Search');
+  $form['actions']['submit']['#value'] = html_entity_decode('&#xf061;');
+  $form['actions']['submit']['#attributes']['class'][] = 'search-button-block';
+}
+
+/**
+ * Implements hook_preprocess_breadcrumb().
+ */
+function drupal8_w3css_theme_preprocess_breadcrumb(&$variables) {
+  if ($variables['breadcrumb']) {
+    $request = \Drupal::request();
+    $route_match = \Drupal::routeMatch();
+    $page_title = \Drupal::service('title_resolver')->getTitle($request, $route_match->getRouteObject());
+    if (!empty($page_title)) {
+      $variables['breadcrumb'][] = [
+        'text' => $page_title,
+      ];
+      // Add cache context based on url.
+      $variables['#cache']['contexts'][] = 'url';
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_page_alter().
+ */
+function drupal8_w3css_theme_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  // Suggest the node page according to the content type name.
+  // In 8.3 the node id and revision id are both strings
+  // https://www.drupal.org/node/2521876#comment-12144221
+  $node     = \Drupal::routeMatch()->getParameter('node');
+  $revision = \Drupal::routeMatch()->getRawParameter('node_revision');
+  if ($node) {
+    if ($revision) {
+      $revised_node = \Drupal::entityTypeManager()->getStorage('node')->loadRevision($revision);
+      $content_type = $revised_node->bundle();
+    }
+    else {
+      $content_type = $node->bundle();
+    }
+    $suggestions[] = 'page__' . $content_type;
+  }
+  // Suggest the view page according to view name.
+  if ($view_name = \Drupal::routeMatch()->getRouteObject()->getDefault('view_id')) {
+    $suggestions[] = 'page__' . $view_name;
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for maintenance-page.html.twig.
+ */
+function drupal8_w3css_theme_preprocess_maintenance_page(&$variables) {
+  // By default, site_name is set to Drupal if no db connection is available
+  // or during site installation. Setting site_name to an empty string makes
+  // the site and update pages look cleaner.
+  // @see template_preprocess_maintenance_page
+  if (!$variables['db_is_active']) {
+    $variables['site_name'] = '';
+  }
+
+  // drupal8_w3css_theme has custom styling for the maintenance page.
+  $variables['#attached']['library'][] = 'drupal8_w3css_theme/templates/layout/maintenance_page';
+}

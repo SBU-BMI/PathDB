@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Hide Revision Field.
+ */
+
+use Drupal\user\RoleInterface;
+
+/**
+ * Implements HOOK_install().
+ */
+function hide_revision_field_install() {
+  module_set_weight('hide_revision_field', 1);
+}
+
+/**
+ * Set revision field weight
+ */
+function hide_revision_field_update_8203() {
+  module_set_weight('hide_revision_field', 1);
+}
+
+/**
+ * Update settings.
+ */
+function hide_revision_field_update_8201() {
+  drupal_flush_all_caches();
+  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+  $entity_type_manager = \Drupal::entityTypeManager();
+  foreach (['node_type', 'media_bundle'] as $type) {
+    if (!$entity_type_manager->hasDefinition($type)) {
+      continue;
+    }
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $bundle */
+    foreach ($entity_type_manager->getStorage($type)->loadMultiple() as $bundle) {
+      $type = $bundle->getEntityType();
+      $bundle_id = $bundle->id();
+      $entity_type_manager->getStorage('entity_form_display')
+        ->load('node.article.default')
+        ->setComponent('revision_log', [
+          'type' => 'hide_revision_field_log_widget',
+          'settings' => [
+            'show' => !$bundle->getThirdPartySetting('hide_revision_field', 'hide', FALSE),
+          ],
+        ])->save();
+      $bundle->unsetThirdPartySetting('hide_revision_field', 'hide');
+      $bundle->unsetThirdPartySetting('hide_revision_field', 'personalizable');
+    }
+  }
+  user_role_revoke_permissions(RoleInterface::ANONYMOUS_ID, ['view revision field']);
+}
+
+/**
+ * Perform entity updates.
+ */
+function hide_revision_field_update_8202() {
+  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+}

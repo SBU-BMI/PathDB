@@ -1,0 +1,17 @@
+name: 'LDAP Authentication'
+description: 'Implements LDAP authentication'
+type: module
+# core: 8.x
+package: 'Lightweight Directory Access Protocol'
+dependencies:
+  - ldap:ldap_servers
+  - ldap:ldap_user
+  - externalauth:externalauth
+
+configure: ldap_authentication.admin_form
+
+# Information added by Drupal.org packaging script on 2019-05-31
+version: '8.x-3.0-beta7'
+core: '8.x'
+project: 'ldap'
+datestamp: 1559320103

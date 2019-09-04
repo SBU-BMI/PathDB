@@ -1,0 +1,6 @@
+administer revision field personalization:
+  title: 'Administer own revision field display.'
+  description: 'Set personalized revision field visibility if enabled per entity/bundle.'
+access revision field:
+  title: 'Control Revision Messages.'
+  description: 'View and use the revision field if enabled per entity bundle.'

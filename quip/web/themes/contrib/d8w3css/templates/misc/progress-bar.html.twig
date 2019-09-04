@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Theme override for a progress bar.
+ *
+ * Note that the core Batch API uses this only for non-JavaScript batch jobs.
+ *
+ * Available variables:
+ * - label: The label of the working task.
+ * - percent: The percentage of the progress.
+ * - message: A string containing information to be displayed.
+ */
+#}
+{{ attach_library('classy/progress') }}
+<div class="w3-light-grey w3-border w3-rounded progress" data-drupal-progress>
+  {% if label %}
+    <div class="progress__label">{{ label }}</div>
+  {% endif %}
+  <div class="progress__track"><div class="w3-container w3-center progress__bar" style="width: {{ percent }}%"></div></div>
+  <div class="w3-large progress__percentage">{{ percent }}%</div>
+  <div class="w3-small progress__description">{{ message }}</div>
+</div>

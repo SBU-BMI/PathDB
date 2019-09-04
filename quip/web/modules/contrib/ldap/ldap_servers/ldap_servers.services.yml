@@ -1,0 +1,13 @@
+services:
+  logger.channel.ldap_servers:
+    parent: logger.channel_base
+    arguments: ['ldap_servers']
+  ldap.servers:
+    class: Drupal\ldap_servers\ServerFactory
+    arguments: ['@config.factory', '@logger.channel.ldap_servers', '@entity_type.manager', '@cache.default']
+  ldap.detail_log:
+    class: Drupal\ldap_servers\Logger\LdapDetailLog
+    arguments: ['@logger.factory', '@config.factory']
+  ldap.token_processor:
+    class: Drupal\ldap_servers\Processor\TokenProcessor
+    arguments: [ '@ldap.detail_log', '@file_system']

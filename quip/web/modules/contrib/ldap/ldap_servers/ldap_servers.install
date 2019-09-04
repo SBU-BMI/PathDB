@@ -1,0 +1,129 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the LDAP API module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function ldap_servers_requirements($phase) {
+  $requirements = [];
+
+  if (version_compare(phpversion(), '5.6.0') < 0) {
+    $requirements['php_ldap_version'] = [
+      'title' => t('PHP Version for LDAP'),
+      'description' => t('Your PHP installation is too old for the LDAP module. Please upgrade to at least 5.6, 7.1 is recommended.'),
+      'severity' => REQUIREMENT_ERROR,
+      'value' => phpversion(),
+    ];
+  }
+
+  if (extension_loaded('ldap')) {
+    $requirements['ldap_extension_loaded'] = [
+      'title' => t('PHP LDAP extension'),
+      'severity' => REQUIREMENT_OK,
+      'value' => t('Available'),
+    ];
+  }
+  else {
+    $requirements['ldap_extension_loaded'] = [
+      'title' => t('PHP LDAP extension'),
+      'severity' => REQUIREMENT_ERROR,
+      'value' => t('Missing'),
+      'description' => t('The LDAP extension of PHP is not available. Please consult your distribution to discover how to install it.'),
+    ];
+  }
+
+  return $requirements;
+}
+
+/**
+ * Updates bind method to new value.
+ */
+function ldap_servers_update_8301() {
+  $factory = \Drupal::service('ldap.servers');
+  /** @var \Drupal\ldap_servers\ServerFactory $factory */
+  $servers = $factory->getAllServers();
+  foreach ($servers as $server) {
+    $currentMethod = $server->get('bind_method');
+    if ($currentMethod == 1) {
+      $server->set('bind_method', 'service_account');
+    }
+    elseif ($currentMethod == 2) {
+      $server->set('bind_method', 'user');
+    }
+    elseif ($currentMethod == 3) {
+      $server->set('bind_method', 'anon');
+    }
+    elseif ($currentMethod == 4) {
+      $server->set('bind_method', 'anon_user');
+    }
+    $server->save();
+  }
+}
+
+/**
+ * Removes HTTPS checking.
+ */
+function ldap_servers_update_8302() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_servers.settings');
+  $config->delete();
+
+  return t('HTTPS validation was removed, if you need mixed mode consider another module such as securelogin for this. Mixed mode is strongly discouraged.');
+}
+
+/**
+ * Adds default timeout to all servers.
+ */
+function ldap_servers_update_8303() {
+  $factory = \Drupal::service('ldap.servers');
+  /** @var \Drupal\ldap_servers\ServerFactory $factory */
+  $servers = $factory->getAllServers();
+  foreach ($servers as $server) {
+    $server->set('timeout', 10);
+    $server->save();
+  }
+  return t('Server network timeouts are now configurable. Your servers have been set to 10 seconds.');
+}
+
+/**
+ * Force server attributes to be lowercase.
+ */
+function ldap_servers_update_8304() {
+  $factory = \Drupal::service('ldap.servers');
+  /** @var \Drupal\ldap_servers\ServerFactory $factory */
+  $servers = $factory->getAllServers();
+  foreach ($servers as $server) {
+    $fields = [
+      'user_attr',
+      'account_name_attr',
+      'mail_attr',
+      'mail_template',
+      'picture_attr',
+      'unique_persistent_attr',
+      'user_dn_expression',
+      'grp_memb_attr',
+      'grp_object_cat',
+      'grp_memb_attr_match_user_attr',
+      'grp_user_memb_attr',
+      'grp_derive_from_dn_attr',
+    ];
+
+    foreach ($fields as $field) {
+      $server->set($field, mb_strtolower($server->get($field)));
+    }
+    $server->save();
+  }
+  return t('All server configuration attributes are forced to lowercase. Note that exporting this state can contain configuration overrides. Please review.');
+}
+
+
+/**
+ * Removal of double-escaping.
+ */
+function ldap_servers_update_8305() {
+  return t('Escaping of field data now relies solely on Twig auto-escaping. If you have created custom code make sure it takes this into account. See https://www.drupal.org/project/ldap/issues/2969097 for details.');
+}

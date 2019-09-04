@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Theme override for a marker for new or updated content.
+ *
+ * Available variables:
+ * - status: Number representing the marker status to display. Use the constants
+ *   below for comparison:
+ *   - MARK_NEW
+ *   - MARK_UPDATED
+ *   - MARK_READ
+ */
+#}
+{% if logged_in %}
+  {% if status is constant('MARK_NEW') %}
+    <span class="w3-white w3-border w3-border-red w3-text-red w3-round-large marker">{{ 'New'|t }}</span>
+  {% elseif status is constant('MARK_UPDATED') %}
+    <span class="w3-white w3-border w3-border-green w3-text-green w3-round-large marker">{{ 'Updated'|t }}</span>
+  {% endif %}
+{% endif %}

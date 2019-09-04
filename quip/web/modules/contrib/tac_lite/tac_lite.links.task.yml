@@ -1,0 +1,13 @@
+tac_lite.administration:
+  title: 'Settings'
+  route_name: tac_lite.administration
+  base_route: tac_lite.administration
+
+tac_lite.user_access:
+  title: 'Access by Taxonomy'
+  route_name: tac_lite.user_access
+  base_route: entity.user.canonical
+
+tac_lite.plugins:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\tac_lite\Plugin\Derivative\SchemeLocalTask

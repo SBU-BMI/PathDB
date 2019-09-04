@@ -1,0 +1,24 @@
+drupal8_w3css_theme.screen-sm-min:
+  label: screen-sm-min
+  mediaQuery:
+  weight: 0
+  multipliers:
+    - 1x
+drupal8_w3css_theme.screen-md-min:
+  label: screen-md-min
+  mediaQuery: 'all and (min-width: 601px) and (max-width: 992px)'
+  weight: 1
+  multipliers:
+    - 1x
+drupal8_w3css_theme.screen-lg-min:
+  label: screen-lg-min
+  mediaQuery: 'all and (min-width: 993px) and (max-width: 1280px)'
+  weight: 2
+  multipliers:
+    - 1x
+drupal8_w3css_theme.screen-xlg-min:
+  label: screen-xlg-min
+  mediaQuery: 'all and (min-width: 1281px)'
+  weight: 3
+  multipliers:
+    - 1x
