@@ -1,8 +1,0 @@
-*.patch
-*.zip
-Thumbs.db
-Desktop.ini
-.DS_Store
-sonar*
-.sonar
-.idea
