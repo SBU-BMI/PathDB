@@ -1,0 +1,6 @@
+name: Restrict By IP
+description: Enables limiting user login and role access to specific IP Addresses.
+type: module
+package: Access control
+core: 8.x
+configure: restrict_by_ip.general_settings

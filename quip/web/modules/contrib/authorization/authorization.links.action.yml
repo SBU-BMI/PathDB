@@ -1,0 +1,5 @@
+entity.authorization_profile.add_form:
+  route_name: 'entity.authorization_profile.add_form'
+  title: 'Add Authorization profile'
+  appears_on:
+    - entity.authorization_profile.collection

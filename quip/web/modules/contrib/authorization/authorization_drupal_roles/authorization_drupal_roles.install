@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Contains authorization_drupal_roles.module..
+ */
+
+/**
+ * Implements hook_module_preinstall().
+ */
+function authorization_drupal_roles_module_preinstall($module) {
+  if ($module == 'authorization_drupal_roles') {
+    $type = \Drupal::entityTypeManager()->getDefinition('user');
+    $fields = authorization_drupal_roles_entity_base_field_info($type);
+    foreach ($fields as $name => $data) {
+      \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($name, 'user', 'authorization_drupal_roles', $data);
+    }
+  }
+}
+
+/**
+ * Enable grant records on existing sites.
+ */
+function authorization_drupal_roles_update_8001() {
+  authorization_drupal_roles_module_preinstall('authorization_drupal_roles');
+  return t('See README.md for the current behaviour.');
+}
