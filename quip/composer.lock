@@ -2271,8 +2271,7 @@
             "homepage": "https://www.drupal.org/project/authorization",
             "support": {
                 "source": "https://git.drupalcode.org/project/authorization"
-            },
-            "time": "2018-09-18T18:07:38+00:00"
+            }
         },
         {
             "name": "drupal/auto_entitylabel",
@@ -3815,8 +3814,7 @@
             "homepage": "https://www.drupal.org/project/restrict_by_ip",
             "support": {
                 "source": "https://git.drupalcode.org/project/restrict_by_ip"
-            },
-            "time": "2017-09-29T01:36:20+00:00"
+            }
         },
         {
             "name": "drupal/restui",

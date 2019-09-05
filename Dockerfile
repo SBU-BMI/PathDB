@@ -19,6 +19,7 @@ RUN php installer
 RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 COPY pathdbmysql.cnf pathdbmysql.cnf
+COPY w3-theme-custom.css w3-theme-custom.css
 
 # create initial Drupal environment
 WORKDIR /
@@ -56,7 +57,7 @@ COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
 RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.4.3
-RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.1
+RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.2
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
 RUN yum update -y && yum clean all
