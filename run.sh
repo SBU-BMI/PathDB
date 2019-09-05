@@ -20,6 +20,7 @@ if [ ! -f /quip/web/sites/default/settings.php ]; then
 	cp /build/settings.php /quip/web/sites/default
 	echo "\$settings['hash_salt'] = '`uuidgen`';" >> /quip/web/sites/default/settings.php
 fi
+cp /config/pathdb/w3-theme-custom.css /quip/web/themes/contrib/d8w3css/css/w3-css-theme-custom
 # make sure permissions of pathdb folder are correct
 chown -R apache:apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
