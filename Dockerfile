@@ -19,6 +19,7 @@ RUN php installer
 RUN rm -f installer
 RUN mv composer.phar /usr/local/bin/composer
 COPY pathdbmysql.cnf pathdbmysql.cnf
+COPY w3-theme-custom.css w3-theme-custom.css
 
 # create initial Drupal environment
 WORKDIR /

@@ -1,8 +1,4 @@
-<?php
-
-// @codingStandardsIgnoreFile
-
-$config_directories = [];
+ = [];
 $settings['update_free_access'] = FALSE;
 
 # $settings['http_client_config']['proxy']['http'] = 'http://proxy_user:proxy_pass@example.com:8080';
