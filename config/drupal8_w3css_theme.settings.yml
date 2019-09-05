@@ -31,7 +31,7 @@ favicon:
   use_default: 1
 website_width: ''
 equal_width: 0
-current_theme: w3-theme-blue-grey
+current_theme: w3-theme-custom
 color_page_wrapper: ''
 color_header: ''
 color_primary_menu: ''
