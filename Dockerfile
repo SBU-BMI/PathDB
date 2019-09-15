@@ -24,7 +24,7 @@ COPY w3-theme-custom.css w3-theme-custom.css
 # create initial Drupal environment
 WORKDIR /
 COPY quip/ quip/
-COPY modules/quip/ /quip/modules/quip/
+COPY modules/quip/ /quip/web/modules/quip/
 COPY images/ /quip/web/images/
 COPY settings.php /build
 # set permissions correctly for apache demon access
