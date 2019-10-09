@@ -45,7 +45,7 @@
         "drupal/typed_data": "^1.0@alpha",
         "drupal/views_base_url": "^1.0",
         "drupal/views_data_export": "^1.0@beta",
-        "drupal/views_taxonomy_term_name_depth": "^3.3",
+        "drupal/views_taxonomy_term_name_depth": "6.x-dev",
         "drush/drush": "^9.0.0",
         "vlucas/phpdotenv": "^2.4",
         "webflo/drupal-finder": "^1.0.0",
