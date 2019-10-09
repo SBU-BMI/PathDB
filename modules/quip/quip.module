@@ -39,13 +39,26 @@ function quip_theme() {
   );
 }
 
+
+function quip_custom_term_validator(array &$form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+//	drupal_set_message(t('An error occurred and processing did not complete.'), 'error');
+	preg_match("/^[A-Za-z0-9_:]+$/", $form_state->getValue('name')[0]['value'], $matches);
+	if (!$matches) {
+		$form_state->setErrorByName($form_state->getValue('name')[0]['value'], t('Error Message : only upper and lower case letters, numbers, and underscore allowed in collection names'));
+	}
+}
+
+
 function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
         if(($form_id=="node_wsi_form")||($form_id=="node_map_form")||($form_id=="node_bulk_csv_upload_form")) {
         	//dpm($form);
         	$form['actions']['preview']['#access'] = FALSE;
 //        	$form['meta'] = FALSE;
         	$form['revision_log'] = FALSE;
-	}
+	} 
+        if ($form_id=="taxonomy_term_collections_form") {
+		$form['#validate'][] = 'quip_custom_term_validator';
+        }
 }
 
 
