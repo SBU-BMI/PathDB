@@ -79,15 +79,15 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
               		$uri = drupal_realpath($uri);
 			$height = $entity->get('imagedvolumewidth')->getValue()[0]['value'];
 			$width = $entity->get('imagedvolumeheight')->getValue()[0]['value'];
-			if (($height == 0)&&($width == 0)) {
-               			#\Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
-               			$eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
-               			$p = json_decode($eww,true);
-               			$entity->set('imagedvolumewidth',$p["imagedvolumewidth"][0]["value"]);
-          			$entity->set('imagedvolumeheight',$p["imagedvolumeheight"][0]["value"]);
-               			$entity->set('referencepixelphysicalvaluex',$p["referencepixelphysicalvaluex"][0]["value"]);
-               			$entity->set('referencepixelphysicalvaluey',$p["referencepixelphysicalvaluey"][0]["value"]);
-			}
+			//if (($height == 0)&&($width == 0)) {
+               		//	\Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
+               		//	$eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
+               		//	$p = json_decode($eww,true);
+               		//	$entity->set('imagedvolumewidth',$p["imagedvolumewidth"][0]["value"]);
+          		//	$entity->set('imagedvolumeheight',$p["imagedvolumeheight"][0]["value"]);
+               		//	$entity->set('referencepixelphysicalvaluex',$p["referencepixelphysicalvaluex"][0]["value"]);
+               		//	$entity->set('referencepixelphysicalvaluey',$p["referencepixelphysicalvaluey"][0]["value"]);
+			//}
               		$uri = "/data/images/".substr($uri,23);
               		$entity->set('field_iip_path',$uri);
                 } else if (($entity->bundle() == 'bulk_upload')&&(strlen($entity->get("field_path")->getString()))!=0) {
