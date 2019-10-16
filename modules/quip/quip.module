@@ -65,45 +65,31 @@ function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_stat
 function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
         if ($entity->isNew()) {
                 if ($entity->bundle() == 'wsi') {
-                        //if (is_null($entity->field_wsiimage->entity)) {
-                        //      \Drupal::logger('quip')->notice("NO IMPORT TODAY....");
-                        //} else {
-                                if (strlen($entity->get("field_utarget")->getString())!=0) {
-                                        \Drupal::logger('quip')->notice("importing file : ".$entity->get("field_utarget")->getString());
-                                        $file = File::Create([
-                                                'uri' => $entity->get("field_utarget")->getString(),
-                                        ]);
-                                        $file->uid = $entity->uid;
-                                        $file->save();
-                                        $entity->set('field_wsiimage',$file);
-                                        $entity->field_wsiimage->description = '';
-                                        $entity->field_wsiimage->display = 1;
-                                }
-                                $uri = $entity->field_wsiimage->entity->getFileUri();
-                                $uri = drupal_realpath($uri);
-                                \Drupal::logger('quip')->notice("new images URI = ".$uri);
-                                \Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
-                                $eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
-                                $p = json_decode($eww,true);
-                                $entity->set('imagedvolumewidth',$p["imagedvolumewidth"][0]["value"]);
-                                $entity->set('imagedvolumeheight',$p["imagedvolumeheight"][0]["value"]);
-                                $entity->set('referencepixelphysicalvaluex',$p["referencepixelphysicalvaluex"][0]["value"]);
-                                $entity->set('referencepixelphysicalvaluey',$p["referencepixelphysicalvaluey"][0]["value"]);
-                                $uri = "/data/images/".substr($uri,23);
-                                $entity->set('field_iip_path',$uri);
-                        //}
-                } else if (($entity->bundle() == 'wsitest')&&(strlen($entity->get("field_utarget")->getString()))!=0) {
-                        //\Drupal::logger('quip')->notice("RAH = ".$entity->get("field_utarget")->getString());
-                        \Drupal::logger('quip')->notice(\Drupal::service('file_system')->realpath("private://"));
-                        //\Drupal::logger('quip')->notice(\Drupal::service('file_system')->realpath(file_default_scheme() . "://"));
-                        $file = File::Create([
-                                'uri' => $entity->get("field_utarget")->getString(),
-                        ]);
-                        $file->uid = $entity->uid;
-                        $file->save();
-                        $entity->set('field_testfile',$file);
-                        $entity->field_testfile->description = '';
-                        $entity->field_testfile->display = 1;
+                	if (strlen($entity->get("field_utarget")->getString())!=0) {
+                		$file = File::Create([
+                			'uri' => $entity->get("field_utarget")->getString(),
+                		]);
+                		$file->uid = $entity->uid;
+                		$file->save();
+                		$entity->set('field_wsiimage',$file);
+                		$entity->field_wsiimage->description = '';
+                		$entity->field_wsiimage->display = 1;
+                	}
+                	$uri = $entity->field_wsiimage->entity->getFileUri();
+              		$uri = drupal_realpath($uri);
+			$height = $entity->get('imagedvolumewidth')->getValue()[0]['value'];
+			$width = $entity->get('imagedvolumeheight')->getValue()[0]['value'];
+			//if (($height == 0)&&($width == 0)) {
+               		//	\Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
+               		//	$eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
+               		//	$p = json_decode($eww,true);
+               		//	$entity->set('imagedvolumewidth',$p["imagedvolumewidth"][0]["value"]);
+          		//	$entity->set('imagedvolumeheight',$p["imagedvolumeheight"][0]["value"]);
+               		//	$entity->set('referencepixelphysicalvaluex',$p["referencepixelphysicalvaluex"][0]["value"]);
+               		//	$entity->set('referencepixelphysicalvaluey',$p["referencepixelphysicalvaluey"][0]["value"]);
+			//}
+              		$uri = "/data/images/".substr($uri,23);
+              		$entity->set('field_iip_path',$uri);
                 } else if (($entity->bundle() == 'bulk_upload')&&(strlen($entity->get("field_path")->getString()))!=0) {
                         $path = $entity->get("field_path")->getString();
                         $eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
