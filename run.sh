@@ -41,8 +41,8 @@ if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
 	chown -R mysql mysql
 	rm mysql.tgz
 	# since database is being rebuilt, make sure permissions are okay on files folder
-        #chown -R apache:apache /data/pathdb/files
-        #chmod -R 775 /data/pathdb/files
+        chown apache:apache /data/pathdb/files
+        chmod 775 /data/pathdb/files
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
