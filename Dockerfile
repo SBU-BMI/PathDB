@@ -56,7 +56,7 @@ RUN mkdir /quip/web/sup
 COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
-RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.6
+RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.7
 RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
