@@ -4,7 +4,6 @@ status: true
 dependencies:
   config:
     - taxonomy.vocabulary.collections
-    - user.role.authenticated
   module:
     - ds
     - rest
@@ -27,10 +26,9 @@ display:
     position: 0
     display_options:
       access:
-        type: role
+        type: perm
         options:
-          role:
-            authenticated: authenticated
+          perm: 'access content'
       cache:
         type: tag
         options: {  }
@@ -107,7 +105,7 @@ display:
           group_type: group
           admin_label: ''
           label: ID
-          exclude: false
+          exclude: true
           alter:
             alter_text: false
             text: ''
@@ -336,7 +334,20 @@ display:
       title: Collections
       header: {  }
       footer: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: false
+          content:
+            value: 'No collections available'
+            format: basic_html
+          plugin_id: text
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
@@ -346,7 +357,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-        - user.roles
+        - user.permissions
       tags: {  }
   page_1:
     display_plugin: page
@@ -362,7 +373,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-        - user.roles
+        - user.permissions
       tags: {  }
   rest_export_1:
     display_plugin: rest_export
@@ -386,5 +397,5 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - request_format
-        - user.roles
+        - user.permissions
       tags: {  }

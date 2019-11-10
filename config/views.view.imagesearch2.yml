@@ -1,4 +1,4 @@
-uuid: d378d708-b210-461a-8060-1e8faeae7d2e
+uuid: 189ad730-21e1-445c-a991-41e3801f7980
 langcode: en
 status: true
 dependencies:
@@ -6,17 +6,15 @@ dependencies:
     - field.storage.node.clinicaltrialsubjectid
     - field.storage.node.imageid
     - field.storage.node.studyid
-    - search_api.index.default_index
-    - user.role.authenticated
+    - search_api.index.imagesearch
   module:
     - search_api
-    - user
-id: searchme
-label: searchme
+id: imagesearch2
+label: imagesearch2
 module: views
 description: ''
 tag: ''
-base_table: search_api_index_default_index
+base_table: search_api_index_imagesearch
 base_field: search_api_id
 core: 8.x
 display:
@@ -27,10 +25,8 @@ display:
     position: 0
     display_options:
       access:
-        type: role
-        options:
-          role:
-            authenticated: authenticated
+        type: none
+        options: {  }
       cache:
         type: tag
         options: {  }
@@ -53,7 +49,7 @@ display:
       pager:
         type: full
         options:
-          items_per_page: 50
+          items_per_page: 25
           offset: 0
           id: 0
           total_pages: null
@@ -73,13 +69,58 @@ display:
           quantity: 9
       style:
         type: table
+        options:
+          grouping: {  }
+          row_class: ''
+          default_row_class: true
+          override: true
+          sticky: false
+          caption: ''
+          summary: ''
+          description: ''
+          columns:
+            collectionname: collectionname
+            studyid: studyid
+            clinicaltrialsubjectid: clinicaltrialsubjectid
+            imageid: imageid
+          info:
+            collectionname:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            studyid:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            clinicaltrialsubjectid:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            imageid:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+          default: '-1'
+          empty_table: false
       row:
         type: fields
       fields:
-        name:
-          id: name
-          table: search_api_index_default_index
-          field: name
+        collectionname:
+          id: collectionname
+          table: search_api_index_imagesearch
+          field: collectionname
           relationship: none
           group_type: group
           admin_label: ''
@@ -148,7 +189,7 @@ display:
           plugin_id: search_api_field
         studyid:
           id: studyid
-          table: search_api_index_default_index
+          table: search_api_index_imagesearch
           field: studyid
           relationship: none
           group_type: group
@@ -218,12 +259,84 @@ display:
           plugin_id: search_api_field
         clinicaltrialsubjectid:
           id: clinicaltrialsubjectid
-          table: search_api_index_default_index
+          table: search_api_index_imagesearch
           field: clinicaltrialsubjectid
           relationship: none
           group_type: group
           admin_label: ''
-          label: '​Subject ID'
+          label: 'Subject ID'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          field_rendering: true
+          fallback_handler: search_api
+          fallback_options:
+            link_to_item: false
+            use_highlighting: false
+            multi_type: separator
+            multi_separator: ', '
+          entity_type: null
+          entity_field: null
+          plugin_id: search_api_field
+        imageid:
+          id: imageid
+          table: search_api_index_imagesearch
+          field: imageid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Image ID'
           exclude: false
           alter:
             alter_text: false
@@ -286,79 +399,9 @@ display:
             multi_type: separator
             multi_separator: ', '
           plugin_id: search_api_field
-        imageid:
-          id: imageid
-          table: search_api_index_default_index
-          field: imageid
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: 'Image ID'
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: string
-          settings:
-            link_to_entity: true
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-          field_rendering: true
-          fallback_handler: search_api
-          fallback_options:
-            link_to_item: false
-            use_highlighting: false
-            multi_type: separator
-            multi_separator: ', '
-          plugin_id: search_api_field
         nid:
           id: nid
-          table: search_api_datasource_default_index_entity_node
+          table: search_api_datasource_imagesearch_entity_node
           field: nid
           relationship: none
           group_type: group
@@ -370,90 +413,7 @@ display:
             text: caMic
             make_link: true
             path: '/caMicroscope/apps/viewer/viewer.html?slideId={{nid}}&mode=pathdb'
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: number_integer
-          settings:
-            thousand_separator: ''
-            prefix_suffix: true
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-          field_rendering: true
-          fallback_handler: search_api_numeric
-          fallback_options:
-            set_precision: false
-            precision: 0
-            decimal: .
-            separator: ','
-            format_plural: false
-            format_plural_string: !!binary MQNAY291bnQ=
-            prefix: ''
-            suffix: ''
-            link_to_item: false
-            use_highlighting: false
-            multi_type: separator
-            multi_separator: ', '
-            format_plural_values:
-              - '1'
-              - '@count'
-          entity_type: node
-          plugin_id: search_api_field
-        nid_1:
-          id: nid_1
-          table: search_api_datasource_default_index_entity_node
-          field: nid
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: Maps
-          exclude: false
-          alter:
-            alter_text: true
-            text: Maps
-            make_link: true
-            path: '/maps/{{ nid_1 }}'
-            absolute: false
+            absolute: true
             external: false
             replace_spaces: false
             path_case: none
@@ -525,56 +485,112 @@ display:
       filters:
         search_api_fulltext:
           id: search_api_fulltext
-          table: search_api_index_default_index
+          table: search_api_index_imagesearch
           field: search_api_fulltext
           relationship: none
           group_type: group
           admin_label: ''
-          operator: or
+          operator: and
           value: ''
           group: 1
           exposed: true
           expose:
             operator_id: search_api_fulltext_op
-            label: 'Search (3 character minimum)'
+            label: 'Search on Subject ID and Image ID (3 character minimum)'
             description: ''
             use_operator: false
             operator: search_api_fulltext_op
             identifier: search_api_fulltext
-            required: true
+            required: false
             remember: false
             multiple: false
             remember_roles:
               authenticated: authenticated
               anonymous: '0'
               administrator: '0'
-              editor: '0'
-              demo: '0'
             placeholder: ''
           is_grouped: false
           group_info:
-            label: 'Fulltext search'
-            description: null
-            identifier: search_api_fulltext
+            label: ''
+            description: ''
+            identifier: ''
             optional: true
             widget: select
             multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
-            group_items:
-              1: {  }
-              2: {  }
-              3: {  }
+            group_items: {  }
           parse_mode: terms
-          min_length: null
+          min_length: 3
           fields: {  }
           plugin_id: search_api_fulltext
-      sorts: {  }
-      title: imagesearch
+      sorts:
+        collectionname:
+          id: collectionname
+          table: search_api_index_imagesearch
+          field: collectionname
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: search_api
+        studyid:
+          id: studyid
+          table: search_api_index_imagesearch
+          field: studyid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: search_api
+        clinicaltrialsubjectid:
+          id: clinicaltrialsubjectid
+          table: search_api_index_imagesearch
+          field: clinicaltrialsubjectid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: search_api
+        imageid:
+          id: imageid
+          table: search_api_index_imagesearch
+          field: imageid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: search_api
+      title: imagesearch2
       header: {  }
       footer: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: false
+          content:
+            value: 'No images found'
+            format: basic_html
+          plugin_id: text
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
@@ -585,7 +601,6 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
-        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.imageid'
@@ -599,6 +614,10 @@ display:
     display_options:
       display_extenders: {  }
       path: imagesearch
+      cache:
+        type: none
+      defaults:
+        cache: false
     cache_metadata:
       max-age: -1
       contexts:
@@ -606,7 +625,6 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
-        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.imageid'

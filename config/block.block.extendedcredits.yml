@@ -1,0 +1,31 @@
+uuid: 6eb8cc19-6c10-4ffd-9950-35131bf47056
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:44cec25c-13d9-4568-899f-6b636db52d03'
+  module:
+    - block_content
+    - system
+  theme:
+    - drupal8_w3css_theme
+id: extendedcredits
+theme: drupal8_w3css_theme
+region: bottom_first
+weight: 0
+provider: null
+plugin: 'block_content:44cec25c-13d9-4568-899f-6b636db52d03'
+settings:
+  id: 'block_content:44cec25c-13d9-4568-899f-6b636db52d03'
+  label: extendedcredits
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: "/listofimages\r\n/collections"
+    negate: false
+    context_mapping: {  }
