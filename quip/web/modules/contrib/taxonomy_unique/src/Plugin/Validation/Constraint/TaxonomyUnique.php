@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraint;
  */
 class TaxonomyUnique extends Constraint {
 
-  public $notUnique = TAXONOMY_UNIQUE_DEFAULT_MESSAGE;
+  public $notUnique = 'Term %term already exists in vocabulary %vocabulary.';
 
   /**
    * Overwrites the default error message.

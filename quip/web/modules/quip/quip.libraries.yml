@@ -1,0 +1,11 @@
+openseadragon:
+  version: 2.3.1
+  js:
+    openseadragon/openseadragon.min.js: {preprocess: false}
+  css:
+    component:
+      css/openseadragon.css: {}
+  dependencies:
+      - core/jquery
+      - core/jquery-once
+      - core/drupalSettings

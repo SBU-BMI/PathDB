@@ -2,6 +2,7 @@
 
 namespace Drupal\auto_entitylabel;
 
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -255,9 +256,15 @@ class AutoEntityLabelManager implements AutoEntityLabelManagerInterface {
    */
   protected function generateLabel($pattern, $entity) {
     $entity_type = $entity->getEntityType()->id();
+    // To avoid that the token replacement leaking render metadata (which might
+    // be a problem when generating labels using JSON:api or similar) we pass in
+    // metadata to the token replacement.
+    // @see https://www.drupal.org/project/auto_entitylabel/issues/3051165
+    $metadata = new BubbleableMetadata();
     $output = $this->token->replace($pattern,
       [$entity_type => $entity],
-      ['clear' => TRUE]
+      ['clear' => TRUE],
+      $metadata
     );
 
     // Decode HTML entities, returning them to their original UTF-8 characters.

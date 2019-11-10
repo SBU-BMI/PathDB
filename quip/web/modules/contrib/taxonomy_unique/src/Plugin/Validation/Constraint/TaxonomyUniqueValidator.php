@@ -17,12 +17,12 @@ class TaxonomyUniqueValidator extends ConstraintValidator {
   public function validate($value, Constraint $constraint) {
     /** @var TermInterface $term */
     $term = $value->getEntity();
-    if (\Drupal::config('taxonomy_unique.settings')->get($term->getVocabularyId()) && !$this->isUnique($term)) {
-      $message = \Drupal::config('taxonomy_unique.settings')->get($term->getVocabularyId() . '_message');
+    if (\Drupal::config('taxonomy_unique.settings')->get($term->bundle()) && !$this->isUnique($term)) {
+      $message = \Drupal::config('taxonomy_unique.settings')->get($term->bundle() . '_message');
       if ($message != '') {
         $constraint->setErrorMessage($message);
       }
-      $this->context->addViolation($constraint->notUnique, ['%term' => $term->getName(), '%vocabulary' => $term->getVocabularyId()]);
+      $this->context->addViolation($constraint->notUnique, ['%term' => $term->getName(), '%vocabulary' => $term->bundle()]);
     }
   }
 
@@ -36,7 +36,7 @@ class TaxonomyUniqueValidator extends ConstraintValidator {
    *   Whether the term is unique or not
    */
   private function isUnique(TermInterface $term) {
-    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['name' => $term->getName(), 'vid' => $term->getVocabularyId()]);
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['name' => $term->getName(), 'vid' => $term->bundle()]);
 
     if (empty($terms)) {
       return TRUE;

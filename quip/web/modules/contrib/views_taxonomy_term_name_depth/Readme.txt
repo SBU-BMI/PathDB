@@ -3,42 +3,47 @@ CONTENTS OF THIS FILE
 
  * Introduction
  * Requirements
- * Recommended modules
  * Installation
  * Configuration
- * Troubleshooting
- * FAQ
  * Maintainers
 
 
- INTRODUCTION
- ------------
+INTRODUCTION
+------------
 
-     We have a contextual filter from core "Content:Has taxonomy term Id with Depth".
-     Looking for a way to filter a view with taxonomy term name ?
+The Views Taxonomy Term Name Depth module adds a contextual Filter plugin that
+allows a view to be filtered based on the taxonomy term name.
 
-      This module, on installation adds a contextual Filter plugin that allows a view to be filtered based on the
-      taxonomy term name.
+ * For a full description of the module visit:
+   https://www.drupal.org/project/views_taxonomy_term_name_depth
+
+ * To submit bug reports and feature suggestions, or to track changes visit:
+   https://www.drupal.org/project/issues/views_taxonomy_term_name_depth
+
 
 REQUIREMENTS
 ------------
 
-"No special requirements"
+This module requires no modules outside of Drupal core.
 
 
 INSTALLATION
 ------------
 
- * Install as you would normally install a contributed Drupal module. See:
-   https://drupal.org/documentation/install/modules-themes/modules-7
-   for further information.
+ * Install the Views Taxonomy Term Name Depth module as you would normally
+   install a contributed Drupal module.
+   Visit https://www.drupal.org/node/1897420 for further information.
+
+
+CONFIGURATION
+-------------
+
+    1. Navigate to Administration > Extend and enable the module.
+    2. Navigate to Administration > Structure > Views.
+    3. There is now a "Has taxonomy term name with Depth" contextual filter.
+
 
 MAINTAINERS
 -----------
 
-Current maintainers:
  * Rakesh James (rakesh.gectcr) - https://www.drupal.org/u/rakeshgectcr
- * Harika Gujjula (harika gujjula) - https://www.drupal.org/u/harika-gujjula
- * Manoj K (manojapare) - https://www.drupal.org/u/manojapare
- * Saket Kumar (rockingguyster) - https://www.drupal.org/u/rockingguyster
-

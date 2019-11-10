@@ -67,7 +67,7 @@ EOF
 
             $loadedClass = 123;
 
-            $res = new ClassExistenceResource('MissingFooClass', false);
+            new ClassExistenceResource('MissingFooClass', false);
 
             $this->assertSame(123, $loadedClass);
         } finally {
@@ -75,22 +75,12 @@ EOF
         }
     }
 
-    /**
-     * @group issue-32995
-     *
-     * @runInSeparateProcess https://github.com/symfony/symfony/issues/32995
-     */
     public function testBadParentWithTimestamp()
     {
         $res = new ClassExistenceResource(BadParent::class, false);
         $this->assertTrue($res->isFresh(time()));
     }
 
-    /**
-     * @group issue-32995
-     *
-     * @runInSeparateProcess https://github.com/symfony/symfony/issues/32995
-     */
     public function testBadParentWithNoTimestamp()
     {
         $this->expectException('ReflectionException');
