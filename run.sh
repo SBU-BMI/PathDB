@@ -111,6 +111,7 @@ else
 	done
         httpd -f /config/httpd.conf
 	cd /quip/web
+	/quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi
