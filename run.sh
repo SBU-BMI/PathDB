@@ -38,6 +38,10 @@ fi
 if [ ! -d /data/pathdb/mysql ]; then
 	mysql_install_db --force --defaults-file=/config/pathdbmysql.cnf
 	/usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
+        until mysqladmin status
+        do
+                sleep 3
+        done
 	cd /build
         tar xvfz mysql.tgz
         mysql -u root -e "create database QuIP"
