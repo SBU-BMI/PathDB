@@ -4,6 +4,7 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 # QuIP - PathDB Docker Container
 #
 ### update OS
+RUN yum update -y && yum clean all
 RUN yum -y install wget which zip unzip java-1.8.0-openjdk bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73

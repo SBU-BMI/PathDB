@@ -35,13 +35,13 @@ if [ ! -d /data/pathdb/config/sync ]; then
 	chmod -R 770 /data/pathdb/config/sync
 fi
 
-if [ ! -d /data/pathdb/mysql/QuIP ] && [ -f /build/mysql.tgz ]; then
+if [ ! -d /data/pathdb/mysql ]; then
+	mysql_install_db --force --defaults-file=/config/pathdbmysql.cnf
+	/usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
 	cd /build
         tar xvfz mysql.tgz
         mysql -u root -e "create database QuIP"
         mysql QuIP < mysql
-	#rm -f mysql.tgz
-        #rm -f mysql
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
