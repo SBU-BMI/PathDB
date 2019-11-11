@@ -52,8 +52,6 @@ COPY mysql.tgz /build
 RUN mkdir /quip/pathdbconfig
 COPY config/* /quip/pathdbconfig/
 COPY content/* /quip/content/
-RUN mkdir /quip/web/sup
-COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
 RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=develop

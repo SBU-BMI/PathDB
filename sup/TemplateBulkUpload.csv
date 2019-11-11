@@ -1,3 +1,0 @@
-path,collection,studyid,clinicaltrialsubjectid,imageid
-use path as seen by the PathDB docker,use collection ID,,,
-
