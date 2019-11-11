@@ -27,6 +27,7 @@ COPY quip/ quip/
 COPY modules/quip/ /quip/web/modules/quip/
 COPY images/ /quip/web/images/
 COPY settings.php /build
+COPY mysql.tgz /build
 # set permissions correctly for apache demon access
 RUN chown -R apache:apache /quip
 # adjust location of Drupal-supporting MySQL database files

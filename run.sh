@@ -40,8 +40,8 @@ if [ ! -d /data/pathdb/mysql/QuIP ] && [ -f /build/mysql.tgz ]; then
         tar xvfz mysql.tgz
         mysql -u root -e "create database QuIP"
         mysql QuIP < mysql
-	rm -f mysql.tgz
-        rm -f mysql
+	#rm -f mysql.tgz
+        #rm -f mysql
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
