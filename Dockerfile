@@ -4,6 +4,7 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 # QuIP - PathDB Docker Container
 #
 ### update OS
+RUN yum update -y && yum clean all
 RUN yum -y install wget which zip unzip java-1.8.0-openjdk bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73
@@ -27,6 +28,7 @@ COPY quip/ quip/
 COPY modules/quip/ /quip/web/modules/quip/
 COPY images/ /quip/web/images/
 COPY settings.php /build
+COPY mysql.tgz /build
 # set permissions correctly for apache demon access
 RUN chown -R apache:apache /quip
 # adjust location of Drupal-supporting MySQL database files
@@ -52,11 +54,9 @@ COPY mysql.tgz /build
 RUN mkdir /quip/pathdbconfig
 COPY config/* /quip/pathdbconfig/
 COPY content/* /quip/content/
-RUN mkdir /quip/web/sup
-COPY sup/* /quip/web/sup/
 # download caMicroscope
 WORKDIR /quip/web
-RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.8
+RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.9
 RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh

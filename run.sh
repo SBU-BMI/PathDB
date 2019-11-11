@@ -34,15 +34,18 @@ if [ ! -d /data/pathdb/config/sync ]; then
 	chown -R apache:apache /data/pathdb/config/sync
 	chmod -R 770 /data/pathdb/config/sync
 fi
-if [ ! -d /data/pathdb/mysql ] && [ -f /build/mysql.tgz ]; then
-	cd /data/pathdb
-	cp -cp  /build/mysql.tgz .
-	tar xvfz mysql.tgz
-	chown -R mysql mysql
-	rm mysql.tgz
-	# since database is being rebuilt, make sure permissions are okay on files folder
-        chown apache:apache /data/pathdb/files
-        chmod 775 /data/pathdb/files
+
+if [ ! -d /data/pathdb/mysql ]; then
+	mysql_install_db --force --defaults-file=/config/pathdbmysql.cnf
+	/usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
+        until mysqladmin status
+        do
+                sleep 3
+        done
+	cd /build
+        tar xvfz mysql.tgz
+        mysql -u root -e "create database QuIP"
+        mysql QuIP < mysql
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
@@ -108,6 +111,7 @@ else
 	done
         httpd -f /config/httpd.conf
 	cd /quip/web
+	/quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi

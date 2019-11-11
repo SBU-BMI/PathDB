@@ -1,6 +1,6 @@
 uuid: 4a460522-eea5-4c80-a739-58a62705c7c6
 langcode: en
-status: true
+status: false
 dependencies:
   module:
     - comment

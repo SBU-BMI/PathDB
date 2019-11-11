@@ -2,10 +2,9 @@ name: Automatic Entity Labels
 description: Allows hiding of entity label fields and automatic label creation.
 package: Entity
 type: module
-# core: 8.x
+core: 8.x
 
-# Information added by Drupal.org packaging script on 2019-07-24
-version: '8.x-3.0-beta1'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2019-10-10
+version: '8.x-3.0-beta2'
 project: 'auto_entitylabel'
-datestamp: 1563986603
+datestamp: 1570745588

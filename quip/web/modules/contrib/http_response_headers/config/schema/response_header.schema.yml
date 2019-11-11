@@ -1,0 +1,25 @@
+# Schema for the configuration entities of the HTTP Response Headers module.
+http_response_headers.response_header.*:
+  type: config_entity
+  label: 'Example config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    description:
+      type: string
+      label: 'description'
+    group:
+      type: string
+      label: 'Header group'
+      nullable: TRUE
+    name:
+      type: string
+      label: 'Header type'
+    value:
+      type: string
+      label: 'Header value'
+      nullable: TRUE

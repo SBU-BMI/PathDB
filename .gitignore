@@ -1,0 +1,5 @@
+**/.gitignore
+**/.gitattributes
+**/.github
+/quip/web/sites/default/files/
+

@@ -1,0 +1,19 @@
+{
+  "type": [
+    {
+      "target_id": "page"
+    }
+  ],
+  "title": [
+    {
+      "value": "QuIP"
+    }
+  ],
+  "promote":[{"value":true}],
+  "body": [
+    {
+      "value": "<p><img src=\"/images/banner1.jpg\" /></p>",
+      "format": "full_html"
+    }
+  ]
+}

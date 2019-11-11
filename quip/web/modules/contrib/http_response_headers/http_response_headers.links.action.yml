@@ -1,0 +1,5 @@
+entity.response_header.add_form:
+  route_name: 'entity.response_header.add_form'
+  title: 'Add a response header'
+  appears_on:
+    - entity.response_header.collection
