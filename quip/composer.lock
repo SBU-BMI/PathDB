@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "90c0c6df6b666f254dd8ee30cd2081da",
+    "content-hash": "7d03293ebe73ba4efa3fac81d4c24536",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -3382,6 +3382,57 @@
             "homepage": "https://www.drupal.org/project/hide_revision_field",
             "support": {
                 "source": "http://cgit.drupalcode.org/hide_revision_field"
+            }
+        },
+        {
+            "name": "drupal/http_response_headers",
+            "version": "2.0.0-alpha1",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/http_response_headers.git",
+                "reference": "8.x-2.0-alpha1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/http_response_headers-8.x-2.0-alpha1.zip",
+                "reference": "8.x-2.0-alpha1",
+                "shasum": "2d4188bd04467a27afddb33fffdd5eb5f8abaf04"
+            },
+            "require": {
+                "drupal/core": "~8.0"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "branch-alias": {
+                    "dev-2.x": "2.x-dev"
+                },
+                "drupal": {
+                    "version": "8.x-2.0-alpha1",
+                    "datestamp": "1501159742",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Alpha releases are not covered by Drupal security advisories."
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL 2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "minnur",
+                    "homepage": "https://www.drupal.org/user/702026"
+                },
+                {
+                    "name": "vijaycs85",
+                    "homepage": "https://www.drupal.org/user/93488"
+                }
+            ],
+            "description": "Allows addition, removal and modification of http headers.",
+            "homepage": "https://www.drupal.org/project/http_response_headers",
+            "support": {
+                "source": "https://git.drupalcode.org/project/http_response_headers"
             }
         },
         {

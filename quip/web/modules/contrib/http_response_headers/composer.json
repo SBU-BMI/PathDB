@@ -1,0 +1,6 @@
+{
+    "name": "drupal/http_response_headers",
+    "description": "Allows addition, removal and modification of http headers.",
+    "type": "drupal-module",
+    "license": "GPL 2.0+"
+}

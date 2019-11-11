@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * HTTP Header manipulations module.
+ */
+
+use Drupal\Core\Url;
+use Drupal\Core\Link;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function http_response_headers_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name !== 'help.page.http_response_headers') {
+    return '';
+  }
+
+  $output = '<h3>HTTP Repsonse Headers Help</h3>';
+
+  $output .= 'This module provides basic security headers by default. But in most cases will require further configuration based on your requirements.';
+
+  $help = [
+    '#theme' => 'item_list',
+    '#list_type' => 'ul',
+    '#title' => 'For more information about security headers visit:',
+    '#items' => [
+      Link::fromTextAndUrl('securityheaders.io', Url::fromUri('https://securityheaders.io/')),
+      Link::fromTextAndUrl('scotthelme.co.uk', Url::fromUri('https://scotthelme.co.uk/')),
+    ],
+    '#attributes' => ['class' => 'help-resources'],
+    '#wrapper_attributes' => ['class' => 'container'],
+  ];
+  $output .= render($help);
+
+  return $output;
+}
