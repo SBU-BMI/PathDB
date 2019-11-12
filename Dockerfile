@@ -51,8 +51,12 @@ RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nod
 EXPOSE 80
 COPY run.sh /root/run.sh
 COPY mysql.tgz /build
-RUN mkdir /quip/pathdbconfig
-COPY config/* /quip/pathdbconfig/
+RUN mkdir /quip/config
+RUN mkdir /quip/config-update
+COPY config/* /quip/config/
+COPY config/* /quip/config-update/
+# remove local exceptions to updates
+RUN rm /quip/config-update/tac_lite.settings.yml
 COPY content/* /quip/content/
 # download caMicroscope
 WORKDIR /quip/web

@@ -9,10 +9,12 @@ dependencies:
     - field.storage.node.imageid
     - field.storage.node.studyid
     - node.type.wsi
+    - user.role.authenticated
   module:
     - node
     - rest
     - serialization
+    - user
     - views_taxonomy_term_name_depth
 id: listofimages
 label: listofimages
@@ -30,8 +32,10 @@ display:
     position: 0
     display_options:
       access:
-        type: none
-        options: {  }
+        type: role
+        options:
+          role:
+            authenticated: authenticated
       cache:
         type: tag
         options: {  }
@@ -86,9 +90,65 @@ display:
           summary: ''
           description: ''
           columns:
-            title: title
+            field_collection_1: field_collection_1
+            field_collection: field_collection
+            studyid: studyid
+            clinicaltrialsubjectid: clinicaltrialsubjectid
+            imageid: imageid
+            nid: nid
+            nid_1: nid_1
+            nid_2: nid_2
           info:
-            title:
+            field_collection_1:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_collection:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            studyid:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            clinicaltrialsubjectid:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            imageid:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            nid:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            nid_1:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            nid_2:
               sortable: false
               default_sort_order: asc
               align: ''
@@ -562,7 +622,7 @@ display:
             alter_text: true
             text: Maps
             make_link: true
-            path: '/maps/{{ nid_2 }}'
+            path: '/maps/{{ nid_1 }}'
             absolute: false
             external: false
             replace_spaces: false
@@ -668,10 +728,10 @@ display:
           entity_field: type
           plugin_id: bundle
       sorts:
-        created:
-          id: created
-          table: node_field_data
-          field: created
+        field_collection_target_id:
+          id: field_collection_target_id
+          table: node__field_collection
+          field: field_collection_target_id
           relationship: none
           group_type: group
           admin_label: ''
@@ -679,10 +739,43 @@ display:
           exposed: false
           expose:
             label: ''
-          granularity: second
-          entity_type: node
-          entity_field: created
-          plugin_id: date
+          plugin_id: standard
+        studyid_value:
+          id: studyid_value
+          table: node__studyid
+          field: studyid_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: standard
+        clinicaltrialsubjectid_value:
+          id: clinicaltrialsubjectid_value
+          table: node__clinicaltrialsubjectid
+          field: clinicaltrialsubjectid_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: standard
+        imageid_value:
+          id: imageid_value
+          table: node__imageid
+          field: imageid_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          plugin_id: standard
       title: 'List of Images'
       header: {  }
       footer: {  }
@@ -750,6 +843,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
@@ -772,6 +866,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
@@ -826,6 +921,7 @@ display:
         - url
         - url.query_args
         - 'user.node_grants:view'
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'

@@ -10,6 +10,7 @@ dependencies:
     - field.storage.node.imageid
     - field.storage.node.studyid
     - node.type.wsi
+    - user.role.authenticated
   module:
     - csv_serialization
     - file
@@ -36,9 +37,10 @@ display:
     position: 0
     display_options:
       access:
-        type: perm
+        type: role
         options:
-          perm: 'access content'
+          role:
+            authenticated: authenticated
       cache:
         type: tag
         options: {  }
@@ -580,7 +582,7 @@ display:
         - 'languages:language_interface'
         - url
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_iip_path'
@@ -1012,7 +1014,7 @@ display:
         - request_format
         - url
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_iip_path'
@@ -1114,7 +1116,7 @@ display:
         - request_format
         - url
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_iip_path'
@@ -1137,7 +1139,7 @@ display:
         - 'languages:language_interface'
         - url
         - 'user.node_grants:view'
-        - user.permissions
+        - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_iip_path'
