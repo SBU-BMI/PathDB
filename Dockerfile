@@ -52,7 +52,9 @@ EXPOSE 80
 COPY run.sh /root/run.sh
 COPY mysql.tgz /build
 RUN mkdir /quip/pathdbconfig
+RUN mkdir /quip/pathdbconfig-update
 COPY config/* /quip/pathdbconfig/
+COPY config-update/* /quip/pathdbconfig-update/
 COPY content/* /quip/content/
 # download caMicroscope
 WORKDIR /quip/web
