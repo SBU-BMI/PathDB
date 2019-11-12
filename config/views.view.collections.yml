@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - taxonomy.vocabulary.collections
+    - user.role.authenticated
   module:
     - ds
     - rest
@@ -26,9 +27,10 @@ display:
     position: 0
     display_options:
       access:
-        type: perm
+        type: role
         options:
-          perm: 'access content'
+          role:
+            authenticated: authenticated
       cache:
         type: tag
         options: {  }
@@ -357,7 +359,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-        - user.permissions
+        - user.roles
       tags: {  }
   page_1:
     display_plugin: page
@@ -373,7 +375,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-        - user.permissions
+        - user.roles
       tags: {  }
   rest_export_1:
     display_plugin: rest_export
@@ -397,5 +399,5 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - request_format
-        - user.permissions
+        - user.roles
       tags: {  }

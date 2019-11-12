@@ -34,7 +34,11 @@ if [ ! -d /data/pathdb/config/sync ]; then
 	chown -R apache:apache /data/pathdb/config/sync
 	chmod -R 770 /data/pathdb/config/sync
 fi
-
+#create logs directory if missing
+if [ ! -d /data/pathdb/logs ]; then
+        mkdir -p /data/pathdb/logs
+	chown -R apache:apache /data/pathdb/logs
+fi
 if [ ! -d /data/pathdb/mysql ]; then
 	mysql_install_db --force --defaults-file=/config/pathdbmysql.cnf
 	/usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
@@ -109,9 +113,14 @@ else
 	do
         	sleep 3
 	done
+        #if [ ! -d /quip/config-local ]; then
+        #  mkdir /quip/config-local
+        #  chown -R apache:apache /quip/config-local
+        #fi
+        #/quip/vendor/bin/drush -y config:export --destination /quip/config-local
         httpd -f /config/httpd.conf
 	cd /quip/web
-	/quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig-update/
+	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi
