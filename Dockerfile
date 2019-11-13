@@ -60,8 +60,8 @@ RUN rm /quip/config-update/tac_lite.settings.yml
 COPY content/* /quip/content/
 # download caMicroscope
 WORKDIR /quip/web
-RUN git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.9
-RUN git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3
+RUN if [ -z ${viewer} ]; then git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.10; else git clone https://github.com/camicroscope/caMicroscope.git --branch=$viewer; fi
+RUN if [ -z ${featureMap} ]; then git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3; else git clone https://github.com/SBU-BMI/FeatureMap --branch=$featureMap; fi
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
 RUN yum update -y && yum clean all
