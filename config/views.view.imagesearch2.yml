@@ -131,7 +131,7 @@ display:
           label: ID
           exclude: true
           alter:
-            alter_text: true
+            alter_text: false
             text: caMic
             make_link: true
             path: '/caMicroscope/apps/viewer/viewer.html?slideId={{nid}}&mode=pathdb'
