@@ -1,0 +1,19 @@
+uuid: 252583fd-c619-4b0e-9010-7b4cde913b83
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.md5
+    - node.type.wsi
+id: node.wsi.md5
+field_name: md5
+entity_type: node
+bundle: wsi
+label: MD5
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

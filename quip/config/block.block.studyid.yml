@@ -1,0 +1,23 @@
+uuid: 106b4318-bddd-411e-9424-dc8b44c1097c
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.study_id
+  module:
+    - facets
+  theme:
+    - drupal8_w3css_theme
+id: studyid
+theme: drupal8_w3css_theme
+region: sidebar_first
+weight: -6
+provider: null
+plugin: 'facet_block:study_id'
+settings:
+  id: 'facet_block:study_id'
+  label: 'Study ID'
+  provider: facets
+  label_display: visible
+  block_id: studyid
+visibility: {  }
