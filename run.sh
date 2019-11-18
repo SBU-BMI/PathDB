@@ -28,6 +28,10 @@ cp /config/pathdb/w3-theme-custom.css /quip/web/themes/contrib/d8w3css/css/w3-cs
 # make sure permissions of pathdb folder are correct
 chown -R apache:apache /quip/web/sites/default
 chmod -R 770 /quip/web/sites/default
+#create pathdb directory if missing
+if [ ! -d /data/pathdb ]; then
+        mkdir -p /data/pathdb
+fi
 # make sure sync folder exists and set permissions
 if [ ! -d /data/pathdb/config/sync ]; then
 	mkdir -p /data/pathdb/config/sync
@@ -42,6 +46,9 @@ fi
 if [ ! -d /data/pathdb/files/wsi ]; then
         mkdir -p /data/pathdb/files/wsi
 fi
+# check security
+chown apache:apache /data/pathdb
+chown -R apache:apache /data/pathdb/config
 chown apache:apache /data/pathdb/files
 chown apache:apache /data/pathdb/wsi
 #create logs directory if missing
