@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ea819e46739510767970d28d1b419d30",
+    "content-hash": "53c42a0144ba7dee2a78771146ed8eca",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1845,16 +1845,16 @@
         },
         {
             "name": "symfony/dependency-injection",
-            "version": "v3.4.15",
+            "version": "v3.4.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dependency-injection.git",
-                "reference": "09d7df7bf06c1393b6afc85875993cbdbdf897a0"
+                "reference": "0ea4d39ca82409a25a43b61ce828048a90000920"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/09d7df7bf06c1393b6afc85875993cbdbdf897a0",
-                "reference": "09d7df7bf06c1393b6afc85875993cbdbdf897a0",
+                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/0ea4d39ca82409a25a43b61ce828048a90000920",
+                "reference": "0ea4d39ca82409a25a43b61ce828048a90000920",
                 "shasum": ""
             },
             "require": {
@@ -1912,7 +1912,7 @@
             ],
             "description": "Symfony DependencyInjection Component",
             "homepage": "https://symfony.com",
-            "time": "2018-08-08T11:42:34+00:00"
+            "time": "2019-11-08T16:18:30+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -3551,7 +3551,7 @@
             "version": "8.2.12",
             "source": {
                 "type": "git",
-                "url": "https://git.drupal.org/project/coder.git",
+                "url": "https://git.drupalcode.org/project/coder.git",
                 "reference": "984c54a7b1e8f27ff1c32348df69712afd86b17f"
             },
             "require": {
@@ -3932,12 +3932,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "8a457eb0e3dcd366b85fd0ee1e6509cf17e47814"
+                "reference": "4665f6411253f737658f9aae12e6cafd3ca26b13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/8a457eb0e3dcd366b85fd0ee1e6509cf17e47814",
-                "reference": "8a457eb0e3dcd366b85fd0ee1e6509cf17e47814",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/4665f6411253f737658f9aae12e6cafd3ca26b13",
+                "reference": "4665f6411253f737658f9aae12e6cafd3ca26b13",
                 "shasum": ""
             },
             "require": {
@@ -4002,7 +4002,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-02-11T23:06:14+00:00"
+            "time": "2018-11-07T22:53:13+00:00"
         },
         {
             "name": "symfony/filesystem",
