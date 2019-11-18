@@ -34,6 +34,11 @@ if [ ! -d /data/pathdb/config/sync ]; then
 	chown -R apache:apache /data/pathdb/config/sync
 	chmod -R 770 /data/pathdb/config/sync
 fi
+#create files directory if missing
+if [ ! -d /data/pathdb/files ]; then
+        mkdir -p /data/pathdb/files
+        chown apache:apache /data/pathdb/files
+fi
 #create logs directory if missing
 if [ ! -d /data/pathdb/logs ]; then
         mkdir -p /data/pathdb/logs
