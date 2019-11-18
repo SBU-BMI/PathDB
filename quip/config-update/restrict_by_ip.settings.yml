@@ -1,0 +1,12 @@
+header: REMOTE_ADDR
+error_page: ''
+login_range: ''
+user:
+  2: 127.0.0.1/32
+role: {  }
+dependencies:
+  enforced:
+    module:
+      - restrict_by_ip
+_core:
+  default_config_hash: GEn2BysZFUY3b2nsNhzlkcXAIj-Y5d3LKedVDgwfn8w

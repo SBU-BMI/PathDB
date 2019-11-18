@@ -1,0 +1,14 @@
+uuid: e505fe49-177e-4c38-88a3-3cdf2b839ca1
+langcode: en
+status: true
+dependencies:
+  config:
+    - taxonomy.vocabulary.collections
+id: taxonomy_term.collections.default
+targetEntityType: taxonomy_term
+bundle: collections
+mode: default
+content: {  }
+hidden:
+  description: true
+  search_api_excerpt: true

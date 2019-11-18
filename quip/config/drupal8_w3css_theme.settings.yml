@@ -1,0 +1,60 @@
+features:
+  comment_user_picture: 1
+  comment_user_verification: 1
+  favicon: 1
+  logo: true
+  name: true
+  node_user_picture: 1
+  slogan: true
+facebook_url: 'https://www.facebook.com/flashwebcenter'
+twitter_url: 'https://twitter.com/flashwebcenter'
+pinterest_url: 'https://www.pinterest.com/alaahaddad'
+google_plus_url: 'https://plus.google.com/+Flashwebcenter'
+linkedin_url: 'http://www.linkedin.com/company/flash-web-center'
+instagram_url: 'https://www.instagram.com/flashwebcenter'
+youtube_url: 'https://www.youtube.com/user/flashwebcenter'
+drupal_url: 'https://www.drupal.org/u/flashwebcenter'
+rss_url: rss.xml
+copyright_text: '5U24CA215109 - TCIA Sustainment and Scalability - Platforms for Quantitative Imaging Informatics in Precision Medicine (PRISM)'
+show_social_icon: 0
+show_credit_link: 0
+top_region: 1
+main_region: 1
+bottom_region: 1
+footer_region: 1
+_core:
+  default_config_hash: dgz9gxPMcs1i9Iu9qsUxrYdLR_N-a74VDp9m5LThnjY
+logo:
+  use_default: 0
+  path: ''
+favicon:
+  use_default: 1
+website_width: ''
+equal_width: 0
+current_theme: w3-theme-custom
+color_page_wrapper: ''
+color_header: ''
+color_primary_menu: ''
+color_welcome_text: ''
+color_highlighted: ''
+color_top_container: ''
+color_top_first: ''
+color_top_second: ''
+color_top_third: ''
+color_page_title: ''
+color_main: 'w3-link-blue-grey w3-link-teal-hover'
+color_breadcrumb: ''
+color_sidebar_first: ''
+color_content: ''
+color_sidebar_second: ''
+color_bottom_container: ''
+color_bottom_first: ''
+color_bottom_second: ''
+color_bottom_third: ''
+color_bottom_forth: ''
+color_footer_container: ''
+color_footer_first: ''
+color_footer_second: ''
+color_footer_third: ''
+color_footer_menu: ''
+color_copyright: ''
