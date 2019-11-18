@@ -37,8 +37,13 @@ fi
 #create files directory if missing
 if [ ! -d /data/pathdb/files ]; then
         mkdir -p /data/pathdb/files
-        chown apache:apache /data/pathdb/files
 fi
+#create files/wsi directory if missing
+if [ ! -d /data/pathdb/files/wsi ]; then
+        mkdir -p /data/pathdb/files/wsi
+fi
+chown apache:apache /data/pathdb/files
+chown apache:apache /data/pathdb/wsi
 #create logs directory if missing
 if [ ! -d /data/pathdb/logs ]; then
         mkdir -p /data/pathdb/logs
