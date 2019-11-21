@@ -21,10 +21,19 @@ settings:
     -
       value: Pyradiomics
       label: Pyradiomics
+    -
+      value: Cancer
+      label: Cancer
+    -
+      value: Area
+      label: Area
+    -
+      value: Perimeter
+      label: Perimeter
   allowed_values_function: ''
 module: options
 locked: false
-cardinality: 1
+cardinality: -1
 translatable: true
 indexes: {  }
 persist_with_no_fields: false
