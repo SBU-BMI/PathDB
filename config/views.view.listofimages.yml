@@ -594,7 +594,7 @@ display:
           click_sort_column: value
           type: number_integer
           settings:
-            thousand_separator: .
+            thousand_separator: ''
             prefix_suffix: false
           group_column: value
           group_columns: {  }
@@ -849,7 +849,6 @@ display:
         - 'config:field.storage.node.field_collection'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions
   page_1:
     display_plugin: page
     id: page_1
@@ -872,7 +871,6 @@ display:
         - 'config:field.storage.node.field_collection'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions
   rest_export_1:
     display_plugin: rest_export
     id: rest_export_1
@@ -927,4 +925,3 @@ display:
         - 'config:field.storage.node.field_collection'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions

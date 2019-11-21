@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.node.map.execution_id
     - field.field.node.map.field_map
     - field.field.node.map.field_map_type
     - field.field.node.map.field_target_collection
@@ -15,6 +16,14 @@ targetEntityType: node
 bundle: map
 mode: default
 content:
+  execution_id:
+    weight: 26
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
   field_map:
     weight: 2
     settings:
