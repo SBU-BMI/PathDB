@@ -1,0 +1,25 @@
+uuid: e7829046-4bbd-44a8-8aa7-9b7893cc48b3
+langcode: en
+status: true
+dependencies:
+  module:
+    - basic_auth
+    - file
+    - jwt
+    - serialization
+    - user
+id: entity.file
+plugin_id: 'entity:file'
+granularity: resource
+configuration:
+  methods:
+    - GET
+    - POST
+    - DELETE
+    - PATCH
+  formats:
+    - json
+  authentication:
+    - basic_auth
+    - jwt_auth
+    - cookie

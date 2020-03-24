@@ -1,0 +1,398 @@
+ Select generator: 
+  [0] ..
+  [1] Drupal 7
+  [2] Drupal 8
+  [3] Other
+  ➤➤➤ 1⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Ctools plugin
+  [2 ] Views plugin
+  [3 ] Hook
+  [4 ] Info (module)
+  [5 ] Info (theme)
+  [6 ] Install file
+  [7 ] Javascript
+  [8 ] Module
+  [9 ] Module file
+  [10] Test
+  [11] Theme
+  [12] settings.php
+  [13] template.php
+  ➤➤➤➤ 1⏎
+ Select generator: 
+  [0] ..
+  [1] Access
+  [2] Content type
+  [3] Relationship
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Ctools plugin
+  [2 ] Views plugin
+  [3 ] Hook
+  [4 ] Info (module)
+  [5 ] Info (theme)
+  [6 ] Install file
+  [7 ] Javascript
+  [8 ] Module
+  [9 ] Module file
+  [10] Test
+  [11] Theme
+  [12] settings.php
+  [13] template.php
+  ➤➤➤➤ 2⏎
+ Select generator: 
+  [0] ..
+  [1] Argument default
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Ctools plugin
+  [2 ] Views plugin
+  [3 ] Hook
+  [4 ] Info (module)
+  [5 ] Info (theme)
+  [6 ] Install file
+  [7 ] Javascript
+  [8 ] Module
+  [9 ] Module file
+  [10] Test
+  [11] Theme
+  [12] settings.php
+  [13] template.php
+  ➤➤➤➤ 0⏎
+ Select generator: 
+  [0] ..
+  [1] Drupal 7
+  [2] Drupal 8
+  [3] Other
+  ➤➤➤ 2⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 1⏎
+ Select generator: 
+  [0] ..
+  [1] Config
+  [2] Confirm
+  [3] Simple
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 2⏎
+ Select generator: 
+  [0] ..
+  [1] Configuration entity
+  [2] Content entity
+  [3] Standard
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 3⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Field
+  [2 ] Migrate
+  [3 ] Views
+  [4 ] Action
+  [5 ] Block
+  [6 ] CKEditor
+  [7 ] Condition
+  [8 ] Constraint
+  [9 ] Entity reference selection
+  [10] Filter
+  [11] Menu link
+  [12] Queue worker
+  [13] REST resource
+  ➤➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 4⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Access checker
+  [2 ] Breadcrumb builder
+  [3 ] Cache context
+  [4 ] Custom service
+  [5 ] Event subscriber
+  [6 ] Logger
+  [7 ] Middleware
+  [8 ] Param converter
+  [9 ] Path processor
+  [10] Request policy
+  [11] Response policy
+  [12] Route subscriber
+  [13] Theme negotiator
+  [14] Twig extension
+  [15] Uninstall validator
+  ➤➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 5⏎
+ Select generator: 
+  [0] ..
+  [1] Browser
+  [2] Kernel
+  [3] Nightwatch
+  [4] Unit
+  [5] Web (simpletest)
+  [6] WebDriver
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 6⏎
+ Select generator: 
+  [0] ..
+  [1] Links
+  [2] Breakpoints
+  [3] Info (module)
+  [4] Info (theme)
+  [5] Libraries (module)
+  [6] Libraries (theme)
+  [7] Permissions
+  [8] Routing
+  [9] Services
+  ➤➤➤ 1⏎
+ Select generator: 
+  [0] ..
+  [1] Action
+  [2] Contextual
+  [3] Menu
+  [4] Task
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0] ..
+  [1] Links
+  [2] Breakpoints
+  [3] Info (module)
+  [4] Info (theme)
+  [5] Libraries (module)
+  [6] Libraries (theme)
+  [7] Permissions
+  [8] Routing
+  [9] Services
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 0⏎
+ Select generator: 
+  [0] ..
+  [1] Drupal 7
+  [2] Drupal 8
+  [3] Other
+  ➤➤➤ 3⏎
+ Select generator: 
+  [0] ..
+  [1] Apache virtual host
+  [2] DCG command
+  [3] Drupal console command
+  [4] Drush command
+  [5] HTML page
+  [6] Nginx virtual host
+  ➤➤➤ 0⏎
+ Select generator: 
+  [0] ..
+  [1] Drupal 7
+  [2] Drupal 8
+  [3] Other
+  ➤➤➤ 2⏎
+ Select generator: 
+  [0 ] ..
+  [1 ] Form
+  [2 ] Module
+  [3 ] Plugin
+  [4 ] Service
+  [5 ] Test
+  [6 ] Yml
+  [7 ] Controller
+  [8 ] Field
+  [9 ] Hook
+  [10] Install file
+  [11] Javascript
+  [12] Layout
+  [13] Module file
+  [14] Plugin manager
+  [15] Project
+  [16] Render element
+  [17] Service provider
+  [18] Settings local
+  [19] Template
+  [20] Theme
+  [21] Theme file
+  [22] Theme settings
+  [23] composer.json
+  ➤➤➤➤ 10⏎
+
+ Welcome to d8:install-file generator!
+–––––––––––––––––––––––––––––––––––––––
+
+ Module name [Dcg sandbox]:
+ ➤ Foo⏎
+
+ Module machine name [foo]:
+ ➤ foo⏎
+
+ The following directories and files have been created or updated:
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+ • foo.install
