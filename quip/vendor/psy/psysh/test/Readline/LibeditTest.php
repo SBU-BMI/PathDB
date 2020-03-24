@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -38,6 +38,16 @@ class LibeditTest extends \PHPUnit\Framework\TestCase
         if (\is_file($this->historyFile)) {
             \unlink($this->historyFile);
         }
+    }
+
+    public function testReadlineName()
+    {
+        if (\defined('HHVM_VERSION')) {
+            $this->markTestSkipped();
+        }
+
+        $readline = new Libedit($this->historyFile);
+        $this->assertEquals(\readline_info('readline_name'), 'psysh');
     }
 
     public function testHistory()

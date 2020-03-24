@@ -1,6 +1,6 @@
 <?php
 
-namespace DrupalPractice\Sniffs\Objects;
+namespace DrupalPractice\Test\Objects;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -14,9 +14,11 @@ class StrictSchemaDisabledUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of errors that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    protected function getErrorList()
+    protected function getErrorList(string $testFile): array
     {
         return [
             11 => 1,
@@ -35,9 +37,11 @@ class StrictSchemaDisabledUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of warnings that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    protected function getWarningList()
+    protected function getWarningList(string $testFile): array
     {
         return [];
 

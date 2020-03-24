@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,6 @@ use Psy\Exception\RuntimeException;
 use Psy\Formatter\CodeFormatter;
 use Psy\Formatter\SignatureFormatter;
 use Psy\Input\CodeArgument;
-use Psy\Output\ShellOutput;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -35,7 +34,7 @@ class ShowCommand extends ReflectingCommand
     private $lastExceptionIndex;
 
     /**
-     * @param null|string $colorMode (default: null)
+     * @param string|null $colorMode (default: null)
      */
     public function __construct($colorMode = null)
     {
@@ -99,11 +98,15 @@ HELP
                 throw new \InvalidArgumentException('Too many arguments (supply either "target" or "--ex")');
             }
 
-            return $this->writeExceptionContext($input, $output);
+            $this->writeExceptionContext($input, $output);
+
+            return 0;
         }
 
         if ($input->getArgument('target')) {
-            return $this->writeCodeContext($input, $output);
+            $this->writeCodeContext($input, $output);
+
+            return 0;
         }
 
         throw new RuntimeException('Not enough arguments (missing: "target")');
@@ -117,7 +120,7 @@ HELP
         $this->setCommandScopeVariables($reflector);
 
         try {
-            $output->page(CodeFormatter::format($reflector, $this->colorMode), ShellOutput::OUTPUT_RAW);
+            $output->page(CodeFormatter::format($reflector, $this->colorMode), OutputInterface::OUTPUT_RAW);
         } catch (RuntimeException $e) {
             $output->writeln(SignatureFormatter::format($reflector));
             throw $e;
@@ -216,7 +219,7 @@ HELP
             return;
         }
 
-        $output->write($this->getHighlighter()->getCodeSnippet($code, $line, 5, 5), ShellOutput::OUTPUT_RAW);
+        $output->write($this->getHighlighter()->getCodeSnippet($code, $line, 5, 5), false, OutputInterface::OUTPUT_RAW);
     }
 
     private function getHighlighter()

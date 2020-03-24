@@ -3,7 +3,7 @@
  * Unit test class for all good files that must not throw errors/warnings.
  */
 
-namespace DrupalPractice\good;
+namespace DrupalPractice\Test\good;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -20,9 +20,11 @@ class GoodUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of errors that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getErrorList()
+    protected function getErrorList(string $testFile): array
     {
         return [];
 
@@ -35,9 +37,11 @@ class GoodUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of warnings that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getWarningList()
+    protected function getWarningList(string $testFile): array
     {
         return [];
 
@@ -49,38 +53,26 @@ class GoodUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFileBase The base path that the unit tests files will have.
      *
-     * @return array The list of test files.
+     * @return array<string>
      */
-    protected function getTestFiles($testFileBase)
+    protected function getTestFiles($testFileBase): array
     {
-        $dir = dirname(__FILE__);
-        $di  = new \DirectoryIterator($dir);
-
-        foreach ($di as $file) {
-            $path = $file->getPathname();
-            if ($path !== __FILE__ && $file->isFile() === true) {
-                $testFiles[] = $path;
-            }
-        }
-
-        // Get them in order.
-        sort($testFiles);
-        return $testFiles;
+        return [__DIR__.'/good.php'];
 
     }//end getTestFiles()
 
 
     /**
-     * Returns a list of sniff codes that should be checked in this test.
+     * False if just the current sniff should be checked, true if all sniffs should be checked.
      *
-     * @return array The list of sniff codes.
+     * @return bool
      */
-    protected function allSniffCodes()
+    protected function checkAllSniffCodes()
     {
         // We want to test all sniffs defined in the standard.
         return true;
 
-    }//end allSniffCodes()
+    }//end checkAllSniffCodes()
 
 
 }//end class

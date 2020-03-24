@@ -10,3 +10,6 @@ services:
     arguments: ["@restrict_by_ip.login_firewall","@current_user"]
     tags:
       - { name: event_subscriber }
+  restrict_by_ip.role_firewall:
+      class: Drupal\restrict_by_ip\RoleFirewall
+      arguments: ["@restrict_by_ip.ip_tools","@config.factory","@entity_type.manager"]

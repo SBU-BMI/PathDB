@@ -527,7 +527,8 @@ function ds_preprocess_ds_layout(&$variables) {
           );
         }
         list($key, $attribute_value) = explode('|', $replaced_attribute);
-        $variables['attributes'][$key] = $attribute_value;
+        // Handle the class attribute as an array and others as strings.
+        $key == 'class' ? $variables['attributes'][$key][] = $attribute_value : $variables['attributes'][$key] = $attribute_value;
       }
     }
   }

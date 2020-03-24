@@ -7,6 +7,7 @@ use Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataDefinitionInterface;
+use Drupal\file\FileInterface;
 use Drupal\typed_data\DataFilterBase;
 
 /**
@@ -24,9 +25,18 @@ class EntityUrlFilter extends DataFilterBase {
    */
   public function filter(DataDefinitionInterface $definition, $value, array $arguments, BubbleableMetadata $bubbleable_metadata = NULL) {
     assert($value instanceof EntityInterface);
-    // @todo url() is deprecated, but toUrl() does not work for file entities,
-    // thus remove url() once toUrl() works for file entities also.
-    return $value->url('canonical', ['absolute' => TRUE]);
+    // EntityInterface::toUrl() does not work properly for File entities; this
+    // is evidently "by design" and will not be fixed in core. Thus in order
+    // for this filter to work with File entities we must treat them
+    // differently, using the FileInterface::createFileUrl() method instead.
+    // @see https://www.drupal.org/project/drupal/issues/2402533
+    if ($value instanceof FileInterface) {
+      // The FALSE argument creates an absolute URL.
+      return $value->createFileUrl(FALSE);
+    }
+    else {
+      return $value->toUrl('canonical', ['absolute' => TRUE])->toString();
+    }
   }
 
   /**

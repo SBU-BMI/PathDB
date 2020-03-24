@@ -1,6 +1,6 @@
 <?php
 
-namespace DrupalPractice\Sniffs\Objects;
+namespace DrupalPractice\Test\Objects;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -14,9 +14,11 @@ class GlobalFunctionUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of errors that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    protected function getErrorList()
+    protected function getErrorList(string $testFile): array
     {
         return [];
 
@@ -31,9 +33,9 @@ class GlobalFunctionUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFile The name of the file being tested.
      *
-     * @return array(int => int)
+     * @return array<int, int>
      */
-    protected function getWarningList($testFile=null)
+    protected function getWarningList(string $testFile): array
     {
         switch ($testFile) {
         case 'TestForm.php':
@@ -65,9 +67,9 @@ class GlobalFunctionUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFileBase The base path that the unit tests files will have.
      *
-     * @return array The list of test files.
+     * @return array<string>
      */
-    protected function getTestFiles($testFileBase)
+    protected function getTestFiles($testFileBase): array
     {
         return [
             __DIR__.'/drupal8/DeclareT.php',

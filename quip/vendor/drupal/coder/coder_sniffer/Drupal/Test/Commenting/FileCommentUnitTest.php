@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Sniffs\Commenting;
+namespace Drupal\Test\Commenting;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -16,9 +16,9 @@ class FileCommentUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFile The name of the file being tested.
      *
-     * @return array(int => int)
+     * @return array<int, int>
      */
-    public function getErrorList($testFile=null)
+    protected function getErrorList(string $testFile): array
     {
         switch ($testFile) {
         case 'FileCommentUnitTest.inc':
@@ -49,6 +49,8 @@ class FileCommentUnitTest extends CoderSniffUnitTest
             return [2 => 1];
         }//end switch
 
+        return [];
+
     }//end getErrorList()
 
 
@@ -58,9 +60,11 @@ class FileCommentUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of warnings that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getWarningList()
+    protected function getWarningList(string $testFile): array
     {
         return [];
 

@@ -25,7 +25,7 @@ class FunctionTriggerErrorSniff extends FunctionCall
     /**
      * Returns an array of function names this test wants to listen for.
      *
-     * @return array
+     * @return array<string>
      */
     public function registerFunctionNames()
     {
@@ -37,13 +37,13 @@ class FunctionTriggerErrorSniff extends FunctionCall
     /**
      * Processes this function call.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile    The file being scanned.
-     * @param int                  $stackPtr     The position of the function call in
-     *                                           the stack.
-     * @param int                  $openBracket  The position of the opening
-     *                                           parenthesis in the stack.
-     * @param int                  $closeBracket The position of the closing
-     *                                           parenthesis in the stack.
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile    The file being scanned.
+     * @param int                         $stackPtr     The position of the function call in
+     *                                                  the stack.
+     * @param int                         $openBracket  The position of the opening
+     *                                                  parenthesis in the stack.
+     * @param int                         $closeBracket The position of the closing
+     *                                                  parenthesis in the stack.
      *
      * @return void
      */
@@ -79,6 +79,7 @@ class FunctionTriggerErrorSniff extends FunctionCall
             // quotes away and possibly not report a faulty message.
             $messageText = substr($tokens[$messagePosition]['content'], 1, ($tokens[$messagePosition]['length'] - 2));
         } else {
+            $messageParts = [];
             // If not sprintf() then extract and store all the items except
             // whitespace, concatenation operators and comma. This will give all
             // real content such as concatenated strings and constants.
@@ -112,7 +113,10 @@ class FunctionTriggerErrorSniff extends FunctionCall
             $block         = $phpcsFile->findPrevious(T_DOC_COMMENT_OPEN_TAG, $argument['start']);
         }
 
-        if (isset($block) === true && $tokens[$block]['level'] === $requiredLevel && isset($tokens[$block]['comment_tags']) === true) {
+        if (isset($tokens[$block]['level']) === true
+            && $tokens[$block]['level'] === $requiredLevel
+            && isset($tokens[$block]['comment_tags']) === true
+        ) {
             foreach ($tokens[$block]['comment_tags'] as $tag) {
                 $strictStandard = $strictStandard || (strtolower($tokens[$tag]['content']) === '@deprecated');
             }

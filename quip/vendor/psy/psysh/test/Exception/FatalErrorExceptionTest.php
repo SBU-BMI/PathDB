@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -45,6 +45,10 @@ class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
 
     public function testNegativeOneLineNumberIgnored()
     {
+        if (\defined('HHVM_VERSION')) {
+            $this->markTestSkipped('HHVM does not support the line number argument, apparently.');
+        }
+
         $e = new FatalErrorException('{msg}', 0, 1, null, -1);
         $this->assertEquals(0, $e->getLine());
     }

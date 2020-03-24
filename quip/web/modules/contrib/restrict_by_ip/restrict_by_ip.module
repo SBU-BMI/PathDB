@@ -168,3 +168,21 @@ function restrict_by_ip_role_check(&$user){
     }
   }
 }
+
+/**
+ * When a user entity is loaded, remove any roles that are restricted based on
+ * IP whitelists.
+ *
+ * @param \Drupal\user\Entity\User[] $users
+ *   Array of user entities keyed by entity ID.
+ */
+function restrict_by_ip_user_load($users) {
+  $role_firewall = \Drupal::service('restrict_by_ip.role_firewall');
+  $remove_roles = $role_firewall->rolesToRemove();
+
+  foreach ($users as $user) {
+    foreach ($remove_roles as $role) {
+      $user->removeRole($role);
+    }
+  }
+}

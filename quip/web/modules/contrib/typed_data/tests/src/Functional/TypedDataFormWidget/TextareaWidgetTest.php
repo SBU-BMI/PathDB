@@ -78,7 +78,7 @@ class TextareaWidgetTest extends BrowserTestBase {
       ->setLabel('Example string')
       ->setDescription('Some example string')
       ->setDefaultValue('default1');
-    \Drupal::state()->set('typed_data_widgets.definition', $context_definition);
+    $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
     $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();

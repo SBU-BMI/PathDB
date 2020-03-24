@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,7 @@
 
 namespace Psy\Test\Formatter;
 
+use Psy\Configuration;
 use Psy\Formatter\CodeFormatter;
 use Psy\Test\Formatter\Fixtures\SomeClass;
 
@@ -21,7 +22,7 @@ class CodeFormatterTest extends \PHPUnit\Framework\TestCase
      */
     public function testFormat($reflector, $expected)
     {
-        $formatted = CodeFormatter::format($reflector);
+        $formatted = CodeFormatter::format($reflector, Configuration::COLOR_MODE_FORCED);
         $formattedWithoutColors = \preg_replace('#' . \chr(27) . '\[\d\d?m#', '', $formatted);
 
         $this->assertEquals($expected, self::trimLines($formattedWithoutColors));

@@ -1,6 +1,6 @@
 <?php
 
-namespace DrupalPractice\Sniffs\InfoFiles;
+namespace DrupalPractice\Test\InfoFiles;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -14,9 +14,11 @@ class NamespacedDependencyUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of errors that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getErrorList()
+    protected function getErrorList(string $testFile): array
     {
         return [];
 
@@ -31,9 +33,9 @@ class NamespacedDependencyUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFile The name of the file being tested.
      *
-     * @return array(int => int)
+     * @return array<int, int>
      */
-    public function getWarningList($testFile=null)
+    protected function getWarningList(string $testFile): array
     {
         switch ($testFile) {
         case 'dependencies_test.info.yml':
@@ -46,6 +48,8 @@ class NamespacedDependencyUnitTest extends CoderSniffUnitTest
             return [];
         }
 
+        return [];
+
     }//end getWarningList()
 
 
@@ -54,9 +58,9 @@ class NamespacedDependencyUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFileBase The base path that the unit tests files will have.
      *
-     * @return array The list of test files.
+     * @return array<string>
      */
-    protected function getTestFiles($testFileBase)
+    protected function getTestFiles($testFileBase): array
     {
         return [
             __DIR__.'/dependencies_test.info.yml',

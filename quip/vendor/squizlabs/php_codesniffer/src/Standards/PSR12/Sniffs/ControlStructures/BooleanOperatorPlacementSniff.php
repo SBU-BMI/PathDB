@@ -9,12 +9,20 @@
 
 namespace PHP_CodeSniffer\Standards\PSR12\Sniffs\ControlStructures;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Util\Tokens;
+use PHP_CodeSniffer\Sniffs\Sniff;
 
 class BooleanOperatorPlacementSniff implements Sniff
 {
+
+    /**
+     * Used to restrict the placement of the boolean operator.
+     *
+     * Allowed value are "first" or "last".
+     *
+     * @var string|null
+     */
+    public $allowOnly = null;
 
 
     /**
@@ -66,8 +74,13 @@ class BooleanOperatorPlacementSniff implements Sniff
             T_BOOLEAN_OR,
         ];
 
+        if ($this->allowOnly === 'first' || $this->allowOnly === 'last') {
+            $position = $this->allowOnly;
+        } else {
+            $position = null;
+        }
+
         $operator  = $parenOpener;
-        $position  = null;
         $error     = false;
         $operators = [];
 

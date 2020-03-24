@@ -1,63 +1,39 @@
 <?php
 
 namespace Drupal\restrict_by_ip\Tests;
-use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests logins are restricted to certain IP address range(s).
  *
  * @group restrict_by_ip
- *
- * Assumes that local testing environment has IP address of 127.0.0.1.
  */
-class LoginTest extends WebTestBase {
-  /**
-   * @var \Drupal\user\Entity\User
-   */
-  private $regularUser;
-
-  /**
-   * @var \Drupal\Core\Config\Config
-   */
-  private $conf;
-
-  public static $modules = ['restrict_by_ip'];
-
-  public function setUp() {
-    // Enable modules needed for these tests.
-    parent::setUp();
-
-    $this->conf = $this->config('restrict_by_ip.settings');
-
-    // Create a user that we'll use to test logins.
-    $this->regularUser = $this->drupalCreateUser();
-  }
+class LoginTest extends RestrictByIPWebTestBase {
 
   // User can login when users IP matches global range.
   public function testIpMatchGlobal() {
     // Add global IP range.
-    $this->conf->set('login_range', '127.0.0.0/8')->save();
+    $this->conf->set('login_range', $this->currentIPCIDR)->save();
     $this->drupalLogin($this->regularUser);
   }
 
   // User disallowed login outside global range.
   public function testIpDifferGlobal() {
     // Add global IP range.
-    $this->conf->set('login_range', '10.0.0.0/8')->save();
+    $this->conf->set('login_range', $this->outOfRangeCIDR)->save();
     $this->assertNoLogin();
   }
 
   // User can login when users IP matchs users range.
   public function testIpMatchUser() {
     // Add in range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '127.0.0.0/8')->save();
+    $this->conf->set('user.' . $this->regularUser->id(), $this->currentIPCIDR)->save();
     $this->drupalLogin($this->regularUser);
   }
 
   // User disallowed login outside user range.
   public function testIpDifferUser() {
     // Add out of range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '10.0.0.0/8')->save();
+    $this->conf->set('user.' . $this->regularUser->id(), $this->outOfRangeCIDR)->save();
     $this->assertNoLogin();
   }
 
@@ -65,9 +41,9 @@ class LoginTest extends WebTestBase {
   // users range.
   public function testIpDifferGlobalMatchUser() {
     // Add out of range global IP.
-    $this->conf->set('login_range', '10.0.0.0/8');
+    $this->conf->set('login_range', $this->outOfRangeCIDR);
     // Add in range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '127.0.0.0/8');
+    $this->conf->set('user.' . $this->regularUser->id(), $this->currentIPCIDR);
     $this->conf->save();
     $this->drupalLogin($this->regularUser);
   }
@@ -76,9 +52,9 @@ class LoginTest extends WebTestBase {
   // global range.
   public function testIpMatchGlobalDifferUser() {
     // Add out of range global IP.
-    $this->conf->set('login_range', '127.0.0.0/8');
+    $this->conf->set('login_range', $this->currentIPCIDR);
     // Add in range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '10.0.0.0/8');
+    $this->conf->set('user.' . $this->regularUser->id(), $this->outOfRangeCIDR);
     $this->conf->save();
     $this->drupalLogin($this->regularUser);
   }
@@ -86,9 +62,9 @@ class LoginTest extends WebTestBase {
   // User disallowed login when users IP doesn't match global or users range.
   public function testIpDifferGlobalDiffUser() {
     // Add out of range global IP.
-    $this->conf->set('login_range', '10.0.0.0/8');
+    $this->conf->set('login_range', $this->outOfRangeCIDR);
     // Add in range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '10.0.0.0/8');
+    $this->conf->set('user.' . $this->regularUser->id(), $this->outOfRangeCIDR);
     $this->conf->save();
     $this->assertNoLogin();
   }
@@ -96,9 +72,9 @@ class LoginTest extends WebTestBase {
   // User can login when users IP matches global and users range.
   public function testIpMatchGlobalMatchUser() {
     // Add out of range global IP.
-    $this->conf->set('login_range', '127.0.0.0/8');
+    $this->conf->set('login_range', $this->currentIPCIDR);
     // Add in range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '127.0.0.0/8');
+    $this->conf->set('user.' . $this->regularUser->id(), $this->currentIPCIDR);
     $this->conf->save();
     $this->drupalLogin($this->regularUser);
   }
@@ -108,7 +84,7 @@ class LoginTest extends WebTestBase {
     // First login
     $this->drupalLogin($this->regularUser);
     // Add out of range global IP.
-    $this->conf->set('login_range', '10.0.0.0/8')->save();
+    $this->conf->set('login_range', $this->outOfRangeCIDR)->save();
     // Load any page, and check if logged out.
     $this->dumpHeaders = TRUE;
     $this->drupalGet('user');
@@ -117,9 +93,10 @@ class LoginTest extends WebTestBase {
 
   // Test that deleting a user also removes any IP restrictions.
   public function testUserDelete() {
-    $this->conf->set('user.' . $this->regularUser->id(), '10.0.0.0/8')->save();
+    $this->conf->set('user.' . $this->regularUser->id(), $this->outOfRangeCIDR)->save();
     $this->regularUser->delete();
-    $result = $this->conf->get('user.' . $this->regularUser->id());
+    $updatedConf = $this->config('restrict_by_ip.settings');
+    $result = $updatedConf->get('user.' . $this->regularUser->id());
     $this->assertNull($result);
   }
 

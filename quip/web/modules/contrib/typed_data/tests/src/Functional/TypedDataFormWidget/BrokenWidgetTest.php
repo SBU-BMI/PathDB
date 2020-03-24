@@ -77,7 +77,7 @@ class BrokenWidgetTest extends BrowserTestBase {
     $data_type = 'string';
     $context_definition = ContextDefinition::create($data_type)
       ->setLabel('Example string');
-    \Drupal::state()->set('typed_data_widgets.definition', $context_definition);
+    $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
     $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();

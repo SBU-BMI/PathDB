@@ -37,7 +37,7 @@ class ObjectOperatorIndentSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -72,7 +72,8 @@ class ObjectOperatorIndentSniff implements Sniff
         }
 
         // Check if the line before is in the same scope and go back if necessary.
-        $scopeDiff = [$previousLine => $previousLine];
+        $scopeDiff   = [$previousLine => $previousLine];
+        $startOfLine = $stackPtr;
         while (empty($scopeDiff) === false) {
             // Find the first non whitespace character on the previous line.
             $startOfLine      = $this->findStartOfline($phpcsFile, $previousLine);

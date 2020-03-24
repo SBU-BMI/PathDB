@@ -79,7 +79,7 @@ class SelectWidgetTest extends BrowserTestBase {
     $context_definition = ContextDefinition::create('filter_format')
       ->setLabel('Filter format')
       ->setDescription('Some example selection.');
-    \Drupal::state()->set('typed_data_widgets.definition', $context_definition);
+    $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
     $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();
@@ -107,7 +107,7 @@ class SelectWidgetTest extends BrowserTestBase {
       ->setLabel('Filter format')
       ->setDescription('Some example selection.')
       ->setRequired(TRUE);
-    \Drupal::state()->set('typed_data_widgets.definition', $context_definition);
+    $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
     $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();

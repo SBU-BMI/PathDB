@@ -2,10 +2,12 @@
 
 namespace Drupal\authorization_drupal_roles\Plugin\authorization\Consumer;
 
+use Drupal\Component\Transliteration\TransliterationInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\Role;
 use Drupal\authorization\Consumer\ConsumerPluginBase;
 use Drupal\user\UserInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a consumer for Drupal roles.
@@ -17,9 +19,55 @@ use Drupal\user\UserInterface;
  */
 class DrupalRolesConsumer extends ConsumerPluginBase {
 
+  /**
+   * Allow consumer target creation.
+   *
+   * @var bool
+   */
   protected $allowConsumerTargetCreation = TRUE;
 
+  /**
+   * Wildcard.
+   *
+   * @var string
+   */
   protected $wildcard = 'source';
+
+  /**
+   * Transliteration.
+   *
+   * @var \Drupal\Component\Transliteration\TransliterationInterface
+   */
+  protected $transliteration;
+
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, TransliterationInterface $transliteration, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->transliteration = $transliteration;
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('transliteration'),
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -27,7 +75,7 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form['description'] = [
       '#type' => 'markup',
-      '#markup' => t('There are no settings for Drupal roles.'),
+      '#markup' => $this->t('There are no settings for Drupal roles.'),
     ];
     return $form;
   }
@@ -48,7 +96,7 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
     $role_options['source'] = $this->t('Source (Any group)');
     $row['role'] = [
       '#type' => 'select',
-      '#title' => t('Role'),
+      '#title' => $this->t('Role'),
       '#options' => $role_options,
       '#default_value' => isset($mappings[$index]) ? $mappings[$index]['role'] : NULL,
       '#description' => $this->t("Choosing 'Source' maps any input directly to Drupal, use with caution."),
@@ -94,9 +142,10 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
    * {@inheritdoc}
    */
   public function createConsumerTarget($consumer) {
-    $safe_consumer = \Drupal::transliteration()->transliterate($consumer);
-    if (!Role::load($safe_consumer)) {
-      $role = Role::create(['id' => $safe_consumer, 'label' => $consumer]);
+    $safe_consumer = $this->transliteration->transliterate($consumer);
+    $storage = $this->entityTypeManager->getStorage('user_role');
+    if (!$storage->load($safe_consumer)) {
+      $role = $storage->create(['id' => $safe_consumer, 'label' => $consumer]);
       $role->save();
     }
   }

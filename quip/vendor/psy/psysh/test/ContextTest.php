@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -35,7 +35,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(['_' => null], $context->getAll());
 
         $e = new \Exception('eeeeeee');
-        $obj = new \StdClass();
+        $obj = new \stdClass();
         $context->setLastException($e);
         $context->setLastStdout('out');
         $context->setBoundObject($obj);
@@ -71,7 +71,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase
     {
         $context = new Context();
 
-        $baz = new \StdClass();
+        $baz = new \stdClass();
         $vars = [
             'foo' => 'Foo',
             'bar' => 123,
@@ -140,7 +140,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($val, $context->getReturnValue());
         $this->assertEquals($val, $context->get('_'));
 
-        $obj = new \StdClass();
+        $obj = new \stdClass();
         $context->setReturnValue($obj);
         $this->assertSame($obj, $context->getReturnValue());
         $this->assertSame($obj, $context->get('_'));
@@ -191,7 +191,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $context = new Context();
         $this->assertNull($context->getBoundObject());
 
-        $obj = new \StdClass();
+        $obj = new \stdClass();
         $context->setBoundObject($obj);
         $this->assertSame($obj, $context->getBoundObject());
         $this->assertSame($obj, $context->get('this'));
@@ -221,7 +221,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $context->setBoundClass('Psy\Shell');
         $this->assertEquals('Psy\Shell', $context->getBoundClass());
 
-        $context->setBoundObject(new \StdClass());
+        $context->setBoundObject(new \stdClass());
         $this->assertNotNull($context->getBoundObject());
         $this->assertNull($context->getBoundClass());
 

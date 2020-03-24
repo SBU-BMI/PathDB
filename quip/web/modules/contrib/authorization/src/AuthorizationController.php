@@ -5,7 +5,7 @@ namespace Drupal\authorization;
 use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\user\UserInterface;
-use Drupal\Core\Logger\LoggerChannelInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class AuthorizationController.
@@ -22,7 +22,7 @@ class AuthorizationController {
   /**
    * Logger.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
 
@@ -46,7 +46,7 @@ class AuthorizationController {
   /**
    * Constructs a new AuthorizationController object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerChannelInterface $logger_channel_authorization) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger_channel_authorization) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger_channel_authorization;
   }
@@ -71,10 +71,6 @@ class AuthorizationController {
    *
    * @param string $profile_id
    *   Authorization profile to act upon.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function setIndividualProfile($profile_id) {
     /** @var \Drupal\authorization\Entity\AuthorizationProfile $profile */
@@ -108,10 +104,6 @@ class AuthorizationController {
    *
    * @param string $profile_id
    *   Authorization profile to act upon.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function queryIndividualProfile($profile_id) {
     /** @var \Drupal\authorization\Entity\AuthorizationProfile $profile */
@@ -146,8 +138,6 @@ class AuthorizationController {
    *   The profile to act upon.
    * @param bool $save_user
    *   Save the user in the end.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function processAuthorizations(AuthorizationProfile $profile, $save_user) {
     if ($profile->checkConditions()) {

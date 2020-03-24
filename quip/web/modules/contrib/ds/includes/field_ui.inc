@@ -37,6 +37,11 @@ function ds_field_ui_fields_layouts(&$form, FormStateInterface $form_state) {
   $entity_display = $entity_form->getEntity();
   $view_mode = $entity_display->getMode();
 
+  // Check layout builder.
+  if (\Drupal::moduleHandler()->moduleExists('layout_builder') && $entity_display->isLayoutBuilderEnabled()) {
+    return;
+  }
+
   // Create vertical tabs.
   ds_field_ui_create_vertical_tabs($form);
 
@@ -324,6 +329,15 @@ function ds_field_ui_layouts_save($form, FormStateInterface $form_state) {
   /* @var \Drupal\Core\Entity\Display\EntityDisplayInterface $display */
   $display = $entity_form->getEntity();
 
+  if (\Drupal::moduleHandler()->moduleExists('layout_builder') && $display->isLayoutBuilderEnabled()) {
+    $display->unsetThirdPartySetting('ds', 'layout');
+    $display->unsetThirdPartySetting('ds', 'regions');
+    $display->unsetThirdPartySetting('ds', 'fields');
+    $display->save();
+    $form_state->set('ignore_ds_fields', FALSE);
+    return;
+  }
+
   // Get view mode.
   $view_mode = $display->getMode();
 
@@ -359,19 +373,32 @@ function ds_field_ui_layouts_save($form, FormStateInterface $form_state) {
     $display->unsetThirdPartySetting('ds', 'layout');
     $display->unsetThirdPartySetting('ds', 'regions');
 
-    // If layout is empty, unset all regions of the core fields, forcing the
-    // display to set the default region. Because we are earlier than core,
-    // change the values in $form_state instead of manipulating the display.
-    // Also notify ds_field_ui_fields_save() that it shouldn't save the
-    // third party settings anymore for fields.
+    // If layout is empty, reset all fields to content, if the region is not
+    // set to hidden at the moment. This takes field groups into account as well
+    // automatically.
     if (empty($layout)) {
       $form_state->set('ignore_ds_fields', FALSE);
       $display->unsetThirdPartySetting('ds', 'fields');
 
+      // Check for Field Group form params. If it's available, reset the
+      // available and default regions.
+      $field_group_params = $form_state->get('field_group_params');
+      if (isset($field_group_params) && !empty($field_group_params->available_regions) && !empty($field_group_params->default_region)) {
+        $field_group_params->available_regions = ['content', 'hidden'];
+        $field_group_params->default_region = 'hidden';
+        $form_state->set('field_group_params', $field_group_params);
+      }
+
       $fields = $form_state->getValue('fields');
       if (!empty($fields)) {
-        foreach (array_keys($display->getComponents()) as $name) {
-          $fields[$name]['region'] = NULL;
+        foreach (array_keys($fields) as $name) {
+          if (isset($fields[$name]['region'])) {
+            $reset_region = 'content';
+            if ($fields[$name]['region'] == 'hidden') {
+              $reset_region = 'hidden';
+            }
+            $fields[$name]['region'] = $reset_region;
+          }
         }
       }
       $form_state->setValue('fields', $fields);
@@ -716,6 +743,9 @@ function _ds_field_group_field_ui_fix_notices(array $form, FormStateInterface $f
 function _ds_field_ui_table_layouts($entity_type, $bundle, $view_mode, array &$form, FormStateInterface $form_state) {
   $ds_layouts = Ds::getLayouts();
   $layout_options = [];
+
+  unset($ds_layouts['layout_builder_blank']);
+
   /** @var \Drupal\Core\Layout\LayoutDefinition $layout_definition */
   foreach ($ds_layouts as $key => $layout_definition) {
     // Create new layout option group.

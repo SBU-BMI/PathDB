@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Sniffs\Semantics;
+namespace Drupal\Test\Semantics;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -13,14 +13,13 @@ class ConstantNameUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFileBase The base path that the unit tests files will have.
      *
-     * @return array The list of test files.
+     * @return array<string>
      */
-    protected function getTestFiles($testFileBase)
+    protected function getTestFiles($testFileBase): array
     {
-        $dir = dirname(__FILE__);
         return [
-            $dir.'/constant_test.install',
-            $dir.'/constant_test.module',
+            __DIR__.'/constant_test.install',
+            __DIR__.'/constant_test.module',
         ];
 
     }//end getTestFiles()
@@ -32,9 +31,11 @@ class ConstantNameUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of errors that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getErrorList()
+    protected function getErrorList(string $testFile): array
     {
         return [];
 
@@ -47,9 +48,11 @@ class ConstantNameUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of warnings that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getWarningList()
+    protected function getWarningList(string $testFile): array
     {
         return [3 => 1];
 

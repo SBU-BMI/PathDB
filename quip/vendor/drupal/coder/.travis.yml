@@ -1,5 +1,3 @@
-# For PHP 5.5 and lower testing we need to stick to Ubuntu 14.04.
-dist: trusty
 language: php
 sudo: false
 
@@ -9,21 +7,30 @@ cache:
     - $HOME/.composer/cache
     - vendor
 
-matrix:
+jobs:
   fast_finish: true
   include:
-    - php: 5.5
-    - php: 5.6
+    # Support PHP 7.0 because that is the minimum requirement of Drupal 8 core.
     - php: 7.0
+      dist: xenial
     - php: 7.1
+      dist: bionic
     - php: 7.2
+      dist: bionic
     - php: 7.3
+      dist: bionic
+    - php: 7.4
+      dist: bionic
+      env: PHPSTAN=1
 
 before_install:
   # Speed up build time by disabling Xdebug when its not needed.
   - phpenv config-rm xdebug.ini || echo 'No xdebug config.'
 
 before_script:
+  # We have a dedicated composer.json file for PHP 7.0 that does not have
+  # PHPStan because it requires >= PHP 7.1.
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then cp composer-php-7-0.json composer.json; fi
   # Running composer install without a lock file will also update cached
   # dependencies in vendor.
   - composer install
@@ -38,3 +45,6 @@ script:
   # Ensure that the DrupalPractice standard can be invoked standalone and the
   # auto-loading of abstract classes works.
   - ./vendor/bin/phpcs -p --standard=coder_sniffer/DrupalPractice coder_sniffer/DrupalPractice/Test/good/ --ignore=coder_sniffer/DrupalPractice/Test/good/GoodUnitTest.php
+   # Only run PHPStan on the latest PHP version, no need to run it multiple
+   # times.
+  - if [[ $PHPSTAN == "1" ]]; then ./vendor/bin/phpstan analyse; fi

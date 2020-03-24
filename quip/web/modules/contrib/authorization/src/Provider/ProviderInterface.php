@@ -31,8 +31,6 @@ interface ProviderInterface extends ConfigurableAuthorizationPluginInterface {
    *
    * @return array
    *   Relevant proposals.
-   *
-   * @throws \Drupal\authorization\AuthorizationSkipAuthorization
    */
   public function getProposals(UserInterface $user);
 

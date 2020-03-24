@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -43,6 +43,9 @@ class InstanceOfPassTest extends CodeCleanerTestCase
             ['true && false instanceof stdClass'],
             ['"a"."b" instanceof stdClass'],
             ['!5 instanceof stdClass'],
+            ['[1] instanceof stdClass'],
+            ['(1+1) instanceof stdClass'],
+            ['DateTime::ISO8601 instanceof stdClass'],
         ];
     }
 
@@ -60,11 +63,8 @@ class InstanceOfPassTest extends CodeCleanerTestCase
         $data = [
             ['$a instanceof stdClass'],
             ['strtolower("foo") instanceof stdClass'],
-            ['array(1) instanceof stdClass'],
             ['(string) "foo" instanceof stdClass'],
-            ['(1+1) instanceof stdClass'],
             ['"foo ${foo} $bar" instanceof stdClass'],
-            ['DateTime::ISO8601 instanceof stdClass'],
         ];
 
         return $data;

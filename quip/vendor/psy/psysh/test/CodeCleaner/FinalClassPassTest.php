@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -34,7 +34,7 @@ class FinalClassPassTest extends CodeCleanerTestCase
         $data = [
             ['final class A {} class B extends A {}'],
             ['class A {} final class B extends A {} class C extends B {}'],
-            // array('namespace A { final class B {} } namespace C { class D extends \\A\\B {} }'),
+            // ['namespace A { final class B {} } namespace C { class D extends \\A\\B {} }'],
         ];
 
         if (!\defined('HHVM_VERSION')) {

@@ -404,8 +404,6 @@ class AuthorizationProfile extends ConfigEntityBase {
    *
    * @return \Drupal\authorization\AuthorizationResponse
    *   Responses.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function grantsAndRevokes(UserInterface $user, $user_save = FALSE) {
 

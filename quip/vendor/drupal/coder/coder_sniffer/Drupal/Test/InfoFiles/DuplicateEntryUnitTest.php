@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Sniffs\InfoFiles;
+namespace Drupal\Test\InfoFiles;
 
 use Drupal\Test\CoderSniffUnitTest;
 
@@ -20,9 +20,11 @@ class DuplicateEntryUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of errors that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getErrorList()
+    protected function getErrorList(string $testFile): array
     {
         return [1 => 1];
 
@@ -35,9 +37,11 @@ class DuplicateEntryUnitTest extends CoderSniffUnitTest
      * The key of the array should represent the line number and the value
      * should represent the number of warnings that should occur on that line.
      *
-     * @return array(int => int)
+     * @param string $testFile The name of the file being tested.
+     *
+     * @return array<int, int>
      */
-    public function getWarningList()
+    protected function getWarningList(string $testFile): array
     {
         return [];
 
@@ -49,9 +53,9 @@ class DuplicateEntryUnitTest extends CoderSniffUnitTest
      *
      * @param string $testFileBase The base path that the unit tests files will have.
      *
-     * @return array The list of test files.
+     * @return array<string>
      */
-    protected function getTestFiles($testFileBase)
+    protected function getTestFiles($testFileBase): array
     {
         return [__DIR__.'/drupal7/test.info'];
 

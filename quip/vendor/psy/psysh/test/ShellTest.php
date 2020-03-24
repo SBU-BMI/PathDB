@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,10 +12,10 @@
 namespace Psy\Test;
 
 use Psy\Configuration;
-use Psy\Exception\ErrorException;
 use Psy\Exception\ParseErrorException;
 use Psy\Shell;
 use Psy\TabCompletion\Matcher\ClassMethodsMatcher;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
 class ShellTest extends \PHPUnit\Framework\TestCase
@@ -33,7 +33,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $one       = 'banana';
         $two       = 123;
-        $three     = new \StdClass();
+        $three     = new \stdClass();
         $__psysh__ = 'ignore this';
         $_         = 'ignore this';
         $_e        = 'ignore this';
@@ -75,7 +75,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $one       = 'banana';
         $two       = 123;
-        $three     = new \StdClass();
+        $three     = new \stdClass();
         $__psysh__ = 'ignore this';
         $_         = 'ignore this';
         $_e        = 'ignore this';
@@ -90,11 +90,70 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $shell->run(null, $this->getOutput());
 
         $this->assertNotContains('__psysh__', $shell->getScopeVariableNames());
-        $this->assertSame(['one', 'two', 'three', '_', '_e'], $shell->getScopeVariableNames());
+        $this->assertArrayEquals(['one', 'two', 'three', '_', '_e'], $shell->getScopeVariableNames());
         $this->assertSame('banana', $shell->getScopeVariable('one'));
         $this->assertSame(123, $shell->getScopeVariable('two'));
         $this->assertSame($three, $shell->getScopeVariable('three'));
         $this->assertNull($shell->getScopeVariable('_'));
+    }
+
+    protected function assertArrayEquals(array $expected, array $actual, $message = '')
+    {
+        if (\method_exists($this, 'assertEqualsCanonicalizing')) {
+            return $this->assertEqualsCanonicalizing($expected, $actual, $message);
+        }
+
+        sort($expected);
+        sort($actual);
+
+        return $this->assertEquals($expected, $actual, $message);
+    }
+
+    public function testNonInteractiveDoesNotUpdateContext()
+    {
+        $config = $this->getConfig(['usePcntl' => false]);
+        $shell = new Shell($config);
+
+        $input = $this->getInput('');
+        $input->setInteractive(false);
+
+        $shell->addInput('$var=5;', true);
+        $shell->addInput('exit', true);
+
+        // This is still super slow and we shouldn't do this :(
+        $shell->run($input, $this->getOutput());
+
+        $this->assertNotContains('var', $shell->getScopeVariableNames());
+    }
+
+    public function testNonInteractiveRawOutput()
+    {
+        $config = $this->getConfig(['usePcntl' => false, 'rawOutput' => true]);
+        $shell = new Shell($config);
+
+        $input = $this->getInput('');
+        $input->setInteractive(false);
+
+        $output = $this->getOutput();
+        $stream = $output->getStream();
+        $shell->setOutput($output);
+
+        $shell->addInput('$foo = "bar"', true);
+        $shell->addInput('exit', true);
+
+        // Sigh
+        $shell->run($input, $output);
+
+        \rewind($stream);
+        $streamContents = \stream_get_contents($stream);
+
+        // There shouldn't be a welcome message with raw output
+        $this->assertNotContains('Justin Hileman', $streamContents);
+        $this->assertNotContains(PHP_VERSION, $streamContents);
+        $this->assertNotContains(Shell::VERSION, $streamContents);
+
+        // @todo prolly shouldn't have an exit message with raw output, either
+        $this->assertContains('Goodbye', $streamContents);
     }
 
     public function testIncludes()
@@ -171,47 +230,64 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $this->assertContains('line 13', $streamContents);
     }
 
-    public function testHandlingErrors()
+    /**
+     * @dataProvider notSoBadErrors
+     */
+    public function testReportsErrors($errno, $label)
     {
         $shell  = new Shell($this->getConfig());
         $output = $this->getOutput();
         $stream = $output->getStream();
         $shell->setOutput($output);
 
-        $oldLevel = \error_reporting();
-        \error_reporting($oldLevel & ~E_USER_NOTICE);
+        $oldLevel = \error_reporting(E_ALL);
 
-        try {
-            $shell->handleError(E_USER_NOTICE, 'wheee', null, 13);
-        } catch (ErrorException $e) {
-            \error_reporting($oldLevel);
-            $this->fail('Unexpected error exception');
-        }
+        $shell->handleError($errno, 'wheee', null, 13);
+
         \error_reporting($oldLevel);
 
         \rewind($stream);
         $streamContents = \stream_get_contents($stream);
 
-        $this->assertContains('PHP Notice:', $streamContents);
-        $this->assertContains('wheee',       $streamContents);
-        $this->assertContains('line 13',     $streamContents);
+        $this->assertContains($label, $streamContents);
+        $this->assertContains('wheee', $streamContents);
+        $this->assertContains('line 13', $streamContents);
+    }
+
+    public function notSoBadErrors()
+    {
+        return [
+            [E_WARNING, 'PHP Warning:'],
+            [E_NOTICE, 'PHP Notice:'],
+            [E_CORE_WARNING, 'PHP Warning:'],
+            [E_COMPILE_WARNING, 'PHP Warning:'],
+            [E_USER_WARNING, 'PHP Warning:'],
+            [E_USER_NOTICE, 'PHP Notice:'],
+            [E_DEPRECATED, 'PHP Deprecated:'],
+            [E_USER_DEPRECATED, 'PHP Deprecated:'],
+        ];
     }
 
     /**
+     * @dataProvider badErrors
      * @expectedException \Psy\Exception\ErrorException
      */
-    public function testNotHandlingErrors()
+    public function testThrowsBadErrors($errno)
     {
-        $shell    = new Shell($this->getConfig());
-        $oldLevel = \error_reporting();
-        \error_reporting($oldLevel | E_USER_NOTICE);
+        $shell = new Shell($this->getConfig());
+        $shell->handleError($errno, 'wheee', null, 13);
+    }
 
-        try {
-            $shell->handleError(E_USER_NOTICE, 'wheee', null, 13);
-        } catch (ErrorException $e) {
-            \error_reporting($oldLevel);
-            throw $e;
-        }
+    public function badErrors()
+    {
+        return [
+            [E_ERROR],
+            [E_PARSE],
+            [E_CORE_ERROR],
+            [E_COMPILE_ERROR],
+            [E_USER_ERROR],
+            [E_RECOVERABLE_ERROR],
+        ];
     }
 
     public function testVersion()
@@ -330,6 +406,22 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expected, \stream_get_contents($stream));
     }
 
+    /**
+     * @dataProvider getReturnValues
+     */
+    public function testDoNotWriteReturnValueWhenQuiet($input, $expected)
+    {
+        $output = $this->getOutput();
+        $output->setVerbosity(StreamOutput::VERBOSITY_QUIET);
+        $stream = $output->getStream();
+        $shell  = new Shell($this->getConfig());
+        $shell->setOutput($output);
+
+        $shell->writeReturnValue($input);
+        \rewind($stream);
+        $this->assertEquals('', \stream_get_contents($stream));
+    }
+
     public function getReturnValues()
     {
         return [
@@ -415,6 +507,13 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
+    private function getInput($input)
+    {
+        $input = new StringInput($input);
+
+        return $input;
+    }
+
     private function getOutput()
     {
         $stream = \fopen('php://memory', 'w+');
@@ -435,6 +534,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
             'configDir'  => $dir,
             'dataDir'    => $dir,
             'runtimeDir' => $dir,
+            'colorMode'  => Configuration::COLOR_MODE_FORCED,
         ];
 
         return new Configuration(\array_merge($defaults, $config));

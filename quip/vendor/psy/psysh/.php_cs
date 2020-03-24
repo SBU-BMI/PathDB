@@ -10,23 +10,24 @@ $finder = PhpCsFixer\Finder::create()
 $header = <<<EOF
 This file is part of Psy Shell.
 
-(c) 2012-2018 Justin Hileman
+(c) 2012-2020 Justin Hileman
 
 For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 EOF;
 
 return PhpCsFixer\Config::create()
-    ->setRules(array(
+    ->setRules([
         '@Symfony' => true,
-        'array_syntax' => array('syntax' => 'short'),
+        'array_syntax' => ['syntax' => 'short'],
         'binary_operator_spaces' => false,
-        'concat_space' => array('spacing' => 'one'),
-        'header_comment' => array('header' => $header),
-        'increment_style' => array('style' => 'post'),
-        'method_argument_space' => array('keep_multiple_spaces_after_comma' => true),
+        'concat_space' => ['spacing' => 'one'],
+        'header_comment' => ['header' => $header],
+        'increment_style' => ['style' => 'post'],
+        'method_argument_space' => ['keep_multiple_spaces_after_comma' => true],
+        'no_superfluous_phpdoc_tags' => false,
         'ordered_imports' => true,
         'pre_increment' => false,
         'yoda_style' => false,
-    ))
+    ])
     ->setFinder($finder);

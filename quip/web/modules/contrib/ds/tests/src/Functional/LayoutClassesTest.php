@@ -132,12 +132,15 @@ class LayoutClassesTest extends TestBase {
       'layout_configuration[region_wrapper][header]' => 'header',
       'layout_configuration[region_wrapper][right]' => 'footer',
       'layout_configuration[region_wrapper][outer_wrapper]' => 'article',
+      'layout_configuration[region_wrapper][attributes]' => 'class|test-class,role|testing-role',
     ];
     $this->dsConfigureUi($wrappers);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains('<header class="class_name_1 group-header');
     $this->assertSession()->responseContains('<footer class="group-right');
     $this->assertSession()->responseContains('<article');
+    $this->assertSession()->responseContains('test-class');
+    $this->assertSession()->responseContains('testing-role');
 
     // Remove all the node classes.
     $edit = ['entity_classes' => 'no_classes'];
@@ -189,7 +192,7 @@ class LayoutClassesTest extends TestBase {
     ];
     $this->dsConfigureUi($fields, 'admin/structure/types/manage/article/display/full');
 
-    // Change layout via admin/structure/ds/layout-change.
+    // Change layout via admin/structure/ds/change-layout.
     // First verify that header and footer are not here.
     $this->drupalGet('admin/structure/types/manage/article/display/full');
     $this->assertSession()->responseNotContains('<td colspan="8">' . t('Header') . '</td>');
@@ -213,10 +216,16 @@ class LayoutClassesTest extends TestBase {
     /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $entity_display */
     $entity_display = EntityViewDisplay::load('node.article.full');
     $data = $entity_display->getThirdPartySettings('ds');
+    $this->assertEquals('ds/ds_2col_stacked', $data['layout']['library']);
+    $this->assertEquals(5, count($data['layout']['settings']['wrappers']));
     $this->assertTrue(in_array('node_author', $data['regions']['header']), t('Author is in header'));
     $this->assertTrue(in_array('node_links', $data['regions']['header']), t('Links field is in header'));
     $this->assertTrue(in_array('body', $data['regions']['footer']), t('Body field is in footer'));
     $this->assertTrue(in_array('dynamic_token_field:node-test_field', $data['regions']['footer']), t('Test field is in footer'));
+
+    // Check regions of fields.
+    $body = $entity_display->getComponent('body');
+    $this->assertEquals($body['region'], 'footer');
 
     // Test that a default view mode with no layout is not affected by a
     // disabled view mode.
