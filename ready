@@ -1,0 +1,6 @@
+#!/bin/bash
+rm -rf quip/caMicroscope
+rm -rf quip/FeatureMap
+rm -rf config
+rm -rf comfig-update
+
