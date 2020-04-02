@@ -103,7 +103,7 @@ class Filesystem
                     if (self::$lastError) {
                         throw new IOException(sprintf('Failed to create "%s": %s.', $dir, self::$lastError), 0, null, $dir);
                     }
-                    throw new IOException(sprintf('Failed to create "%s"', $dir), 0, null, $dir);
+                    throw new IOException(sprintf('Failed to create "%s".', $dir), 0, null, $dir);
                 }
             }
         }
@@ -362,7 +362,7 @@ class Filesystem
         }
 
         if (!is_file($originFile)) {
-            throw new FileNotFoundException(sprintf('Origin file "%s" is not a file', $originFile));
+            throw new FileNotFoundException(sprintf('Origin file "%s" is not a file.', $originFile));
         }
 
         foreach ($this->toIterable($targetFiles) as $targetFile) {
@@ -388,10 +388,10 @@ class Filesystem
     {
         if (self::$lastError) {
             if ('\\' === \DIRECTORY_SEPARATOR && false !== strpos(self::$lastError, 'error code(1314)')) {
-                throw new IOException(sprintf('Unable to create %s link due to error code 1314: \'A required privilege is not held by the client\'. Do you have the required Administrator-rights?', $linkType), 0, null, $target);
+                throw new IOException(sprintf('Unable to create "%s" link due to error code 1314: \'A required privilege is not held by the client\'. Do you have the required Administrator-rights?', $linkType), 0, null, $target);
             }
         }
-        throw new IOException(sprintf('Failed to create %s link from "%s" to "%s".', $linkType, $origin, $target), 0, null, $target);
+        throw new IOException(sprintf('Failed to create "%s" link from "%s" to "%s".', $linkType, $origin, $target), 0, null, $target);
     }
 
     /**

@@ -23,7 +23,9 @@ dependencies:
     - field.field.node.wsi.referencepixelphysicalvaluey
     - field.field.node.wsi.studyid
     - node.type.wsi
+    - workflows.workflow.quip
   module:
+    - content_moderation
     - datetime
     - field_group
     - file
@@ -35,10 +37,9 @@ third_party_settings:
         - group_subject
         - group_specimen
       parent_name: ''
-      weight: 6
+      weight: 7
       format_type: tabs
       format_settings:
-        label: Tabbers
         direction: horizontal
         id: khan
         classes: ''
@@ -50,7 +51,6 @@ third_party_settings:
       weight: 10
       format_type: tab
       format_settings:
-        label: Specimen
         formatter: closed
         description: ''
         required_fields: true
@@ -125,7 +125,7 @@ content:
     type: file_generic
     region: content
   imageid:
-    weight: 5
+    weight: 6
     settings:
       size: 16
       placeholder: ''
@@ -164,6 +164,12 @@ content:
     third_party_settings: {  }
     type: string_textfield
     region: content
+  moderation_state:
+    type: moderation_state_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   patientid:
     weight: 6
     settings:

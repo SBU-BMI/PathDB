@@ -45,6 +45,7 @@
         "drupal/token": "^1.5",
         "drupal/typed_data": "^1.0@alpha",
         "drupal/views_base_url": "^1.0",
+        "drupal/views_bulk_operations": "^3.6",
         "drupal/views_data_export": "^1.0@beta",
         "drupal/views_field_view": "^1.0",
         "drupal/views_taxonomy_term_name_depth": "6.x-dev",

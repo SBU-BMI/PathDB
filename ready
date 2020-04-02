@@ -1,6 +1,6 @@
 #!/bin/bash
-rm -rf quip/caMicroscope
-rm -rf quip/FeatureMap
+rm -rf quip/web/caMicroscope
+rm -rf quip/web/FeatureMap
 rm -rf quip/config
 rm -rf quip/config-update
 

@@ -37,6 +37,7 @@ third_party_settings:
       disable_css: false
       entity_classes: all_classes
       settings:
+        label: ''
         wrappers:
           header: div
           left: div
@@ -56,19 +57,19 @@ third_party_settings:
         - studyid
         - clinicaltrialsubjectid
         - imageid
-        - patientid
         - group_tabbers
+        - patientid
         - imagedvolumeheight
         - imagedvolumewidth
         - acquisitiondatetime
         - referencepixelphysicalvaluex
         - referencepixelphysicalvaluey
-        - lossyimagecompression
         - group_image
+        - lossyimagecompression
         - lossyimagecompressionmethod
         - group_subject
-        - group_specimen
         - lossyimagecompressionratio
+        - group_specimen
         - manufacturer
         - md5
     fields:
@@ -84,14 +85,14 @@ third_party_settings:
         - group_subject
         - group_specimen
       parent_name: ''
-      weight: 7
+      weight: 6
       format_type: tabs
       format_settings:
         id: ''
         classes: ''
         direction: horizontal
       label: Tabbers
-      region: hidden
+      region: header
     group_image:
       children:
         - imagedvolumeheight
@@ -113,7 +114,7 @@ third_party_settings:
         formatter: open
         description: ''
       label: Image
-      region: hidden
+      region: header
     group_specimen:
       children: {  }
       parent_name: group_tabbers
@@ -125,7 +126,7 @@ third_party_settings:
         formatter: closed
         description: ''
       label: Specimen
-      region: hidden
+      region: header
     group_subject:
       children:
         - patientid
@@ -138,7 +139,7 @@ third_party_settings:
         formatter: closed
         description: ''
       label: Subject
-      region: hidden
+      region: header
 id: node.wsi.full
 targetEntityType: node
 bundle: wsi
@@ -168,6 +169,11 @@ content:
     label: inline
     settings:
       link: false
+    third_party_settings: {  }
+  flag_blah222:
+    weight: 1
+    region: header
+    settings: {  }
     third_party_settings: {  }
   imagedvolumeheight:
     type: number_decimal
@@ -283,6 +289,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
 hidden:
+  content_moderation_control: true
   field_bulk_upload: true
   field_iip_path: true
   field_utarget: true

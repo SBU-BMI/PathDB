@@ -36,6 +36,7 @@ third_party_settings:
       disable_css: false
       entity_classes: all_classes
       settings:
+        label: ''
         wrappers:
           header: div
           left: div
@@ -81,7 +82,7 @@ third_party_settings:
         classes: ''
         direction: horizontal
       label: Tabbers
-      region: hidden
+      region: header
     group_image:
       children: {  }
       parent_name: group_tabbers
@@ -93,7 +94,7 @@ third_party_settings:
         formatter: open
         description: ''
       label: Image
-      region: hidden
+      region: header
 id: node.wsi.default
 targetEntityType: node
 bundle: wsi
@@ -254,6 +255,7 @@ content:
     type: string
     region: header
 hidden:
+  content_moderation_control: true
   field_utarget: true
   field_wsiimage: true
   search_api_excerpt: true
