@@ -1,0 +1,12 @@
+quip:
+  path: '/rrr/{node}'
+  defaults:
+    _title: 'QuIP'
+    _controller: '\Drupal\quip\quipController::content'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+

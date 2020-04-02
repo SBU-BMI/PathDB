@@ -1,0 +1,17 @@
+# Schema for the configuration files of the moderated_content_bulk_publish module.
+# set up the actions for bulk operations for publish and unpublish on /admin/content view.
+action.configuration.unpublish_current_revision_action:
+  type: action_configuration_default
+  label: 'Unpublish current revision'
+
+action.configuration.publish_latest_revision_action:
+  type: action_configuration_default
+  label: 'Publish latest revision'
+
+# set up the actions for bulk operations for pin and unpin content on /admin/content view.
+action.configuration.pin_content_action:
+  type: action_configuration_default
+  label: 'Pin Content'
+action.configuration.unpin_content_action:
+  type: action_configuration_default
+  label: 'Unpin Content'

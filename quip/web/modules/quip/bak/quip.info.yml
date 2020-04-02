@@ -1,0 +1,5 @@
+name: Quip
+type: module
+description: QuIP Module for Pathology Imaging
+core: 8.x
+package: Pathology

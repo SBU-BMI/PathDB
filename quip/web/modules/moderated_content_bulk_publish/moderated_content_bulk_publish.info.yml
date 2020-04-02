@@ -1,0 +1,10 @@
+name: Moderated Content Bulk Publish
+description: 'Provides general administration features that Drupal 8 core does not provide.'
+package: Administration
+type: module
+core: 8.x
+
+# Information added by Drupal.org packaging script on 2020-01-12
+version: '8.x-1.0-alpha5'
+project: 'moderated_content_bulk_publish'
+datestamp: 1578856387

@@ -1,0 +1,9 @@
+bulk_update_fields.form:
+  path: /admin/bulk_update_fields
+  defaults:
+    _title: Bulk Update Fields
+    _form: \Drupal\bulk_update_fields\Form\BulkUpdateFieldsForm
+  options:
+   _admin_route: TRUE
+  requirements:
+    _permission: 'administer bulk_update_fields'

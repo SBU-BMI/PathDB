@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: pin
+label: 'Pin Content'
+type: node
+confirm: true
+plugin: pin_content_action
+configuration: {  }
