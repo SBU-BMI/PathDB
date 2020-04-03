@@ -46,7 +46,6 @@ module:
   layout_discovery: 0
   link: 0
   menu_ui: 0
-  moderated_content_bulk_publish: 0
   node: 0
   options: 0
   page_cache: 0
@@ -60,7 +59,6 @@ module:
   rest: 0
   restrict_by_ip: 0
   restui: 0
-  rules: 0
   search_api: 0
   search_api_db: 0
   search_api_db_defaults: 0
@@ -71,15 +69,12 @@ module:
   taxonomy_unique: 0
   text: 0
   token: 0
-  token_filter: 0
   toolbar: 0
   tour: 0
   typed_data: 0
   update: 0
   user: 0
   views_base_url: 0
-  views_bulk_operations: 0
-  views_bulk_operations_example: 0
   views_data_export: 0
   views_field_view: 0
   views_taxonomy_term_name_depth: 0
