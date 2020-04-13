@@ -75,7 +75,7 @@ class AutoCompleterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * TODO
+     * @todo
      * ====
      * draft, open to modifications
      * - [ ] if the variable is an array, return the square bracket for completion
@@ -96,11 +96,12 @@ class AutoCompleterTest extends \PHPUnit\Framework\TestCase
             // input, must had, must not had
             ['T_OPE', ['T_OPEN_TAG'], []],
             ['st', ['stdClass'], []],
+            ['DateT', ['DateTime', 'DateTimeImmutable', 'DateTimeInterface', 'DateTimeZone'], []],
             ['stdCla', ['stdClass'], []],
             ['new s', ['stdClass'], []],
             [
                 'new ',
-                ['stdClass', 'Psy\\Context', 'Psy\\Configuration'],
+                ['stdClass', Context::class, Configuration::class],
                 ['require', 'array_search', 'T_OPEN_TAG', '$foo'],
             ],
             ['new Psy\\C', ['Context'], ['CASE_LOWER']],

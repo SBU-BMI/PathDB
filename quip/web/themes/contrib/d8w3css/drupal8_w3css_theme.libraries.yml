@@ -31,7 +31,7 @@ global-components:
       css/custom/theme.css: {}
       css/custom/responsive.css: {}
   js:
-    js/jquery.matchHeight.js: {}
+    js/jquery.matchHeight.js: {preprocess: false }
     js/custom.js: {}
   dependencies:
     - core/jquery
@@ -50,11 +50,6 @@ w3-css-theme-amber:
     theme:
       css/w3-css-theme/w3-theme-amber.css: {}
       css/w3-css-theme/w3-theme-amber-custom.css: {}
-w3-css-theme-black:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-black.css: {}
 w3-css-theme-blue:
   Version: VERSION
   css:
@@ -79,11 +74,6 @@ w3-css-theme-cyan:
     theme:
       css/w3-css-theme/w3-theme-cyan.css: {}
       css/w3-css-theme/w3-theme-cyan-custom.css: {}
-w3-css-theme-dark-grey:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-dark-grey.css: {}
 w3-css-theme-deep-orange:
   Version: VERSION
   css:
@@ -102,23 +92,12 @@ w3-css-theme-green:
     theme:
       css/w3-css-theme/w3-theme-green.css: {}
       css/w3-css-theme/w3-theme-green-custom.css: {}
-w3-css-theme-grey:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-grey.css: {}
 w3-css-theme-indigo:
   Version: VERSION
   css:
     theme:
       css/w3-css-theme/w3-theme-indigo.css: {}
       css/w3-css-theme/w3-theme-indigo-custom.css: {}
-w3-css-theme-blue:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-blue.css: {}
-      css/w3-css-theme/w3-theme-blue-csutom.css: {}
 w3-css-theme-khaki:
   Version: VERSION
   css:
@@ -149,12 +128,7 @@ w3-css-theme-orange:
     theme:
       css/w3-css-theme/w3-theme-orange.css: {}
       css/w3-css-theme/w3-theme-orange-custom.css: {}
-w3-css-theme-blue:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-blue.css: {}
-      css/w3-css-theme/w3-theme-blue-custom.css: {}
+
 w3-css-theme-pink:
   Version: VERSION
   css:
@@ -185,3 +159,18 @@ w3-css-theme-yellow:
     theme:
       css/w3-css-theme/w3-theme-yellow.css: {}
       css/w3-css-theme/w3-theme-yellow-custom.css: {}
+w3-css-theme-black:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-black.css: {}
+w3-css-theme-dark-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-dark-grey.css: {}
+w3-css-theme-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-grey.css: {}

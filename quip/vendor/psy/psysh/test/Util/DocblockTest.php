@@ -21,7 +21,7 @@ class DocblockTest extends \PHPUnit\Framework\TestCase
     public function testDocblockParsing($comment, $body, $tags)
     {
         $reflector = $this
-            ->getMockBuilder('ReflectionClass')
+            ->getMockBuilder(\ReflectionClass::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -94,6 +94,18 @@ class DocblockTest extends \PHPUnit\Framework\TestCase
                 [
                     'tagname' => ['plus a description'],
                 ],
+            ],
+            [
+                '/**
+                 * This is a single-line docblock.
+                 */',
+                'This is a single-line docblock.',
+                [],
+            ],
+            [
+                '/** This is a single-line docblock. */',
+                'This is a single-line docblock.',
+                [],
             ],
         ];
     }

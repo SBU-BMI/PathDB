@@ -150,10 +150,9 @@ a:hover > img.w3-image {
   clear: none!important;
   float: left;
 }
-.field--label-above > .field__label,
+.field__items > .field__item,
 .field--label-inline > .field__label {
-  font-size: 13px;
-  line-height: 30px;
+  margin-right: 10px;
 }
 .field--label-inline .field__label::after {
   content: ':';
@@ -189,4 +188,32 @@ ul.links li a {
 }
 .site-slogan {
   padding-left: 16px;
+}
+table td ul {
+  margin: 0;
+}
+table td li {
+  list-style: none;
+}
+table ul.dropbutton li.w3-left.dropbutton-action {
+  float: none!important;
+  z-index: 1;
+  margin-right: 0!important;
+  line-height: 26px;
+}
+table ul.dropbutton {
+  background-color: white;
+  border: 1px solid #e8e8e8;
+  padding: 0 10px!important;
+  border-radius: 10px;
+}
+table ul.dropbutton li:first-child {
+  margin-right: 10px!important;
+}
+table ul.dropbutton li.dropbutton-toggle {
+  margin-right: 0!important;
+  margin-left: 10px;
+}
+table ul.dropbutton li a {
+  line-height: 26px;
 }

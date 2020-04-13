@@ -1,8 +1,8 @@
 language: php
+os: linux
+dist: bionic
 
-sudo: false
-
-matrix:
+jobs:
     include:
         - php: 5.5.9
           env: 'COMPOSER_FLAGS="--prefer-lowest --prefer-stable"'
@@ -14,27 +14,24 @@ matrix:
         - php: 7.0
           dist: xenial
         - php: 7.1
-          dist: bionic
         - php: 7.2
-          dist: bionic
         - php: 7.3
-          dist: bionic
         - php: 7.4
-          dist: bionic
         - php: nightly
-          dist: bionic
           env: 'COMPOSER_FLAGS="--ignore-platform-reqs"'
         - php: hhvm-3.18
           dist: trusty
     allow_failures:
         - php: 5.5.9
           env: 'COMPOSER_FLAGS="--prefer-lowest --prefer-stable"'
+        - php: nightly
+          env: 'COMPOSER_FLAGS="--ignore-platform-reqs"'
     fast_finish: true
 
 install:
     - travis_retry composer update --no-interaction $COMPOSER_FLAGS
     - |
-      if php -r 'version_compare(PHP_VERSION, "7.1", "<") || exit(1);'; then
+      if [[ $TRAVIS_PHP_VERSION != 7.2* ]]; then
         composer bin phpunit update
       fi
 
@@ -52,8 +49,8 @@ before_deploy: make dist -j 4
 
 deploy:
     provider: releases
-    api_key:
-        secure: LL8koDM1xDqzF9t0URHvmMPyWjojyd4PeZ7IW7XYgyvD6n1H6GYrVAeKCh5wfUKFbwHoa9s5AAn6pLzra00bODVkPTmUH+FSMWz9JKLw9ODAn8HvN7C+IooxmeClGHFZc0TfHfya8/D1E9C1iXtGGEoE/GqtaYq/z0C1DLpO0OU=
+    token:
+        secure: jMTc2z9JgpNJbf5Ia8uVMQRz2BYEqhr2IGZQtHoj3zgqt+SzgTdjFWK5yfSRdkiqt671JfSFU7Epc1NhURwMoQTlzLdCYnP9Lct9CFzHMTn0sNbDLDmZXkGuxe15DToMiaCexv8dBM2zb5QsdXpNeFunz+eqfeKqechuX6QXoaY=
     file_glob: true
     file: dist/psysh-*.tar.gz
     skip_cleanup: true

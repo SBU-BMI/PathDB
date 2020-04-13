@@ -15,6 +15,7 @@ use Psy\Configuration;
 use Psy\Exception\ParseErrorException;
 use Psy\Shell;
 use Psy\TabCompletion\Matcher\ClassMethodsMatcher;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
@@ -111,11 +112,13 @@ class ShellTest extends \PHPUnit\Framework\TestCase
 
     public function testNonInteractiveDoesNotUpdateContext()
     {
-        $config = $this->getConfig(['usePcntl' => false]);
+        $config = $this->getConfig([
+            'usePcntl'        => false,
+            'interactiveMode' => Configuration::INTERACTIVE_MODE_DISABLED,
+        ]);
         $shell = new Shell($config);
 
         $input = $this->getInput('');
-        $input->setInteractive(false);
 
         $shell->addInput('$var=5;', true);
         $shell->addInput('exit', true);
@@ -128,11 +131,14 @@ class ShellTest extends \PHPUnit\Framework\TestCase
 
     public function testNonInteractiveRawOutput()
     {
-        $config = $this->getConfig(['usePcntl' => false, 'rawOutput' => true]);
+        $config = $this->getConfig([
+            'usePcntl'        => false,
+            'rawOutput'       => true,
+            'interactiveMode' => Configuration::INTERACTIVE_MODE_DISABLED,
+        ]);
         $shell = new Shell($config);
 
         $input = $this->getInput('');
-        $input->setInteractive(false);
 
         $output = $this->getOutput();
         $stream = $output->getStream();
@@ -294,7 +300,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $shell = new Shell($this->getConfig());
 
-        $this->assertInstanceOf('Symfony\Component\Console\Application', $shell);
+        $this->assertInstanceOf(Application::class, $shell);
         $this->assertContains(Shell::VERSION, $shell->getVersion());
         $this->assertContains(PHP_VERSION, $shell->getVersion());
         $this->assertContains(PHP_SAPI, $shell->getVersion());
@@ -378,6 +384,8 @@ class ShellTest extends \PHPUnit\Framework\TestCase
 
     public function testWriteStdoutWithoutNewline()
     {
+        $this->markTestSkipped('This test won\'t work on CI without overriding pipe detection');
+
         $output = $this->getOutput();
         $stream = $output->getStream();
         $shell  = new Shell($this->getConfig());
@@ -389,6 +397,21 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $streamContents = \stream_get_contents($stream);
 
         $this->assertSame('{{stdout}}<aside>⏎</aside>' . PHP_EOL, $streamContents);
+    }
+
+    public function testWriteStdoutRawOutputWithoutNewline()
+    {
+        $output = $this->getOutput();
+        $stream = $output->getStream();
+        $shell  = new Shell($this->getConfig(['rawOutput' => true]));
+        $shell->setOutput($output);
+
+        $shell->writeStdout('{{stdout}}');
+
+        \rewind($stream);
+        $streamContents = \stream_get_contents($stream);
+
+        $this->assertSame('{{stdout}}' . PHP_EOL, $streamContents);
     }
 
     /**
@@ -483,7 +506,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $shell = new Shell($this->getConfig());
 
         // :-/
-        $refl = new \ReflectionClass('Psy\\Shell');
+        $refl = new \ReflectionClass(Shell::class);
         $method = $refl->getMethod('hasCommand');
         $method->setAccessible(true);
 

@@ -81,7 +81,7 @@ class ClassConstantEnumeratorTest extends EnumeratorTestCase
                     ],
                 ],
             ]],
-            ['--constants', new \ReflectionClass('Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta'), null, [
+            ['--constants', new \ReflectionClass(Fixtures\InterfaceDelta::class), null, [
                 'Interface Constants' => [
                     'D' => [
                         'name'  => 'D',
@@ -90,7 +90,7 @@ class ClassConstantEnumeratorTest extends EnumeratorTestCase
                     ],
                 ],
             ]],
-            ['--constants', new \ReflectionClass('Psy\Test\Command\ListCommand\Fixtures\InterfaceEcho'), null, [
+            ['--constants', new \ReflectionClass(Fixtures\InterfaceEcho::class), null, [
                 'Interface Constants' => [
                     'D' => [
                         'name'  => 'D',
@@ -106,8 +106,8 @@ class ClassConstantEnumeratorTest extends EnumeratorTestCase
             ]],
 
             // Traits don't have constants
-            ['--constants', new \ReflectionClass('Psy\Test\Command\ListCommand\Fixtures\TraitFoxtrot'), null, []],
-            ['--constants', new \ReflectionClass('Psy\Test\Command\ListCommand\Fixtures\TraitGolf'), null, []],
+            ['--constants', new \ReflectionClass(Fixtures\TraitFoxtrot::class), null, []],
+            ['--constants', new \ReflectionClass(Fixtures\TraitGolf::class), null, []],
 
             // If we didn't ask for 'em, don't include 'em
             ['', new \ReflectionClass($bravo), $bravo, []],
@@ -133,7 +133,7 @@ class ClassConstantEnumeratorTest extends EnumeratorTestCase
                     ],
                 ],
             ]],
-            ['--constants --methods', new \ReflectionClass('Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta'), null, [
+            ['--constants --methods', new \ReflectionClass(Fixtures\InterfaceDelta::class), null, [
                 'Interface Constants' => [
                     'D' => [
                         'name'  => 'D',
@@ -154,7 +154,7 @@ class ClassConstantEnumeratorTest extends EnumeratorTestCase
                 ],
             ]],
 
-            // TODO: move `testEnumerateExcludeInherited` into here after PHP 7.1
+            // @todo move `testEnumerateExcludeInherited` into here after PHP 7.1
         ];
     }
 
@@ -167,7 +167,7 @@ class ClassConstantEnumeratorTest extends EnumeratorTestCase
 
         $enumerator = new ClassConstantEnumerator($this->getPresenter());
         $input = $this->getInput('--constants --no-inherit');
-        $reflector = new \ReflectionClass('Psy\Test\Command\ListCommand\Fixtures\InterfaceEcho');
+        $reflector = new \ReflectionClass(Fixtures\InterfaceEcho::class);
 
         $this->assertEquals([
             'Interface Constants' => [
