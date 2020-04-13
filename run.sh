@@ -98,8 +98,6 @@ if [ ! -d /data/pathdb/mysql ]; then
 	/quip/vendor/bin/drush -y cache-rebuild
 
 	# create REST API System User
-	/quip/vendor/bin/drush user:create --password bluecheese2018 archon
-	/quip/vendor/bin/drush user:role:add administrator archon
 	/quip/vendor/bin/drush user:role:add administrator admin
 
 	# create private and public security taxonomy items
