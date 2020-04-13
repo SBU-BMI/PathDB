@@ -63,6 +63,47 @@ third_party_settings:
                 type: string
             additional: {  }
             weight: 2
+          14e9865c-c904-4a79-b829-14311c2c3145:
+            uuid: 14e9865c-c904-4a79-b829-14311c2c3145
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:page:body'
+              formatter:
+                label: hidden
+                type: text_default
+                settings: {  }
+                third_party_settings: {  }
+            additional: {  }
+            weight: 3
+          2c9ea1b5-58f5-41af-a1b1-82c04ad97690:
+            uuid: 2c9ea1b5-58f5-41af-a1b1-82c04ad97690
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'extra_field_block:node:page:links'
+            additional: {  }
+            weight: 4
+          a519cf61-5f20-43da-b749-c2ea4c7765d9:
+            uuid: a519cf61-5f20-43da-b749-c2ea4c7765d9
+            region: content
+            configuration:
+              label_display: '0'
+              context_mapping:
+                entity: layout_builder.entity
+              id: 'field_block:node:page:test_me'
+              formatter:
+                label: above
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+                type: string
+            additional: {  }
+            weight: 5
         third_party_settings: {  }
 _core:
   default_config_hash: g1S3_GLaxq4l3I9RIca5Mlz02MxI2KmOquZpHw59akM

@@ -1,4 +1,4 @@
-admin: ''
-default: drupal8_w3css_theme
+admin: seven
+default: bootstrap
 _core:
   default_config_hash: fOjer9hADYYnbCJVZMFZIIM1azTFWyg84ZkFDHfAbUg
