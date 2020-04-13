@@ -84,6 +84,8 @@ if [ ! -d /data/pathdb/mysql ]; then
         /quip/vendor/bin/drush -y php-eval 'node_access_rebuild();'
 	/quip/vendor/bin/drush -y pm:uninstall toolbar
         /quip/vendor/bin/drush -y pm:uninstall hide_revision_field
+        /quip/vendor/bin/drush -y pm:enable css_editor
+        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
         /quip/vendor/bin/drush -y cache-rebuild
         httpd -f /config/httpd.conf
 	counter=0;
