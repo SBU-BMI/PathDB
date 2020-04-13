@@ -68,10 +68,6 @@ if [ ! -d /data/pathdb/mysql ]; then
         mysql -u root -e "create database QuIP"
         mysql QuIP < mysql
 fi
-# random historical fixes
-        /quip/vendor/bin/drush -y pm:enable css_editor
-        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
-
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
         mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
@@ -84,12 +80,12 @@ if [ ! -d /data/pathdb/mysql ]; then
         /quip/vendor/bin/drush -y pm:enable rest serialization
         /quip/vendor/bin/drush -y cset system.site uuid 533fc7cc-82dd-46b2-8d63-160785138977
         /quip/vendor/bin/drush -y ev '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
+        /quip/vendor/bin/drush -y pm:enable css_editor
+        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
         /quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig/
         /quip/vendor/bin/drush -y php-eval 'node_access_rebuild();'
 	/quip/vendor/bin/drush -y pm:uninstall toolbar
         /quip/vendor/bin/drush -y pm:uninstall hide_revision_field
-        /quip/vendor/bin/drush -y pm:enable css_editor
-        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
         /quip/vendor/bin/drush -y cache-rebuild
         httpd -f /config/httpd.conf
 	counter=0;
@@ -145,5 +141,9 @@ else
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi
+# random historical fixes
+        /quip/vendor/bin/drush -y pm:enable css_editor
+        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
+
 while true; do sleep 1000; done
 
