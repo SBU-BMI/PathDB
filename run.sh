@@ -137,13 +137,11 @@ else
         #/quip/vendor/bin/drush -y config:export --destination /quip/config-local
         httpd -f /config/httpd.conf
 	cd /quip/web
+        /quip/vendor/bin/drush -y pm:enable css_editor
+        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 fi
-# random historical fixes
-        /quip/vendor/bin/drush -y pm:enable css_editor
-        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
-
 while true; do sleep 1000; done
 
