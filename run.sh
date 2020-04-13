@@ -68,6 +68,10 @@ if [ ! -d /data/pathdb/mysql ]; then
         mysql -u root -e "create database QuIP"
         mysql QuIP < mysql
 fi
+# random historical fixes
+        /quip/vendor/bin/drush -y pm:enable css_editor
+        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
+
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
         mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
