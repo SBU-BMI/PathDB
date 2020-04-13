@@ -41,34 +41,11 @@ function quip_theme() {
 
 
 function quip_custom_term_validator(array &$form, \Drupal\Core\Form\FormStateInterface &$form_state) {
-//	drupal_set_message(t('An error occurred and processing did not complete.'), 'error');
 	preg_match("/^[A-Za-z0-9_:]+$/", $form_state->getValue('name')[0]['value'], $matches);
 	if (!$matches) {
 		$form_state->setErrorByName($form_state->getValue('name')[0]['value'], t('Error Message : only upper and lower case letters, numbers, and underscore allowed in collection names'));
 	}
 }
-
-//function quip_review() {
-//	\Drupal::logger('quip')->notice('This was a test ');
-//	$node = \Drupal::routeMatch()->getParameter('node');
-//	if ($node instanceof \Drupal\node\NodeInterface) {
-//		// You can get nid and anything else you need from the node object.
-//		$nid = $node->id();
-//		$nn = NULL;
-//		$nn = Node::load($nid);
-//		$nn->title->value = 'YAY 1';
-//		$nn->save();
-//	}
-//	\Drupal::logger('quip')->notice('This is the node '.$nid);
-//#	$entity->set('imagedvolumewidth','1234567');
-//}
-
-//function custom_inactive_user($user_id){
-//
-// \Drupal::logger('quip')->notice('WOW !!! '.$user_id);
-//}
-
-
 
 function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
                 //$form['my_button'] = array(
@@ -105,53 +82,14 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
               		$uri = drupal_realpath($uri);
 			$height = $entity->get('imagedvolumewidth')->getValue()[0]['value'];
 			$width = $entity->get('imagedvolumeheight')->getValue()[0]['value'];
-			//if (($height == 0)&&($width == 0)) {
-               		//	\Drupal::logger('quip')->notice('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri);
-               		//	$eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.ImageInfo '.$uri,$output,$return);
-               		//	$p = json_decode($eww,true);
-               		//	$entity->set('imagedvolumewidth',$p["imagedvolumewidth"][0]["value"]);
-          		//	$entity->set('imagedvolumeheight',$p["imagedvolumeheight"][0]["value"]);
-               		//	$entity->set('referencepixelphysicalvaluex',$p["referencepixelphysicalvaluex"][0]["value"]);
-               		//	$entity->set('referencepixelphysicalvaluey',$p["referencepixelphysicalvaluey"][0]["value"]);
-			//}
               		$uri = "/data/images/".substr($uri,23);
               		$entity->set('field_iip_path',$uri);
                 } else if (($entity->bundle() == 'bulk_upload')&&(strlen($entity->get("field_path")->getString()))!=0) {
                         $path = $entity->get("field_path")->getString();
-                        $eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
+                        // remove this at some point $eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
                         $entity->set('field_number_of_images',$eww);
                 }
         }
 }
 
-function quip_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
-        $uid = "archon";
-        $pw = "bluecheese2018";
-        if (($entity->bundle() == 'bulk_upload')) {
-                \Drupal::logger('quip')->notice("bulk_upload");
-                if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
-                        $nid = $entity->id();
-                        $cnid = $entity->get("field_target_collection")->target_id;
-                        \Drupal::logger('quip')->notice(getcwd()."  UH NEW ".$nid." Security : ".$cnid);
-                        $path = $entity->get("field_path")->getString();
-                        $pd = \Drupal::service('file_system')->realpath("private://");
-                        $id = \Drupal::currentUser()->id();
-                        $cmd = 'java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.BulkUploader dir http://localhost '.$pd." ".$path." ".$nid." ".$cnid." ".$id." ".$uid." ".$pw." >/dev/null 2>&1 &";
-                        \Drupal::logger('quip')->notice($cmd);
-                        $eww = shell_exec($cmd);
-                }
-        } else if (($entity->bundle() == 'bulk_csv_upload')) {
-                \Drupal::logger('quip')->notice("CSV UPLOAD TRIGGER");
-                if (strcmp($entity->get("field_upload_status")->getString(),"New")==0) {
-                        $nid = $entity->id();
-                        $cnid = $entity->get("field_target_collection")->target_id;
-                        $path = \Drupal::service('file_system')->realpath($entity->field_csvfile->entity->getFileUri());
-                        $pd = \Drupal::service('file_system')->realpath("private://");
-                        $id = \Drupal::currentUser()->id();
-                        $cmd = 'java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.BulkUploader csv http://localhost '.$pd." ".$path." ".$nid." ".$cnid." ".$id." ".$uid." ".$pw." >/dev/null 2>&1 &";
-                        \Drupal::logger('quip')->notice($cmd);
-                        $eww = shell_exec($cmd);
-                }
-        }
-}
 

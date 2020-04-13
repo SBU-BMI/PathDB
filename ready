@@ -3,4 +3,4 @@ rm -rf quip/web/caMicroscope
 rm -rf quip/web/FeatureMap
 rm -rf quip/config
 rm -rf quip/config-update
-
+rm -rf quip/web/modules/quip
