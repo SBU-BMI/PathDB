@@ -9,10 +9,6 @@ if [ -f "$FILE" ]; then
     echo "$FILE exists"
     rm -f $FILE
 fi
-# check to see if custom theme file exists
-if [ ! -f "/config/pathdb/w3-theme-custom.css" ]; then
-        cp /build/w3-theme-custom.css /config/pathdb/w3-theme-custom.css
-fi
 # check to see of PathDB MySQL defaults file exists
 if [ ! -f "/config/pathdbmysql.cnf" ]; then
 	cp /build/pathdbmysql.cnf /config/pathdbmysql.cnf
