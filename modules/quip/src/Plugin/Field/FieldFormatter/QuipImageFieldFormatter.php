@@ -64,7 +64,8 @@ class QuipImageFieldFormatter extends FileFormatterBase {
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
       $elements[$delta] = [
         //'#markup' => exec('java -cp . HelloWorldApp '.$nid.' '.file_url_transform_relative(file_create_url($file->getFileUri()))),
-        '#markup' => exec('java -cp ./QuIP-1.0.jar edu.stonybrook.bmi.quip.ImageInfo '.$nid.' '.file_url_transform_relative(file_create_url($file->getFileUri()))),
+        //'#markup' => exec('java -cp ./QuIP-1.0.jar edu.stonybrook.bmi.quip.ImageInfo '.$nid.' '.file_url_transform_relative(file_create_url($file->getFileUri()))),
+        '#markup' => $nid.' '.file_url_transform_relative(file_create_url($file->getFileUri())),
         '#cache' => [
           'tags' => $file->getCacheTags(),
         ],
@@ -73,6 +74,5 @@ class QuipImageFieldFormatter extends FileFormatterBase {
     }
     return $elements;
   }
-
 }
 

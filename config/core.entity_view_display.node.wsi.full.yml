@@ -57,17 +57,17 @@ third_party_settings:
         - studyid
         - clinicaltrialsubjectid
         - imageid
-        - group_tabbers
         - patientid
+        - group_tabbers
         - imagedvolumeheight
         - imagedvolumewidth
         - acquisitiondatetime
         - referencepixelphysicalvaluex
         - referencepixelphysicalvaluey
-        - group_image
         - lossyimagecompression
-        - lossyimagecompressionmethod
+        - group_image
         - group_subject
+        - lossyimagecompressionmethod
         - lossyimagecompressionratio
         - group_specimen
         - manufacturer

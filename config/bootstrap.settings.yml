@@ -20,6 +20,7 @@ css: "body { background-color: #ffffff; color: #000000; margin-top: 0px}\r\n.nav
 plaintext_enabled: 0
 autopreview_enabled: 0
 preview_path: ''
+fluid_container: 1
 features:
   comment_user_picture: true
   comment_user_verification: true
@@ -29,4 +30,4 @@ logo:
   path: ''
   url: ''
   use_default: false
-fluid_container: 1
+table_bordered: 1

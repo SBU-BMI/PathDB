@@ -13,24 +13,20 @@
         console.log("Inject : "+cool+" and ("+rcool+")");
 
         // SVS base image
-        var filepath = "/data/images/Hawaii/batch2/BC_201_1_1.svs_files/"; // Must have trailing slash.
+        var filepath = "/data/images/tcga_data/luad/TCGA-05-4244-01Z-00-DX1.d4ff32cd-38cf-40ea-8213-45c2b100ac01.svs_files/";
 
         var viewer = OpenSeadragon({
             id: "content",
             prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@2.3/build/openseadragon/images/",
             tileSources: {
-
                 height: height,
                 width: width,
                 tileSize: tilesize,
                 minLevel: 7,
                 maxLevel: 17,
-
                 getTileUrl: function (level, x, y) {
-
-                    return "http://quip3.bmi.stonybrook.edu/fcgi-bin/iipsrv.fcgi?DeepZoom=" + filepath
+                    return "http://quip1.bmi.stonybrook.edu/fcgi-bin/iipsrv.fcgi?DeepZoom=" + filepath
                         + level + "/" + x + "_" + y + ".jpg"
-
                 }
             }
         });

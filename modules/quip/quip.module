@@ -39,7 +39,6 @@ function quip_theme() {
   );
 }
 
-
 function quip_custom_term_validator(array &$form, \Drupal\Core\Form\FormStateInterface &$form_state) {
 	preg_match("/^[A-Za-z0-9_:]+$/", $form_state->getValue('name')[0]['value'], $matches);
 	if (!$matches) {
@@ -63,7 +62,6 @@ function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_stat
 		$form['#validate'][] = 'quip_custom_term_validator';
         }
 }
-
 
 function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
         if ($entity->isNew()) {
@@ -91,5 +89,4 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                 }
         }
 }
-
 
