@@ -641,7 +641,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: Dropbutton
+          label: ''
           exclude: false
           alter:
             alter_text: false
@@ -674,7 +674,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: true
+          element_label_colon: false
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -683,9 +683,9 @@ display:
           empty_zero: false
           hide_alter_empty: true
           fields:
-            nothing: nothing
-            nothing_2: nothing_2
             nothing_1: nothing_1
+            nothing_2: nothing_2
+            nothing: nothing
             nid: '0'
             field_collection: '0'
             studyid: '0'
