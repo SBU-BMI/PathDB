@@ -134,6 +134,35 @@ else
 	cd /quip/web
         /quip/vendor/bin/drush -y pm:enable css_editor
         /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
+	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap
+	/quip/vendor/bin/drush -y config-set system.theme default bootstrap
+	/quip/vendor/bin/drush config-delete block.block.bartik_branding
+	/quip/vendor/bin/drush config-delete block.block.bartik_account_menu
+	/quip/vendor/bin/drush config-delete block.block.bartik_breadcrumbs
+	/quip/vendor/bin/drush config-delete block.block.bartik_content
+	/quip/vendor/bin/drush config-delete block.block.bartik_footer
+	/quip/vendor/bin/drush config-delete block.block.bartik_help
+	/quip/vendor/bin/drush config-delete block.block.bartik_local_actions
+	/quip/vendor/bin/drush config-delete block.block.bartik_local_tasks
+	/quip/vendor/bin/drush config-delete block.block.bartik_main_menu
+	/quip/vendor/bin/drush config-delete block.block.bartik_messages
+	/quip/vendor/bin/drush config-delete block.block.bartik_page_title
+	/quip/vendor/bin/drush config-delete block.block.bartik_powered
+	/quip/vendor/bin/drush config-delete block.block.bartik_tools
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_account_menu
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_branding
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_breadcrumbs
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_content
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_help
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_local_actions
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_local_tasks
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_main_menu
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_messages
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_page_title
+	/quip/vendor/bin/drush -y theme:uninstall drupal8_w3css_theme
+	/quip/vendor/bin/drush -y theme:uninstall bartik
+	/quip/vendor/bin/drush -y theme:uninstall seven
+	/quip/vendor/bin/drush config-delete field.storage.node.field_map_type
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
