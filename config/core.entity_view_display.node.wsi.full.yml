@@ -1,6 +1,6 @@
 uuid: 4d12d7be-9cc0-45cb-ba37-bd0b5b98f8e6
 langcode: en
-status: true
+status: false
 dependencies:
   config:
     - core.entity_view_mode.node.full
@@ -26,58 +26,9 @@ dependencies:
     - node.type.wsi
   module:
     - datetime
-    - ds
     - field_group
     - user
 third_party_settings:
-  ds:
-    layout:
-      id: ds_2col_stacked
-      library: ds/ds_2col_stacked
-      disable_css: false
-      entity_classes: all_classes
-      settings:
-        label: ''
-        wrappers:
-          header: div
-          left: div
-          right: div
-          footer: div
-        outer_wrapper: div
-        attributes: ''
-        link_attribute: ''
-        link_custom: ''
-        classes:
-          layout_class: {  }
-    regions:
-      header:
-        - links
-        - node_title
-        - field_collection
-        - studyid
-        - clinicaltrialsubjectid
-        - imageid
-        - patientid
-        - group_tabbers
-        - imagedvolumeheight
-        - imagedvolumewidth
-        - acquisitiondatetime
-        - referencepixelphysicalvaluex
-        - referencepixelphysicalvaluey
-        - lossyimagecompression
-        - group_image
-        - group_subject
-        - lossyimagecompressionmethod
-        - lossyimagecompressionratio
-        - group_specimen
-        - manufacturer
-        - md5
-    fields:
-      node_title:
-        plugin_id: node_title
-        weight: 1
-        label: hidden
-        formatter: default
   field_group:
     group_tabbers:
       children:
