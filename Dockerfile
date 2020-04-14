@@ -50,6 +50,7 @@ RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nod
 # copy over Docker initialization scripts
 EXPOSE 80
 COPY run.sh /root/run.sh
+COPY savepathdb /root/savepathdb
 COPY mysql.tgz /build
 RUN mkdir /quip/config
 RUN mkdir /quip/config-update
