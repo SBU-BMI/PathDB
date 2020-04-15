@@ -163,7 +163,11 @@ else
 	/quip/vendor/bin/drush -y theme:uninstall drupal8_w3css_theme
 	/quip/vendor/bin/drush -y theme:uninstall bartik
 	/quip/vendor/bin/drush -y theme:uninstall seven
-	/quip/vendor/bin/drush config-delete field.storage.node.field_map_type
+	/quip/vendor/bin/drush -y pm:uninstall ds_extras ds_switch_view_mode ds
+        /quip/vendor/bin/drush config-delete field.storage.node.field_map_type
+        mkdir /data/tmp2
+	cp -f /quip/config-update/field.storage.node.field_map_type.yml /data/tmp2
+	/quip/vendor/bin/drush -y config:import --partial --source /data/tmp2
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
