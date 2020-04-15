@@ -58,8 +58,8 @@ display:
           id: 0
           total_pages: null
           tags:
-            previous: ‹‹
-            next: ››
+            previous: ..
+            next: ..
             first: '« First'
             last: 'Last »'
           expose:
@@ -95,7 +95,7 @@ display:
           default: '-1'
           empty_table: false
       row:
-        type: 'ds_entity:taxonomy_term'
+        type: fields
       fields:
         tid:
           id: tid
@@ -404,3 +404,4 @@ display:
         - request_format
         - user.roles
       tags: {  }
+
