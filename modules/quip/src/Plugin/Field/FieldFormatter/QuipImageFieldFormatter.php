@@ -13,7 +13,7 @@ use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
  * Plugin implementation of the 'QuipImage_field_formatter' formatter.
  *
  * @FieldFormatter(
- *   id = "QuipImage_field_formatter",
+ *   id = "QuipSeaDragon_field_formatter",
  *   label = @Translation("Quip Image field formatter"),
  *   field_types = {
  *     "file"
@@ -62,15 +62,13 @@ class QuipImageFieldFormatter extends FileFormatterBase {
       $nid = 0;
     }
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
-      $elements[$delta] = [
-        //'#markup' => exec('java -cp . HelloWorldApp '.$nid.' '.file_url_transform_relative(file_create_url($file->getFileUri()))),
-        //'#markup' => exec('java -cp ./QuIP-1.0.jar edu.stonybrook.bmi.quip.ImageInfo '.$nid.' '.file_url_transform_relative(file_create_url($file->getFileUri()))),
-        '#markup' => $nid.' '.file_url_transform_relative(file_create_url($file->getFileUri())),
-        '#cache' => [
-          'tags' => $file->getCacheTags(),
-        ],
-      ];
-     //\Drupal\Core\Cache\Cache::invalidateTags(array('node:13'));
+	$url = "http://www.ebremer.com";
+	$height = 10000;
+	$elements[$delta] = [
+       		'#theme' => 'openseadragon_link_formatter',
+       		'#url' => $url,
+       		'#height' => $height,
+      	];
     }
     return $elements;
   }

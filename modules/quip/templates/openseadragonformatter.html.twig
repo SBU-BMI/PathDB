@@ -1,43 +1,73 @@
-{{ attach_library('openseadragon/openseadragon') }}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.3.0/openseadragon.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
 <div id="openseadragon1">{{ url }}</div>
 <div id="osdcontent"></div>
 <script type="text/javascript">
-    $(document).ready(function () {
+window.addEventListener('load', 
+  function() { 
         var tilesize = 256;
         var height = 67341;
         var width = 107519;
         var cool = "{{ url }}";
         var rcool = "{{ height }}";
         console.log("Inject : "+cool+" and ("+rcool+")");
-
-        // SVS base image
         var filepath = "/data/images/tcga_data/luad/TCGA-05-4244-01Z-00-DX1.d4ff32cd-38cf-40ea-8213-45c2b100ac01.svs_files/";
 
-        var viewer = OpenSeadragon({
-            id: "content",
-            prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@2.3/build/openseadragon/images/",
-            tileSources: {
-                height: height,
-                width: width,
-                tileSize: tilesize,
-                minLevel: 7,
-                maxLevel: 17,
-                getTileUrl: function (level, x, y) {
-                    return "http://quip1.bmi.stonybrook.edu/fcgi-bin/iipsrv.fcgi?DeepZoom=" + filepath
-                        + level + "/" + x + "_" + y + ".jpg"
-                }
-            }
-        });
+var p = "http://imagebox.ebremer.com/iiif/?iiif=https://s3.amazonaws.com//ebremeribox/image.svs";
+console.log("image ID : "+p);
+    OpenSeadragon({
+        id:                 "example-inline-configuration-for-iiif",
+        prefixUrl:          "/openseadragon/images/",
+        preserveViewport:   true,
+        visibilityRatio:    1,
+        minZoomLevel:       1,
+        defaultZoomLevel:   1,
+        sequenceMode:       true,
+        tileSources:   [{
+          "@context": "http://iiif.io/api/image/2/context.json",
+          "@id": "https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000001.jp2",
+          "height": 7200,
+          "width": 5233,
+          "profile": [ "http://iiif.io/api/image/2/level2.json" ],
+          "protocol": "http://iiif.io/api/image",
+          "tiles": [{
+            "scaleFactors": [ 1, 2, 4, 8, 16, 32 ],
+            "width": 1024
+          }]
+        },{
+          "@context": "http://iiif.io/api/image/2/context.json",
+          "@id": "https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000002.jp2",
+          "height": 7200,
+          "width": 5093,
+          "profile": [ "http://iiif.io/api/image/2/level2.json" ],
+          "protocol": "http://iiif.io/api/image",
+          "tiles": [{
+            "scaleFactors": [ 1, 2, 4, 8, 16, 32 ],
+            "width": 1024
+          }]
+        },{
+          "@context": "http://iiif.io/api/image/2/context.json",
+          "@id": "https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000003.jp2",
+          "height": 7200,
+          "width": 5387,
+          "profile": [ "http://iiif.io/api/image/2/level2.json" ],
+          "protocol": "http://iiif.io/api/image",
+          "tiles": [{
+            "scaleFactors": [ 1, 2, 4, 8, 16, 32 ],
+            "width": 1024
+          }]
+        },{
+          "@context": "http://iiif.io/api/image/2/context.json",
+          "@id": "https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000004.jp2",
+          "height": 7200,
+          "width": 5434,
+          "profile": [ "http://iiif.io/api/image/2/level2.json" ],
+          "protocol": "http://iiif.io/api/image",
+          "tiles": [{
+            "scaleFactors": [ 1, 2, 4, 8, 16, 32 ],
+            "width": 1024
+          }]
+        }]
     });
-
-    $(window).on("load", function () {
-        var div = document.getElementById("content");
-        var w = window.innerWidth/3;
-        var h = window.innerHeight/3;
-        div.setAttribute("style", "width: " + w + "px; height: " + h + "px;");
-    });
-
+  }, false);
 </script>
 
