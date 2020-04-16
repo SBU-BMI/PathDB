@@ -1,11 +1,7 @@
 uuid: c9d66498-f8f0-4d70-aab1-938d953e68f6
 langcode: en
-status: true
+status: false
 dependencies:
-  content:
-    - 'block_content:basic:17eec47a-e4aa-4020-aae7-ba86347d94dd'
-  module:
-    - block_content
   theme:
     - bootstrap
 id: quipfooter

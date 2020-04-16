@@ -26,6 +26,7 @@ dependencies:
   module:
     - datetime
     - field_group
+    - file
     - user
 third_party_settings:
   field_group:
@@ -89,6 +90,14 @@ content:
     label: inline
     settings:
       link: true
+    third_party_settings: {  }
+  field_wsiimage:
+    type: file_default
+    weight: 5
+    region: content
+    label: above
+    settings:
+      use_description_as_link_text: true
     third_party_settings: {  }
   imageid:
     type: string
@@ -165,7 +174,6 @@ hidden:
   field_bulk_upload: true
   field_iip_path: true
   field_utarget: true
-  field_wsiimage: true
   imagedvolumeheight: true
   imagedvolumewidth: true
   links: true

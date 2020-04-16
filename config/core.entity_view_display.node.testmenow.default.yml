@@ -23,7 +23,7 @@ content:
     third_party_settings: {  }
     region: content
   field_wsiimage:
-    weight: 107
+    weight: 108
     label: above
     settings: {  }
     third_party_settings: {  }

@@ -1,6 +1,6 @@
 <script src="/openseadragon/openseadragon.min.js"></script>
 <div id="openseadragon1">{{ url }}</div>
-<div id="osdcontent" class="openseadragon-viewer"></div>
+<div id="osdcontent" class="openseadragon-viewer">BLAH</div>
 <script type="text/javascript">
 window.addEventListener('load', 
   function() { 
@@ -13,6 +13,7 @@ window.addEventListener('load',
         var filepath = "/data/images/tcga_data/luad/TCGA-05-4244-01Z-00-DX1.d4ff32cd-38cf-40ea-8213-45c2b100ac01.svs_files/";
 
 var p = "http://imagebox.ebremer.com/iiif/?iiif=https://s3.amazonaws.com//ebremeribox/image.svs";
+console.log("image ID : "+p);
     var viewer1 = OpenSeadragon({
         id: "osdcontent",
         preserveViewport: true,
