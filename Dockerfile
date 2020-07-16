@@ -62,7 +62,8 @@ COPY content/* /quip/content/
 # download caMicroscope
 WORKDIR /quip/web
 ARG viewer
-RUN if [ -z ${viewer} ]; then git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.10; else git clone https://github.com/camicroscope/caMicroscope.git --branch=$viewer; fi
+ARG fork
+RUN git clone https://github.com/${fork:-camicroscope}/camicroscope.git --branch=${viewer:-master}
 ARG featureMap
 RUN if [ -z ${featureMap} ]; then git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3; else git clone https://github.com/SBU-BMI/FeatureMap --branch=$featureMap; fi
 RUN rm /etc/httpd/conf.d/ssl.conf
