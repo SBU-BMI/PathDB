@@ -25,18 +25,20 @@ if [ ! -f /quip/web/sites/default/settings.php ]; then
 	echo "\$settings['hash_salt'] = '`uuidgen`';" >> /quip/web/sites/default/settings.php
 fi
 cp /config/pathdb/w3-theme-custom.css /quip/web/themes/contrib/d8w3css/css/w3-css-theme-custom
+echo "HERE 1"
 # make sure permissions of pathdb folder are correct
-chown -R apache:apache /quip/web/sites/default
-chmod -R 770 /quip/web/sites/default
+# chown -R $UID:0 /quip/web/sites/default
+# chmod -R 770 /quip/web/sites/default
 #create pathdb directory if missing
 if [ ! -d /data/pathdb ]; then
         mkdir -p /data/pathdb
 fi
 # make sure sync folder exists and set permissions
+echo "HERE 2"
 if [ ! -d /data/pathdb/config/sync ]; then
 	mkdir -p /data/pathdb/config/sync
-	chown -R apache:apache /data/pathdb/config/sync
-	chmod -R 770 /data/pathdb/config/sync
+	# chown -R $UID:0 /data/pathdb/config/sync
+	# chmod -R 770 /data/pathdb/config/sync
 fi
 #create files directory if missing
 if [ ! -d /data/pathdb/files ]; then
@@ -46,17 +48,20 @@ fi
 if [ ! -d /data/pathdb/files/wsi ]; then
         mkdir -p /data/pathdb/files/wsi
 fi
+echo "HERE 3"
 # check security
-chown apache:apache /data/pathdb
-chown -R apache:apache /data/pathdb/config
-chown apache:apache /data/pathdb/files
-chown apache:apache /data/pathdb/wsi
+# chown $UID:0 /data/pathdb
+# chown -R $UID:0 /data/pathdb/config
+# chown $UID:0 /data/pathdb/files
+# chown $UID:0 /data/pathdb/wsi
 #create logs directory if missing
 if [ ! -d /data/pathdb/logs ]; then
         mkdir -p /data/pathdb/logs
-	chown -R apache:apache /data/pathdb/logs
+	# chown -R $UID:0 /data/pathdb/logs
 fi
+echo "HERE 4"
 if [ ! -d /data/pathdb/mysql ]; then
+	sed -i 's/user=mysql/user='"$UID"'/g' /config/pathdbmysql.cnf
 	mysql_install_db --force --defaults-file=/config/pathdbmysql.cnf
 	/usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
         until mysqladmin status
@@ -66,7 +71,7 @@ if [ ! -d /data/pathdb/mysql ]; then
 	cd /build
         tar xvfz mysql.tgz
         mysql -u root -e "create database QuIP"
-        mysql QuIP < mysql
+        mysql -u root QuIP < mysql
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes

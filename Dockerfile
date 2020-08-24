@@ -30,7 +30,7 @@ COPY images/ /quip/web/images/
 COPY settings.php /build
 COPY mysql.tgz /build
 # set permissions correctly for apache demon access
-RUN chown -R apache:apache /quip
+# RUN chown -R apache:apache /quip
 # adjust location of Drupal-supporting MySQL database files
 RUN sed -i 's/datadir=\/var\/lib\/mysql/datadir=\/data\/pathdb\/mysql/g' /etc/my.cnf
 # increase php file upload sizes and posts
@@ -40,7 +40,7 @@ RUN sed -i 's/;upload_tmp_dir =/upload_tmp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 # set up Drupal private file area
 RUN mkdir -p /data/pathdb/files
-RUN chown -R apache:apache /data/pathdb/files
+# RUN chown -R apache:apache /data/pathdb/files
 RUN chmod -R 775 /data/pathdb/files
 
 # create self-signed digital keys for JWT
@@ -67,4 +67,38 @@ RUN if [ -z ${featureMap} ]; then git clone https://github.com/SBU-BMI/FeatureMa
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
 RUN yum update -y && yum clean all
+
+RUN mkdir /config
+COPY config_quip/ /config/
+
+RUN mkdir /keys
+COPY jwt_keys_quip/ /keys/
+
+RUN mkdir -p /quip/web/sites/default
+COPY config_quip/pathdb/ /quip/web/sites/default/
+
+RUN chgrp -R 0 /root && \
+    chmod -R g+rwX /root
+
+RUN chgrp -R 0 /keys && \
+    chmod -R g+rwX /keys
+
+RUN chgrp -R 0 /data && \
+    chmod -R g+rwX /data
+
+RUN chgrp -R 0 /config && \
+    chmod -R g+rwX /config
+
+RUN chgrp -R 0 /run && \
+    chmod -R g+rwX /run
+
+RUN chgrp -R 0 /build && \
+    chmod -R g+rwX /build
+
+RUN chgrp -R 0 /quip && \
+    chmod -R g+rwX /quip
+
+RUN chgrp -R 0 /var && \
+    chmod -R g+rwX /var
+
 CMD ["sh", "/root/run.sh"]
