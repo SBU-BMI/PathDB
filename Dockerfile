@@ -70,6 +70,8 @@ RUN yum update -y && yum clean all
 
 RUN mkdir /config
 COPY config_quip/ /config/
+RUN cp /config/httpd.conf.template /config/httpd.conf
+RUN cp /config/pathdb_routes.json /config/routes.json
 
 RUN mkdir /keys
 COPY jwt_keys_quip/ /keys/
