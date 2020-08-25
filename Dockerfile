@@ -97,7 +97,7 @@ RUN 	chgrp -R 0 /run && \
 RUN 	chgrp -R 0 /build && \
     	chmod -R g+rwX /build
 RUN 	chgrp -R 0 /quip && \
-    	chmod -R g+rwX /quip
+    	chmod -R a+rwx /quip
 RUN 	chgrp -R 0 /var && \
     	chmod -R g+rwX /var
 
