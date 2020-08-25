@@ -40,9 +40,9 @@ RUN sed -i 's/post_max_size = 8M/post_max_size = 30G/g' /etc/php.ini
 RUN sed -i 's/;upload_tmp_dir =/upload_tmp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 # set up Drupal private file area
-RUN mkdir -p /data/pathdb/files
+# RUN mkdir -p /data/pathdb/files
 # RUN chown -R apache:apache /data/pathdb/files
-RUN chmod -R 775 /data/pathdb/files
+# RUN chmod -R 775 /data/pathdb/files
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
