@@ -25,19 +25,23 @@ if [ ! -f /quip/web/sites/default/settings.php ]; then
 	echo "\$settings['hash_salt'] = '`uuidgen`';" >> /quip/web/sites/default/settings.php
 fi
 cp /config/pathdb/w3-theme-custom.css /quip/web/themes/contrib/d8w3css/css/w3-css-theme-custom
-echo "HERE 1"
+
+# NOTE: chown and chmod are commented out to run container 
+#		as non-root user. group and mod are set in Dockerfile 
+# 		during build. When container is run as non-root user
+#		chown and chmod operations fail.
+
 # make sure permissions of pathdb folder are correct
-# chown -R $UID:0 /quip/web/sites/default
+# chown -R apache:apache /quip/web/sites/default
 # chmod -R 770 /quip/web/sites/default
-#create pathdb directory if missing
+# create pathdb directory if missing
 if [ ! -d /data/pathdb ]; then
         mkdir -p /data/pathdb
 fi
 # make sure sync folder exists and set permissions
-echo "HERE 2"
 if [ ! -d /data/pathdb/config/sync ]; then
 	mkdir -p /data/pathdb/config/sync
-	# chown -R $UID:0 /data/pathdb/config/sync
+	# chown -R apache:apache /data/pathdb/config/sync
 	# chmod -R 770 /data/pathdb/config/sync
 fi
 #create files directory if missing
@@ -48,20 +52,20 @@ fi
 if [ ! -d /data/pathdb/files/wsi ]; then
         mkdir -p /data/pathdb/files/wsi
 fi
-echo "HERE 3"
 # check security
-# chown $UID:0 /data/pathdb
-# chown -R $UID:0 /data/pathdb/config
-# chown $UID:0 /data/pathdb/files
-# chown $UID:0 /data/pathdb/wsi
-#create logs directory if missing
+# chown apache:apache /data/pathdb
+# chown -R apache:apache /data/pathdb/config
+# chown apache:apache /data/pathdb/files
+# chown apache:apache /data/pathdb/wsi
+# create logs directory if missing
 if [ ! -d /data/pathdb/logs ]; then
         mkdir -p /data/pathdb/logs
-	# chown -R $UID:0 /data/pathdb/logs
+	# chown -R apache:apache /data/pathdb/logs
 fi
-echo "HERE 4"
 if [ ! -d /data/pathdb/mysql ]; then
+	# replace user=mysql with UID of non-root user from container
 	sed -i 's/user=mysql/user='"$UID"'/g' /config/pathdbmysql.cnf
+
 	mysql_install_db --force --defaults-file=/config/pathdbmysql.cnf
 	/usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
         until mysqladmin status
@@ -75,7 +79,9 @@ if [ ! -d /data/pathdb/mysql ]; then
 fi
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
-        mysql_install_db --user=mysql --ldata=/data/pathdb/mysql
+		# Use $UID instead of mysql (--user=$UID instead of --user=mysql 
+		# to run container as non-root user
+        mysql_install_db --user=$UID --ldata=/data/pathdb/mysql
         /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
         sleep 10
         mysql -u root -e "create database QuIP"
@@ -87,20 +93,20 @@ if [ ! -d /data/pathdb/mysql ]; then
         /quip/vendor/bin/drush -y ev '\Drupal::entityManager()->getStorage("shortcut_set")->load("default")->delete();'
         /quip/vendor/bin/drush -y config:import --source /quip/pathdbconfig/
         /quip/vendor/bin/drush -y php-eval 'node_access_rebuild();'
-	/quip/vendor/bin/drush -y pm:uninstall toolbar
+		/quip/vendor/bin/drush -y pm:uninstall toolbar
         /quip/vendor/bin/drush -y pm:uninstall hide_revision_field
         /quip/vendor/bin/drush -y cache-rebuild
         httpd -f /config/httpd.conf
-	counter=0;
+		counter=0;
         wget --spider --quiet http://localhost
         while [ "$?" != 0 ]
         do
-		counter=$((counter+1))
-		echo "Checked $counter time(s)"
-		sleep 1
-		wget --spider --quiet http://localhost
-	done
-	/quip/vendor/bin/drush -y cache-rebuild
+			counter=$((counter+1))
+			echo "Checked $counter time(s)"
+			sleep 1
+			wget --spider --quiet http://localhost
+		done
+		/quip/vendor/bin/drush -y cache-rebuild
 
 	# create REST API System User
 	/quip/vendor/bin/drush user:create --password bluecheese2018 archon
@@ -130,17 +136,12 @@ if [ ! -d /data/pathdb/mysql ]; then
 	# create core content
 	curl --user admin:bluecheese2018 -k -X POST http://localhost/node?_format=json -H "Content-Type: application/json" --data-binary "@/quip/content/node1"
 else
-        /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
+    /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
 	until mysqladmin status
 	do
-        	sleep 3
+    	sleep 3
 	done
-        #if [ ! -d /quip/config-local ]; then
-        #  mkdir /quip/config-local
-        #  chown -R apache:apache /quip/config-local
-        #fi
-        #/quip/vendor/bin/drush -y config:export --destination /quip/config-local
-        httpd -f /config/httpd.conf
+    httpd -f /config/httpd.conf
 	cd /quip/web
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y updatedb
