@@ -88,7 +88,7 @@ RUN 	chgrp -R 0 /root && \
     	chmod -R g+rwX /root
 RUN 	chgrp -R 0 /keys && \
     	chmod -R g+rwX /keys
-RUN 	chgrp -R 0 /data && \
+RUN 	mkdir /data && chgrp -R 0 /data && \
     	chmod -R g+rwX /data
 RUN 	chgrp -R 0 /config && \
     	chmod -R g+rwX /config
