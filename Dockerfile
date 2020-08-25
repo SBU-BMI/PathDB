@@ -85,20 +85,20 @@ RUN 	mkdir -p /quip/web/sites/default
 COPY 	config_quip/pathdb/ /quip/web/sites/default/
 
 RUN 	chgrp -R 0 /root && \
-    	chmod -R a+rwX /root
+    	chmod -R a=rwx+s /root
 RUN 	chgrp -R 0 /keys && \
-    	chmod -R a+rwX /keys
+    	chmod -R a=rwX+s /keys
 RUN 	mkdir /data && chgrp -R 0 /data && \
-    	chmod -R a+rwX /data
+    	chmod -R a=rwx+s /data
 RUN 	chgrp -R 0 /config && \
-    	chmod -R a+rwX /config
+    	chmod -R a=rwx+s /config
 RUN 	chgrp -R 0 /run && \
-    	chmod -R a+rwX /run
+    	chmod -R a=rwx+s /run
 RUN 	chgrp -R 0 /build && \
-    	chmod -R a+rwX /build
+    	chmod -R a=rwx+s /build
 RUN 	chgrp -R 0 /quip && \
-    	chmod -R a+rwx /quip
+    	chmod -R a=rwx+s /quip
 RUN 	chgrp -R 0 /var && \
-    	chmod -R a+rwX /var
+    	chmod -R a=rwx+s /var
 
 CMD ["sh", "/root/run.sh"]
