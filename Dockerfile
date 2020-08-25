@@ -89,7 +89,7 @@ RUN 	chgrp -R 0 /root && \
 RUN 	chgrp -R 0 /keys && \
     	chmod -R g+rwX /keys
 RUN 	mkdir /data && chgrp -R 0 /data && \
-    	chmod -R g+rwX /data
+    	chmod -R a+rwX /data
 RUN 	chgrp -R 0 /config && \
     	chmod -R g+rwX /config
 RUN 	chgrp -R 0 /run && \
