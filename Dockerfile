@@ -39,10 +39,11 @@ RUN sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 30G/g' /etc/php.ini
 RUN sed -i 's/post_max_size = 8M/post_max_size = 30G/g' /etc/php.ini
 RUN sed -i 's/;upload_tmp_dir =/upload_tmp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
+
 # set up Drupal private file area
-# RUN mkdir -p /data/pathdb/files
-# RUN chown -R apache:apache /data/pathdb/files
-# RUN chmod -R 775 /data/pathdb/files
+RUN mkdir -p /data/pathdb/files
+RUN chgrp -R 0 /data/pathdb/files
+RUN chmod -R 775 /data/pathdb/files
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
@@ -84,21 +85,42 @@ COPY 	jwt_keys_quip/ /keys/
 RUN 	mkdir -p /quip/web/sites/default
 COPY 	config_quip/pathdb/ /quip/web/sites/default/
 
+RUN		mkdir -p /data/tmp && \
+    	chmod a=rwx,o+t /data/tmp
+
+RUN		mkdir -p /data/pathdb && \
+		mkdir -p /data/pathdb/config/sync && \
+		mkdir -p /data/pathdb/files && \
+		mkdir -p /data/pathdb/files/wsi && \
+		mkdir -p /data/pathdb/logs && \
+		touch /data/pathdb/logs/error_log && \
+		touch /data/pathdb/logs/access_log 
+
 RUN 	chgrp -R 0 /root && \
-    	chmod -R a=rwx /root
+    	chmod -R g=u /root && \
+		setfacl -R -m g::rwx /root
 RUN 	chgrp -R 0 /keys && \
-    	chmod -R a=rwX /keys
-RUN 	mkdir -p /data/pathdb/files/wsi && chgrp -R 0 /data && \
-    	chmod -R g=rwX+s,a=rwX+s /data
+    	chmod -R g=u /keys && \
+		setfacl -R -m g::rwx /keys
+RUN 	chgrp -R 0 /data && \
+    	chmod -R g=u /data && \
+		setfacl -R -m g::rwx /data
 RUN 	chgrp -R 0 /config && \
-    	chmod -R g+rwx /config
+    	chmod -R g=u /config && \
+		setfacl -R -m g::rwx /config
 RUN 	chgrp -R 0 /run && \
-    	chmod -R a=rwx /run
+    	chmod -R g=u /run && \
+		setfacl -R -m g::rwx /run
 RUN 	chgrp -R 0 /build && \
-    	chmod -R g=rwX /build
+    	chmod -R g=u /build && \
+		setfacl -R -m g::rwx /build
 RUN 	chgrp -R 0 /quip && \
-    	chmod -R a=rwx /quip
+    	chmod -R g=u /quip && \
+		setfacl -R -m g::rwx /quip
 RUN 	chgrp -R 0 /var && \
-    	chmod -R a=rwx /var
+    	chmod -R g=u /var && \
+		setfacl -R -m g::rwx /var
+
+USER 1001
 
 CMD ["sh", "/root/run.sh"]
