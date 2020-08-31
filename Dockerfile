@@ -97,29 +97,21 @@ RUN		mkdir -p /data/pathdb && \
 		touch /data/pathdb/logs/access_log 
 
 RUN 	chgrp -R 0 /root && \
-    	chmod -R g=u /root && \
-		setfacl -R -m g::rwx /root
+    	chmod -R g=rwx,o+t /root 
 RUN 	chgrp -R 0 /keys && \
-    	chmod -R g=u /keys && \
-		setfacl -R -m g::rwx /keys
+    	chmod -R g=rwx,o+t /keys 
 RUN 	chgrp -R 0 /data && \
-    	chmod -R g=u /data && \
-		setfacl -R -m g::rwx /data
+    	chmod -R g=rwx,o+t /data && \
 RUN 	chgrp -R 0 /config && \
-    	chmod -R g=u /config && \
-		setfacl -R -m g::rwx /config
+    	chmod -R g=rwx,o+t /config 
 RUN 	chgrp -R 0 /run && \
-    	chmod -R g=u /run && \
-		setfacl -R -m g::rwx /run
+    	chmod -R g=rwx,o+t /run 
 RUN 	chgrp -R 0 /build && \
-    	chmod -R g=u /build && \
-		setfacl -R -m g::rwx /build
+    	chmod -R g=rwx,o+t /build 
 RUN 	chgrp -R 0 /quip && \
-    	chmod -R g=u /quip && \
-		setfacl -R -m g::rwx /quip
+    	chmod -R g=rwx,o+t /quip 
 RUN 	chgrp -R 0 /var && \
-    	chmod -R g=u /var && \
-		setfacl -R -m g::rwx /var
+    	chmod -R g=rwx,o+t /var 
 
 USER 1001
 
