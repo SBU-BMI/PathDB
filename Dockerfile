@@ -97,28 +97,28 @@ RUN		mkdir -p /data/pathdb && \
 		touch /data/pathdb/logs/access_log 
 
 RUN 	chgrp -R 0 /root/* && \
-    	chmod -R g+rwx /root/*
+    	chmod g+rwx -R /root/*
 
 RUN 	chgrp -R 0 /keys/* && \
-    	chmod -R g+rwx /keys/* 
+    	chmod g+rwx -R /keys/* 
 
 RUN 	chgrp -R 0 /data/* && \
-    	chmod -R g+rwx /data/* 
+    	chmod g+rwx -R /data/* 
 
 RUN 	chgrp -R 0 /config/* && \
-    	chmod -R g+rwx /config/* 
+    	chmod g+rwx -R /config/* 
 
 RUN 	chgrp -R 0 /run/* && \
-    	chmod -R g+rwx /run/* 
+    	chmod g+rwx -R /run/* 
 
 RUN 	chgrp -R 0 /build/* && \
-    	chmod -R g+rwx /build/* 
+    	chmod g+rwx -R /build/* 
 
 RUN 	chgrp -R 0 /quip/* && \
-    	chmod -R g+rwx /quip/* 
+    	chmod g+rwx -R /quip/* 
 
 RUN 	chgrp -R 0 /var/* && \
-    	chmod -R g+rwx /var/* 
+    	chmod g+rwx -R /var/* 
 
 USER 1001
 
