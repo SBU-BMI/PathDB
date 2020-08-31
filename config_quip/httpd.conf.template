@@ -338,7 +338,7 @@ EnableSendfile on
 # Load config files in the "/etc/httpd/conf.d" directory, if any.
 IncludeOptional conf.d/*.conf
 
-<VirtualHost *:80>
+<VirtualHost *:8080>
     SSLEngine off
 #    SSLCertificateFile /config/quip.bmi.stonybrook.edu.cer
 #    SSLCertificateKeyFile /config/quip.bmi.stonybrook.edu.key
@@ -355,7 +355,7 @@ IncludeOptional conf.d/*.conf
     ErrorLog "/data/pathdb/logs/error_log"
 </VirtualHost>
 
-<VirtualHost *:443>
+<VirtualHost *:8443>
 #    SSLEngine on
 #    SSLCertificateFile /config/quip.bmi.stonybrook.edu.cer
 #    SSLCertificateKeyFile /config/quip.bmi.stonybrook.edu.key
