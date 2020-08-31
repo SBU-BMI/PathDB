@@ -96,29 +96,29 @@ RUN		mkdir -p /data/pathdb && \
 		touch /data/pathdb/logs/error_log && \
 		touch /data/pathdb/logs/access_log 
 
-RUN 	chgrp -R 0 /root && \
-    	chmod -R g=rwx,o+t /root
+RUN 	chgrp -R 0 /root/* && \
+    	chmod -R g=rwx,o+t /root/*
 
-RUN 	chgrp -R 0 /keys && \
-    	chmod -R g=rwx,o+t /keys 
+RUN 	chgrp -R 0 /keys/* && \
+    	chmod -R g=rwx,o+t /keys/* 
 
-RUN 	chgrp -R 0 /data && \
-    	chmod -R g=rwx,o+t /data 
+RUN 	chgrp -R 0 /data/* && \
+    	chmod -R g=rwx,o+t /data/* 
 
-RUN 	chgrp -R 0 /config && \
-    	chmod -R g=rwx,o+t /config 
+RUN 	chgrp -R 0 /config/* && \
+    	chmod -R g=rwx,o+t /config/* 
 
-RUN 	chgrp -R 0 /run && \
-    	chmod -R g=rwx,o+t /run 
+RUN 	chgrp -R 0 /run/* && \
+    	chmod -R g=rwx,o+t /run/* 
 
-RUN 	chgrp -R 0 /build && \
-    	chmod -R g=rwx,o+t /build 
+RUN 	chgrp -R 0 /build/* && \
+    	chmod -R g=rwx,o+t /build/* 
 
-RUN 	chgrp -R 0 /quip && \
-    	chmod -R g=rwx,o+t /quip 
+RUN 	chgrp -R 0 /quip/* && \
+    	chmod -R g=rwx,o+t /quip/* 
 
-RUN 	chgrp -R 0 /var && \
-    	chmod -R g=rwx,o+t /var 
+RUN 	chgrp -R 0 /var/* && \
+    	chmod -R g=rwx,o+t /var/* 
 
 USER 1001
 

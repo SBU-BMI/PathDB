@@ -1,5 +1,6 @@
 #create tmp directory if missing
 if [ ! -d /data/tmp ]; then
+	echo "/data/tmp DOES NOT EXIST"
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
@@ -36,7 +37,8 @@ cp /config/pathdb/w3-theme-custom.css /quip/web/themes/contrib/d8w3css/css/w3-cs
 # chmod -R 770 /quip/web/sites/default
 # create pathdb directory if missing
 if [ ! -d /data/pathdb ]; then
-        mkdir -p /data/pathdb
+	echo "/data/pathdb DOES NOT EXIST"
+    mkdir -p /data/pathdb
 fi
 # make sure sync folder exists and set permissions
 if [ ! -d /data/pathdb/config/sync ]; then
