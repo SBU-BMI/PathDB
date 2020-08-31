@@ -70,6 +70,7 @@ ARG featureMap
 RUN if [ -z ${featureMap} ]; then git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3; else git clone https://github.com/SBU-BMI/FeatureMap --branch=$featureMap; fi
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
+RUN chmod 755 /root/run_sleep.sh
 RUN yum update -y && yum clean all
 
 # To run container as non-root user
