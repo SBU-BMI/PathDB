@@ -1,3 +1,15 @@
+echo "CREATING FOLDERS"
+
+mkdir -p /data/tmp && chmod a=rwx,o+t /data/tmp
+
+mkdir -p /data/pathdb && \
+mkdir -p /data/pathdb/config/sync && \
+mkdir -p /data/pathdb/files && \
+mkdir -p /data/pathdb/files/wsi && \
+mkdir -p /data/pathdb/logs && \
+touch /data/pathdb/logs/error_log && \
+touch /data/pathdb/logs/access_log 
+
 #create tmp directory if missing
 if [ ! -d /data/tmp ]; then
 	echo "/data/tmp DOES NOT EXIST"
