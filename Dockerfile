@@ -87,10 +87,10 @@ COPY 	jwt_keys_quip/ /keys/
 RUN 	mkdir -p /quip/web/sites/default
 COPY 	config_quip/pathdb/ /quip/web/sites/default/
 
-# RUN		mkdir -p /data/tmp && \
+# RUN	mkdir -p /data/tmp && \
 #     	chmod a=rwx,o+t /data/tmp
 
-# RUN		mkdir -p /data/pathdb && \
+# RUN	mkdir -p /data/pathdb && \
 # 		mkdir -p /data/pathdb/config/sync && \
 # 		mkdir -p /data/pathdb/files && \
 # 		mkdir -p /data/pathdb/files/wsi && \
@@ -98,12 +98,16 @@ COPY 	config_quip/pathdb/ /quip/web/sites/default/
 # 		touch /data/pathdb/logs/error_log && \
 # 		touch /data/pathdb/logs/access_log 
 
+RUN		mkdir -p /data && \
+		chgrp -R 0 /data/ && \
+		chmod g+rwx -R /data/
+RUN		mkdir -p /images && \
+		chgrp -R 0 /images/ && \
+		chmod g+rwx -R /images/
 RUN 	chgrp -R 0 /root/ && \
     	chmod g+rwx -R /root/
-
 RUN 	chgrp -R 0 /keys/ && \
     	chmod g+rwx -R /keys/ 
-
 RUN 	chgrp -R 0 /config/ && \
     	chmod g+rwx -R /config/ 
 RUN 	chgrp -R 0 /run/ && \

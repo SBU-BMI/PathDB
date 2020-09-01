@@ -1,18 +1,23 @@
-echo "CREATING FOLDERS"
+#!/bin/bash 
 
-mkdir -p /data/tmp && chmod a=rwx,o+t /data/tmp
-
-mkdir -p /data/pathdb && \
-mkdir -p /data/pathdb/config/sync && \
-mkdir -p /data/pathdb/files && \
-mkdir -p /data/pathdb/files/wsi && \
-mkdir -p /data/pathdb/logs && \
-touch /data/pathdb/logs/error_log && \
-touch /data/pathdb/logs/access_log 
+# create folders used by Drupal, etc.
+if [ ! -d /data/pathdb/config/sync ]; then
+	mkdir -p /data/pathdb/config/sync 
+fi
+if [ ! -d /data/pathdb/files/wsi ]; then
+	mkdir -p /data/pathdb/files/wsi
+	ln -s /data/pathdb/files/wsi /data/images
+fi
+if [ ! -d /data/pathdb/logs ]; then
+	mkdir -p /data/pathdb/logs 
+	touch /data/pathdb/logs/error_log 
+	touch /data/pathdb/logs/access_log 
+fi
+chgrp -R 0 /data/pathdb/
+chmod -R g=u /data/pathdb/
 
 #create tmp directory if missing
 if [ ! -d /data/tmp ]; then
-	echo "/data/tmp DOES NOT EXIST"
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
@@ -49,7 +54,6 @@ cp /config/pathdb/w3-theme-custom.css /quip/web/themes/contrib/d8w3css/css/w3-cs
 # chmod -R 770 /quip/web/sites/default
 # create pathdb directory if missing
 if [ ! -d /data/pathdb ]; then
-	echo "/data/pathdb DOES NOT EXIST"
     mkdir -p /data/pathdb
 fi
 # make sure sync folder exists and set permissions
@@ -63,12 +67,6 @@ if [ ! -d /data/pathdb/files ]; then
         mkdir -p /data/pathdb/files
 		chgrp -R 0 /data/pathdb/files
 		chmod -R g=u /data/pathdb/files
-fi
-#create files/wsi directory if missing
-if [ ! -d /data/pathdb/files/wsi ]; then
-        mkdir -p /data/pathdb/files/wsi
-		chgrp -R 0 /data/pathdb/files/wsi
-		chmod -R g=u /data/pathdb/files/wsi
 fi
 # check security
 # chown apache:apache /data/pathdb
