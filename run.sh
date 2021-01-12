@@ -171,6 +171,7 @@ else
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
+	/quip/vendor/bin/drush -y user:cancel archon
 fi
 while true; do sleep 1000; done
 
