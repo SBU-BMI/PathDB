@@ -149,6 +149,12 @@ function facets_entity_presave(EntityInterface $entity) {
  */
 function facets_preprocess_block(&$variables) {
   if ($variables['configuration']['provider'] == 'facets') {
+    // Hide the block if it's empty.
+    if (!empty($variables['elements']['content'][0]['#attributes']['class']) && in_array('facet-hidden', $variables['elements']['content'][0]['#attributes']['class'])) {
+      // Add the Drupal class for hiding this for everyone, including screen
+      // readers. See hidden.module.css in the core system module.
+      $variables['attributes']['class'][] = 'hidden';
+    }
     if (!empty($variables['derivative_plugin_id'])) {
       $facet = Facet::load($variables['derivative_plugin_id']);
       $variables['attributes']['class'][] = 'block-facet--' . Html::cleanCssIdentifier($facet->getWidget()['type']);
@@ -368,7 +374,8 @@ function facets_language_switch_links_alter(array &$links, $type, Url $url) {
     }
 
     foreach ($allFacets as $facet) {
-      if (!isset($link['query'][$facet->getFacetSourceConfig()->getFilterKey()])) {
+      if (!isset($link['query'][$facet->getFacetSourceConfig()->getFilterKey()]) ||
+          !is_array($link['query'][$facet->getFacetSourceConfig()->getFilterKey()])) {
         continue;
       }
 

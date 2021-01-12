@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization_drupal_roles\Plugin\authorization\Consumer;
 
 use Drupal\Component\Transliteration\TransliterationInterface;
@@ -72,7 +74,7 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $form['description'] = [
       '#type' => 'markup',
       '#markup' => $this->t('There are no settings for Drupal roles.'),
@@ -83,13 +85,13 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildRowForm(array $form, FormStateInterface $form_state, $index = 0) {
+  public function buildRowForm(array $form, FormStateInterface $form_state, $index = 0): array {
     $row = [];
     $mappings = $this->configuration['profile']->getConsumerMappings();
     $role_options = ['none' => $this->t('- N/A -')];
     $roles = user_roles(TRUE);
     foreach ($roles as $key => $role) {
-      if ($key != 'authenticated') {
+      if ($key !== 'authenticated') {
         $role_options[$key] = $role->label();
       }
     }
@@ -107,13 +109,13 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function grantSingleAuthorization(UserInterface $user, $consumerMapping) {
+  public function grantSingleAuthorization(UserInterface $user, $consumerMapping): void {
     $previousRoles = [];
     $savedRoles = $user->get('authorization_drupal_roles_roles')->getValue();
     foreach ($savedRoles as $savedRole) {
       $previousRoles[] = $savedRole['value'];
     }
-    if (!in_array($consumerMapping, $previousRoles)) {
+    if (!in_array($consumerMapping, $previousRoles, TRUE)) {
       $previousRoles[] = $consumerMapping;
     }
     $user->set('authorization_drupal_roles_roles', $previousRoles);
@@ -123,7 +125,7 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function revokeGrants(UserInterface $user, array $context) {
+  public function revokeGrants(UserInterface $user, array $context): void {
     $previousRoles = [];
     $savedRoles = $user->get('authorization_drupal_roles_roles')->getValue();
     foreach ($savedRoles as $savedRole) {
@@ -141,7 +143,7 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function createConsumerTarget($consumer) {
+  public function createConsumerTarget(string $consumer): void {
     $safe_consumer = $this->transliteration->transliterate($consumer);
     $storage = $this->entityTypeManager->getStorage('user_role');
     if (!$storage->load($safe_consumer)) {
@@ -158,20 +160,20 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
    * @return string
    *   Wildcard.
    */
-  private function getWildcard() {
+  private function getWildcard(): string {
     return $this->wildcard;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function filterProposals(array $proposals, array $consumerMapping) {
-    if ($consumerMapping['role'] == $this->getWildcard()) {
+  public function filterProposals(array $proposals, array $consumerMapping): array {
+    if ($consumerMapping['role'] === $this->getWildcard()) {
       return $proposals;
     }
 
     // Filters out valid providers with invalid assignments.
-    if ($consumerMapping['role'] == 'none') {
+    if ($consumerMapping['role'] === 'none') {
       return [];
     }
 
@@ -180,9 +182,8 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
       // is correct, thus we can safely map the value directly.
       return [$consumerMapping['role'] => $consumerMapping['role']];
     }
-    else {
-      return [];
-    }
+
+    return [];
   }
 
 }

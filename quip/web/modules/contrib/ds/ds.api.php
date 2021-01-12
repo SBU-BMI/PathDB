@@ -1,5 +1,10 @@
 <?php
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\Entity\Node;
+
 /**
  * @file
  * Hooks provided by Display Suite module.
@@ -64,7 +69,7 @@ function hook_ds_field_format_summary(array $field) {
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form_state values.
  */
-function hook_ds_layout_settings_alter(array $record, \Drupal\Core\Form\FormStateInterface $form_state) {
+function hook_ds_layout_settings_alter(array $record, FormStateInterface $form_state) {
   $record['layout']['settings']['classes'] = ['layout-class'];
 }
 
@@ -102,7 +107,7 @@ function hook_ds_pre_render_alter(array &$layout_render_array, array $context, a
 function hook_ds_layout_region_alter(array $context, array &$region_info) {
   $region_info['region_options']['my_region'] = 'New region';
   $region_info['table_regions']['my_region'] = [
-    'title' => \Drupal\Component\Utility\Html::escape('New region'),
+    'title' => Html::escape('New region'),
     'message' => t('No fields are displayed in this region'),
   ];
 }
@@ -151,9 +156,9 @@ function hook_ds_views_view_mode_alter(&$view_mode, array $context) {
  * @return array
  *   The rendered entity
  */
-function hook_ds_views_row_render_entity(\Drupal\Core\Entity\EntityInterface $entity, $view_mode) {
-  $entity = Drupal\ds\Plugin\DsField\Node::load(1);
-  return \Drupal::entityManager()->getViewBuilder('node')->view($entity, $view_mode);
+function hook_ds_views_row_render_entity(EntityInterface $entity, $view_mode) {
+  $entity = Node::load(1);
+  return \Drupal::service('entity_type.manager')->getViewBuilder('node')->view($entity, $view_mode);
 }
 
 /**

@@ -13,7 +13,7 @@ namespace Psy\Test;
 
 use Psy\CodeCleaner;
 
-class CodeCleanerTest extends \PHPUnit\Framework\TestCase
+class CodeCleanerTest extends TestCase
 {
     /**
      * @dataProvider semicolonCodeProvider
@@ -43,7 +43,7 @@ class CodeCleanerTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnclosedStatements(array $lines, $isUnclosed)
     {
-        $cc  = new CodeCleaner();
+        $cc = new CodeCleaner();
         $res = $cc->clean($lines);
 
         if ($isUnclosed) {
@@ -83,7 +83,7 @@ class CodeCleanerTest extends \PHPUnit\Framework\TestCase
             $this->markTestSkipped('HHVM not supported.');
         }
 
-        $cc  = new CodeCleaner();
+        $cc = new CodeCleaner();
         $res = $cc->clean($lines);
 
         $this->assertFalse($res);
@@ -102,12 +102,15 @@ class CodeCleanerTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider invalidStatementsProvider
-     * @expectedException \Psy\Exception\ParseErrorException
      */
     public function testInvalidStatementsThrowParseErrors($code)
     {
+        $this->expectException(\Psy\Exception\ParseErrorException::class);
+
         $cc = new CodeCleaner();
         $cc->clean([$code]);
+
+        $this->fail();
     }
 
     public function invalidStatementsProvider()

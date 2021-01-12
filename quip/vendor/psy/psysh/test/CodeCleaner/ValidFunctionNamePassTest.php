@@ -15,18 +15,23 @@ use Psy\CodeCleaner\ValidFunctionNamePass;
 
 class ValidFunctionNamePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ValidFunctionNamePass());
     }
 
     /**
      * @dataProvider getInvalidFunctions
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalidFunctionCallsAndDeclarations($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function getInvalidFunctions()

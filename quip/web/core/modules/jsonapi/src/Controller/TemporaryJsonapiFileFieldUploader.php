@@ -287,6 +287,10 @@ class TemporaryJsonapiFileFieldUploader {
     $file_data = fopen('php://input', 'rb');
 
     $temp_file_path = $this->fileSystem->tempnam('temporary://', 'file');
+    if ($temp_file_path === FALSE) {
+      $this->logger->error('Temporary file could not be created for file upload.');
+      throw new HttpException(500, 'Temporary file could not be created');
+    }
     $temp_file = fopen($temp_file_path, 'wb');
 
     if ($temp_file) {
@@ -376,26 +380,42 @@ class TemporaryJsonapiFileFieldUploader {
    *   The prepared/munged filename.
    */
   protected function prepareFilename($filename, array &$validators) {
-    if (!empty($validators['file_validate_extensions'][0])) {
-      // If there is a file_validate_extensions validator and a list of
-      // valid extensions, munge the filename to protect against possible
-      // malicious extension hiding within an unknown file type. For example,
-      // "filename.html.foo".
-      $filename = file_munge_filename($filename, $validators['file_validate_extensions'][0]);
-    }
-
-    // Rename potentially executable files, to help prevent exploits (i.e. will
-    // rename filename.php.foo and filename.php to filename.php.foo.txt and
-    // filename.php.txt, respectively). Don't rename if 'allow_insecure_uploads'
-    // evaluates to TRUE.
-    if (!$this->systemFileConfig->get('allow_insecure_uploads') && preg_match(FILE_INSECURE_EXTENSION_REGEX, $filename) && (substr($filename, -4) != '.txt')) {
-      // The destination filename will also later be used to create the URI.
-      $filename .= '.txt';
-
-      // The .txt extension may not be in the allowed list of extensions. We
-      // have to add it here or else the file upload will fail.
+    //  Don't rename if 'allow_insecure_uploads' evaluates to TRUE.
+    if (!$this->systemFileConfig->get('allow_insecure_uploads')) {
       if (!empty($validators['file_validate_extensions'][0])) {
-        $validators['file_validate_extensions'][0] .= ' txt';
+        // If there is a file_validate_extensions validator and a list of
+        // valid extensions, munge the filename to protect against possible
+        // malicious extension hiding within an unknown file type. For example,
+        // "filename.html.foo".
+        $filename = file_munge_filename($filename, $validators['file_validate_extensions'][0]);
+      }
+
+      // Rename potentially executable files, to help prevent exploits (i.e.
+      // will rename filename.php.foo and filename.php to filename._php._foo.txt
+      // and filename._php.txt, respectively).
+      if (preg_match(FILE_INSECURE_EXTENSION_REGEX, $filename)) {
+        // If the file will be rejected anyway due to a disallowed extension, it
+        // should not be renamed; rather, we'll let file_validate_extensions()
+        // reject it below.
+        $passes_validation = FALSE;
+        if (!empty($validators['file_validate_extensions'][0])) {
+          $file = File::create([]);
+          $file->setFilename($filename);
+          $passes_validation = empty(file_validate_extensions($file, $validators['file_validate_extensions'][0]));
+        }
+        if (empty($validators['file_validate_extensions'][0]) || $passes_validation) {
+          if (substr($filename, -4) != '.txt') {
+            // The destination filename will also later be used to create the URI.
+            $filename .= '.txt';
+          }
+          $filename = file_munge_filename($filename, $validators['file_validate_extensions'][0] ?? '');
+
+          // The .txt extension may not be in the allowed list of extensions. We
+          // have to add it here or else the file upload will fail.
+          if (!empty($validators['file_validate_extensions'][0])) {
+            $validators['file_validate_extensions'][0] .= ' txt';
+          }
+        }
       }
     }
 
@@ -425,7 +445,7 @@ class TemporaryJsonapiFileFieldUploader {
    * Retrieves the upload validators for a field definition.
    *
    * This is copied from \Drupal\file\Plugin\Field\FieldType\FileItem as there
-   * is no entity instance available here that that a FileItem would exist for.
+   * is no entity instance available here that a FileItem would exist for.
    *
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
    *   The field definition for which to get validators.

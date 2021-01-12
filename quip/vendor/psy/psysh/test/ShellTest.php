@@ -12,6 +12,7 @@
 namespace Psy\Test;
 
 use Psy\Configuration;
+use Psy\Exception\BreakException;
 use Psy\Exception\ParseErrorException;
 use Psy\Shell;
 use Psy\TabCompletion\Matcher\ClassMethodsMatcher;
@@ -19,11 +20,14 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
-class ShellTest extends \PHPUnit\Framework\TestCase
+class ShellTest extends TestCase
 {
     private $streams = [];
 
-    public function tearDown()
+    /**
+     * @after
+     */
+    public function closeOpenStreams()
     {
         foreach ($this->streams as $stream) {
             \fclose($stream);
@@ -32,12 +36,12 @@ class ShellTest extends \PHPUnit\Framework\TestCase
 
     public function testScopeVariables()
     {
-        $one       = 'banana';
-        $two       = 123;
-        $three     = new \stdClass();
+        $one = 'banana';
+        $two = 123;
+        $three = new \stdClass();
         $__psysh__ = 'ignore this';
-        $_         = 'ignore this';
-        $_e        = 'ignore this';
+        $_ = 'ignore this';
+        $_e = 'ignore this';
 
         $shell = new Shell($this->getConfig());
         $shell->setScopeVariables(\compact('one', 'two', 'three', '__psysh__', '_', '_e', 'this'));
@@ -62,24 +66,25 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['_' => null, 'this' => $this], $shell->getScopeVariables());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testUnknownScopeVariablesThrowExceptions()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $shell = new Shell($this->getConfig());
         $shell->setScopeVariables(['foo' => 'FOO', 'bar' => 1]);
         $shell->getScopeVariable('baz');
+
+        $this->fail();
     }
 
     public function testIncludesWithScopeVariables()
     {
-        $one       = 'banana';
-        $two       = 123;
-        $three     = new \stdClass();
+        $one = 'banana';
+        $two = 123;
+        $three = new \stdClass();
         $__psysh__ = 'ignore this';
-        $_         = 'ignore this';
-        $_e        = 'ignore this';
+        $_ = 'ignore this';
+        $_e = 'ignore this';
 
         $config = $this->getConfig(['usePcntl' => false]);
 
@@ -104,8 +109,8 @@ class ShellTest extends \PHPUnit\Framework\TestCase
             return $this->assertEqualsCanonicalizing($expected, $actual, $message);
         }
 
-        sort($expected);
-        sort($actual);
+        \sort($expected);
+        \sort($actual);
 
         return $this->assertEquals($expected, $actual, $message);
     }
@@ -154,17 +159,17 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $streamContents = \stream_get_contents($stream);
 
         // There shouldn't be a welcome message with raw output
-        $this->assertNotContains('Justin Hileman', $streamContents);
-        $this->assertNotContains(PHP_VERSION, $streamContents);
-        $this->assertNotContains(Shell::VERSION, $streamContents);
+        $this->assertStringNotContainsString('Justin Hileman', $streamContents);
+        $this->assertStringNotContainsString(\PHP_VERSION, $streamContents);
+        $this->assertStringNotContainsString(Shell::VERSION, $streamContents);
 
         // @todo prolly shouldn't have an exit message with raw output, either
-        $this->assertContains('Goodbye', $streamContents);
+        $this->assertStringContainsString('Goodbye', $streamContents);
     }
 
     public function testIncludes()
     {
-        $config = $this->getConfig(['configFile' => __DIR__ . '/fixtures/empty.php']);
+        $config = $this->getConfig(['configFile' => __DIR__.'/fixtures/empty.php']);
 
         $shell = new Shell($config);
         $this->assertEmpty($shell->getIncludes());
@@ -176,7 +181,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $config = $this->getConfig([
             'defaultIncludes' => ['/file.php'],
-            'configFile'      => __DIR__ . '/fixtures/empty.php',
+            'configFile'      => __DIR__.'/fixtures/empty.php',
         ]);
 
         $shell = new Shell($config);
@@ -212,10 +217,10 @@ class ShellTest extends \PHPUnit\Framework\TestCase
 
     public function testRenderingExceptions()
     {
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $e      = new ParseErrorException('message', 13);
+        $e = new ParseErrorException('message', 13);
 
         $shell->setOutput($output);
         $shell->addCode('code');
@@ -231,9 +236,9 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         \rewind($stream);
         $streamContents = \stream_get_contents($stream);
 
-        $this->assertContains('PHP Parse error', $streamContents);
-        $this->assertContains('message', $streamContents);
-        $this->assertContains('line 13', $streamContents);
+        $this->assertStringContainsString('PHP Parse error', $streamContents);
+        $this->assertStringContainsString('message', $streamContents);
+        $this->assertStringContainsString('line 13', $streamContents);
     }
 
     /**
@@ -241,12 +246,12 @@ class ShellTest extends \PHPUnit\Framework\TestCase
      */
     public function testReportsErrors($errno, $label)
     {
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $output = $this->getOutput();
         $stream = $output->getStream();
         $shell->setOutput($output);
 
-        $oldLevel = \error_reporting(E_ALL);
+        $oldLevel = \error_reporting(\E_ALL);
 
         $shell->handleError($errno, 'wheee', null, 13);
 
@@ -255,44 +260,47 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         \rewind($stream);
         $streamContents = \stream_get_contents($stream);
 
-        $this->assertContains($label, $streamContents);
-        $this->assertContains('wheee', $streamContents);
-        $this->assertContains('line 13', $streamContents);
+        $this->assertStringContainsString($label, $streamContents);
+        $this->assertStringContainsString('wheee', $streamContents);
+        $this->assertStringContainsString('line 13', $streamContents);
     }
 
     public function notSoBadErrors()
     {
         return [
-            [E_WARNING, 'PHP Warning:'],
-            [E_NOTICE, 'PHP Notice:'],
-            [E_CORE_WARNING, 'PHP Warning:'],
-            [E_COMPILE_WARNING, 'PHP Warning:'],
-            [E_USER_WARNING, 'PHP Warning:'],
-            [E_USER_NOTICE, 'PHP Notice:'],
-            [E_DEPRECATED, 'PHP Deprecated:'],
-            [E_USER_DEPRECATED, 'PHP Deprecated:'],
+            [\E_WARNING, 'PHP Warning:'],
+            [\E_NOTICE, 'PHP Notice:'],
+            [\E_CORE_WARNING, 'PHP Warning:'],
+            [\E_COMPILE_WARNING, 'PHP Warning:'],
+            [\E_USER_WARNING, 'PHP Warning:'],
+            [\E_USER_NOTICE, 'PHP Notice:'],
+            [\E_DEPRECATED, 'PHP Deprecated:'],
+            [\E_USER_DEPRECATED, 'PHP Deprecated:'],
         ];
     }
 
     /**
      * @dataProvider badErrors
-     * @expectedException \Psy\Exception\ErrorException
      */
     public function testThrowsBadErrors($errno)
     {
+        $this->expectException(\Psy\Exception\ErrorException::class);
+
         $shell = new Shell($this->getConfig());
         $shell->handleError($errno, 'wheee', null, 13);
+
+        $this->fail();
     }
 
     public function badErrors()
     {
         return [
-            [E_ERROR],
-            [E_PARSE],
-            [E_CORE_ERROR],
-            [E_COMPILE_ERROR],
-            [E_USER_ERROR],
-            [E_RECOVERABLE_ERROR],
+            [\E_ERROR],
+            [\E_PARSE],
+            [\E_CORE_ERROR],
+            [\E_COMPILE_ERROR],
+            [\E_USER_ERROR],
+            [\E_RECOVERABLE_ERROR],
         ];
     }
 
@@ -301,9 +309,18 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $shell = new Shell($this->getConfig());
 
         $this->assertInstanceOf(Application::class, $shell);
-        $this->assertContains(Shell::VERSION, $shell->getVersion());
-        $this->assertContains(PHP_VERSION, $shell->getVersion());
-        $this->assertContains(PHP_SAPI, $shell->getVersion());
+        $this->assertStringContainsString(Shell::VERSION, $shell->getVersion());
+        $this->assertStringContainsString(\PHP_VERSION, $shell->getVersion());
+        $this->assertStringContainsString(\PHP_SAPI, $shell->getVersion());
+    }
+
+    public function testGetVersionHeader()
+    {
+        $header = Shell::getVersionHeader(false);
+
+        $this->assertStringContainsString(Shell::VERSION, $header);
+        $this->assertStringContainsString(\PHP_VERSION, $header);
+        $this->assertStringContainsString(\PHP_SAPI, $header);
     }
 
     public function testCodeBuffer()
@@ -346,14 +363,15 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('return 1 + 1 + 1;', $code);
     }
 
-    /**
-     * @expectedException \Psy\Exception\ParseErrorException
-     */
     public function testCodeBufferThrowsParseExceptions()
     {
+        $this->expectException(\Psy\Exception\ParseErrorException::class);
+
         $shell = new Shell($this->getConfig());
         $shell->addCode('this is not valid');
         $shell->flushCode();
+
+        $this->fail();
     }
 
     public function testClosuresSupport()
@@ -371,7 +389,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $shell->setOutput($output);
 
         $shell->writeStdout("{{stdout}}\n");
@@ -379,7 +397,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         \rewind($stream);
         $streamContents = \stream_get_contents($stream);
 
-        $this->assertSame('{{stdout}}' . PHP_EOL, $streamContents);
+        $this->assertSame('{{stdout}}'.\PHP_EOL, $streamContents);
     }
 
     public function testWriteStdoutWithoutNewline()
@@ -388,7 +406,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
 
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $shell->setOutput($output);
 
         $shell->writeStdout('{{stdout}}');
@@ -396,14 +414,14 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         \rewind($stream);
         $streamContents = \stream_get_contents($stream);
 
-        $this->assertSame('{{stdout}}<aside>⏎</aside>' . PHP_EOL, $streamContents);
+        $this->assertSame('{{stdout}}<aside>⏎</aside>'.\PHP_EOL, $streamContents);
     }
 
     public function testWriteStdoutRawOutputWithoutNewline()
     {
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig(['rawOutput' => true]));
+        $shell = new Shell($this->getConfig(['rawOutput' => true]));
         $shell->setOutput($output);
 
         $shell->writeStdout('{{stdout}}');
@@ -411,7 +429,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         \rewind($stream);
         $streamContents = \stream_get_contents($stream);
 
-        $this->assertSame('{{stdout}}' . PHP_EOL, $streamContents);
+        $this->assertSame('{{stdout}}'.\PHP_EOL, $streamContents);
     }
 
     /**
@@ -421,7 +439,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $shell->setOutput($output);
 
         $shell->writeReturnValue($input);
@@ -437,7 +455,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $output = $this->getOutput();
         $output->setVerbosity(StreamOutput::VERBOSITY_QUIET);
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $shell->setOutput($output);
 
         $shell->writeReturnValue($input);
@@ -448,8 +466,8 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     public function getReturnValues()
     {
         return [
-            ['{{return value}}', "=> \"\033[32m{{return value}}\033[39m\"" . PHP_EOL],
-            [1, "=> \033[35m1\033[39m" . PHP_EOL],
+            ['{{return value}}', "=> \"\033[32m{{return value}}\033[39m\"".\PHP_EOL],
+            [1, "=> \033[35m1\033[39m".\PHP_EOL],
         ];
     }
 
@@ -460,7 +478,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $shell->setOutput($output);
 
         $shell->writeException($exception);
@@ -468,10 +486,44 @@ class ShellTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expected, \stream_get_contents($stream));
     }
 
+    /**
+     * @dataProvider getRenderedExceptions
+     */
+    public function testWriteExceptionVerbose($exception, $expected)
+    {
+        $output = $this->getOutput();
+        $output->setVerbosity(StreamOutput::VERBOSITY_VERBOSE);
+        $stream = $output->getStream();
+        $shell = new Shell($this->getConfig());
+        $shell->setOutput($output);
+
+        $shell->writeException($exception);
+        \rewind($stream);
+        $stdout = \stream_get_contents($stream);
+        $this->assertStringStartsWith($expected, $stdout);
+        $this->assertStringContainsString(\basename(__FILE__), $stdout);
+
+        $lineCount = \count(\explode(\PHP_EOL, $stdout));
+        $this->assertGreaterThan(4, $lineCount); // /shrug
+    }
+
+    public function testWriteExceptionVerboseButNotReallyBecauseItIsABreakException()
+    {
+        $output = $this->getOutput();
+        $output->setVerbosity(StreamOutput::VERBOSITY_VERBOSE);
+        $stream = $output->getStream();
+        $shell = new Shell($this->getConfig());
+        $shell->setOutput($output);
+
+        $shell->writeException(new BreakException('yeah.'));
+        \rewind($stream);
+        $this->assertSame('Exit:  yeah.'.\PHP_EOL, \stream_get_contents($stream));
+    }
+
     public function getRenderedExceptions()
     {
         return [
-            [new \Exception('{{message}}'), "Exception with message '{{message}}'" . PHP_EOL],
+            [new \Exception('{{message}}'), "Exception with message '{{message}}'".\PHP_EOL],
         ];
     }
 
@@ -482,7 +534,7 @@ class ShellTest extends \PHPUnit\Framework\TestCase
     {
         $output = $this->getOutput();
         $stream = $output->getStream();
-        $shell  = new Shell($this->getConfig());
+        $shell = new Shell($this->getConfig());
         $shell->setOutput($output);
         $this->assertEquals($expected, $shell->execute($input));
         \rewind($stream);

@@ -33,6 +33,27 @@ class ArrayNodeTest extends TestCase
         $node->normalize(['foo' => 'bar']);
     }
 
+    public function testNormalizeWithProposals()
+    {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('Did you mean "alpha1", "alpha2"?');
+        $node = new ArrayNode('root');
+        $node->addChild(new ArrayNode('alpha1'));
+        $node->addChild(new ArrayNode('alpha2'));
+        $node->addChild(new ArrayNode('beta'));
+        $node->normalize(['alpha3' => 'foo']);
+    }
+
+    public function testNormalizeWithoutProposals()
+    {
+        $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
+        $this->expectExceptionMessage('Available options are "alpha1", "alpha2".');
+        $node = new ArrayNode('root');
+        $node->addChild(new ArrayNode('alpha1'));
+        $node->addChild(new ArrayNode('alpha2'));
+        $node->normalize(['beta' => 'foo']);
+    }
+
     public function ignoreAndRemoveMatrixProvider()
     {
         $unrecognizedOptionException = new InvalidConfigurationException('Unrecognized option "foo" under "root"');
@@ -216,7 +237,7 @@ class ArrayNodeTest extends TestCase
 
         $deprecationTriggered = false;
         $deprecationHandler = function ($level, $message, $file, $line) use (&$prevErrorHandler, &$deprecationTriggered) {
-            if (E_USER_DEPRECATED === $level) {
+            if (\E_USER_DEPRECATED === $level) {
                 return $deprecationTriggered = true;
             }
 
@@ -233,5 +254,67 @@ class ArrayNodeTest extends TestCase
         $node->finalize(['foo' => []]);
         restore_error_handler();
         $this->assertTrue($deprecationTriggered, '->finalize() should trigger if the deprecated node is set');
+    }
+
+    /**
+     * @dataProvider getDataWithIncludedExtraKeys
+     */
+    public function testMergeWithoutIgnoringExtraKeys($prenormalizeds, $merged)
+    {
+        $this->expectException('RuntimeException');
+        $this->expectExceptionMessage('merge() expects a normalized config array.');
+        $node = new ArrayNode('root');
+        $node->addChild(new ScalarNode('foo'));
+        $node->addChild(new ScalarNode('bar'));
+        $node->setIgnoreExtraKeys(false);
+
+        $r = new \ReflectionMethod($node, 'mergeValues');
+        $r->setAccessible(true);
+
+        $r->invoke($node, ...$prenormalizeds);
+    }
+
+    /**
+     * @dataProvider getDataWithIncludedExtraKeys
+     */
+    public function testMergeWithIgnoringAndRemovingExtraKeys($prenormalizeds, $merged)
+    {
+        $this->expectException('RuntimeException');
+        $this->expectExceptionMessage('merge() expects a normalized config array.');
+        $node = new ArrayNode('root');
+        $node->addChild(new ScalarNode('foo'));
+        $node->addChild(new ScalarNode('bar'));
+        $node->setIgnoreExtraKeys(true);
+
+        $r = new \ReflectionMethod($node, 'mergeValues');
+        $r->setAccessible(true);
+
+        $r->invoke($node, ...$prenormalizeds);
+    }
+
+    /**
+     * @dataProvider getDataWithIncludedExtraKeys
+     */
+    public function testMergeWithIgnoringExtraKeys($prenormalizeds, $merged)
+    {
+        $node = new ArrayNode('root');
+        $node->addChild(new ScalarNode('foo'));
+        $node->addChild(new ScalarNode('bar'));
+        $node->setIgnoreExtraKeys(true, false);
+
+        $r = new \ReflectionMethod($node, 'mergeValues');
+        $r->setAccessible(true);
+
+        $this->assertEquals($merged, $r->invoke($node, ...$prenormalizeds));
+    }
+
+    public function getDataWithIncludedExtraKeys()
+    {
+        return [
+            [
+                [['foo' => 'bar', 'baz' => 'not foo'], ['bar' => 'baz', 'baz' => 'foo']],
+                ['foo' => 'bar', 'bar' => 'baz', 'baz' => 'foo'],
+            ],
+        ];
     }
 }

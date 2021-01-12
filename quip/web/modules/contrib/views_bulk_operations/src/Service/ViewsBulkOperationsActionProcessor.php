@@ -127,7 +127,7 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       $this->queue = [];
     }
 
-    $this->excludeMode = $view_data['exclude_mode'];
+    $this->excludeMode = !empty($view_data['exclude_mode']);
 
     if (isset($view_data['action_id'])) {
       if (!isset($view_data['configuration'])) {
@@ -210,6 +210,26 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       $this->view->setExposedInput(['_views_bulk_operations_override' => TRUE]);
     }
 
+    // In some cases we may encounter nondeterministic behaviour in
+    // db queries with sorts allowing different order of results.
+    // To fix this we're removing all sorts and setting one sorting
+    // rule by the view base id field.
+    $sorts = $this->view->getHandlers('sort');
+    foreach ($sorts as $id => $sort) {
+      $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $id, NULL);
+    }
+    $base_field = $this->view->storage->get('base_field');
+    $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $base_field, [
+      'id' => $base_field,
+      'table' => $this->view->storage->get('base_table'),
+      'field' => $base_field,
+      'order' => 'ASC',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'exposed' => 'FALSE',
+      'plugin_id' => 'standard',
+    ]);
+
     $this->view->setItemsPerPage($this->bulkFormData['batch_size']);
     $this->view->setCurrentPage($page);
     $this->view->build();
@@ -283,7 +303,7 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       $batch_list = $list;
     }
 
-    $this->view->setItemsPerPage(0);
+    $this->view->setItemsPerPage($batch_size);
     $this->view->setCurrentPage(0);
     $this->view->setOffset(0);
     $this->view->initHandlers();
@@ -312,7 +332,12 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
     }
 
     if (isset($this->view->query->fields[$base_field])) {
-      $base_field_alias = $this->view->query->fields[$base_field]['table'] . '.' . $this->view->query->fields[$base_field]['alias'];
+      if (!empty($this->view->query->fields[$base_field]['table'])) {
+        $base_field_alias = $this->view->query->fields[$base_field]['table'] . '.' . $this->view->query->fields[$base_field]['alias'];
+      }
+      else {
+        $base_field_alias = $this->view->query->fields[$base_field]['alias'];
+      }
     }
     else {
       $base_field_alias = $base_field;
@@ -322,6 +347,10 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
 
     // Rebuild the view query.
     $this->view->query->build($this->view);
+
+    // We just destroyed any metadata that other modules may have added to the
+    // query. Give those modules the opportunity to alter the query again.
+    $this->view->query->alter($this->view);
 
     // Execute the view.
     $this->moduleHandler->invokeAll('views_pre_execute', [$this->view]);
@@ -435,13 +464,9 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       for ($i = 0; $i < $count; $i++) {
         $output[] = $this->bulkFormData['action_label'];
       }
+      return $output;
     }
-    else {
-      foreach ($results as $result) {
-        $output[] = $result;
-      }
-    }
-    return $output;
+    return array_merge($output, $results);
   }
 
   /**

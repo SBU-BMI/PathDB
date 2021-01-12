@@ -36,7 +36,7 @@ regions:
   footer_menu: 'Footer Menu Container'
   auto_hidden_block: 'Auto Hidden Blocks'
 
-# Information added by Drupal.org packaging script on 2020-04-01
-version: '8.x-1.16'
+# Information added by Drupal.org packaging script on 2020-06-20
+version: '8.x-1.17'
 project: 'd8w3css'
-datestamp: 1585783149
+datestamp: 1592668253

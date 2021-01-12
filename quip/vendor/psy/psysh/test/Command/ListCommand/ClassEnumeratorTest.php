@@ -46,14 +46,14 @@ class ClassEnumeratorTest extends EnumeratorTestCase
             Fixtures\ClassBravo::class => [
                 'name'  => Fixtures\ClassBravo::class,
                 'style' => 'class',
-                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> ' .
+                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> '.
                     'implements <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta</class>',
             ],
             Fixtures\ClassCharlie::class => [
                 'name'  => Fixtures\ClassCharlie::class,
                 'style' => 'class',
-                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassCharlie</class> ' .
-                    'extends <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> ' .
+                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassCharlie</class> '.
+                    'extends <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> '.
                     'implements <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta</class>',
             ],
         ];
@@ -70,7 +70,7 @@ class ClassEnumeratorTest extends EnumeratorTestCase
         $this->assertArrayHasKey('Interfaces', $res);
         $fixtureClasses = \array_filter($res['Interfaces'], [$this, 'isFixtureClass']);
 
-        $prefix = PHP_VERSION === '7.4.0' ? '<keyword>static</keyword> ' : '';
+        $prefix = \PHP_VERSION === '7.4.0' ? '<keyword>static</keyword> ' : '';
 
         $expected = [
             Fixtures\InterfaceDelta::class => [
@@ -81,7 +81,7 @@ class ClassEnumeratorTest extends EnumeratorTestCase
             Fixtures\InterfaceEcho::class => [
                 'name'  => Fixtures\InterfaceEcho::class,
                 'style' => 'class',
-                'value' => $prefix . 'interface <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceEcho</class> ' .
+                'value' => $prefix.'interface <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceEcho</class> '.
                     'extends <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta</class>',
             ],
         ];
@@ -130,14 +130,14 @@ class ClassEnumeratorTest extends EnumeratorTestCase
             Fixtures\ClassBravo::class => [
                 'name'  => Fixtures\ClassBravo::class,
                 'style' => 'class',
-                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> ' .
+                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> '.
                     'implements <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta</class>',
             ],
             Fixtures\ClassCharlie::class => [
                 'name'  => Fixtures\ClassCharlie::class,
                 'style' => 'class',
-                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassCharlie</class> ' .
-                    'extends <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> ' .
+                'value' => 'class <class>Psy\Test\Command\ListCommand\Fixtures\ClassCharlie</class> '.
+                    'extends <class>Psy\Test\Command\ListCommand\Fixtures\ClassBravo</class> '.
                     'implements <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta</class>',
             ],
         ];
@@ -145,7 +145,7 @@ class ClassEnumeratorTest extends EnumeratorTestCase
         $this->assertArrayHasKey('Classes', $res);
         $this->assertEquals($expectedClasses, $res['Classes']);
 
-        $prefix = PHP_VERSION === '7.4.0' ? '<keyword>static</keyword> ' : '';
+        $prefix = \PHP_VERSION === '7.4.0' ? '<keyword>static</keyword> ' : '';
         $expectedInterfaces = [
             Fixtures\InterfaceDelta::class => [
                 'name'  => Fixtures\InterfaceDelta::class,
@@ -155,7 +155,7 @@ class ClassEnumeratorTest extends EnumeratorTestCase
             Fixtures\InterfaceEcho::class => [
                 'name'  => Fixtures\InterfaceEcho::class,
                 'style' => 'class',
-                'value' => $prefix . 'interface <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceEcho</class> ' .
+                'value' => $prefix.'interface <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceEcho</class> '.
                     'extends <class>Psy\Test\Command\ListCommand\Fixtures\InterfaceDelta</class>',
             ],
         ];

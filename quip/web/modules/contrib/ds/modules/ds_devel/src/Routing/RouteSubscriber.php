@@ -51,7 +51,7 @@ class RouteSubscriber extends RouteSubscriberBase {
             $devel_render,
             [
               '_controller' => '\Drupal\ds_devel\Controller\DsDevelController::entityMarkup',
-              '_title' => 'Devel Render',
+              '_title' => 'Markup',
             ],
             ['_permission' => 'access devel information'],
             $options

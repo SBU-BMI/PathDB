@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\facets\FacetManager\DefaultFacetManager;
 use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\Plugin\facets\facet_source\SearchApiDisplay;
 use Drupal\facets\FacetSource\SearchApiFacetSourceInterface;
@@ -53,6 +54,13 @@ class FacetForm extends EntityForm {
   protected $facetSourcePluginManager;
 
   /**
+   * The facet manager.
+   *
+   * @var \Drupal\facets\FacetManager\DefaultFacetManager
+   */
+  protected $facetsManager;
+
+  /**
    * Constructs an FacetDisplayForm object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -63,12 +71,15 @@ class FacetForm extends EntityForm {
    *   The plugin manager for widgets.
    * @param \Drupal\facets\FacetSource\FacetSourcePluginManager $facet_source_plugin_manager
    *   The plugin manager for facet sources.
+   * @param \Drupal\facets\FacetManager\DefaultFacetManager $facets_manager
+   *   The facet manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ProcessorPluginManager $processor_plugin_manager, WidgetPluginManager $widget_plugin_manager, FacetSourcePluginManager $facet_source_plugin_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ProcessorPluginManager $processor_plugin_manager, WidgetPluginManager $widget_plugin_manager, FacetSourcePluginManager $facet_source_plugin_manager, DefaultFacetManager $facets_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->processorPluginManager = $processor_plugin_manager;
     $this->widgetPluginManager = $widget_plugin_manager;
     $this->facetSourcePluginManager = $facet_source_plugin_manager;
+    $this->facetsManager = $facets_manager;
   }
 
   /**
@@ -79,7 +90,8 @@ class FacetForm extends EntityForm {
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.facets.processor'),
       $container->get('plugin.manager.facets.widget'),
-      $container->get('plugin.manager.facets.facet_source')
+      $container->get('plugin.manager.facets.facet_source'),
+      $container->get('facets.manager')
     );
   }
 
@@ -376,7 +388,7 @@ class FacetForm extends EntityForm {
     $form['facet_settings']['show_title'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show title of facet'),
-      '#description' => $this->t('Show the title of the facet trough a twig template'),
+      '#description' => $this->t('Show the title of the facet through a Twig template'),
       '#default_value' => $facet->get('show_title'),
     ];
 
@@ -636,14 +648,6 @@ class FacetForm extends EntityForm {
     elseif (preg_match('/[^a-zA-Z0-9_~\.\-]/', $url_alias)) {
       $form_state->setErrorByName('url_alias', $this->t('The URL alias contains characters that are not allowed.'));
     }
-
-    $already_enabled_facets_on_same_source = \Drupal::service('facets.manager')->getFacetsByFacetSourceId($facet->getFacetSourceId());
-    /** @var \Drupal\facets\FacetInterface $other */
-    foreach ($already_enabled_facets_on_same_source as $other) {
-      if ($other->getUrlAlias() === $url_alias && $other->id() !== $facet->id()) {
-        $form_state->setErrorByName('url_alias', $this->t('This alias is already in use for another facet defined on the same source.'));
-      }
-    }
   }
 
   /**
@@ -717,7 +721,16 @@ class FacetForm extends EntityForm {
     $facet->set('show_title', $form_state->getValue(['facet_settings', 'show_title'], FALSE));
 
     $facet->save();
-    \Drupal::messenger()->addMessage($this->t('Facet %name has been updated.', ['%name' => $facet->getName()]));
+
+    $already_enabled_facets_on_same_source = $this->facetsManager->getFacetsByFacetSourceId($facet->getFacetSourceId());
+    /** @var \Drupal\facets\FacetInterface $other */
+    foreach ($already_enabled_facets_on_same_source as $other) {
+      if ($other->getUrlAlias() === $facet->getUrlAlias() && $other->id() !== $facet->id()) {
+        $this->messenger()->addWarning($this->t('This alias is already in use for another facet defined on the same source.'));
+      }
+    }
+
+    $this->messenger()->addMessage($this->t('Facet %name has been updated.', ['%name' => $facet->getName()]));
   }
 
   /**

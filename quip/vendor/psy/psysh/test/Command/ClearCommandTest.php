@@ -14,7 +14,7 @@ namespace Psy\Test\Command;
 use Psy\Command\ClearCommand;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class ClearCommandTest extends \PHPUnit\Framework\TestCase
+class ClearCommandTest extends \Psy\Test\TestCase
 {
     public function testExecute()
     {
@@ -23,6 +23,6 @@ class ClearCommandTest extends \PHPUnit\Framework\TestCase
         $tester->execute([]);
 
         $clear = \sprintf('%c[2J%c[0;0f', 27, 27);
-        $this->assertContains($clear, $tester->getDisplay());
+        $this->assertStringContainsString($clear, $tester->getDisplay());
     }
 }

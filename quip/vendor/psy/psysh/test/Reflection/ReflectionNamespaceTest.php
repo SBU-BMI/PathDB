@@ -13,21 +13,21 @@ namespace Psy\Test\Reflection;
 
 use Psy\Reflection\ReflectionNamespace;
 
-class ReflectionNamespaceTest extends \PHPUnit\Framework\TestCase
+class ReflectionNamespaceTest extends \Psy\Test\TestCase
 {
     public function testConstruction()
     {
-        $refl  = new ReflectionNamespace('Psy\\Test\\Reflection');
+        $refl = new ReflectionNamespace('Psy\\Test\\Reflection');
 
         $this->assertEquals('Psy\\Test\\Reflection', $refl->getName());
         $this->assertEquals('Psy\\Test\\Reflection', (string) $refl);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testNotYetImplemented()
     {
+        $this->expectException(\RuntimeException::class);
         ReflectionNamespace::export('Psy\\Test\\Reflection');
+
+        $this->fail();
     }
 }

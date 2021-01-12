@@ -15,18 +15,23 @@ use Psy\CodeCleaner\CallTimePassByReferencePass;
 
 class CallTimePassByReferencePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new CallTimePassByReferencePass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()

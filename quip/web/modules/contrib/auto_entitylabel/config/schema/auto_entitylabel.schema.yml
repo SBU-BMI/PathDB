@@ -11,6 +11,9 @@ auto_entitylabel.settings.*:
     escape:
       type: boolean
       label: 'Remove special characters'
+    preserve_titles:
+      type: boolean
+      label: 'Preserve node titles'
     dependencies:
       type: config_dependencies
       label: 'Dependencies'

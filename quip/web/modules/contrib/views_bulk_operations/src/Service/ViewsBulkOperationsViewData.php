@@ -38,7 +38,7 @@ class ViewsBulkOperationsViewData implements ViewsBulkOperationsViewDataInterfac
   protected $view;
 
   /**
-   * The realtionship ID.
+   * The relationship ID.
    *
    * @var string
    */

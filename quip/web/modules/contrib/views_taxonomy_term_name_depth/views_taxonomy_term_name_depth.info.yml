@@ -3,3 +3,4 @@ type: module
 description: The module provides the Views plugin for Contextual filter with Taxonomy Term Name Depth.
 core: 8.x
 package: Views
+core_version_requirement: ^8 || ^9

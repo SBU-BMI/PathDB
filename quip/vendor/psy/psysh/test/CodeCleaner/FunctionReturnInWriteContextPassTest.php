@@ -15,19 +15,25 @@ use Psy\CodeCleaner\FunctionReturnInWriteContextPass;
 
 class FunctionReturnInWriteContextPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new FunctionReturnInWriteContextPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
-     * @expectedExceptionMessage Can't use function return value in write context
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
+        $this->expectExceptionMessage('Can\'t use function return value in write context');
+
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()
@@ -42,27 +48,28 @@ class FunctionReturnInWriteContextPassTest extends CodeCleanerTestCase
         ];
     }
 
-    /**
-     * @expectedException \Psy\Exception\FatalErrorException
-     * @expectedExceptionMessage Cannot use isset() on the result of an expression (you can use "null !== expression" instead)
-     */
     public function testIsset()
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
+        $this->expectExceptionMessage('Cannot use isset() on the result of an expression (you can use "null !== expression" instead)');
+
         $this->traverser->traverse($this->parse('isset(strtolower("A"))'));
+
         $this->fail();
     }
 
-    /**
-     * @expectedException \Psy\Exception\FatalErrorException
-     * @expectedExceptionMessage Can't use function return value in write context
-     */
     public function testEmpty()
     {
-        if (\version_compare(PHP_VERSION, '5.5', '>=')) {
+        if (\version_compare(\PHP_VERSION, '5.5', '>=')) {
             $this->markTestSkipped();
         }
 
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
+        $this->expectExceptionMessage('Can\'t use function return value in write context');
+
         $this->traverser->traverse($this->parse('empty(strtolower("A"))'));
+
+        $this->fail();
     }
 
     /**

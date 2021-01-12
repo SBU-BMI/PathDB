@@ -86,18 +86,18 @@ class LayoutClassesTest extends TestBase {
     $entity_display = $entity_manager->getStorage('entity_view_display')->load('node.article.default');
     $data = $entity_display->getThirdPartySettings('ds');
 
-    $this->assertTrue(!empty($data), t('Configuration found for layout settings for node article'));
-    $this->assertTrue(in_array('ds_extras_extra_test_field', $data['regions']['header']), t('Extra field is in header'));
-    $this->assertTrue(in_array('node_post_date', $data['regions']['header']), t('Post date is in header'));
-    $this->assertTrue(in_array('dynamic_token_field:node-test_field', $data['regions']['left']), t('Test field is in left'));
-    $this->assertTrue(in_array('node_author', $data['regions']['left']), t('Author is in left'));
-    $this->assertTrue(in_array('node_links', $data['regions']['left']), t('Links is in left'));
-    $this->assertTrue(in_array('dynamic_block_field:node-test_block_field', $data['regions']['left']), t('Test block field is in left'));
-    $this->assertTrue(in_array('body', $data['regions']['right']), t('Body is in right'));
-    $this->assertTrue(in_array('class_name_1', $data['layout']['settings']['classes']['header']), t('Class name 1 is in header'));
-    $this->assertTrue(empty($data['layout']['settings']['classes']['left']), t('Left has no classes'));
-    $this->assertTrue(empty($data['layout']['settings']['classes']['right']), t('Right has classes'));
-    $this->assertTrue(in_array('class_name_2', $data['layout']['settings']['classes']['footer']), t('Class name 2 is in header'));
+    $this->assertNotEmpty($data, t('Configuration found for layout settings for node article'));
+    $this->assertNotEmpty(in_array('ds_extras_extra_test_field', $data['regions']['header']), t('Extra field is in header'));
+    $this->assertNotEmpty(in_array('node_post_date', $data['regions']['header']), t('Post date is in header'));
+    $this->assertNotEmpty(in_array('dynamic_token_field:node-test_field', $data['regions']['left']), t('Test field is in left'));
+    $this->assertNotEmpty(in_array('node_author', $data['regions']['left']), t('Author is in left'));
+    $this->assertNotEmpty(in_array('node_links', $data['regions']['left']), t('Links is in left'));
+    $this->assertNotEmpty(in_array('dynamic_block_field:node-test_block_field', $data['regions']['left']), t('Test block field is in left'));
+    $this->assertNotEmpty(in_array('body', $data['regions']['right']), t('Body is in right'));
+    $this->assertNotEmpty(in_array('class_name_1', $data['layout']['settings']['classes']['header']), t('Class name 1 is in header'));
+    $this->assertEmpty($data['layout']['settings']['classes']['left'], t('Left has no classes'));
+    $this->assertEmpty($data['layout']['settings']['classes']['right'], t('Right has classes'));
+    $this->assertNotEmpty(in_array('class_name_2', $data['layout']['settings']['classes']['footer']), t('Class name 2 is in header'));
 
     // Create a article node and verify settings.
     $settings = [
@@ -233,11 +233,11 @@ class LayoutClassesTest extends TestBase {
       'ds_layout' => '_none',
       'display_modes_custom[full]' => FALSE,
     ];
-    $this->drupalPostForm('admin/structure/types/manage/article/display', $edit,'Save');
+    $this->drupalPostForm('admin/structure/types/manage/article/display', $edit, 'Save');
 
     $elements = $this->xpath('//*[@id="edit-fields-body-region"]');
 
-    $this->assertTrue($elements[0]->find('xpath', '//option[@value = "content" and @selected = "selected"]'));
+    $this->assertNotEmpty($elements[0]->find('xpath', '//option[@value = "content" and @selected = "selected"]'));
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->pageTextNotContains('Test code field on node 1');
   }

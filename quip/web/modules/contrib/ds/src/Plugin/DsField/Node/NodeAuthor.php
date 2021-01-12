@@ -20,10 +20,8 @@ class NodeAuthor extends DsFieldBase {
    * {@inheritdoc}
    */
   public function build() {
-    /* @var $node NodeInterface */
+    /* @var \Drupal\node\NodeInterface $node */
     $node = $this->entity();
-
-    /* @var $user UserInterface */
     $user = $node->getOwner();
 
     // Users without a user name are anonymous users. These are never linked.
@@ -36,7 +34,7 @@ class NodeAuthor extends DsFieldBase {
     $field = $this->getFieldConfiguration();
     if ($field['formatter'] == 'author') {
       return [
-        '#markup' => $user->getUsername(),
+        '#markup' => $user->getAccountName(),
         '#cache' => [
           'tags' => $user->getCacheTags(),
         ],
@@ -62,12 +60,10 @@ class NodeAuthor extends DsFieldBase {
    */
   public function formatters() {
 
-    $formatters = [
+    return [
       'author' => $this->t('Author'),
       'author_linked' => $this->t('Author linked to profile'),
     ];
-
-    return $formatters;
   }
 
 }

@@ -1,4 +1,8 @@
 /* Global settings */
+[type=checkbox],
+[type=radio] {
+  box-shadow: none;
+}
 a:hover {
   opacity: 0.60;
 }
@@ -157,7 +161,6 @@ a:hover > img.w3-image {
 .field--label-inline .field__label::after {
   content: ':';
 }
-
 .field--name-field-tags .field__item,
 ul.links li {
   border: none!important;

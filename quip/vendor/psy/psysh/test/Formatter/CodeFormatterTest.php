@@ -15,7 +15,7 @@ use Psy\Configuration;
 use Psy\Formatter\CodeFormatter;
 use Psy\Test\Formatter\Fixtures\SomeClass;
 
-class CodeFormatterTest extends \PHPUnit\Framework\TestCase
+class CodeFormatterTest extends \Psy\Test\TestCase
 {
     /**
      * @dataProvider reflectors
@@ -74,11 +74,13 @@ EOS;
 
     /**
      * @dataProvider invalidReflectors
-     * @expectedException \Psy\Exception\RuntimeException
      */
     public function testCodeFormatterThrowsExceptionForReflectorsItDoesntUnderstand($reflector)
     {
+        $this->expectException(\Psy\Exception\RuntimeException::class);
         CodeFormatter::format($reflector);
+
+        $this->fail();
     }
 
     public function invalidReflectors()
@@ -89,7 +91,7 @@ EOS;
             [new \ReflectionProperty(SomeClass::class, 'someProp')],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.1.0', '>=')) {
+        if (\version_compare(\PHP_VERSION, '7.1.0', '>=')) {
             $reflectors[] = [new \ReflectionClassConstant(SomeClass::class, 'SOME_CONST')];
         }
 
@@ -98,10 +100,11 @@ EOS;
 
     /**
      * @dataProvider filenames
-     * @expectedException \Psy\Exception\RuntimeException
      */
     public function testCodeFormatterThrowsExceptionForMissingFile($filename)
     {
+        $this->expectException(\Psy\Exception\RuntimeException::class);
+
         $reflector = $this->getMockBuilder(\ReflectionClass::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -112,6 +115,8 @@ EOS;
             ->will($this->returnValue($filename));
 
         CodeFormatter::format($reflector);
+
+        $this->fail();
     }
 
     public function filenames()

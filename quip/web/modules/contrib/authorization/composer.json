@@ -1,7 +1,8 @@
 {
     "name": "drupal/authorization",
     "type": "drupal-module",
-    "license": "GPL-2.0+",
+    "description": "An abstraction layer for providers and consumers of authorizations.",
+    "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
     "require": {}
 }

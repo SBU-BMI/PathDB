@@ -6,10 +6,6 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
-use Drupal\Core\TypedData\TypedDataTrait;
-use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\typed_data\Traits\BrowserTestHelpersTrait;
-use Drupal\typed_data\Widget\FormWidgetManagerTrait;
 
 /**
  * Class SelectWidgetTest.
@@ -18,11 +14,7 @@ use Drupal\typed_data\Widget\FormWidgetManagerTrait;
  *
  * @coversDefaultClass \Drupal\typed_data\Plugin\TypedDataFormWidget\SelectWidget
  */
-class SelectWidgetTest extends BrowserTestBase {
-
-  use BrowserTestHelpersTrait;
-  use FormWidgetManagerTrait;
-  use TypedDataTrait;
+class SelectWidgetTest extends FormWidgetBrowserTestBase {
 
   /**
    * The tested form widget.
@@ -32,15 +24,11 @@ class SelectWidgetTest extends BrowserTestBase {
   protected $widget;
 
   /**
-   * Modules to enable.
+   * Modules to enable, in addition to those specified in the base class.
    *
    * @var array
    */
-  public static $modules = [
-    'typed_data',
-    'typed_data_widget_test',
-    'text',
-  ];
+  protected static $modules = ['text'];
 
   /**
    * {@inheritdoc}

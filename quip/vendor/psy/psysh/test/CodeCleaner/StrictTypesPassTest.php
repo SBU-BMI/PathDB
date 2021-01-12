@@ -15,9 +15,12 @@ use Psy\CodeCleaner\StrictTypesPass;
 
 class StrictTypesPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
-        if (\version_compare(PHP_VERSION, '7.0', '<')) {
+        if (\version_compare(\PHP_VERSION, '7.0', '<')) {
             $this->markTestSkipped();
         }
 
@@ -34,11 +37,13 @@ class StrictTypesPassTest extends CodeCleanerTestCase
 
     /**
      * @dataProvider invalidDeclarations
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testInvalidDeclarations($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidDeclarations()

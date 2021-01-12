@@ -34,7 +34,7 @@ function views_bulk_operations_update_8034(&$sandbox) {
             if ($field['plugin_id'] === 'views_bulk_operations_bulk_form') {
               $new_selected_actions = [];
               foreach ($field['selected_actions'] as $plugin_id) {
-                if (!$plugin_id) {
+                if (!is_string($plugin_id)) {
                   continue;
                 }
                 $action_config_array = ['action_id' => $plugin_id];

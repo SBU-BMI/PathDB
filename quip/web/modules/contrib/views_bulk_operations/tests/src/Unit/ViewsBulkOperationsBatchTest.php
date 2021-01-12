@@ -94,12 +94,12 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
       ->with('test_view')
       ->will($this->returnValue($view));
 
-    $entity_manager = $this->createMock('Drupal\Core\Entity\EntityManagerInterface');
-    $entity_manager->expects($this->any())
+    $entity_type_manager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $entity_type_manager->expects($this->any())
       ->method('getStorage')
       ->with('view')
       ->will($this->returnValue($view_storage));
-    $this->container->set('entity.manager', $entity_manager);
+    $this->container->set('entity_type.manager', $entity_type_manager);
 
     $executable = $this->getMockBuilder('Drupal\views\ViewExecutable')
       ->disableOriginalConstructor()

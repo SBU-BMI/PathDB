@@ -6,6 +6,7 @@ use Drupal\Core\Action\ActionManager;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 
@@ -27,6 +28,13 @@ class ViewsBulkOperationsActionManager extends ActionManager {
   protected $eventDispatcher;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Additional parameters passed to alter event.
    *
    * @var array
@@ -45,15 +53,21 @@ class ViewsBulkOperationsActionManager extends ActionManager {
    *   The module handler to invoke the alter hook with.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
    *   The event dispatcher service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
    */
   public function __construct(
     \Traversable $namespaces,
     CacheBackendInterface $cacheBackend,
     ModuleHandlerInterface $moduleHandler,
-    EventDispatcherInterface $eventDispatcher
+    EventDispatcherInterface $eventDispatcher,
+    EntityTypeManagerInterface $entityTypeManager
   ) {
     parent::__construct($namespaces, $cacheBackend, $moduleHandler);
+
     $this->eventDispatcher = $eventDispatcher;
+    $this->entityTypeManager = $entityTypeManager;
+
     $this->setCacheBackend($cacheBackend, 'views_bulk_operations_action_info');
   }
 
@@ -63,15 +77,28 @@ class ViewsBulkOperationsActionManager extends ActionManager {
   protected function findDefinitions() {
     $definitions = $this->getDiscovery()->getDefinitions();
 
-    // Incompatible actions.
-    $incompatible = [
-      'node_delete_action',
-      'user_cancel_user_action',
-    ];
-
+    $entity_type_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($definitions as $plugin_id => &$definition) {
       $this->processDefinition($definition, $plugin_id);
-      if (empty($definition) || in_array($definition['id'], $incompatible)) {
+
+      // We only allow actions of existing entity type and empty
+      // type meaning it's applicable to all entity types.
+      if (
+        empty($definition) ||
+        (
+          !empty($definition['type']) &&
+          !isset($entity_type_definitions[$definition['type']])
+        )
+      ) {
+        unset($definitions[$plugin_id]);
+      }
+
+      // Filter definitions that are incompatible due to applied core
+      // configuration form workaround (using confirm_form_route for config
+      // forms and using action execute() method for purposes other than
+      // actual action execution). Luckily, core also has useful actions
+      // without the workaround, like node_assign_owner_action.
+      if (!in_array('Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionInterface', class_implements($definition['class'])) && (!empty($definition['confirm_form_route_name']))) {
         unset($definitions[$plugin_id]);
       }
     }

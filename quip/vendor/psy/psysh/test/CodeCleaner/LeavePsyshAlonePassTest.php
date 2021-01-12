@@ -15,7 +15,10 @@ use Psy\CodeCleaner\LeavePsyshAlonePass;
 
 class LeavePsyshAlonePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new LeavePsyshAlonePass());
     }
@@ -50,11 +53,13 @@ class LeavePsyshAlonePassTest extends CodeCleanerTestCase
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\RuntimeException
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\RuntimeException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()

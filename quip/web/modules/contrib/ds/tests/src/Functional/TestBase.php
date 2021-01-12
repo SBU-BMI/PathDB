@@ -22,6 +22,8 @@ abstract class TestBase extends BrowserTestBase {
   use FieldUiTestTrait;
   use TaxonomyTestTrait;
 
+  protected $defaultTheme = 'classy';
+
   /**
    * Modules to install.
    *

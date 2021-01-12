@@ -14,7 +14,7 @@ namespace Psy\Test;
 use Psy\Context;
 use Psy\Shell;
 
-class ContextTest extends \PHPUnit\Framework\TestCase
+class ContextTest extends TestCase
 {
     public function testGet()
     {
@@ -104,14 +104,17 @@ class ContextTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider specialNames
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessageRegEx /Unknown variable: \$\w+/
      */
     public function testSetAllDoesNotSetSpecial($name)
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Unknown variable: \$\w+/');
+
         $context = new Context();
         $context->setAll([$name => 'fail']);
         $context->get($name);
+
+        $this->fail();
     }
 
     public function specialNames()
@@ -159,14 +162,15 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($e, $context->get('_e'));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage No most-recent exception
-     */
     public function testLastExceptionThrowsSometimes()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('No most-recent exception');
+
         $context = new Context();
         $context->getLastException();
+
+        $this->fail();
     }
 
     public function testLastStdout()
@@ -177,14 +181,15 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('ouuuuut', $context->get('__out'));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage No most-recent output
-     */
     public function testLastStdoutThrowsSometimes()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('No most-recent output');
+
         $context = new Context();
         $context->getLastStdout();
+
+        $this->fail();
     }
 
     public function testBoundObject()
@@ -201,14 +206,15 @@ class ContextTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($context->getBoundObject());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Unknown variable: $this
-     */
     public function testBoundObjectThrowsSometimes()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown variable: $this');
+
         $context = new Context();
         $context->get('this');
+
+        $this->fail();
     }
 
     public function testBoundClass()
@@ -237,13 +243,13 @@ class ContextTest extends \PHPUnit\Framework\TestCase
 
     public function testCommandScopeVariables()
     {
-        $__function  = 'donkey';
-        $__method    = 'diddy';
-        $__class     = 'cranky';
+        $__function = 'donkey';
+        $__method = 'diddy';
+        $__class = 'cranky';
         $__namespace = 'funky';
-        $__file      = 'candy';
-        $__line      = 'dixie';
-        $__dir       = 'wrinkly';
+        $__file = 'candy';
+        $__line = 'dixie';
+        $__dir = 'wrinkly';
 
         $vars = \compact('__function', '__method', '__class', '__namespace', '__file', '__line', '__dir');
 

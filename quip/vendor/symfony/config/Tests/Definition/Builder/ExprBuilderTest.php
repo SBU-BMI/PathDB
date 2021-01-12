@@ -12,6 +12,7 @@
 namespace Symfony\Component\Config\Tests\Definition\Builder;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Builder\ExprBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class ExprBuilderTest extends TestCase
@@ -148,7 +149,7 @@ class ExprBuilderTest extends TestCase
     /**
      * @dataProvider castToArrayValues
      */
-    public function testcastToArrayExpression($configValue, $expectedValue)
+    public function testCastToArrayExpression($configValue, $expectedValue)
     {
         $test = $this->getTestBuilder()
             ->castToArray()
@@ -201,15 +202,13 @@ class ExprBuilderTest extends TestCase
 
     /**
      * Create a test treebuilder with a variable node, and init the validation.
-     *
-     * @return TreeBuilder
      */
-    protected function getTestBuilder()
+    protected function getTestBuilder(): ExprBuilder
     {
-        $builder = new TreeBuilder();
+        $builder = new TreeBuilder('test');
 
         return $builder
-            ->root('test')
+            ->getRootNode()
             ->children()
             ->variableNode('key')
             ->validate()
@@ -225,7 +224,7 @@ class ExprBuilderTest extends TestCase
      *
      * @return array The finalized config values
      */
-    protected function finalizeTestBuilder($testBuilder, $config = null)
+    protected function finalizeTestBuilder($testBuilder, $config = null): array
     {
         return $testBuilder
             ->end()
@@ -240,10 +239,8 @@ class ExprBuilderTest extends TestCase
      * Return a closure that will return the given value.
      *
      * @param mixed $val The value that the closure must return
-     *
-     * @return \Closure
      */
-    protected function returnClosure($val)
+    protected function returnClosure($val): \Closure
     {
         return function ($v) use ($val) {
             return $val;

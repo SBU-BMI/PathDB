@@ -16,10 +16,10 @@ use Psy\Reflection\ReflectionConstant_;
 use Psy\Reflection\ReflectionNamespace;
 use Psy\Util\Mirror;
 
-class MirrorTest extends \PHPUnit\Framework\TestCase
+class MirrorTest extends \Psy\Test\TestCase
 {
-    const FOO           = 1;
-    private $bar        = 2;
+    const FOO = 1;
+    private $bar = 2;
     private static $baz = 3;
 
     public function aPublicMethod()
@@ -39,7 +39,7 @@ class MirrorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(\ReflectionObject::class, $refl);
 
         $refl = Mirror::get($this, 'FOO');
-        if (\version_compare(PHP_VERSION, '7.1.0', '>=')) {
+        if (\version_compare(\PHP_VERSION, '7.1.0', '>=')) {
             $this->assertInstanceOf(\ReflectionClassConstant::class, $refl);
         } else {
             $this->assertInstanceOf(ReflectionClassConstant::class, $refl);
@@ -68,21 +68,23 @@ class MirrorTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(\ReflectionClass::class, $refl);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testMirrorThrowsExceptions()
     {
+        $this->expectException(\RuntimeException::class);
         Mirror::get($this, 'notAMethod');
+
+        $this->fail();
     }
 
     /**
-     * @expectedException \InvalidArgumentException
      * @dataProvider invalidArguments
      */
     public function testMirrorThrowsInvalidArgumentExceptions($value)
     {
+        $this->expectException(\InvalidArgumentException::class);
         Mirror::get($value);
+
+        $this->fail();
     }
 
     public function invalidArguments()

@@ -53,10 +53,10 @@
       %}
      {% if menu_level == 0 and item.is_expanded %}
         <li{{ item.attributes.addClass(item_classes) }} role="none">
-        <a href="#" class="w3-button tMenu toggle-parent" aria-haspopup="true">{{ item.title }} <span class="fa fa-chevron-down dropdown-arrow"></span></a>
+        <a href="#" class="w3-button tMenu toggle-parent" role="menuitem" aria-haspopup="true">{{ item.title }} <span class="fa fa-chevron-down dropdown-arrow"></span></a>
       {% elseif menu_level != 0 and item.is_expanded %}
         <li{{ item.attributes.addClass(item_classes) }} role="none">
-        <a href="#" class="w3-button tMenu toggle-child" aria-haspopup="true">{{ item.title }} <span class="fa fa-arrow-right right-arrow"></span><span class=" fa fa-chevron-down dropdown-arrow"></span></a>
+        <a href="#" class="w3-button tMenu toggle-child" role="menuitem" aria-haspopup="true">{{ item.title }} <span class="fa fa-arrow-right right-arrow"></span><span class=" fa fa-chevron-down dropdown-arrow"></span></a>
       {% else %}
       {%
         set link_classes = [
@@ -68,7 +68,8 @@
           link(
             item.title,
             item.url,
-            item.attributes.removeClass(item_classes).addClass(link_classes)
+            item.attributes.removeClass(item_classes).addClass(link_classes),
+            item.attributes.setAttribute("role", "menuitem")
           )
         }}
       {% endif %}

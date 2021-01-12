@@ -14,22 +14,25 @@ namespace Psy\Test\VersionUpdater;
 use Psy\Shell;
 use Psy\VersionUpdater\GitHubChecker;
 
-class GitHubCheckerTest extends \PHPUnit\Framework\TestCase
+class GitHubCheckerTest extends \Psy\Test\TestCase
 {
     /**
      * @dataProvider malformedResults
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Unable to check for updates
      *
      * @param mixed $input
      */
     public function testExceptionInvocation($input)
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to check for updates');
+
         $checker = $this->getMockBuilder(GitHubChecker::class)
             ->setMethods(['fetchLatestRelease'])
             ->getMock();
         $checker->expects($this->once())->method('fetchLatestRelease')->willReturn($input);
         $checker->isLatest();
+
+        $this->fail();
     }
 
     /**
@@ -54,7 +57,7 @@ class GitHubCheckerTest extends \PHPUnit\Framework\TestCase
     {
         return [
             [false, \json_decode('{"tag_name":"v9.0.0"}')],
-            [true, \json_decode('{"tag_name":"v' . Shell::VERSION . '"}')],
+            [true, \json_decode('{"tag_name":"v'.Shell::VERSION.'"}')],
             [true, \json_decode('{"tag_name":"v0.0.1"}')],
             [true, \json_decode('{"tag_name":"v0.4.1-alpha"}')],
             [true, \json_decode('{"tag_name":"v0.4.2-beta3"}')],

@@ -40,7 +40,11 @@ class UpdateCoreTest extends UpdateTestBase {
 
   protected function setUp() {
     parent::setUp();
-    $admin_user = $this->drupalCreateUser(['administer site configuration', 'administer modules', 'administer themes']);
+    $admin_user = $this->drupalCreateUser([
+      'administer site configuration',
+      'administer modules',
+      'administer themes',
+      ]);
     $this->drupalLogin($admin_user);
     $this->drupalPlaceBlock('local_actions_block');
   }
@@ -98,7 +102,7 @@ class UpdateCoreTest extends UpdateTestBase {
 
     // Ensure that the update check requires a token.
     $this->drupalGet('admin/reports/updates/check');
-    $this->assertResponse(403, 'Accessing admin/reports/updates/check without a CSRF token results in access denied.');
+    $this->assertSession()->statusCodeEquals(403);
 
     foreach ([0, 1] as $minor_version) {
       foreach (['-alpha1', '-beta1', ''] as $extra_version) {
@@ -134,6 +138,7 @@ class UpdateCoreTest extends UpdateTestBase {
               $this->assertRaw('check.svg', 'Check icon was found.');
             }
             break;
+
           case 1:
             // Both stable and unstable releases are available.
             // A stable release is the latest.
@@ -355,6 +360,14 @@ class UpdateCoreTest extends UpdateTestBase {
         'expected_update_message_type' => static::UPDATE_NONE,
         'fixture' => 'sec.0.2-rc2',
       ],
+      // Ensure that 8.0.2 security release is not shown because it is earlier
+      // version than 1.0.
+      '1.0, 0.2 1.2' => [
+        'site_patch_version' => '1.0',
+        'expected_security_releases' => ['1.2', '2.0-rc2'],
+        'expected_update_message_type' => static::SECURITY_UPDATE_REQUIRED,
+        'fixture' => 'sec.0.2-rc2',
+      ],
     ];
     $pre_releases = [
       '2.0-alpha1',
@@ -365,24 +378,25 @@ class UpdateCoreTest extends UpdateTestBase {
       '2.0-rc2',
     ];
 
-    // If the site is on an alpha/beta/RC of an upcoming minor and none of the
-    // alpha/beta/RC versions are marked insecure, no security update should be
-    // required.
     foreach ($pre_releases as $pre_release) {
+      // If the site is on an alpha/beta/RC of an upcoming minor and none of the
+      // alpha/beta/RC versions are marked insecure, no security update should
+      // be required.
       $test_cases["Pre-release:$pre_release, no security update"] = [
         'site_patch_version' => $pre_release,
         'expected_security_releases' => [],
         'expected_update_message_type' => $pre_release === '2.0-rc2' ? static::UPDATE_NONE : static::UPDATE_AVAILABLE,
         'fixture' => 'sec.0.2-rc2-b',
       ];
+      // If the site is on an alpha/beta/RC of an upcoming minor and there is
+      // an RC version with a security update, it should be recommended.
+      $test_cases["Pre-release:$pre_release, security update"] = [
+        'site_patch_version' => $pre_release,
+        'expected_security_releases' => $pre_release === '2.0-rc2' ? [] : ['2.0-rc2'],
+        'expected_update_message_type' => $pre_release === '2.0-rc2' ? static::UPDATE_NONE : static::SECURITY_UPDATE_REQUIRED,
+        'fixture' => 'sec.0.2-rc2',
+      ];
     }
-
-    // @todo In https://www.drupal.org/node/2865920 add test cases:
-    //   - For all pre-releases for 8.2.0 except 8.2.0-rc2 using the
-    //     'sec.0.2-rc2' fixture to ensure that 8.2.0-rc2 is the only security
-    //     update.
-    //   - For 8.1.0 using fixture 'sec.0.2-rc2' to ensure that only security
-    //     updates are 8.1.2 and 8.2.0-rc2.
     return $test_cases;
   }
 
@@ -804,7 +818,12 @@ class UpdateCoreTest extends UpdateTestBase {
    * Ensures that the local actions appear.
    */
   public function testLocalActions() {
-    $admin_user = $this->drupalCreateUser(['administer site configuration', 'administer modules', 'administer software updates', 'administer themes']);
+    $admin_user = $this->drupalCreateUser([
+      'administer site configuration',
+      'administer modules',
+      'administer software updates',
+      'administer themes',
+    ]);
     $this->drupalLogin($admin_user);
 
     $this->drupalGet('admin/modules');
@@ -844,6 +863,43 @@ class UpdateCoreTest extends UpdateTestBase {
   }
 
   /**
+   * Checks that Drupal recovers after problems connecting to update server.
+   */
+  public function testBrokenThenFixedUpdates() {
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer site configuration',
+      'access administration pages',
+    ]));
+    $this->setSystemInfo('8.0.0');
+    // Instead of using refreshUpdateStatus(), set these manually.
+    $this->config('update.settings')
+      ->set('fetch.url', Url::fromRoute('update_test.update_test')->setAbsolute()->toString())
+      ->save();
+    // Use update XML that has no information to simulate a broken response from
+    // the update server.
+    $this->config('update_test.settings')
+      ->set('xml_map', ['drupal' => 'broken'])
+      ->save();
+
+    // This will retrieve broken updates.
+    $this->cronRun();
+    $this->drupalGet('admin/reports/status');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('There was a problem checking available updates for Drupal.');
+    $this->config('update_test.settings')
+      ->set('xml_map', ['drupal' => 'sec.0.2'])
+      ->save();
+    // Simulate the update_available_releases state expiring before cron is run
+    // and the state is used by \Drupal\update\UpdateManager::getProjects().
+    \Drupal::keyValueExpirable('update_available_releases')->deleteAll();
+    // This cron run should retrieve fixed updates.
+    $this->cronRun();
+    $this->drupalGet('admin/structure');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('There is a security update available for your version of Drupal.');
+  }
+
+  /**
    * Tests messages when a project release is marked unsupported.
    *
    * This test confirms unsupported messages are displayed regardless of whether
@@ -854,7 +910,7 @@ class UpdateCoreTest extends UpdateTestBase {
    *    'supported_branches' is '8.0.,8.1.'.
    * - drupal.1.0-unsupported.xml
    *    'supported_branches' is '8.1.'.
-   * They both have an '8.0.3' release that that has the 'Release type' value of
+   * They both have an '8.0.3' release that has the 'Release type' value of
    * 'unsupported' and an '8.1.0' release that has the 'Release type' value of
    * 'supported' and is the expected update.
    */

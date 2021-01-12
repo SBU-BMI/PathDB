@@ -38,14 +38,14 @@
           if (event.which === 13) {
             event.preventDefault();
             event.stopPropagation();
-            selectionObject.update(this.checked, index, $(this).val());
+            selectionObject.update(!this.checked, index, $(this).val());
             $(this).trigger('click');
           }
           if (event.which === 32) {
-            selectionObject.update(this.checked, index, $(this).val());
+            selectionObject.update(!this.checked, index, $(this).val());
           }
         });
-        $element.on('mousedown', function (event) {
+        $element.on('click', function (event) {
           // Act only on left button click.
           if (event.which === 1) {
             selectionObject.update(this.checked, index, $(this).val());
@@ -70,8 +70,8 @@
 
         var list = {}, op = '';
         if (index === 'selection_method_change') {
-          var op = state ? 'method_include' : 'method_exclude';
-          if (!state) {
+          var op = state ? 'method_exclude' : 'method_include';
+          if (state) {
             list = this.list[index];
           }
         }
@@ -82,11 +82,11 @@
           else {
             list = this.list[index];
           }
-          op = state ? 'remove' : 'add';
+          op = state ? 'add' : 'remove';
         }
 
         var $placeholder = this.$placeholder;
-        var target_uri = '/' + drupalSettings.path.pathPrefix + 'views-bulk-operations/ajax/' + this.view_id + '/' + this.display_id;
+        var target_uri = drupalSettings.path.baseUrl + drupalSettings.path.pathPrefix + 'views-bulk-operations/ajax/' + this.view_id + '/' + this.display_id;
         $.ajax(target_uri, {
           method: 'POST',
           data: {
@@ -167,6 +167,10 @@
           this.checked = value;
         });
 
+        // Clear the selection information if exists.
+        $vboForm.find('.vbo-info-list-wrapper').each(function () {
+          $(this).html('');
+        });
       });
 
       if ($multiSelectElement.length) {

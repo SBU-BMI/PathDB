@@ -15,7 +15,10 @@ use Psy\CodeCleaner\RequirePass;
 
 class RequirePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new RequirePass());
     }
@@ -53,28 +56,31 @@ class RequirePassTest extends CodeCleanerTestCase
         ];
     }
 
-    /**
-     * @expectedException \Psy\Exception\FatalErrorException
-     * @expectedExceptionMessage Failed opening required 'not a file name' in eval()'d code on line 2
-     */
     public function testResolve()
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
+        $this->expectExceptionMessage('Failed opening required \'not a file name\' in eval()\'d code on line 2');
+
         RequirePass::resolve('not a file name', 2);
+
+        $this->fail();
     }
 
     /**
      * @dataProvider emptyWarnings
-     *
-     * @expectedException \Psy\Exception\ErrorException
-     * @expectedExceptionMessage Filename cannot be empty on line 1
      */
     public function testResolveEmptyWarnings($file)
     {
-        if (!E_WARNING & \error_reporting()) {
+        if (!\E_WARNING & \error_reporting()) {
             $this->markTestSkipped();
         }
 
+        $this->expectException(\Psy\Exception\ErrorException::class);
+        $this->expectExceptionMessage('Filename cannot be empty on line 1');
+
         RequirePass::resolve($file, 1);
+
+        $this->fail();
     }
 
     public function emptyWarnings()

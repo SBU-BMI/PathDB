@@ -14,7 +14,7 @@ namespace Psy\Test\Exception;
 use Psy\Exception\Exception;
 use Psy\Exception\ParseErrorException;
 
-class ParseErrorExceptionTest extends \PHPUnit\Framework\TestCase
+class ParseErrorExceptionTest extends \Psy\Test\TestCase
 {
     public function testInstance()
     {
@@ -29,15 +29,15 @@ class ParseErrorExceptionTest extends \PHPUnit\Framework\TestCase
     {
         $e = new ParseErrorException('{msg}', 1);
 
-        $this->assertContains('{msg}', $e->getMessage());
-        $this->assertContains('PHP Parse error:', $e->getMessage());
+        $this->assertStringContainsString('{msg}', $e->getMessage());
+        $this->assertStringContainsString('PHP Parse error:', $e->getMessage());
     }
 
     public function testConstructFromParseError()
     {
         $e = ParseErrorException::fromParseError(new \PhpParser\Error('{msg}'));
 
-        $this->assertContains('{msg}', $e->getRawMessage());
-        $this->assertContains('PHP Parse error:', $e->getMessage());
+        $this->assertStringContainsString('{msg}', $e->getRawMessage());
+        $this->assertStringContainsString('PHP Parse error:', $e->getMessage());
     }
 }

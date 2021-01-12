@@ -20,6 +20,7 @@ use Drupal\field\FieldConfigInterface;
 use Drupal\field_ui\FieldUI;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Link;
+use Drupal\layout_builder\LayoutBuilderEnabledInterface;
 
 /**
  * Adds the Display Suite fields and layouts to the form.
@@ -38,7 +39,7 @@ function ds_field_ui_fields_layouts(&$form, FormStateInterface $form_state) {
   $view_mode = $entity_display->getMode();
 
   // Check layout builder.
-  if (\Drupal::moduleHandler()->moduleExists('layout_builder') && $entity_display->isLayoutBuilderEnabled()) {
+  if ($entity_display instanceof LayoutBuilderEnabledInterface && $entity_display->isLayoutBuilderEnabled()) {
     return;
   }
 
@@ -329,7 +330,7 @@ function ds_field_ui_layouts_save($form, FormStateInterface $form_state) {
   /* @var \Drupal\Core\Entity\Display\EntityDisplayInterface $display */
   $display = $entity_form->getEntity();
 
-  if (\Drupal::moduleHandler()->moduleExists('layout_builder') && $display->isLayoutBuilderEnabled()) {
+  if ($display instanceof LayoutBuilderEnabledInterface && $display->isLayoutBuilderEnabled()) {
     $display->unsetThirdPartySetting('ds', 'layout');
     $display->unsetThirdPartySetting('ds', 'regions');
     $display->unsetThirdPartySetting('ds', 'fields');
@@ -1300,7 +1301,7 @@ function _ds_field_ui_fields($entity_type, $bundle, $view_mode, array &$form, Fo
 }
 
 /**
- * Alter the core field on the the Field UI form.
+ * Alter the core field on the Field UI form.
  *
  * @param array $form
  *   A collection of form properties.

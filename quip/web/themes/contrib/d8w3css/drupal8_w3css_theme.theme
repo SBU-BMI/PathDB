@@ -10,6 +10,41 @@
  * Author:       Alaa Haddad http://www.alaahaddad.com.
  */
 
+use Drupal\Component\Utility\Html;
+use Drupal\block_content\BlockContentInterface;
+
+/**
+ * Implements hook_preprocess_HOOK() for HTML document templates.
+ */
+function drupal8_w3css_theme_preprocess_html(&$variables) {
+  // Add node id to the body class.
+  $variables['path_info']['args'] = FALSE;
+  $path_raw                       = \Drupal::service('path.current')->getPath();
+  $path_trimmed                   = ltrim($path_raw, '/');
+  $path_args                      = explode('/', $path_trimmed);
+  // Add user id to the body class.
+  if (isset($path_args[0]) && isset($path_args[1]) && ($path_args[0] == 'user')) {
+    $variables['attributes']['class'][] = 'path-user-' . $path_args[1];
+  }
+  // Add node id to the body class.
+  if (isset($path_args[0]) && isset($path_args[1]) && ($path_args[0] == 'node') && (is_numeric($path_args[1]))) {
+    $variables['attributes']['class'][] = 'path-node-' . $path_args[1];
+  }
+  // Add term id to the body class.
+  if (isset($path_args[0]) && isset($path_args[1]) && isset($path_args[2]) &&
+    $path_args[0] == 'taxonomy' && $path_args[1] == 'term') {
+    $variables['attributes']['class'][] = 'path-taxonomy-term-' . $path_args[2];
+    $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($path_args[2]);
+    $vocabulary_id = $term->bundle();
+    $variables['attributes']['class'][] = 'path-vocabulary-' . Html::cleanCssIdentifier($vocabulary_id);
+  }
+  // Add view id to the body class.
+  $view_id = \Drupal::routeMatch()->getParameter('view_id');
+  if ($view_id) {
+    $variables['attributes']['class'][] = 'path-view-' . Html::cleanCssIdentifier($view_id);
+  }
+}
+
 /**
  * Implements hook_preprocess_page() for page templates.
  */
@@ -125,7 +160,7 @@ function drupal8_w3css_theme_preprocess_page(&$variables) {
   foreach ($mvar as $value) {
     $variables[$value] = theme_get_setting($value);
   }
-  // Social Mdia's $variables.
+  // Social Media's $variables.
   $svar = [
     'show_social_icon',
     'facebook_url',
@@ -182,25 +217,10 @@ function drupal8_w3css_theme_preprocess_page(&$variables) {
   $my_current_theme = ($variables['current_theme'] = theme_get_setting('current_theme'));
   $predefined_theme_filename = 'drupal8_w3css_theme/' . str_replace('w3-theme-', 'w3-css-theme-', $my_current_theme);
   $variables['#attached']['library'][] = $predefined_theme_filename;
-}
-
-/**
- * Implements hook_theme_suggestions_HOOK_alter() for form templates.
- */
-function drupal8_w3css_theme_theme_suggestions_form_alter(array &$suggestions, array $variables) {
-  // Suggest the name for the search block.
-  if ($variables['element']['#form_id'] == 'search_block_form') {
-    $suggestions[] = 'form__search_block_form';
+  // Disable font awesome library if fontawesome module installed.
+  if (\Drupal::moduleHandler()->moduleExists('fontawesome')) {
+    unset($variables['#attached']['library']['drupal8_w3css_theme/font-awesome']);
   }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function drupal8_w3css_theme_form_search_block_form_alter(&$form, &$form_state) {
-  $form['keys']['#attributes']['placeholder'][] = t('Search');
-  $form['actions']['submit']['#value'] = html_entity_decode('&#xf061;');
-  $form['actions']['submit']['#attributes']['class'][] = 'search-button-block';
 }
 
 /**
@@ -218,6 +238,46 @@ function drupal8_w3css_theme_preprocess_breadcrumb(&$variables) {
       // Add cache context based on url.
       $variables['#cache']['contexts'][] = 'url';
     }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for maintenance-page.html.twig.
+ */
+function drupal8_w3css_theme_preprocess_maintenance_page(&$variables) {
+  // By default, site_name is set to Drupal if no db connection is available
+  // or during site installation. Setting site_name to an empty string makes
+  // the site and update pages look cleaner.
+  // @see template_preprocess_maintenance_page
+  if (!$variables['db_is_active']) {
+    $variables['site_name'] = '';
+  }
+
+  // drupal8_w3css_theme has custom styling for the maintenance page.
+  $variables['#attached']['library'][] = 'drupal8_w3css_theme/templates/layout/maintenance_page';
+}
+
+/**
+ * Implements hook_theme_suggestions_block_alter().
+ */
+function drupal8_w3css_theme_theme_suggestions_block_alter(array &$suggestions, array $variables) {
+  $content = $variables['elements']['content'];
+  if (isset($content['#block_content']) and $content['#block_content'] instanceof BlockContentInterface) {
+    $bundle = $content['#block_content']->bundle();
+    $view_mode = $content['#view_mode'];
+    $suggestions[] = 'block__' . $bundle;
+    $suggestions[] = 'block__' . $view_mode;
+    $suggestions[] = 'block__' . $bundle . '__' . $view_mode;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form templates.
+ */
+function drupal8_w3css_theme_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+  // Suggest the name for the search block.
+  if ($variables['element']['#form_id'] == 'search_block_form') {
+    $suggestions[] = 'form__search_block_form';
   }
 }
 
@@ -247,17 +307,10 @@ function drupal8_w3css_theme_theme_suggestions_page_alter(array &$suggestions, a
 }
 
 /**
- * Implements hook_preprocess_HOOK() for maintenance-page.html.twig.
+ * Implements hook_form_FORM_ID_alter().
  */
-function drupal8_w3css_theme_preprocess_maintenance_page(&$variables) {
-  // By default, site_name is set to Drupal if no db connection is available
-  // or during site installation. Setting site_name to an empty string makes
-  // the site and update pages look cleaner.
-  // @see template_preprocess_maintenance_page
-  if (!$variables['db_is_active']) {
-    $variables['site_name'] = '';
-  }
-
-  // drupal8_w3css_theme has custom styling for the maintenance page.
-  $variables['#attached']['library'][] = 'drupal8_w3css_theme/templates/layout/maintenance_page';
+function drupal8_w3css_theme_form_search_block_form_alter(&$form, &$form_state) {
+  $form['keys']['#attributes']['placeholder'][] = t('Search');
+  $form['actions']['submit']['#value'] = html_entity_decode('&#xf061;');
+  $form['actions']['submit']['#attributes']['class'][] = 'search-button-block';
 }

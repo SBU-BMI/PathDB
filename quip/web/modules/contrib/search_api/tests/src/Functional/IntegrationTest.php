@@ -139,7 +139,7 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     Server::create([
       'id' => 456,
       'name' => 789,
-      'description' => 'WebTest server' . ' description',
+      'description' => 'WebTest server description',
       'backend' => $this->serverBackend,
       'backend_config' => [],
     ])->save();
@@ -903,8 +903,9 @@ class IntegrationTest extends SearchApiBrowserTestBase {
    */
   protected function checkDataTypesTable() {
     $this->drupalGet($this->getIndexPath('fields'));
-    $rows = $this->xpath('//*[@id="search-api-data-types-table"]/*/table/tbody/tr');
-    $this->assertTrue(is_array($rows) && !empty($rows), 'Found a datatype listing.');
+    $rows = $this->xpath('//*[@id="search-api-data-types-table"]//table/tbody/tr');
+    $this->assertIsArray($rows);
+    $this->assertNotEmpty($rows);
 
     /** @var \Behat\Mink\Element\NodeElement $row */
     foreach ($rows as $row) {
@@ -1045,7 +1046,7 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     // Find the "Remove" link for the "body" field.
     $links = $this->xpath('//a[@data-drupal-selector=:id]', [':id' => 'edit-fields-body-remove']);
     $this->assertNotEmpty($links, 'Found "Remove" link for body field');
-    $this->assertInternalType('array', $links);
+    $this->assertIsArray($links);
     $url_target = $this->getAbsoluteUrl($links[0]->getAttribute('href'));
     $this->drupalGet($url_target);
     $this->drupalGet($this->getIndexPath('fields'));
@@ -1053,7 +1054,7 @@ class IntegrationTest extends SearchApiBrowserTestBase {
 
     $index = $this->getIndex(TRUE);
     $fields = $index->getFields();
-    $this->assertTrue(!isset($fields['body']), 'The body field has been removed from the index.');
+    $this->assertArrayNotHasKey('body', $fields);
   }
 
   /**
@@ -1101,12 +1102,12 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     // Make sure the field has not been added to the index.
     $index = $this->getIndex(TRUE);
     $fields = $index->getFields();
-    $this->assertTrue(!isset($fields['changed']), 'The changed field has not been added to the index.');
+    $this->assertArrayNotHasKey('changed', $fields);
 
     // Find the "Remove" link for the "title" field.
     $links = $this->xpath('//a[@data-drupal-selector=:id]', [':id' => 'edit-fields-title-remove']);
     $this->assertNotEmpty($links, 'Found "Remove" link for title field');
-    $this->assertInternalType('array', $links);
+    $this->assertIsArray($links);
     $url_target = $this->getAbsoluteUrl($links[0]->getAttribute('href'));
     $this->drupalGet($url_target);
 
@@ -1448,7 +1449,8 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     // Ensure all items need to be indexed.
     $this->getIndex()->reindex();
 
-    $this->drupalPostForm($this->getIndexPath(), [], 'Index now');
+    $this->drupalGet($this->getIndexPath());
+    $this->submitForm([], 'Index now');
     $this->assertSession()->statusCodeEquals(200);
     $this->checkForMetaRefresh();
     $count = \Drupal::entityQuery('node')->count()->execute() - 1;
@@ -1457,7 +1459,8 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     $this->assertSession()->pageTextNotContains("Couldn't index items.");
     $this->assertSession()->pageTextNotContains('An error occurred');
 
-    $this->drupalPostForm($this->getIndexPath(), [], 'Index now');
+    $this->drupalGet($this->getIndexPath());
+    $this->submitForm([], 'Index now');
     $this->assertSession()->statusCodeEquals(200);
     $this->checkForMetaRefresh();
     $this->assertSession()->pageTextContains("Couldn't index items.");
@@ -1465,14 +1468,16 @@ class IntegrationTest extends SearchApiBrowserTestBase {
 
     \Drupal::state()->set($key, []);
     $this->setError('backend', 'indexItems');
-    $this->drupalPostForm($this->getIndexPath(), [], 'Index now');
+    $this->drupalGet($this->getIndexPath());
+    $this->submitForm([], 'Index now');
     $this->assertSession()->statusCodeEquals(200);
     $this->checkForMetaRefresh();
     $this->assertSession()->pageTextContains("Couldn't index items.");
     $this->assertSession()->pageTextNotContains('An error occurred');
 
     $this->setError('backend', 'indexItems', FALSE);
-    $this->drupalPostForm($this->getIndexPath(), [], 'Index now');
+    $this->drupalGet($this->getIndexPath());
+    $this->submitForm([], 'Index now');
     $this->assertSession()->statusCodeEquals(200);
     $this->checkForMetaRefresh();
     $this->assertSession()->pageTextContains("Successfully indexed 1 item.");
@@ -1504,21 +1509,24 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     $this->assertEquals($manipulated_items_count, $tracker->getTotalItemsCount());
     $this->assertEquals($manipulated_items_count + 1, $this->countItemsOnServer());
 
-    $this->drupalPostForm($this->getIndexPath('reindex'), [], 'Confirm');
+    $this->drupalGet($this->getIndexPath('reindex'));
+    $this->submitForm([], 'Confirm');
     $assert_session->pageTextContains("The search index $label was successfully queued for reindexing.");
     $this->assertEquals(0, $tracker->getIndexedItemsCount());
     $this->assertEquals($manipulated_items_count, $tracker->getTotalItemsCount());
     $this->assertEquals($manipulated_items_count + 1, $this->countItemsOnServer());
     $this->indexItems();
 
-    $this->drupalPostForm($this->getIndexPath('clear'), [], 'Confirm');
+    $this->drupalGet($this->getIndexPath('clear'));
+    $this->submitForm([], 'Confirm');
     $assert_session->pageTextContains("All items were successfully deleted from search index $label.");
     $this->assertEquals(0, $tracker->getIndexedItemsCount());
     $this->assertEquals($manipulated_items_count, $tracker->getTotalItemsCount());
     $this->assertEquals(0, $this->countItemsOnServer());
     $this->indexItems();
 
-    $this->drupalPostForm($this->getIndexPath('rebuild-tracker'), [], 'Confirm');
+    $this->drupalGet($this->getIndexPath('rebuild-tracker'));
+    $this->submitForm([], 'Confirm');
     $assert_session->pageTextContains("The tracking information for search index $label will be rebuilt.");
     $this->assertEquals(0, $tracker->getIndexedItemsCount());
     $this->assertEquals($manipulated_items_count + 1, $tracker->getTotalItemsCount());

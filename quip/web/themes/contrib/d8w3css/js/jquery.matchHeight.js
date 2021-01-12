@@ -26,15 +26,15 @@
      *  internal
      */
 
-  var _previousResizeWidth = -1;
-  var _updateTimeout = -1;
+  let _previousResizeWidth = -1;
+  let _updateTimeout = -1;
 
     /*
      *  _parse
      *  value parse utility function
      */
 
-  var _parse = function (value) {
+  let _parse = function (value) {
         // Parse value and convert NaN to 0.
     return parseFloat(value) || 0;
   };
@@ -45,18 +45,18 @@
      *  (as displayed after float wrapping applied by browser)
      */
 
-  var _rows = function (elements) {
-    var tolerance = 1;
-    var $elements = $(elements);
-    var lastTop = null;
-    var rows = [];
+  let _rows = function (elements) {
+    let tolerance = 1;
+    let $elements = $(elements);
+    let lastTop = null;
+    let rows = [];
 
         // Group elements by their top position.
     $elements.each(
             function () {
-              var $that = $(this);
-              var top = $that.offset().top - _parse($that.css('margin-top'));
-              var lastRow = rows.length > 0 ? rows[rows.length - 1] : null;
+              let $that = $(this);
+              let top = $that.offset().top - _parse($that.css('margin-top'));
+              let lastRow = rows.length > 0 ? rows[rows.length - 1] : null;
 
               if (lastRow === null) {
                     // First item on the row, so just push it.
@@ -86,8 +86,8 @@
      *  handle plugin options
      */
 
-  var _parseOptions = function (options) {
-    var opts = {
+  let _parseOptions = function (options) {
+    let opts = {
       byRow: true,
       property: 'height',
       target: null,
@@ -113,12 +113,12 @@
      *  plugin definition
      */
 
-  var matchHeight = $.fn.matchHeight = function (options) {
-    var opts = _parseOptions(options);
+  let matchHeight = $.fn.matchHeight = function (options) {
+    let opts = _parseOptions(options);
 
         // Handle remove.
     if (opts.remove) {
-      var that = this;
+      let that = this;
 
             // Remove fixed height from all selected elements.
       this.css(opts.property, '');
@@ -171,21 +171,21 @@
      */
 
   matchHeight._apply = function (elements, options) {
-    var opts = _parseOptions(options);
-    var $elements = $(elements);
-    var rows = [$elements];
+    let opts = _parseOptions(options);
+    let $elements = $(elements);
+    let rows = [$elements];
 
         // Take note of scroll position.
-    var scrollTop = $(window).scrollTop();
-    var htmlHeight = $('html').outerHeight(true);
+    let scrollTop = $(window).scrollTop();
+    let htmlHeight = $('html').outerHeight(true);
 
         // Get hidden parents.
-    var $hiddenParents = $elements.parents().filter(':hidden');
+    let $hiddenParents = $elements.parents().filter(':hidden');
 
         // Cache the original inline style.
     $hiddenParents.each(
             function () {
-              var $that = $(this);
+              let $that = $(this);
               $that.data('style-cache', $that.attr('style'));
             }
         );
@@ -199,8 +199,8 @@
             // Must first force an arbitrary equal height so floating elements break evenly.
       $elements.each(
                 function () {
-                  var $that = $(this);
-                  var display = $that.css('display');
+                  let $that = $(this);
+                  let display = $that.css('display');
 
                     // Temporarily force a usable display value.
                   if (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex') {
@@ -232,7 +232,7 @@
                 // Revert original inline styles.
       $elements.each(
                 function () {
-                  var $that = $(this);
+                  let $that = $(this);
                   $that.attr('style', $that.data('style-cache') || '');
                 }
             );
@@ -240,8 +240,8 @@
 
     $.each(
             rows, function (key, row) {
-              var $row = $(row);
-              var targetHeight = 0;
+              let $row = $(row);
+              let targetHeight = 0;
 
               if (!opts.target) {
                     // Skip apply to rows with only one item.
@@ -253,9 +253,9 @@
                     // Iterate the row and find the max height.
                 $row.each(
                         function () {
-                          var $that = $(this);
-                          var style = $that.attr('style');
-                          var display = $that.css('display');
+                          let $that = $(this);
+                          let style = $that.attr('style');
+                          let display = $that.css('display');
 
                             // Temporarily force a usable display value.
                           if (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex') {
@@ -263,7 +263,7 @@
                           }
 
                             // Ensure we get the correct actual height (and not a previously set height value)
-                          var css = {
+                          let css = {
                             display: display
                           };
                           css[opts.property] = '';
@@ -292,8 +292,8 @@
                 // Iterate the row and apply the height to all elements.
               $row.each(
                     function () {
-                      var $that = $(this);
-                      var verticalPadding = 0;
+                      let $that = $(this);
+                      let verticalPadding = 0;
 
                         // don't apply to a target.
                       if (opts.target && $that.is(opts.target)) {
@@ -316,7 +316,7 @@
         // Revert hidden parents.
     $hiddenParents.each(
             function () {
-              var $that = $(this);
+              let $that = $(this);
               $that.attr('style', $that.data('style-cache') || null);
             }
         );
@@ -335,13 +335,13 @@
      */
 
   matchHeight._applyDataApi = function () {
-    var groups = {};
+    let groups = {};
 
         // Generate groups by their groupId set by elements using data-match-height.
     $('[data-match-height], [data-mh]').each(
             function () {
-              var $this = $(this);
-              var groupId = $this.attr('data-mh') || $this.attr('data-match-height');
+              let $this = $(this);
+              let groupId = $this.attr('data-mh') || $this.attr('data-match-height');
 
               if (groupId in groups) {
                 groups[groupId] = groups[groupId].add($this);
@@ -365,7 +365,7 @@
      *  updates matchHeight on all current groups with their correct options
      */
 
-  var _update = function (event) {
+  let _update = function (event) {
     if (matchHeight._beforeUpdate) {
       matchHeight._beforeUpdate(event, matchHeight._groups);
     }
@@ -386,7 +386,7 @@
         // where the viewport width hasn't actually changed
         // fixes an event looping bug in IE8.
     if (event && event.type === 'resize') {
-      var windowWidth = $(window).width();
+      let windowWidth = $(window).width();
       if (windowWidth === _previousResizeWidth) {
         return;
       }
@@ -415,7 +415,7 @@
   $(matchHeight._applyDataApi);
 
     // Use on or bind where supported.
-  var on = $.fn.on ? 'on' : 'bind';
+  let on = $.fn.on ? 'on' : 'bind';
 
     // Update heights on load and resize events.
   $(window)[on]('load', function (event) {

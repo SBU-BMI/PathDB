@@ -14,7 +14,7 @@ namespace Psy\Test\Exception;
 use Psy\Exception\Exception;
 use Psy\Exception\FatalErrorException;
 
-class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
+class FatalErrorExceptionTest extends \Psy\Test\TestCase
 {
     public function testInstance()
     {
@@ -30,9 +30,9 @@ class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
         $e = new FatalErrorException('{msg}', 0, 0, '{filename}', 13);
 
         $this->assertSame('{msg}', $e->getRawMessage());
-        $this->assertContains('{msg}', $e->getMessage());
-        $this->assertContains('{filename}', $e->getMessage());
-        $this->assertContains('line 13', $e->getMessage());
+        $this->assertStringContainsString('{msg}', $e->getMessage());
+        $this->assertStringContainsString('{filename}', $e->getMessage());
+        $this->assertStringContainsString('line 13', $e->getMessage());
     }
 
     public function testMessageWithNoFilename()
@@ -40,8 +40,8 @@ class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
         $e = new FatalErrorException('{msg}');
 
         $this->assertSame('{msg}', $e->getRawMessage());
-        $this->assertContains('{msg}', $e->getMessage());
-        $this->assertContains('eval()\'d code', $e->getMessage());
+        $this->assertStringContainsString('{msg}', $e->getMessage());
+        $this->assertStringContainsString('eval()\'d code', $e->getMessage());
     }
 
     public function testNegativeOneLineNumberIgnored()
@@ -51,6 +51,13 @@ class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
         }
 
         $e = new FatalErrorException('{msg}', 0, 1, null, -1);
-        $this->assertEquals(0, $e->getLine());
+
+        // In PHP 8.0+, the line number will be (as of the time of this change) 53, because it's
+        // the line where the exception was first constructed. In older PHP versions, it'll be 0.
+        $this->assertNotEquals(-1, $e->getLine());
+
+        if (\version_compare(\PHP_VERSION, '8.0', '<')) {
+            $this->assertEquals(0, $e->getLine());
+        }
     }
 }

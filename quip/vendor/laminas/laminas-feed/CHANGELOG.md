@@ -2,6 +2,82 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.13.1 - 2021-01-04
+
+### Fixed
+
+- [#33](https://github.com/laminas/laminas-feed/pull/33) fixes an issue whereby parsing a feed entry date that is in an incorrect format was incorrectly causing a `null` value to be returned for the date, rather than correctly throwing an exception.
+
+
+-----
+
+### Release Notes for [2.13.1](https://github.com/laminas/laminas-feed/milestone/6)
+
+2.13.x bugfix release (patch)
+
+### 2.13.1
+
+- Total issues resolved: **1**
+- Total pull requests resolved: **1**
+- Total contributors: **2**
+
+#### Bug
+
+ - [33: Fixes 32 - Method getDateModified of RSS reader doesn't iterate over different formats](https://github.com/laminas/laminas-feed/pull/33) thanks to @froschdesign
+ - [32: Method getDateModified of RSS reader doesn't iterate over different formats](https://github.com/laminas/laminas-feed/issues/32) thanks to @Klaasie
+
+## 2.13.0 - 2020-11-18
+
+### Added
+
+- [#28](https://github.com/laminas/laminas-feed/pull/28) Adds Psalm as QA tool
+- [#29](https://github.com/laminas/laminas-feed/pull/29) Adds PHP 8.0 support
+
+### Removed
+
+- [#29](https://github.com/laminas/laminas-feed/pull/29) Dropped support for laminas-servicemanager less than v3.3
+
+
+-----
+
+### Release Notes for [2.13.0](https://github.com/laminas/laminas-feed/milestone/2)
+
+next feature release (minor)
+
+### 2.13.0
+
+- Total issues resolved: **0**
+- Total pull requests resolved: **2**
+- Total contributors: **1**
+
+#### Enhancement,hacktoberfest-accepted
+
+ - [29: Update to support PHP 8.0](https://github.com/laminas/laminas-feed/pull/29) thanks to @ocean
+ - [28: Add Psalm integration](https://github.com/laminas/laminas-feed/pull/28) thanks to @ocean
+
+## 2.12.3 - 2020-08-18
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#21](https://github.com/laminas/laminas-feed/pull/21) fixes the writer extension
+  of iTunes to support valid values for the `itunes:explicit` element.
+
 ## 2.12.2 - 2020-03-29
 
 ### Added

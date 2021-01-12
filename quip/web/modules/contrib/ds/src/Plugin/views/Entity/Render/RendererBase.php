@@ -23,7 +23,7 @@ abstract class RendererBase extends EntityTranslationRendererBase {
   protected function dsPreRender(array $result, $translation = FALSE) {
     if ($result) {
       // Get all entities which will be used to render in rows.
-      $view_builder = $this->view->rowPlugin->entityManager->getViewBuilder($this->entityType->id());
+      $view_builder = \Drupal::entityTypeManager()->getViewBuilder($this->entityType->id());
 
       $i = 0;
       $grouping = [];
@@ -142,7 +142,7 @@ abstract class RendererBase extends EntityTranslationRendererBase {
             }
           }
 
-          if (!isset($grouping[$group_value])) {
+          if (!isset($grouping[$group_value]) && !empty($group_value)) {
             $group_value_content = [
               '#markup' => '<h2 class="grouping-title">' . $group_value . '</h2>',
               '#weight' => -5,

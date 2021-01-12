@@ -15,18 +15,23 @@ use Psy\CodeCleaner\CalledClassPass;
 
 class CalledClassPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new CalledClassPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\ErrorException
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\ErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()

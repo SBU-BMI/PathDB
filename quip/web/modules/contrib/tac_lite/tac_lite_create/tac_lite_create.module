@@ -52,7 +52,7 @@ function tac_lite_create_form_alter(&$form, FormStateInterface $form_state, $for
     $storage = $form_state->getStorage();
     $form_display = $storage['form_display'] ?: NULL;
     $bundle = $form_display ? $form_display->get('bundle') : NULL;
-    $fields = \Drupal::entityManager()->getFieldDefinitions('node', $bundle);
+    $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', $bundle);
     foreach ($fields as $field_name => $field) {
       $field_type = method_exists($field, 'getType') ? $field->getType() : NULL;
       $target_type = method_exists($field, 'getSetting') ? $field->getSetting('target_type') : NULL;

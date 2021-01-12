@@ -1,48 +1,64 @@
 <?php
-define('TAXONOMY_UNIQUE_DEFAULT_MESSAGE', 'Term @term already exists in vocabulary @vocabulary.');
-function taxonomy_unique_form_taxonomy_vocabulary_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id){
-  $form['unique_container'] = array(
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+define('TAXONOMY_UNIQUE_DEFAULT_MESSAGE', 'Term %term already exists in vocabulary %vocabulary.');
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function taxonomy_unique_form_taxonomy_vocabulary_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  $form['unique_container'] = [
     '#type' => 'fieldset',
     '#title' => t('Taxonomy unique'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-  );
-
+  ];
 
   $unique_default_value = \Drupal::config('taxonomy_unique.settings')->get($form_state->getFormObject()->getEntity()->id());
-  if(is_array($unique_default_value) || empty($unique_default_value)){
+
+  if (is_array($unique_default_value) || empty($unique_default_value)) {
     $unique_default_value = FALSE;
   }
-  $form['unique_container']['unique'] = array(
+
+  $form['unique_container']['unique'] = [
     '#type' => 'checkbox',
     '#title' => t('Terms should be unique.'),
     '#default_value' => $unique_default_value,
-  );
+  ];
 
-  $unique_message_default_value = \Drupal::config('taxonomy_unique.settings')->get($form_state->getFormObject()->getEntity()->id().'_message');
-  if(empty($unique_message_default_value)){
+  $unique_message_default_value = \Drupal::config('taxonomy_unique.settings')->get($form_state->getFormObject()->getEntity()->id() . '_message');
+
+  if (empty($unique_message_default_value)) {
     $unique_message_default_value = TAXONOMY_UNIQUE_DEFAULT_MESSAGE;
   }
-  $form['unique_container']['unique_message'] = array(
+
+  $form['unique_container']['unique_message'] = [
     '#type' => 'textfield',
     '#title' => t('Message to show if term already exists'),
     '#description' => t('Placeholders: %term and %vocabulary'),
     '#default_value' => $unique_message_default_value,
-  );
+  ];
+
   $form['actions']['submit']['#submit'][] = 'taxonomy_unique_taxonomy_form_vocabulary_submit';
 }
 
-function taxonomy_unique_taxonomy_form_vocabulary_submit($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+// Handler function on submit the form.
+function taxonomy_unique_taxonomy_form_vocabulary_submit($form, FormStateInterface $form_state) {
   // Save custom fields to variables.
   \Drupal::configFactory()->getEditable('taxonomy_unique.settings')
     ->set($form_state->getFormObject()->getEntity()->id(), $form_state->getValue('unique'))
-    ->set($form_state->getFormObject()->getEntity()->id().'_message', $form_state->getValue('unique_message'))
+    ->set($form_state->getFormObject()->getEntity()->id() . '_message', $form_state->getValue('unique_message'))
     ->save();
 }
 
-function taxonomy_unique_entity_base_field_info_alter(&$fields, \Drupal\Core\Entity\EntityTypeInterface $entityType){
+/**
+ * Implements hook_entity_base_field_info_alter().
+ */
+function taxonomy_unique_entity_base_field_info_alter(&$fields, EntityTypeInterface $entityType) {
   if ($entityType->id() == 'taxonomy_term') {
-    if(!empty($fields['name'])){
+    if (!empty($fields['name'])) {
       $fields['name']->addConstraint("taxonomy_unique");
     }
   }

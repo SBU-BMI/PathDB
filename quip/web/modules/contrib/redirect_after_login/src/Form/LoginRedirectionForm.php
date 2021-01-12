@@ -28,9 +28,9 @@ class LoginRedirectionForm extends ConfigFormBase {
 
     $form['roles'] = [
       '#type' => 'fieldset',
-      '#title' => t('All roles'),
+      '#title' => $this->t('All roles'),
     ];
-    foreach (user_role_names() as $user => $name) {
+    foreach (user_role_names(TRUE) as $user => $name) {
       if ($user != "anonymous") {
         $form['roles'][$user] = [
           '#type' => 'textfield',
@@ -71,7 +71,7 @@ class LoginRedirectionForm extends ConfigFormBase {
         continue;
       }
       if (!(preg_match('/^[#?\/]+/', $form_state->getValue($user)) || $form_state->getValue($user) == '<front>')) {
-        $form_state->setErrorByName($user, t('This URL %url is not valid for role %role.', [
+        $form_state->setErrorByName($user, $this->t('This URL %url is not valid for role %role.', [
           '%url' => $form_state->getValue($user),
           '%role' => $name,
         ]));
@@ -79,7 +79,7 @@ class LoginRedirectionForm extends ConfigFormBase {
       $path = $form_state->getValue($user);
       $is_valid = \Drupal::service('path.validator')->isValid($path);
       if ($is_valid == NULL) {
-        $form_state->setErrorByName($user, t('Path does not exists.'));
+        $form_state->setErrorByName($user, $this->t('Path does not exists.'));
       }
     }
   }

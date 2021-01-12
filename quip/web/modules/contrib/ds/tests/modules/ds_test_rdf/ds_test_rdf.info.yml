@@ -1,10 +1,10 @@
 name: 'Display Suite Test RDF'
 description: 'Test module for Display Suite RDF integratin'
-core: 8.x
+core_version_requirement: ^8.8 || ^9
 package: 'Display Suite'
 type: module
 
-# Information added by Drupal.org packaging script on 2019-11-26
-version: '8.x-3.5'
+# Information added by Drupal.org packaging script on 2020-08-31
+version: '8.x-3.9'
 project: 'ds'
-datestamp: 1574750289
+datestamp: 1598898823

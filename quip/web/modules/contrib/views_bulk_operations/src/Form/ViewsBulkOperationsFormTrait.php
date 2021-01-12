@@ -108,6 +108,8 @@ trait ViewsBulkOperationsFormTrait {
       $renderable['#title'] = $this->t('Selected @count entities:', ['@count' => $form_data['selected_count']]);
     }
 
+    $renderable['#wrapper_attributes'] = ['class' => ['vbo-info-list-wrapper']];
+
     return $renderable;
   }
 

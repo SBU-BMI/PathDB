@@ -19,9 +19,9 @@ class MergeTest extends TestCase
     public function testForbiddenOverwrite()
     {
         $this->expectException('Symfony\Component\Config\Definition\Exception\ForbiddenOverwriteException');
-        $tb = new TreeBuilder();
+        $tb = new TreeBuilder('root', 'array');
         $tree = $tb
-            ->root('root', 'array')
+            ->getRootNode()
                 ->children()
                     ->node('foo', 'scalar')
                         ->cannotBeOverwritten()
@@ -44,9 +44,9 @@ class MergeTest extends TestCase
 
     public function testUnsetKey()
     {
-        $tb = new TreeBuilder();
+        $tb = new TreeBuilder('root', 'array');
         $tree = $tb
-            ->root('root', 'array')
+            ->getRootNode()
                 ->children()
                     ->node('foo', 'scalar')->end()
                     ->node('bar', 'scalar')->end()
@@ -93,9 +93,9 @@ class MergeTest extends TestCase
     public function testDoesNotAllowNewKeysInSubsequentConfigs()
     {
         $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');
-        $tb = new TreeBuilder();
+        $tb = new TreeBuilder('root', 'array');
         $tree = $tb
-            ->root('config', 'array')
+            ->getRootNode()
                 ->children()
                     ->node('test', 'array')
                         ->disallowNewKeysInSubsequentConfigs()
@@ -127,10 +127,10 @@ class MergeTest extends TestCase
 
     public function testPerformsNoDeepMerging()
     {
-        $tb = new TreeBuilder();
+        $tb = new TreeBuilder('root', 'array');
 
         $tree = $tb
-            ->root('config', 'array')
+            ->getRootNode()
                 ->children()
                     ->node('no_deep_merging', 'array')
                         ->performNoDeepMerging()
@@ -166,10 +166,10 @@ class MergeTest extends TestCase
 
     public function testPrototypeWithoutAKeyAttribute()
     {
-        $tb = new TreeBuilder();
+        $tb = new TreeBuilder('root', 'array');
 
         $tree = $tb
-            ->root('config', 'array')
+            ->getRootNode()
                 ->children()
                     ->arrayNode('append_elements')
                         ->prototype('scalar')->end()

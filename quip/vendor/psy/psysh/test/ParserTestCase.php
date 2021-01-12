@@ -15,13 +15,16 @@ use PhpParser\PrettyPrinter\Standard as Printer;
 use Psy\Exception\ParseErrorException;
 use Psy\ParserFactory;
 
-class ParserTestCase extends \PHPUnit\Framework\TestCase
+class ParserTestCase extends TestCase
 {
     protected $traverser;
     private $parser;
     private $printer;
 
-    public function tearDown()
+    /**
+     * @after
+     */
+    public function clearProperties()
     {
         $this->traverser = null;
         $this->parser = null;
@@ -30,7 +33,7 @@ class ParserTestCase extends \PHPUnit\Framework\TestCase
 
     protected function parse($code, $prefix = '<?php ')
     {
-        $code = $prefix . $code;
+        $code = $prefix.$code;
         try {
             return $this->getParser()->parse($code);
         } catch (\PhpParser\Error $e) {
@@ -40,7 +43,7 @@ class ParserTestCase extends \PHPUnit\Framework\TestCase
 
             try {
                 // Unexpected EOF, try again with an implicit semicolon
-                return $this->getParser()->parse($code . ';');
+                return $this->getParser()->parse($code.';');
             } catch (\PhpParser\Error $e) {
                 return false;
             }
@@ -73,7 +76,7 @@ class ParserTestCase extends \PHPUnit\Framework\TestCase
     {
         if (!isset($this->parser)) {
             $parserFactory = new ParserFactory();
-            $this->parser  = $parserFactory->createParser();
+            $this->parser = $parserFactory->createParser();
         }
 
         return $this->parser;

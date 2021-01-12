@@ -2,14 +2,13 @@
 
 namespace Drupal\ds\Plugin\DsField;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Defines a common interface for all ds field plugins.
  */
-interface DsFieldInterface extends ConfigurablePluginInterface, ContainerFactoryPluginInterface {
+interface DsFieldInterface extends ContainerFactoryPluginInterface {
 
   /**
    * Renders a field.

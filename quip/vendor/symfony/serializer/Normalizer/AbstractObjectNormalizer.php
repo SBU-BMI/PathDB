@@ -108,7 +108,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      *
      * @return string[]
      */
-    protected function getAttributes($object, $format = null, array $context)
+    protected function getAttributes($object, $format, array $context)
     {
         $class = \get_class($object);
         $key = $class.'-'.$context['cache_key'];
@@ -304,7 +304,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      */
     protected function denormalizeParameter(\ReflectionClass $class, \ReflectionParameter $parameter, $parameterName, $parameterData, array $context, $format = null)
     {
-        if (null === $this->propertyTypeExtractor || null === $types = $this->propertyTypeExtractor->getTypes($class->getName(), $parameterName)) {
+        if ((method_exists($parameter, 'isVariadic') && $parameter->isVariadic()) || null === $this->propertyTypeExtractor || null === $this->propertyTypeExtractor->getTypes($class->getName(), $parameterName)) {
             return parent::denormalizeParameter($class, $parameter, $parameterName, $parameterData, $context, $format);
         }
 
@@ -400,6 +400,7 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
      */
     private function getCacheKey($format, array $context)
     {
+        unset($context[self::OBJECT_TO_POPULATE]);
         unset($context['cache_key']); // avoid artificially different keys
         try {
             return md5($format.serialize([

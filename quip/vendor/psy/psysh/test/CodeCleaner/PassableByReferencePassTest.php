@@ -15,18 +15,23 @@ use Psy\CodeCleaner\PassableByReferencePass;
 
 class PassableByReferencePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new PassableByReferencePass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()
@@ -57,7 +62,7 @@ class PassableByReferencePassTest extends CodeCleanerTestCase
             ['array_pop(Foo::qux)'],
         ];
 
-        if (\version_compare(PHP_VERSION, '5.6', '>=')) {
+        if (\version_compare(\PHP_VERSION, '5.6', '>=')) {
             $stmts[] = ['end(...[$a])'];
         }
 
@@ -92,11 +97,13 @@ class PassableByReferencePassTest extends CodeCleanerTestCase
 
     /**
      * @dataProvider invalidArrayMultisort
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testInvalidArrayMultisort($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidArrayMultisort()

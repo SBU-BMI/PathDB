@@ -2,6 +2,8 @@
 
 namespace Drupal\ds\Plugin\DsField;
 
+use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -9,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for all the ds plugins.
  */
-abstract class DsFieldBase extends PluginBase implements DsFieldInterface {
+abstract class DsFieldBase extends PluginBase implements DsFieldInterface, ConfigurableInterface, DependentPluginInterface {
 
   /**
    * {@inheritdoc}
@@ -120,7 +122,6 @@ abstract class DsFieldBase extends PluginBase implements DsFieldInterface {
       return $this->configuration['entity_type'];
     }
     elseif ($entity = $this->entity()) {
-      /* @var $entity EntityInterface */
       return $entity->getEntityTypeId();
     }
     else {

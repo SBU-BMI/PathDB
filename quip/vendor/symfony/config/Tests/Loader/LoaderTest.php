@@ -45,7 +45,7 @@ class LoaderTest extends TestCase
 
     public function testResolveWhenResolverCannotFindLoader()
     {
-        $this->expectException('Symfony\Component\Config\Exception\FileLoaderLoadException');
+        $this->expectException('Symfony\Component\Config\Exception\LoaderLoadException');
         $resolver = $this->getMockBuilder('Symfony\Component\Config\Loader\LoaderResolverInterface')->getMock();
         $resolver->expects($this->once())
             ->method('resolve')
@@ -105,9 +105,9 @@ class ProjectLoader1 extends Loader
     {
     }
 
-    public function supports($resource, $type = null)
+    public function supports($resource, $type = null): bool
     {
-        return \is_string($resource) && 'foo' === pathinfo($resource, PATHINFO_EXTENSION);
+        return \is_string($resource) && 'foo' === pathinfo($resource, \PATHINFO_EXTENSION);
     }
 
     public function getType()

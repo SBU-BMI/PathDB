@@ -4,6 +4,7 @@ namespace Drupal\ds_extras\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Markup;
 
 /**
  * Provides the region block plugin.
@@ -33,7 +34,7 @@ class DsRegionBlock extends BlockBase {
         }
       }
 
-      return ['#markup' => $output];
+      return ['#markup' => Markup::create($output)];
     }
     else {
       return [];

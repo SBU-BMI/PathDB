@@ -15,18 +15,23 @@ use Psy\CodeCleaner\EmptyArrayDimFetchPass;
 
 class EmptyArrayDimFetchPassTest extends CodeCleanerTestCase
 {
-    protected function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new EmptyArrayDimFetchPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalidStatement($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()

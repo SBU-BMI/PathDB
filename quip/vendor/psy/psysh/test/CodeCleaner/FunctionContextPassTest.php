@@ -15,7 +15,10 @@ use Psy\CodeCleaner\FunctionContextPass;
 
 class FunctionContextPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new FunctionContextPass());
     }
@@ -39,11 +42,13 @@ class FunctionContextPassTest extends CodeCleanerTestCase
 
     /**
      * @dataProvider invalidYieldStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testInvalidYield($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidYieldStatements()

@@ -13,8 +13,9 @@ namespace Symfony\Component\Config\Tests\Resource;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Resource\ReflectionClassResource;
-use Symfony\Component\DependencyInjection\ServiceSubscriberInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 class ReflectionClassResourceTest extends TestCase
 {
@@ -134,12 +135,8 @@ EOPHP;
         yield [0, 8, '/** priv docblock */'];
         yield [0, 9, 'private $priv = 123;'];
         yield [1, 10, '/** pub docblock */'];
-        if (\PHP_VERSION_ID >= 50600) {
-            yield [1, 11, 'public function pub(...$arg) {}'];
-        }
-        if (\PHP_VERSION_ID >= 70000) {
-            yield [1, 11, 'public function pub($arg = null): Foo {}'];
-        }
+        yield [1, 11, 'public function pub(...$arg) {}'];
+        yield [1, 11, 'public function pub($arg = null): Foo {}'];
         yield [0, 11, "public function pub(\$arg = null) {\nreturn 123;\n}"];
         yield [1, 12, '/** prot docblock */'];
         yield [1, 13, 'protected function prot($a = [123]) {}'];
@@ -168,6 +165,24 @@ EOPHP;
         $this->assertFalse($res->isFresh(0));
 
         $res = new ReflectionClassResource(new \ReflectionClass(TestEventSubscriber::class));
+        $this->assertTrue($res->isFresh(0));
+    }
+
+    public function testMessageSubscriber()
+    {
+        $res = new ReflectionClassResource(new \ReflectionClass(TestMessageSubscriber::class));
+        $this->assertTrue($res->isFresh(0));
+
+        TestMessageSubscriberConfigHolder::$handledMessages = ['SomeMessageClass' => []];
+        $this->assertFalse($res->isFresh(0));
+
+        $res = new ReflectionClassResource(new \ReflectionClass(TestMessageSubscriber::class));
+        $this->assertTrue($res->isFresh(0));
+
+        TestMessageSubscriberConfigHolder::$handledMessages = ['OtherMessageClass' => []];
+        $this->assertFalse($res->isFresh(0));
+
+        $res = new ReflectionClassResource(new \ReflectionClass(TestMessageSubscriber::class));
         $this->assertTrue($res->isFresh(0));
     }
 
@@ -201,17 +216,31 @@ class TestEventSubscriber implements EventSubscriberInterface
 {
     public static $subscribedEvents = [];
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return self::$subscribedEvents;
     }
+}
+
+class TestMessageSubscriber implements MessageSubscriberInterface
+{
+    public static function getHandledMessages(): iterable
+    {
+        foreach (TestMessageSubscriberConfigHolder::$handledMessages as $key => $subscribedMessage) {
+            yield $key => $subscribedMessage;
+        }
+    }
+}
+class TestMessageSubscriberConfigHolder
+{
+    public static $handledMessages = [];
 }
 
 class TestServiceSubscriber implements ServiceSubscriberInterface
 {
     public static $subscribedServices = [];
 
-    public static function getSubscribedServices()
+    public static function getSubscribedServices(): array
     {
         return self::$subscribedServices;
     }

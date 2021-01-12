@@ -85,7 +85,16 @@ class DataFilterTest extends EntityKernelTestBase {
 
     $fails = $filter->validateArguments($data->getDataDefinition(), []);
     $this->assertEquals(1, count($fails));
-    $this->assertContains('Missing arguments', (string) $fails[0]);
+    // @todo In Drupal 8.8.x PHPUnit 9 functions need to be used otherwise
+    // the tests will fail with a deprecation error.
+    // Remove this once 8.7.x is unsupported.
+    // @see https://www.drupal.org/project/typed_data/issues/3138469
+    if (version_compare(substr(\Drupal::VERSION, 0, 3), '8.8', '>=')) {
+      $this->assertStringContainsString('Missing arguments', (string) $fails[0]);
+    }
+    else {
+      $this->assertContains('Missing arguments', (string) $fails[0]);
+    }
     $fails = $filter->validateArguments($data->getDataDefinition(), [new \stdClass()]);
     $this->assertEquals(1, count($fails));
     $this->assertEquals('This value should be of the correct primitive type.', $fails[0]);

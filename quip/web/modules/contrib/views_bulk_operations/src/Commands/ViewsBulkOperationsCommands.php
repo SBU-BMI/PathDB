@@ -76,7 +76,7 @@ class ViewsBulkOperationsCommands extends DrushCommands {
    * @option display-id
    *   ID of the display to use.
    * @option args
-   *   View arguments (slash is a delimeter).
+   *   View arguments (slash is a delimiter).
    * @option exposed
    *   Exposed filters (query string format).
    * @option batch-size

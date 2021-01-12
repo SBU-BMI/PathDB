@@ -13,7 +13,7 @@ namespace Psy\Test\Reflection;
 
 use Psy\Reflection\ReflectionLanguageConstruct;
 
-class ReflectionLanguageConstructTest extends \PHPUnit\Framework\TestCase
+class ReflectionLanguageConstructTest extends \Psy\Test\TestCase
 {
     /**
      * @dataProvider languageConstructs
@@ -62,11 +62,13 @@ class ReflectionLanguageConstructTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider languageConstructs
-     * @expectedException \RuntimeException
      */
     public function testExportThrows($keyword)
     {
+        $this->expectException(\RuntimeException::class);
         ReflectionLanguageConstruct::export($keyword);
+
+        $this->fail();
     }
 
     public function languageConstructs()
@@ -84,11 +86,13 @@ class ReflectionLanguageConstructTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider unknownLanguageConstructs
-     * @expectedException \InvalidArgumentException
      */
     public function testUnknownLanguageConstructsThrowExceptions($keyword)
     {
+        $this->expectException(\InvalidArgumentException::class);
         new ReflectionLanguageConstruct($keyword);
+
+        $this->fail();
     }
 
     public function unknownLanguageConstructs()

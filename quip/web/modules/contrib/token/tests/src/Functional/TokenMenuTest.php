@@ -3,13 +3,12 @@
 namespace Drupal\Tests\token\Functional;
 
 use Behat\Mink\Element\NodeElement;
-use Drupal\node\Entity\Node;
 use Drupal\Core\Url;
-use Drupal\node\Entity\NodeType;
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\system\Entity\Menu;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
+use Drupal\system\Entity\Menu;
 
 /**
  * Tests menu tokens.
@@ -103,7 +102,7 @@ class TokenMenuTest extends TokenTestBase {
     //$this->config('menu.entity.node.' . $node->getType())->set('available_menus', ['main-menu'])->save();
 
     // Add a node menu link.
-    /** @var \Drupal\menu_link_content\Plugin\Menu\MenuLinkContent $node_link */
+    /** @var \Drupal\menu_link_content\MenuLinkContentInterface $node_link */
     $node_link = MenuLinkContent::create([
       'link' => ['uri' => 'entity:node/' . $node->id()],
       'title' => 'Node link',
@@ -120,7 +119,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu-link:menu' => 'Main menu',
       'menu-link:url' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
       'menu-link:url:path' => '/node/' . $node->id(),
-      'menu-link:edit-url' => $node_link->url('edit-form', ['absolute' => TRUE]),
+      'menu-link:edit-url' => $node_link->toUrl('edit-form', ['absolute' => TRUE])->toString(),
       'menu-link:parent' => 'Configuration',
       'menu-link:parent:id' => $parent_link->getPluginId(),
       'menu-link:parents' => 'Administration, Configuration',
@@ -137,7 +136,7 @@ class TokenMenuTest extends TokenTestBase {
 
     // Regression test for http://drupal.org/node/1317926 to ensure the
     // original node object is not changed when calling menu_node_prepare().
-    $this->assertTrue(!isset($loaded_node->menu), t('The $node->menu property was not modified during token replacement.'), 'Regression');
+    $this->assertTrue(!isset($loaded_node->menu), 'The $node->menu property was not modified during token replacement.', 'Regression');
 
     // Now add a node with a menu-link from the UI and ensure it works.
     $this->drupalLogin($this->drupalCreateUser([
@@ -154,7 +153,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu_options[main]' => 1,
       'menu_parent' => 'main-menu:',
     ];
-    $this->drupalPostForm('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->drupalPostForm('admin/structure/types/manage/page', $edit, 'Save content type');
 
     // Use a menu-link token in the body.
     $this->drupalGet('node/add/page');
@@ -165,17 +164,17 @@ class TokenMenuTest extends TokenTestBase {
       'body[0][value]' => 'This is a [node:menu-link:title] token to the menu link title',
       'menu[enabled]' => 1,
       'menu[title]' => 'Test preview',
-    ], t('Save'));
+    ], 'Save');
     $node = $this->drupalGetNodeByTitle('Node menu title test');
     $this->assertEquals('This is a Test preview token to the menu link title', $node->body->value);
 
     // Disable the menu link, save the node and verify that the menu link is
     // no longer displayed.
     $link = menu_ui_get_menu_link_defaults($node);
-    $this->drupalPostForm('admin/structure/menu/manage/main-menu', ['links[menu_plugin_id:' . $link['id'] . '][enabled]' => FALSE], t('Save'));
+    $this->drupalPostForm('admin/structure/menu/manage/main-menu', ['links[menu_plugin_id:' . $link['id'] . '][enabled]' => FALSE], 'Save');
     $this->assertText('Menu Main menu has been updated.');
-    $this->drupalPostForm('node/' . $node->id() . '/edit', [], t('Save'));
-    $this->assertNoLink('Test preview');
+    $this->drupalPostForm('node/' . $node->id() . '/edit', [], 'Save');
+    $this->assertSession()->linkNotExists('Test preview');
 
     // Now test a parent link and token.
     $this->drupalGet('node/add/page');
@@ -185,7 +184,7 @@ class TokenMenuTest extends TokenTestBase {
     // @see token_node_menu_link_submit()
     $selects = $this->cssSelect('select[name="menu[menu_parent]"]');
     $select = reset($selects);
-    $options = $this->getAllOptions($select);
+    $options = $select->findAll('css', 'option');
     // Filter to items with title containing 'Test preview'.
     $options = array_filter($options, function (NodeElement $element) {
       return strpos($element->getText(), 'Test preview') !== FALSE;
@@ -197,7 +196,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu[enabled]' => 1,
       'menu[title]' => 'Child link',
       'menu[menu_parent]' => 'main-menu:' . $parent_link->getPluginId(),
-    ], t('Save'));
+    ], 'Save');
     $node = $this->drupalGetNodeByTitle('Node menu title parent path test');
     $this->assertEquals('This is a /admin/config token to the menu link parent', $node->body->value);
 
@@ -206,7 +205,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu[menu_parent]' => 'main-menu:' . $node_link->getPluginId(),
       'title[0][value]' => 'Node menu title edit parent path test',
       'body[0][value]' => 'This is a [node:menu-link:parent:url:path] token to the menu link parent',
-    ], t('Save'));
+    ], 'Save');
     $node = $this->drupalGetNodeByTitle('Node menu title edit parent path test', TRUE);
     $this->assertEquals(sprintf('This is a /node/%d token to the menu link parent', $loaded_node->id()), $node->body->value);
 
@@ -217,7 +216,7 @@ class TokenMenuTest extends TokenTestBase {
     $this->drupalGet('node/add/page');
     $selects = $this->cssSelect('select[name="menu[menu_parent]"]');
     $select = reset($selects);
-    $options = $this->getAllOptions($select);
+    $options = $select->findAll('css', 'option');
     // Filter to items with title containing 'Test preview'.
     $options = array_filter($options, function (NodeElement $item) {
       return strpos($item->getText(), 'Child link') !== FALSE;
@@ -230,7 +229,7 @@ class TokenMenuTest extends TokenTestBase {
       'title[0][value]' => 'Node menu adding menu later test',
       'body[0][value]' => 'Going to add a menu link on edit',
       'menu[enabled]' => 0,
-    ], t('Save'));
+    ], 'Save');
     $node = $this->drupalGetNodeByTitle('Node menu adding menu later test');
     // Now edit it and add a menu item.
     $this->drupalGet('node/' . $node->id() . '/edit');
@@ -240,18 +239,18 @@ class TokenMenuTest extends TokenTestBase {
       'menu[enabled]' => 1,
       'menu[title]' => 'Child link',
       'menu[menu_parent]' => 'main-menu:' . $parent_link->getPluginId(),
-    ], t('Save'));
+    ], 'Save');
     $node = $this->drupalGetNodeByTitle('Node menu adding menu later test', TRUE);
     $this->assertEquals('This is a /admin/config token to the menu link parent', $node->body->value);
     // And make sure the menu link exists with the right URI.
     $link = menu_ui_get_menu_link_defaults($node);
-    $this->assertTrue(!empty($link['entity_id']));
+    $this->assertNotEmpty($link['entity_id']);
     $query = \Drupal::entityQuery('menu_link_content')
       ->condition('link.uri', 'entity:node/' . $node->id())
       ->sort('id', 'ASC')
       ->range(0, 1);
     $result = $query->execute();
-    $this->assertTrue($result);
+    $this->assertNotEmpty($result);
 
     // Create a node with a menu link and create 2 menu links linking to this
     // node after. Verify that the menu link provided by the node has priority.
@@ -261,7 +260,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu[enabled]' => 1,
       'menu[title]' => 'menu link provided by node',
     ];
-    $this->drupalPostForm('node/add/page', $edit, t('Save'));
+    $this->drupalPostForm('node/add/page', $edit, 'Save');
     $this->assertText('page ' . $node_title . ' has been created');
     $node = $this->drupalGetNodeByTitle($node_title);
 
@@ -329,7 +328,7 @@ class TokenMenuTest extends TokenTestBase {
       'settings[node][article][fields][title]' => TRUE,
       'settings[menu_link_content][menu_link_content][translatable]' => TRUE,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save configuration'));
+    $this->drupalPostForm(NULL, $edit, 'Save configuration');
     $this->assertText('Settings successfully updated.');
 
     // Create an english node with an english menu.
@@ -339,7 +338,7 @@ class TokenMenuTest extends TokenTestBase {
       'menu[enabled]' => TRUE,
       'menu[title]' => 'English menu title',
     ];
-    $this->drupalPostForm('/node/add/article', $edit, t('Save'));
+    $this->drupalPostForm('/node/add/article', $edit, 'Save');
     $this->assertText('English test node with menu has been created.');
 
     // Add a german translation.
@@ -350,14 +349,14 @@ class TokenMenuTest extends TokenTestBase {
       'menu[enabled]' => TRUE,
       'menu[title]' => 'German menu title',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save (this translation)'));
+    $this->drupalPostForm(NULL, $edit, 'Save (this translation)');
     $this->assertText('German test node with menu has been updated.');
 
     // Verify that the menu links are correct.
     $this->drupalGet('node/1');
-    $this->assertLink('English menu title');
+    $this->assertSession()->linkExists('English menu title');
     $this->drupalGet('de/node/1');
-    $this->assertLink('German menu title');
+    $this->assertSession()->linkExists('German menu title');
 
     // Verify that tokens are correct.
     $node = Node::load(1);
@@ -455,6 +454,32 @@ class TokenMenuTest extends TokenTestBase {
 
     // The token shouldn't have been generated; the menu link has no parent.
     $this->assertNoTokens('menu-link', ['menu-link' => $child_1_1], ['parents']);
+  }
+
+  /**
+   * Tests that no menu link is generated when the node gets previewed.
+   */
+  public function testPreviewMenuLink() {
+    $this->drupalCreateContentType(['type' => 'article']);
+    $permissions = [
+      'access administration pages',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+      'administer menu',
+    ];
+    $this->drupalLogin($this->drupalCreateUser($permissions));
+    // Create an english node with an english menu.
+    $this->drupalGet('/node/add/article');
+    $edit = [
+      'title[0][value]' => 'English test node with menu',
+      'menu[enabled]' => TRUE,
+      'menu[title]' => 'English menu title',
+    ];
+    $this->drupalGet('node/add/article');
+    $this->submitForm($edit, 'Preview');
+    $menu_links = \Drupal::entityTypeManager()->getStorage('menu_link_content')->loadByProperties(['menu_name' => 'main']);
+    $this->assertEmpty($menu_links);
   }
 
 }

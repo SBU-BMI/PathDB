@@ -92,7 +92,7 @@ class ConfigureAction extends FormBase {
     $form['list'] = $this->getListRenderable($form_data);
 
     // :D Make sure the submit button is at the bottom of the form
-    // and is editale from the action buildConfigurationForm method.
+    // and is editable from the action buildConfigurationForm method.
     $form['actions']['#weight'] = 666;
     $form['actions']['submit'] = [
       '#type' => 'submit',

@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * @file
+ * Contains quip.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use \Drupal\node\Entity\Node;
+use \Drupal\file\Entity\File;
+use \Drupal\jwt\Authentication\Provider\JwtAuth;
+use Drupal\jwt\JsonWebToken\JsonWebToken;
+
+/**
+ * Implements hook_help().
+ */
+function quip_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the quip module.
+    case 'help.page.quip':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('QuIP Module') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function quip_theme() {
+  return array(
+    'openseadragon_link_formatter' => array(
+      'variables' => array('url' => NULL, 'height' => NULL),
+      'template' => 'openseadragonformatter',
+    ),
+  );
+}
+
+function quip_custom_term_validator(array &$form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+	preg_match("/^[A-Za-z0-9_:]+$/", $form_state->getValue('name')[0]['value'], $matches);
+	if (!$matches) {
+		$form_state->setErrorByName($form_state->getValue('name')[0]['value'], t('Error Message : only upper and lower case letters, numbers, and underscore allowed in collection names'));
+	}
+}
+
+function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+                //$form['my_button'] = array(
+               //         '#type' => 'submit',
+              //          '#value' => t('Perform Action 10'),
+//			'#submit' => array('quip_review'),
+ //               );
+
+        if(($form_id=="node_wsi_form")||($form_id=="node_map_form")||($form_id=="node_bulk_csv_upload_form")) {
+        	$form['actions']['preview']['#access'] = FALSE;
+//        	$form['meta'] = FALSE;
+        	$form['revision_log'] = FALSE;
+	} 
+        if ($form_id=="taxonomy_term_collections_form") {
+		$form['#validate'][] = 'quip_custom_term_validator';
+        }
+}
+
+function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+        if ($entity->isNew()) {
+                if ($entity->bundle() == 'wsi') {
+                	if (strlen($entity->get("field_utarget")->getString())!=0) {
+                		$file = File::Create([
+                			'uri' => $entity->get("field_utarget")->getString(),
+                		]);
+                		$file->uid = $entity->uid;
+                		$file->save();
+                		$entity->set('field_wsiimage',$file);
+                		$entity->field_wsiimage->description = '';
+                		$entity->field_wsiimage->display = 1;
+                	}
+                	$uri = $entity->field_wsiimage->entity->getFileUri();
+              		$uri = drupal_realpath($uri);
+			$height = $entity->get('imagedvolumewidth')->getValue()[0]['value'];
+			$width = $entity->get('imagedvolumeheight')->getValue()[0]['value'];
+              		$uri = "/data/images/".substr($uri,23);
+              		$entity->set('field_iip_path',$uri);
+                } else if (($entity->bundle() == 'bulk_upload')&&(strlen($entity->get("field_path")->getString()))!=0) {
+                        $path = $entity->get("field_path")->getString();
+                        // remove this at some point $eww = exec('java -cp modules/quip/QuIPUtils-1.2.1.jar edu.stonybrook.bmi.quiputils.CountImages '.$path,$output,$return);
+                        $entity->set('field_number_of_images',$eww);
+                }
+        }
+}
+

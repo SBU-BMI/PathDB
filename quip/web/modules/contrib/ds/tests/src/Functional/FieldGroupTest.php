@@ -18,12 +18,8 @@ class FieldGroupTest extends TestBase {
    */
   public function testFieldPlugin() {
 
-    // Disable the test for now until field group fixed it's schema definition
-    return;
-
     // Create a node.
     $settings = ['type' => 'article', 'promote' => 1];
-    /* @var \Drupal\node\NodeInterface $node */
     $node = $this->drupalCreateNode($settings);
 
     // Configure layout.
@@ -67,7 +63,7 @@ class FieldGroupTest extends TestBase {
     $elements = $this->xpath("//div[contains(@class, 'group-right')]/div");
 
     $this->assertTrue($elements[0]->hasClass('test-class'));
-    $this->assertEquals($elements[0]->getAttribute('id'), 'wrapper-id');
+    $this->assertEquals('wrapper-id', $elements[0]->getAttribute('id'));
   }
 
 }

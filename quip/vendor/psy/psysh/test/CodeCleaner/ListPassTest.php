@@ -16,25 +16,26 @@ use Psy\Exception\ParseErrorException;
 
 class ListPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ListPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\ParseErrorException
      */
     public function testProcessInvalidStatement($code, $expectedMessage)
     {
-        if (\method_exists($this, 'setExpectedException')) {
-            $this->setExpectedException(ParseErrorException::class, $expectedMessage);
-        } else {
-            $this->expectExceptionMessage($expectedMessage);
-        }
+        $this->expectException(ParseErrorException::class);
+        $this->expectExceptionMessage($expectedMessage);
 
         $stmts = $this->parse($code);
         $this->traverser->traverse($stmts);
+
+        $this->fail();
     }
 
     public function invalidStatements()
@@ -44,14 +45,14 @@ class ListPassTest extends CodeCleanerTestCase
         $errorEmptyList = 'Cannot use empty list';
         $errorAssocListAssign = 'Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING, expecting \',\' or \')\'';
         $errorNonVariableAssign = 'Assignments can only happen to writable values';
-        $errorPhpParserSyntax = 'PHP Parse error: Syntax error, unexpected';
+        $errorPhpParserSyntax = 'PHP Parse error: ';
 
         $invalidExpr = [
             ['list() = []', $errorEmptyList],
             ['list("a") = [1]', $errorPhpParserSyntax],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.1', '<')) {
+        if (\version_compare(\PHP_VERSION, '7.1', '<')) {
             return \array_merge($invalidExpr, [
                 ['list("a" => _) = ["a" => 1]', $errorPhpParserSyntax],
                 ['[] = []', $errorShortListAssign],
@@ -88,7 +89,7 @@ class ListPassTest extends CodeCleanerTestCase
             ['list($x, $y) = [1, 2]'],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.1', '>=')) {
+        if (\version_compare(\PHP_VERSION, '7.1', '>=')) {
             return \array_merge($validExpr, [
                 ['[$a] = [1]'],
                 ['list($b) = [2]'],

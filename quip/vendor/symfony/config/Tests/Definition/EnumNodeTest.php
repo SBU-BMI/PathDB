@@ -41,6 +41,12 @@ class EnumNodeTest extends TestCase
         $this->assertSame('foo', $node->finalize('foo'));
     }
 
+    public function testConstructionWithNullName()
+    {
+        $node = new EnumNode(null, null, ['foo']);
+        $this->assertSame('foo', $node->finalize('foo'));
+    }
+
     public function testFinalizeWithInvalidValue()
     {
         $this->expectException('Symfony\Component\Config\Definition\Exception\InvalidConfigurationException');

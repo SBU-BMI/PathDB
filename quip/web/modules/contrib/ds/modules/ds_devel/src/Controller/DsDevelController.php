@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Returns responses for Views UI routes.
+ * Returns responses for DS devel routes.
  */
 class DsDevelController extends ControllerBase {
 

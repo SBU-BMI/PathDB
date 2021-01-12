@@ -15,7 +15,7 @@ use Psy\Input\FilterOptions;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\StringInput;
 
-class FilterOptionsTest extends \PHPUnit\Framework\TestCase
+class FilterOptionsTest extends \Psy\Test\TestCase
 {
     public function testGetOptions()
     {
@@ -48,13 +48,16 @@ class FilterOptionsTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider invalidInputs
-     * @expectedException \Psy\Exception\RuntimeException
      */
     public function testBindInvalidInput($input)
     {
+        $this->expectException(\Psy\Exception\RuntimeException::class);
+
         $input = $this->getInput($input);
         $filterOptions = new FilterOptions();
         $filterOptions->bind($input);
+
+        $this->fail();
     }
 
     public function invalidInputs()

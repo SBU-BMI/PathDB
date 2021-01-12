@@ -6,29 +6,31 @@
 (function ($, Drupal) {
   'use strict';
     // Used for fixed menu.
-  var origOffsetY;
-  var didScroll = false;
-  var mainNavigation = document.querySelector('#main-navigation-h');
+  let origOffsetY;
+  let didScroll = false;
+  let mainNavigation = document.querySelector('#main-navigation-h');
     // In case the main menu not printed.
   if ($('#main-navigation-h .ul-parent').length > 0) {
     origOffsetY = mainNavigation.offsetTop;
   }
     // Add flex position to the main menu at scroll.
-  var scrollWindow = function () {
+  let scrollWindow = function () {
     didScroll = true;
     if (window.scrollY > origOffsetY) {
       mainNavigation.classList.add('w3-sticky');
     }
     else {
-      mainNavigation.classList.remove('w3-sticky');
+      if ($('.w3-sticky').length) {
+        mainNavigation.classList.remove('w3-sticky');
+      }
     }
   };
     // Add and remove classes on window resize.
-  var mediaSize = function () {
-    var currentWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    var mainMenuChild = $('#main-navigation-h').css('background-color');
+  let mediaSize = function () {
+    let currentWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    let mainMenuChild = $('#main-navigation-h').css('background-color');
     if (currentWidth >= 993) {
-            // Add class to the body for large screen.
+      // Add class to the body for large screen.
       $('body').addClass('large-screen');
       $('body').removeClass('small-screen');
       $('body').removeClass('medium-screen');
@@ -39,14 +41,14 @@
       $('#main-navigation-h .ul-parent').removeAttr('style');
       $('#main-navigation-h .ul-child').removeAttr('style');
       $('#main-navigation-h .ul-child').css('background-color', mainMenuChild);
-            // Make sure all the inside regions have the same height.
+      // Make sure all the inside regions have the same height.
       $('.top-region').matchHeight({property: 'height'});
       $('.main-region').matchHeight({property: 'height'});
       $('.bottom-region').matchHeight({property: 'height'});
       $('.footer-region').matchHeight({property: 'height'});
     }
     else if ((currentWidth >= 601) && (currentWidth <= 992)) {
-            // Add class to the body for medium screen.
+      // Add class to the body for medium screen.
       $('body').addClass('medium-screen');
       $('body').removeClass('large-screen');
       $('body').removeClass('small-screen');
@@ -66,13 +68,13 @@
     }
   };
 
-  var fadeBox = function () {
+  let fadeBox = function () {
     didScroll = true;
-    var animationHeight = $(window).innerHeight() * 0.25;
-    var ratio = Math.round((1 / animationHeight) * 10000) / 10000;
+    let animationHeight = $(window).innerHeight() * 0.25;
+    let ratio = Math.round((1 / animationHeight) * 10000) / 10000;
     $('.d8-fade').each(function () {
-      var objectTop = $(this).offset().top;
-      var windowBottom = $(window).scrollTop() + $(window).innerHeight();
+      let objectTop = $(this).offset().top;
+      let windowBottom = $(window).scrollTop() + $(window).innerHeight();
       if (objectTop < windowBottom) {
         if (objectTop < windowBottom - animationHeight) {
           $(this).css({
@@ -106,14 +108,14 @@
             .find('ul')
             .once('ul')
             .each(function () {
-              var depth = $(this).parents('ul').length;
+              let depth = $(this).parents('ul').length;
               $(this).addClass('ul-' + depth);
             });
       $(context)
             .find('ul li')
             .once('ul li')
             .each(function () {
-              var depth = $(this).parents('li').length;
+              let depth = $(this).parents('li').length;
               $(this).addClass('li-' + depth);
             });
     }
@@ -141,7 +143,7 @@
             .on(
                 'click', function (e) {
                   e.preventDefault();
-                  var $this = $(this);
+                  let $this = $(this);
                   if ($this.next().hasClass('show')) {
                     $this.next().removeClass('show');
                     $this.next().slideUp(350);
@@ -197,8 +199,8 @@
             .on(
                 'click', function (e) {
                   e.preventDefault();
-                  var currentWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-                  var $this = $(this);
+                  let currentWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+                  let $this = $(this);
                   if ((currentWidth <= 992) || ($('#main-navigation-v').css('display') === 'block')) {
                     if ($this.next().hasClass('show')) {
                       $this.next().removeClass('show');
@@ -218,14 +220,14 @@
   Drupal.behaviors.d8w3cssTheme = {
     attach: function (context, settings) {
             // Change the form color to match the footer color.
-      var footerFormBg = $('#footer-menu').css('background-color');
+      let footerFormBg = $('#footer-menu').css('background-color');
       $(context)
             .find('#footer-menu form')
             .once('#footer-menu form')
             .css('background-color', footerFormBg);
 
-            // Change the sumbmenu color as the main menu.
-      var mainMenuChild = $('.main-navigation-wrapper').css('background-color');
+            // Change the sub menu color as the main menu.
+      let mainMenuChild = $('.main-navigation-wrapper').css('background-color');
       $(context)
             .find('.main-navigation-wrapper .ul-child')
             .once('.main-navigation-wrapper .ul-child')
@@ -247,7 +249,7 @@
             .find('.tabledrag-toggle-weight-wrapper button')
             .once('button')
             .addClass('w3-button');
-            // Theme setttings.
+            // Theme settings.
       $(context)
             .find('#system-theme-settings details')
             .once('details')

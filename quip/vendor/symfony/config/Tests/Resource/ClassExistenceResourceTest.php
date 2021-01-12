@@ -117,9 +117,6 @@ EOF
         $this->assertFalse($res->isFresh(0));
     }
 
-    /**
-     * @requires PHP 7
-     */
     public function testParseError()
     {
         $this->expectException('ParseError');

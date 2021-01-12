@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -13,7 +15,7 @@ class AuthmapAlterSubscriber implements EventSubscriberInterface {
   /**
    * Action to take on authorization.
    */
-  public function onAuthmapAlter() {
+  public function onAuthmapAlter(): void {
 
   }
 

@@ -15,7 +15,7 @@ use Psy\Command\PsyVersionCommand;
 use Psy\Shell;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class PsyVersionCommandTest extends \PHPUnit\Framework\TestCase
+class PsyVersionCommandTest extends \Psy\Test\TestCase
 {
     public function testExecute()
     {
@@ -24,6 +24,6 @@ class PsyVersionCommandTest extends \PHPUnit\Framework\TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        $this->assertContains(Shell::VERSION, $tester->getDisplay());
+        $this->assertStringContainsString(Shell::VERSION, $tester->getDisplay());
     }
 }

@@ -57,47 +57,6 @@ class ViewsBulkOperationsBulkFormTest extends BrowserTestBase {
   }
 
   /**
-   * Helper function to test a batch process.
-   *
-   * After checking if we're on a Batch API page,
-   * the iterations are executed, the finished page is opened
-   * and browser redirects to the final destination.
-   *
-   * NOTE: As of Drupal 8.4, functional test
-   * automatically redirects user through all Batch API pages,
-   * so this function is not longer needed.
-   */
-  protected function assertBatchProcess() {
-    // Get the current batch ID.
-    $current_url = $this->getUrl();
-    $q = substr($current_url, strrpos($current_url, '/') + 1);
-    $this->assertEquals('batch?', substr($q, 0, 6), 'We are on a Batch API page.');
-
-    preg_match('#id=([0-9]+)#', $q, $matches);
-    $batch_id = $matches[1];
-
-    // Proceed with the operations.
-    // Assumption: all operations will be completed within a single request.
-    // TODO: modify code to include an option when the assumption is false.
-    do {
-      $this->drupalGet('batch', [
-        'query' => [
-          'id' => $batch_id,
-          'op' => 'do_nojs',
-        ],
-      ]);
-    } while (FALSE);
-
-    // Get the finished page.
-    $this->drupalGet('batch', [
-      'query' => [
-        'id' => $batch_id,
-        'op' => 'finished',
-      ],
-    ]);
-  }
-
-  /**
    * Tests the VBO bulk form with simple test action.
    */
   public function testViewsBulkOperationsBulkFormSimple() {

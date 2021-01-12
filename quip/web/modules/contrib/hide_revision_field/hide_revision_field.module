@@ -7,6 +7,7 @@
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
@@ -27,6 +28,8 @@ function hide_revision_field_form_user_form_alter(&$form, FormStateInterface $fo
   $settings = unserialize($user->get('revision_log_settings')->value);
 
   $entity_type_manager = \Drupal::entityTypeManager();
+  /* @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entity_display_repository */
+  $entity_display_repository = \Drupal::service('entity_display.repository');
   /** @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface $bundle_manager */
   $bundle_manager = \Drupal::service('entity_type.bundle.info');
   $config = [];
@@ -40,8 +43,7 @@ function hide_revision_field_form_user_form_alter(&$form, FormStateInterface $fo
     $entity = [];
     foreach ($bundle_manager->getBundleInfo($type_id) as $bundle_id => $bundle) {
       /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
-      $form_display = $entity_type_manager->getStorage('entity_form_display')
-        ->load("{$type_id}.{$bundle_id}.default");
+      $form_display = $entity_display_repository->getFormDisplay($type_id, $bundle_id, 'default');
       $log = $form_display->getComponent($keys['revision_log_message']);
       if (!empty($log['settings']['allow_user_settings'])) {
 
@@ -118,4 +120,35 @@ function hide_revision_field_entity_base_field_info(EntityTypeInterface $entity_
       ->setDescription(t('User customization for revision log settings.'));
   }
   return $fields;
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Ensure that ContentEntityForms don't have an empty Revision Info tab.
+ * Also, hide the revision checkbox if the revision log field is hidden or
+ * disabled.
+ */
+function hide_revision_field_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form_object = $form_state->getFormObject();
+  if (is_a($form_object, ContentEntityForm::class)) {
+    /** @var \Drupal\Core\Entity\ContentEntityForm $form_object */
+    /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $entity_type */
+    $entity_type = $form_object->getEntity()->getEntityType();
+    if ( $field = $entity_type->getRevisionMetadataKey('revision_log_message')) {
+      if (isset($form[$field]['widget'][0]['value']['#type'])) {
+        if ($form[$field]['widget'][0]['value']['#type'] === 'hidden') {
+          unset($form[$field]['#group']);
+          if (isset($form['revision'])) {
+            $form['revision']['#type'] = 'hidden';
+          }
+        }
+      }
+      else {
+        if (isset($form['revision'])) {
+          $form['revision']['#type'] = 'hidden';
+        }
+      }
+    }
+  }
 }

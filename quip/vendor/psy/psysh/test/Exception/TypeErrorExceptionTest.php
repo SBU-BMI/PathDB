@@ -14,7 +14,7 @@ namespace Psy\Test\Exception;
 use Psy\Exception\Exception;
 use Psy\Exception\TypeErrorException;
 
-class TypeErrorExceptionTest extends \PHPUnit\Framework\TestCase
+class TypeErrorExceptionTest extends \Psy\Test\TestCase
 {
     public function testException()
     {
@@ -38,7 +38,7 @@ class TypeErrorExceptionTest extends \PHPUnit\Framework\TestCase
 
     public function testFromTypeError()
     {
-        if (\version_compare(PHP_VERSION, '7.0.0', '<')) {
+        if (\version_compare(\PHP_VERSION, '7.0.0', '<')) {
             $this->markTestSkipped();
         }
 

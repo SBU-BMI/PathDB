@@ -1,0 +1,33 @@
+uuid: b89b622f-0a9a-40d7-a978-e80cb69d5583
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.testmenow.body
+    - field.field.node.testmenow.field_wsiimage
+    - node.type.testmenow
+  module:
+    - text
+    - user
+id: node.testmenow.teaser
+targetEntityType: node
+bundle: testmenow
+mode: teaser
+content:
+  body:
+    label: hidden
+    type: text_summary_or_trimmed
+    weight: 101
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden:
+  field_wsiimage: true
+  search_api_excerpt: true

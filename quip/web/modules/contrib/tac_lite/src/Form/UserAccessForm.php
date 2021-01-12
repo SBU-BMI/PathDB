@@ -1,6 +1,7 @@
 <?php
 namespace Drupal\tac_lite\Form;
 
+use Drupal\Core\Url;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -64,7 +65,7 @@ class UserAccessForm extends ConfigFormBase {
       $form['tac_lite'][0] = [
         '#type' => 'markup',
         '#markup' => '<p>' . $this->t('You may grant this user access based on the schemes and terms below.  These permissions are in addition to <a href=":url">role based grants on scheme settings pages</a>.',
-          [':url' => \Drupal::url('tac_lite.scheme_1')]) . "</p>\n",
+          [':url' => Url::fromRoute('tac_lite.scheme_1')->toString()]) . "</p>\n",
         '#weight' => -1,
       ];
     }
@@ -73,7 +74,7 @@ class UserAccessForm extends ConfigFormBase {
         '#type' => 'markup',
         '#prefix' => '<p>',
         '#suffix' => '</p>',
-        '#markup' => $this->t('First, select one or more vocabularies on the <a href=:url>settings page</a>. Then, return to this page to complete configuration.', [':url' => \Drupal::url('tac_lite.administration')]),
+        '#markup' => $this->t('First, select one or more vocabularies on the <a href=:url>settings page</a>. Then, return to this page to complete configuration.', [':url' => Url::fromRoute('tac_lite.administration')->toString()]),
       ];
     }
     return parent::buildForm($form, $form_state);

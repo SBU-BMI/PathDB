@@ -17,7 +17,7 @@ use Psy\Reflection\ReflectionClassConstant;
 use Psy\Reflection\ReflectionConstant_;
 use Psy\Test\Formatter\Fixtures\BoringTrait;
 
-class SignatureFormatterTest extends \PHPUnit\Framework\TestCase
+class SignatureFormatterTest extends \Psy\Test\TestCase
 {
     const FOO = 'foo value';
     private static $bar = 'bar value';
@@ -40,11 +40,7 @@ class SignatureFormatterTest extends \PHPUnit\Framework\TestCase
 
     public function signatureReflectors()
     {
-        return [
-            [
-                new \ReflectionFunction('implode'),
-                \defined('HHVM_VERSION') ? 'function implode($arg1, $arg2 = null)' : (\version_compare(PHP_VERSION, '8.0', '>=') ? 'function implode($glue, array $pieces = unknown)' : 'function implode($glue, $pieces)'),
-            ],
+        $values = [
             [
                 ReflectionClassConstant::create($this, 'FOO'),
                 'const FOO = "foo value"',
@@ -60,12 +56,8 @@ class SignatureFormatterTest extends \PHPUnit\Framework\TestCase
             [
                 new \ReflectionClass(CodeCleanerPass::class),
                 'abstract class Psy\CodeCleaner\CodeCleanerPass '
-                . 'extends PhpParser\NodeVisitorAbstract '
-                . 'implements PhpParser\NodeVisitor',
-            ],
-            [
-                new \ReflectionFunction('array_chunk'),
-                \defined('HHVM_VERSION') ? 'function array_chunk($input, $size, $preserve_keys = false)' : (\version_compare(PHP_VERSION, '8.0', '>=') ? 'function array_chunk(array $arg, $size, $preserve_keys = unknown)' : 'function array_chunk($arg, $size, $preserve_keys = unknown)'),
+                .'extends PhpParser\NodeVisitorAbstract '
+                .'implements PhpParser\NodeVisitor',
             ],
             [
                 new \ReflectionClass(BoringTrait::class),
@@ -81,7 +73,7 @@ class SignatureFormatterTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 new ReflectionConstant_('PHP_VERSION'),
-                'define("PHP_VERSION", "' . PHP_VERSION . '")',
+                'define("PHP_VERSION", "'.\PHP_VERSION.'")',
             ],
             [
                 new ReflectionConstant_('__LINE__'),
@@ -92,14 +84,28 @@ class SignatureFormatterTest extends \PHPUnit\Framework\TestCase
                 'private function anotherFakeMethod(array $one = [], $two = 2, $three = null)',
             ],
         ];
+
+        if (\defined('HHVM_VERSION')) {
+            $values[] = [new \ReflectionFunction('implode'), 'function implode($arg1, $arg2 = null)'];
+            $values[] = [new \ReflectionFunction('array_chunk'), 'function array_chunk($input, $size, $preserve_keys = false)'];
+        } elseif (\version_compare(\PHP_VERSION, '8.0', '>=')) {
+            $values[] = [new \ReflectionFunction('implode'), 'function implode(array|string $separator, array $array = null): string'];
+            $values[] = [new \ReflectionFunction('array_chunk'), 'function array_chunk(array $array, int $length, bool $preserve_keys = false): array'];
+        } else {
+            $values[] = [new \ReflectionFunction('implode'), 'function implode($glue, $pieces)'];
+            $values[] = [new \ReflectionFunction('array_chunk'), 'function array_chunk($arg, $size, $preserve_keys = unknown)'];
+        }
+
+        return $values;
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testSignatureFormatterThrowsUnknownReflectorExpeption()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $refl = $this->getMockBuilder(\Reflector::class)->getMock();
         SignatureFormatter::format($refl);
+
+        $this->fail();
     }
 }

@@ -15,27 +15,34 @@ use Psy\CodeCleaner\ValidConstructorPass;
 
 class ValidConstructorPassTest extends CodeCleanerTestCase
 {
-    protected function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ValidConstructorPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalidStatement($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     /**
      * @dataProvider invalidParserStatements
-     * @expectedException \Psy\Exception\ParseErrorException
      */
     public function testProcessInvalidStatementCatchedByParser($code)
     {
+        $this->expectException(\Psy\Exception\ParseErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()
@@ -47,7 +54,7 @@ class ValidConstructorPassTest extends CodeCleanerTestCase
             ['class A { private static function a() {}}'],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.0', '>=')) {
+        if (\version_compare(\PHP_VERSION, '7.0', '>=')) {
             $data[] = ['class A { public function A(): ?array {}}'];
             $data[] = ['class A { public function a(): ?array {}}'];
         }
@@ -82,7 +89,7 @@ class ValidConstructorPassTest extends CodeCleanerTestCase
             ['namespace B; class A { private static function A() {}}'],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.0', '>=')) {
+        if (\version_compare(\PHP_VERSION, '7.0', '>=')) {
             $data[] = ['class A { public static function A() {} public function __construct() {}}'];
             $data[] = ['class A { private function __construct() {} public static function A(): ?array {}}'];
             $data[] = ['namespace B; class A { private static function A(): ?array {}}'];

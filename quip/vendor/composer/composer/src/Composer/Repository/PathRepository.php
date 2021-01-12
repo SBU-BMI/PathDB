@@ -21,6 +21,7 @@ use Composer\Package\Version\VersionParser;
 use Composer\Util\Platform;
 use Composer\Util\ProcessExecutor;
 use Composer\Util\Filesystem;
+use Composer\Util\Git as GitUtil;
 
 /**
  * This repository allows installing local packages that are not necessarily under their own VCS.
@@ -164,6 +165,11 @@ class PathRepository extends ArrayRepository implements ConfigurableRepositoryIn
             );
             $package['transport-options'] = $this->options;
 
+            // use the branch-version as the package version if available
+            if (!isset($package['version']) && isset($package['extra']['branch-version'])) {
+                $package['version'] = preg_replace('{(\.x)?(-dev)?$}', '', $package['extra']['branch-version']).'.x-dev';
+            }
+
             // carry over the root package version if this path repo is in the same git repository as root package
             if (!isset($package['version']) && ($rootVersion = getenv('COMPOSER_ROOT_VERSION'))) {
                 if (
@@ -176,7 +182,7 @@ class PathRepository extends ArrayRepository implements ConfigurableRepositoryIn
             }
 
             $output = '';
-            if (is_dir($path . DIRECTORY_SEPARATOR . '.git') && 0 === $this->process->execute('git log -n1 --pretty=%H', $output, $path)) {
+            if (is_dir($path . DIRECTORY_SEPARATOR . '.git') && 0 === $this->process->execute('git log -n1 --pretty=%H'.GitUtil::getNoShowSignatureFlag($this->process), $output, $path)) {
                 $package['dist']['reference'] = trim($output);
             }
 

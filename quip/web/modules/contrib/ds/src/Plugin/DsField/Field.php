@@ -26,7 +26,7 @@ abstract class Field extends DsFieldBase {
     }
     elseif (!empty($entity_render_key) && isset($this->entity()->{$entity_render_key})) {
       if ($this->getEntityTypeId() == 'user' && $entity_render_key == 'name') {
-        $output = $this->entity()->getUsername();
+        $output = $this->entity()->getAccountName();
       }
       else {
         $output = $this->entity()->{$entity_render_key}->value;

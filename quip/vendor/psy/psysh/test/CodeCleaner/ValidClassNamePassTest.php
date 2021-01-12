@@ -16,18 +16,23 @@ use Psy\CodeCleaner\ValidClassNamePass;
 
 class ValidClassNamePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ValidClassNamePass());
     }
 
     /**
      * @dataProvider getInvalid
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalid($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function getInvalid()
@@ -95,7 +100,28 @@ class ValidClassNamePassTest extends CodeCleanerTestCase
             ['class ValidClassNamePassTest implements ArrayAccess, stdClass {}'],
             ['interface ValidClassNamePassTest extends stdClass {}'],
             ['interface ValidClassNamePassTest extends ArrayAccess, stdClass {}'],
+        ];
+    }
 
+    /**
+     * @dataProvider getInvalidLegacy
+     */
+    public function testProcessInvalidLegacy($code)
+    {
+        if (\version_compare(\PHP_VERSION, '7.0', '>=')) {
+            $this->markTestSkipped();
+        }
+
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
+
+        $this->parseAndTraverse($code);
+
+        $this->fail();
+    }
+
+    public function getInvalidLegacy()
+    {
+        return [
             // class instantiations
             ['new Psy_Test_CodeCleaner_ValidClassNamePass_Gamma();'],
             ['
@@ -167,6 +193,7 @@ class ValidClassNamePassTest extends CodeCleanerTestCase
             ['class A {} A::FOO'],
             ['$a = new DateTime; $a::ATOM'],
             ['interface A { const B = 1; } A::B'],
+            ['$foo = true ? A::class : B::class'],
 
             // static call
             ['DateTime::createFromFormat()'],

@@ -71,14 +71,41 @@ class FileLoaderTest extends TestCase
     public function testImportWithGlobLikeResource()
     {
         $locatorMock = $this->getMockBuilder('Symfony\Component\Config\FileLocatorInterface')->getMock();
+        $locatorMock->expects($this->once())->method('locate')->willReturn('');
         $loader = new TestFileLoader($locatorMock);
 
         $this->assertSame('[foo]', $loader->import('[foo]'));
     }
 
+    public function testImportWithGlobLikeResourceWhichContainsSlashes()
+    {
+        $locatorMock = $this->getMockBuilder('Symfony\Component\Config\FileLocatorInterface')->getMock();
+        $locatorMock->expects($this->once())->method('locate')->willReturn('');
+        $loader = new TestFileLoader($locatorMock);
+
+        $this->assertNull($loader->import('foo/bar[foo]'));
+    }
+
+    public function testImportWithGlobLikeResourceWhichContainsMultipleLines()
+    {
+        $locatorMock = $this->getMockBuilder('Symfony\Component\Config\FileLocatorInterface')->getMock();
+        $loader = new TestFileLoader($locatorMock);
+
+        $this->assertSame("foo\nfoobar[foo]", $loader->import("foo\nfoobar[foo]"));
+    }
+
+    public function testImportWithGlobLikeResourceWhichContainsSlashesAndMultipleLines()
+    {
+        $locatorMock = $this->getMockBuilder('Symfony\Component\Config\FileLocatorInterface')->getMock();
+        $loader = new TestFileLoader($locatorMock);
+
+        $this->assertSame("foo\nfoo/bar[foo]", $loader->import("foo\nfoo/bar[foo]"));
+    }
+
     public function testImportWithNoGlobMatch()
     {
         $locatorMock = $this->getMockBuilder('Symfony\Component\Config\FileLocatorInterface')->getMock();
+        $locatorMock->expects($this->once())->method('locate')->willReturn('');
         $loader = new TestFileLoader($locatorMock);
 
         $this->assertNull($loader->import('./*.abc'));
@@ -89,6 +116,14 @@ class FileLoaderTest extends TestCase
         $loader = new TestFileLoader(new FileLocator(__DIR__));
 
         $this->assertSame(__FILE__, strtr($loader->import('FileLoaderTest.*'), '/', \DIRECTORY_SEPARATOR));
+    }
+
+    public function testImportWithExclude()
+    {
+        $loader = new TestFileLoader(new FileLocator(__DIR__.'/../Fixtures'));
+        $loadedFiles = $loader->import('Include/*', null, false, null, __DIR__.'/../Fixtures/Include/{ExcludeFile.txt}');
+        $this->assertCount(2, $loadedFiles);
+        $this->assertNotContains('ExcludeFile.txt', $loadedFiles);
     }
 }
 
@@ -101,7 +136,7 @@ class TestFileLoader extends FileLoader
         return $resource;
     }
 
-    public function supports($resource, $type = null)
+    public function supports($resource, $type = null): bool
     {
         return $this->supports;
     }

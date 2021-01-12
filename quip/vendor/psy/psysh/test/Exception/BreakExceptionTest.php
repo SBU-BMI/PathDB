@@ -14,7 +14,7 @@ namespace Psy\Test\Exception;
 use Psy\Exception\BreakException;
 use Psy\Exception\Exception;
 
-class BreakExceptionTest extends \PHPUnit\Framework\TestCase
+class BreakExceptionTest extends \Psy\Test\TestCase
 {
     public function testInstance()
     {
@@ -28,16 +28,17 @@ class BreakExceptionTest extends \PHPUnit\Framework\TestCase
     {
         $e = new BreakException('foo');
 
-        $this->assertContains('foo', $e->getMessage());
+        $this->assertStringContainsString('foo', $e->getMessage());
         $this->assertSame('foo', $e->getRawMessage());
     }
 
-    /**
-     * @expectedException \Psy\Exception\BreakException
-     * @expectedExceptionMessage Goodbye
-     */
     public function testExitShell()
     {
+        $this->expectException(\Psy\Exception\BreakException::class);
+        $this->expectExceptionMessage('Goodbye');
+
         BreakException::exitShell();
+
+        $this->fail();
     }
 }

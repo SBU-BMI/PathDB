@@ -45,15 +45,26 @@ class Composer
      * const SOURCE_VERSION = '';
      *
      * source (git clone):
-     * const VERSION = '1.10.5';
-     * const BRANCH_ALIAS_VERSION = '';
-     * const RELEASE_DATE = '2020-04-10 11:44:22';
+     * const VERSION = '@package_version@';
+     * const BRANCH_ALIAS_VERSION = '@package_branch_alias_version@';
+     * const RELEASE_DATE = '@release_date@';
      * const SOURCE_VERSION = '1.8-dev+source';
      */
-    const VERSION = '1.10.5';
+    const VERSION = '1.10.19';
     const BRANCH_ALIAS_VERSION = '';
-    const RELEASE_DATE = '2020-04-10 11:44:22';
-    const SOURCE_VERSION = '1.10-dev+source';
+    const RELEASE_DATE = '2020-12-04 09:14:16';
+    const SOURCE_VERSION = '';
+
+    /**
+     * Version number of the internal composer-runtime-api package
+     *
+     * This is used to version features available to projects at runtime
+     * like the platform-check file, the Composer\InstalledVersions class
+     * and possibly others in the future.
+     *
+     * @var string
+     */
+    const RUNTIME_API_VERSION = '1.0.0';
 
     public static function getVersion()
     {

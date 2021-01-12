@@ -15,18 +15,23 @@ use Psy\CodeCleaner\ValidConstantPass;
 
 class ValidConstantPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ValidConstantPass());
     }
 
     /**
      * @dataProvider getInvalidReferences
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalidConstantReferences($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function getInvalidReferences()
