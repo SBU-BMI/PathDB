@@ -76,6 +76,7 @@ fi
         #/quip/vendor/bin/drush -y config:export --destination /quip/config-local
         httpd -f /config/httpd.conf
 	cd /quip/web
+	/quip/vendor/bin/drush -y theme:install bootstrap
         /quip/vendor/bin/drush -y pm:enable css_editor
         /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
 	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap
@@ -105,7 +106,7 @@ fi
 	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_page_title
 	/quip/vendor/bin/drush -y theme:uninstall drupal8_w3css_theme
 	/quip/vendor/bin/drush -y theme:uninstall bartik
-	/quip/vendor/bin/drush -y theme:uninstall seven
+	#/quip/vendor/bin/drush -y theme:uninstall seven
 	/quip/vendor/bin/drush -y pm:uninstall ds_extras ds_switch_view_mode ds
         /quip/vendor/bin/drush config-delete field.storage.node.field_map_type
         mkdir /data/tmp2
