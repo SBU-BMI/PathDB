@@ -831,7 +831,7 @@ display:
           expose:
             label: ''
           plugin_id: search_api
-      title: imagesearch2
+      title: ''
       header: {  }
       footer: {  }
       empty:
@@ -858,12 +858,13 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'user.node_grants:view'
         - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions
+        - 'config:search_api.index.imagesearch'
   page_1:
     display_plugin: page
     id: page_1
@@ -883,9 +884,10 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'user.node_grants:view'
         - user.roles
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions
+        - 'config:search_api.index.imagesearch'
