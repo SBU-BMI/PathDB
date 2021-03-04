@@ -2,6 +2,7 @@
 
 namespace Drupal\redirect_after_login\Form;
 
+use Drupal;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -27,34 +28,34 @@ class LoginRedirectionForm extends ConfigFormBase {
     $savedPathRoles = $config->get('login_redirection');
 
     $form['roles'] = [
-      '#type' => 'fieldset',
+      '#type'  => 'fieldset',
       '#title' => $this->t('All roles'),
     ];
     foreach (user_role_names(TRUE) as $user => $name) {
       if ($user != "anonymous") {
         $form['roles'][$user] = [
-          '#type' => 'textfield',
-          '#title' => $name,
-          '#size' => 60,
-          '#maxlength' => 128,
-          '#description' => $this->t('Add a valid url or &ltfront> for main page'),
-          '#required' => TRUE,
+          '#type'          => 'textfield',
+          '#title'         => $name,
+          '#size'          => 60,
+          '#maxlength'     => 128,
+          '#description'   => $this->t('Add a valid url or &ltfront> for main page'),
+          '#required'      => TRUE,
           '#default_value' => isset($savedPathRoles[$user]) ? $savedPathRoles[$user] : '',
         ];
       }
     }
 
     $form['exclude_urls'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Exclude url from redirection'),
-      '#description' => $this->t('One url per line. Redirection on this urls will be skipped. You can use wildcard "*".'),
+      '#type'          => 'textarea',
+      '#title'         => $this->t('Exclude url from redirection'),
+      '#description'   => $this->t('One url per line. Redirection on this urls will be skipped. You can use wildcard "*".'),
       '#default_value' => $config->get('exclude_urls'),
     ];
 
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
+      '#type'        => 'submit',
+      '#value'       => $this->t('Save'),
       '#button_type' => 'primary',
     ];
 
@@ -72,12 +73,12 @@ class LoginRedirectionForm extends ConfigFormBase {
       }
       if (!(preg_match('/^[#?\/]+/', $form_state->getValue($user)) || $form_state->getValue($user) == '<front>')) {
         $form_state->setErrorByName($user, $this->t('This URL %url is not valid for role %role.', [
-          '%url' => $form_state->getValue($user),
+          '%url'  => $form_state->getValue($user),
           '%role' => $name,
         ]));
       }
       $path = $form_state->getValue($user);
-      $is_valid = \Drupal::service('path.validator')->isValid($path);
+      $is_valid = Drupal::service('path.validator')->isValid($path);
       if ($is_valid == NULL) {
         $form_state->setErrorByName($user, $this->t('Path does not exists.'));
       }

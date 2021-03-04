@@ -418,6 +418,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     $varInfo->firstInitialized = $stackPtr;
+    Helpers::debug('markVariableAssignment: marked as initialized', $varName);
   }
 
   /**
@@ -944,6 +945,14 @@ class VariableAnalysisSniff implements Sniff {
 
     Helpers::debug('processVariableAsAssignment: marking as assignment in scope', $currScope);
     $this->markVariableAssignment($varName, $stackPtr, $currScope);
+
+    // If the left-hand-side of the assignment (the variable we are examining)
+    // is itself a reference, then that counts as a read as well as a write.
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+    if ($varInfo->isDynamicReference) {
+      Helpers::debug('processVariableAsAssignment: also marking as a use because variable is a reference');
+      $this->markVariableRead($varName, $stackPtr, $currScope);
+    }
   }
 
   /**
@@ -1162,6 +1171,13 @@ class VariableAnalysisSniff implements Sniff {
     // Is this the value of a key => value foreach?
     if ($phpcsFile->findPrevious(T_DOUBLE_ARROW, $stackPtr - 1, $openParenPtr) !== false) {
       $varInfo->isForeachLoopAssociativeValue = true;
+    }
+
+    // Are we pass-by-reference?
+    $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
+    if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+      Helpers::debug("processVariableAsForeachLoopVar: found foreach loop variable assigned by reference");
+      $varInfo->isDynamicReference = true;
     }
 
     return true;
@@ -1512,12 +1528,9 @@ class VariableAnalysisSniff implements Sniff {
     }
     Helpers::debug("examining token for variable in string", $token);
 
-    $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if ($currScope === null) {
-      return;
-    }
     foreach ($matches[1] as $varName) {
       $varName = Helpers::normalizeVarName($varName);
+
       // Are we $this within a class?
       if ($this->processVariableAsThisWithinClass($phpcsFile, $stackPtr, $varName)) {
         continue;
@@ -1529,6 +1542,11 @@ class VariableAnalysisSniff implements Sniff {
 
       // Are we a numeric variable used for constructs like preg_replace?
       if (Helpers::isVariableANumericVariable($varName)) {
+        continue;
+      }
+
+      $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr, $varName);
+      if ($currScope === null) {
         continue;
       }
 

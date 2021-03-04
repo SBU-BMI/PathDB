@@ -6,7 +6,7 @@ w3-css:
     url: https://www.w3schools.com/w3css/w3css_downloads.asp
     gpl-compatible: true
   css:
-    theme:
+    base:
       css/w3-css/w3.css: {}
       css/w3-css/w3css-color-libraries.css: {}
 font-awesome:
@@ -17,17 +17,38 @@ font-awesome:
     url: https://fortawesome.github.io/Font-Awesome/license/
     gpl-compatible: true
   css:
-    theme:
+    base:
       https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css: { type: external, minified: true }
+
+d8w3css-font-awesome-local:
+  Version: 4.7.0
+  css:
+    base:
+      css/font/font-awesome.4.7.0.css: {}
+
+d8w3css-google-font-external:
+  Version: VERSION
+  css:
+    base:
+      'https://fonts.googleapis.com/css?family=Montserrat': { type: external, minified: true }
+
+d8w3css-google-font-local:
+  Version: VERSION
+  css:
+    base:
+      css/font/google-font.css: {}
+
 global-components:
   Version: VERSION
   css:
-    theme:
-      'https://fonts.googleapis.com/css?family=Montserrat': { type: external, minified: true }
+    base:
       css/custom/base.css: {}
       css/custom/w3-custom-classes.css: {}
+    layout:
       css/custom/layout.css: {}
+    component:
       css/custom/components.css: {}
+    theme:
       css/custom/theme.css: {}
       css/custom/responsive.css: {}
   js:

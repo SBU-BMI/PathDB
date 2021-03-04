@@ -69,7 +69,7 @@ h6 a {
 #header h5,
 #header a,
 #header p {
-  color: #d0d4d5!important;
+  color: #9fe95e!important;
 }
 #copyright,
 .close-nav,
@@ -125,6 +125,10 @@ textarea,
 
 #footer-menu {
   background-color: #060707;
+}
+
+#footer-menu-inner form.w3-content {
+  border: 1px solid #161819;
 }
 
 #copyright {

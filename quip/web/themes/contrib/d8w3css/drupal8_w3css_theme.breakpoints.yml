@@ -5,6 +5,7 @@ drupal8_w3css_theme.screen-xsm-min:
   multipliers:
     - 1x
 drupal8_w3css_theme.screen-sm-min:
+  label: screen-sm-min
   mediaQuery: 'all and (min-width: 414px)'
   weight: 1
   multipliers:

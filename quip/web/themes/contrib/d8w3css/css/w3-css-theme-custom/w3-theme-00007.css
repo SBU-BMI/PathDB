@@ -136,6 +136,10 @@ textarea:focus,
   color: white;
 }
 
+#footer-menu-inner form.w3-content {
+  border: 1px solid #445963;
+}
+
 #copyright {
   background-color: #0f132a;
   color: white;

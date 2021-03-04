@@ -129,6 +129,9 @@ textarea:focus,
   border-color: #d1d5ef!important;
 }
 
+#footer-menu-inner form.w3-content {
+  border: 1px solid #be0032;
+}
 
 /* button animation  */
 .w3-button {

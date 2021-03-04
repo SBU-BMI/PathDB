@@ -123,8 +123,12 @@ textarea,
   background-color: #0e0f10;
 }
 
-#footer-menu {
-  background-color: #060707;
+#footer-menu-inner form.w3-content {
+  border: 1px solid #161819;
+}
+
+#footer-menu-inner form.w3-content {
+  border: 1px solid #445963;
 }
 
 #copyright {

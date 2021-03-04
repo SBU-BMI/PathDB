@@ -200,14 +200,6 @@ ul li.li-expanded > a:hover {
   float: right;
   width: auto;
 }
-/* Table inside field */
-.field-multiple-drag {
-  width: 50px;
-}
-.tabledrag-handle .handle {
-  width: 25px;
-  height: 25px;
-}
 /* To roll the text around the image */
 .node .field--type-image {
   float: left;
@@ -236,18 +228,20 @@ div.item-list > ol.item-list > li article::before,
   margin-top: -2px;
 }
 /* Search page */
-.path-search .search-form a.search-help-link {
-  float: left!important;
-  margin-bottom: 15px;
+.path-search form.search-form>.form-wrapper {
+  position: relative;
 }
-.path-search .search-form .form-type-search {
-  width: 100%;
-  margin-bottom: 0!important;
+.path-search form.search-form>.form-wrapper>.form-type-search {
+  float: left;
+  width: 74%;
+  margin: 0 0 10px 0!important;
 }
-.path-search .search-form input.form-submit {
-  float: left!important;
-  min-width: 128px;
-  margin-bottom: 0!important;
+.path-search form.search-form>.form-wrapper>.form-submit {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  margin: 0!important;
+  width: 25%;
 }
 .path-search .search-form .search-advanced summary.w3-button {
   box-sizing: border-box;
@@ -527,4 +521,414 @@ ol {
 }
 .view-filters details.form-wrapper:hover {
   cursor: pointer;
+}
+/* Drupal Off Canvas */
+#drupal-off-canvas details,
+#drupal-off-canvas summary,
+#drupal-off-canvas .details-wrapper {
+  margin: 0 -20px!important;
+  display: inline-block;
+  width: 120%;
+  box-sizing: border-box;
+}
+#drupal-off-canvas .details-wrapper ul li a,
+#drupal-off-canvas .details-wrapper ul li,
+#drupal-off-canvas .details-wrapper ul {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+#drupal-off-canvas .details-wrapper ul li a {
+  line-height: 24px;
+  font-size: 14px;
+}
+#drupal-off-canvas summary {
+  line-height: 30px;
+  font-size: 15px;
+  font-weight: normal;
+}
+#drupal-off-canvas details[open] > summary {
+  color: #eaf4fb;
+}
+#drupal-off-canvas a,
+#drupal-off-canvas .link {
+  color: white;
+}
+.layout-builder-block .w3-left.field__item {
+  float: none!important;
+  padding: 0!important;
+}
+#drupal-off-canvas .form-item {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#drupal-off-canvas input[type="checkbox"],
+#drupal-off-canvas input[type="radio"] {
+  position: relative;
+}
+#drupal-off-canvas .form-type-radio label,
+#drupal-off-canvas .form-type-checkbox label {
+  height: 24px;
+  display: inline-block;
+}
+#drupal-off-canvas .inline-block-create-button,
+#drupal-off-canvas .inline-block-list__item {
+  background: #113e5f;
+}
+.ui-dialog.ui-dialog-off-canvas,
+#drupal-off-canvas *,
+#drupal-off-canvas *:not(div) {
+  background: #0c2b42;
+}
+#drupal-off-canvas details[open] > summary {
+  background: #113e5f;
+}
+#drupal-off-canvas a:hover,
+.layout-builder-revert-overrides a:hover,
+.node-layout-builder-form a:hover,
+#layout-builder a:hover {
+  opacity: 1!important;
+}
+/* Layout Form */
+.layout-builder-revert-overrides .form-actions a.button,
+.layout-builder-revert-overrides .form-actions input,
+.node-layout-builder-form  .form-actions input.form-submit {
+  clear: none;
+  display: inline-block;
+  text-align: center;
+  padding: 10px 15px;
+  margin: 0 20px 0 0;
+  border-radius: 20px 0 20px 0;
+}
+.node-layout-builder-form {
+  margin: 0 auto!important;
+  padding: 0!important;
+  font-size: 90%;
+}
+.node-layout-builder-form .messages {
+  padding-left: 30px!important;
+  margin-left: 10px;
+}
+.node-layout-builder-form .vertical-tabs__panes {
+  margin: 20px;
+}
+.layout-builder__region {
+  background-color: #dcedf9;
+}
+.layout-builder-block {
+  padding: 5px 15px;
+  background-color: transparent;
+  clear: both;
+}
+.node-layout-builder-form  .vertical-tabs {
+  background-color: transparent;
+}
+/* Layout Builder body */
+
+.layout-builder {
+  margin: 10px;
+  padding: 10px 15px;
+  border: 1px solid rgb(55,170,220);
+}
+.layout-builder__region {
+  outline: 1px dashed rgb(55,170,220);
+}
+.layout-builder__link--configure,
+.layout-builder__link--remove {
+  font-size: 13px;
+  clear: none;
+  display: inline-block;
+  text-align: center;
+  padding: 7px 15px;
+  margin: 0 10px 0 0;
+  text-indent: unset;
+  width: auto;
+  height: auto;
+}
+
+.layout-builder__link--remove,
+.layout-builder__link--configure {
+  border-radius: 15px 0 15px 0;
+}
+
+.layout-builder__add-block,
+.layout-builder__link--add,
+.layout-builder__add-section {
+  border-radius: 20px 0 20px 0;
+}
+
+.layout-builder__link--add:before {
+  content: "\f196";
+  font-family: FontAwesome;
+  font-size: 16px;
+  margin-right: 10px;
+  background-color: transparent;
+}
+.layout-builder__add-section {
+  margin-bottom: 15px;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+.layout-builder__add-block {
+  padding: 0;
+  margin: 10px!important;
+  display: inline-block;
+}
+
+.layout-builder__link--add {
+  padding: 10px 20px;
+  width: 100%;
+  display: block;
+  text-align: left;
+}
+.layout-builder__add-block>a {
+  padding: 7px 22px!important;
+  font-size: 14px;
+}
+.layout-builder__link--remove:hover {
+  background-image: none;
+}
+.layout-builder__link--configure {
+  margin: 0 0 20px 0;
+  color: #0b3e6f;
+}
+.layout-builder__section .comment-comment-form {
+  padding: 0!important;
+}
+.layout-builder__section h2 {
+  margin: 0!important;
+}
+.layout-builder .field>img {
+  width: 100%;
+  margin-top: 10px;
+}
+.layout-builder__add-block.is-layout-builder-highlighted,
+.layout-builder__add-section.is-layout-builder-highlighted,
+.layout-builder__layout.is-layout-builder-highlighted:before,
+.layout-builder__layout.is-layout-builder-highlighted,
+.layout-builder-block.is-layout-builder-highlighted {
+  border: 2px solid #a2ceef;
+}
+.ui-dialog.ui-dialog-off-canvas .ui-dialog-titlebar {
+  background: #040f17;
+}
+/* Button Colors */
+
+.layout-builder__link--add {
+  color: white;
+  background: rgb(55,170,220);
+  background: -moz-linear-gradient(top, rgb(55,170,220) 0%, rgb(46,147,190) 100%);
+  background: -webkit-linear-gradient(top, rgb(55,170,220) 0%, rgb(46,147,190) 100%);
+  background: linear-gradient(to bottom, rgb(55,170,220) 0%, rgb(46,147,190) 100%);
+}
+.layout-builder__link--remove:hover,
+.layout-builder__link--remove,
+.layout-builder-revert-overrides .form-actions input,
+.node-layout-builder-form  .form-actions input:nth-child(2) {
+  color: white;
+  background: rgb(213,71,43);
+  background: -moz-linear-gradient(top, rgb(213,71,43) 0%, rgb(158,46,37) 100%);
+  background: -webkit-linear-gradient(top, rgb(213,71,43) 0%, rgb(158,46,37) 100%);
+  background: linear-gradient(to bottom, rgb(213,71,43) 0%, rgb(158,46,37) 100%);
+}
+.layout-builder__link--configure,
+.layout-builder-revert-overrides .form-actions a.button,
+.node-layout-builder-form  .form-actions input:nth-child(1) {
+  color: white;
+  background: rgb(75,187,34);
+  background: -moz-linear-gradient(top,  rgb(75,187,34) 0%, rgb(52,130,24) 100%);
+  background: -webkit-linear-gradient(top,  rgb(75,187,34) 0%,rgb(52,130,24) 100%);
+  background: linear-gradient(to bottom,  rgb(75,187,34) 0%,rgb(52,130,24) 100%);
+}
+.node-layout-builder-form  .form-actions input:nth-child(3) {
+  color: white;
+  background: rgb(107,129,205);
+  background: -moz-linear-gradient(top,  rgb(107,129,205) 0%, rgb(64,84,160) 100%);
+  background: -webkit-linear-gradient(top,  rgb(107,129,205) 0%,rgb(64,84,160) 100%);
+  background: linear-gradient(to bottom,  rgb(107,129,205) 0%,rgb(64,84,160) 100%);
+}
+.layout-builder__link--add:hover,
+.layout-builder__link--remove:hover,
+.layout-builder__link--configure:hover,
+.node-layout-builder-form .form-actions input:hover,
+.layout-builder-revert-overrides .form-actions a.button:hover,
+.layout-builder-revert-overrides .form-actions input:hover {
+  color: white!important;
+  background: #45484d;
+  background: -moz-linear-gradient(-45deg,  #45484d 0%, #000000 100%);
+  background: -webkit-linear-gradient(-45deg,  #45484d 0%,#000000 100%);
+  background: linear-gradient(135deg,  #45484d 0%,#000000 100%);
+}
+/* CSS Webform */
+.webform-submission-form fieldset,
+.webform-submission-form fieldset .fieldset-wrapper.w3-panel {
+  border: none;
+  background: transparent!important;
+  margin: 0 auto;
+  padding: 0;
+}
+.webform-submission-form .form-actions {
+  text-align: center;
+}
+.webform-submission-form .form-actions > input {
+  margin: 15px 7px!important;
+}
+.webform-submission-form .form-type-webform-rating label {
+  height: 25px;
+  float: left;
+}
+.webform-multiple-table td input[type="image"] {
+  border-color: #ccc;
+}
+.webform-multiple-add {
+  text-align: center;
+}
+.webform-multiple-add .form-type-number input {
+  display: inline-block;
+  margin: 0;
+  width: 4em;
+}
+.webform-multiple-add div.w3-section.form-item {
+  width: auto;
+  clear: none;
+}
+.webform-multiple-add > div,
+.webform-multiple-add > input {
+  float: left;
+  margin-right: 10px;
+}
+.webform-multiple-add .field-suffix {
+  font-size: 90%;
+}
+.webform-multiple-table td.webform-multiple-table--handle {
+  width: auto;
+}
+.webform-has-field-suffix > div + span.field-suffix,
+.webform-has-field-prefix span.field-prefix + div {
+  display: inline-block;
+  clear: none;
+}
+.webform-multiple-table td input[type="image"] + input[type="image"] {
+  margin: 2px 0 0 0;
+}
+/* CSS Form */
+form > details.form-wrapper::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+form > details.form-wrapper {
+  float: left;
+  width: 100%;
+}
+form details.form-wrapper > summary {
+  cursor: pointer;
+  margin: 10px auto;
+}
+form .tableselect-sort th:first-child,
+form .tableselect-sort td:first-child {
+  width: 85px;
+}
+form tr.draggable td > a,
+form tr.draggable td > div.form-type-radio,
+form tr.draggable td > div.form-type-checkbox {
+  float: left!important;
+  padding: 0!important;
+  margin: 0!important;
+  clear: none!important;
+}
+form a.tabledrag-handle .handle {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+form .draggable a.tabledrag-handle {
+  margin: -3px 5px 0 0!important;
+  width: 25px;
+}
+form tr.draggable .w3-check,
+form tr.draggable .w3-radio {
+  top: 0;
+}
+form .field-multiple-drag {
+  width: 50px;
+}
+form .w3-table-all tr {
+  border-bottom: none;
+}
+form .responsive-enabled {
+  border-collapse: initial;
+}
+form div.form-type-datelist.w3-section.form-item {
+  width: auto;
+  clear: none;
+}
+form .form-type-date label,
+form .form-item-color label,
+form .form-type-select label,
+form .form-type-datelist label,
+form .form-type-datetime label {
+  display: block;
+  clear: both;
+}
+.form-type-datelist > div {
+  padding-left: 0;
+}
+form #edit-datelist,
+form #edit-datetime {
+  padding: 0;
+  margin: 0;
+}
+form #edit-datetime > div {
+  float: left;
+  margin: 0!important;
+  width: 50%;
+}
+form  #edit-datetime > div input {
+  min-width: 165px;
+}
+form .form-type-date,
+form .form-type-datetime,
+form .form-type-webform-time {
+  width: 50%!important;
+  float: left;
+  clear: none;
+}
+form .form-type-date input,
+form .form-type-datetime input,
+form .form-type-webform-time input {
+  width: 99%;
+}
+form .form-item-range > span.field-suffix,
+form .form-item-range .form-item-range__output {
+  display: block;
+  float: left;
+  width: 100%;
+}
+form .form-item-range .form-item-range__output input {
+  width: 4em;
+  display: inline-block;
+  clear: none;
+}
+form .form-item-datelist #edit-datelist > div select {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+form .table-sort-weight.form-select {
+  width: auto;
+}
+form select {
+  min-width: 75px;
+}
+.messages.messages--info {
+  background-position: 2px  17px;
+}
+.js-filter-guidelines {
+  font-size: 85%;
+}
+.js-filter-guidelines li {
+  padding-bottom: 0;
 }

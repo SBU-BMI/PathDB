@@ -130,6 +130,10 @@ textarea:focus,
   animation: borderLeftColors 1s linear forwards;
 }
 
+#footer-menu-inner form.w3-content {
+  border: 1px solid #fff;
+}
+
 @keyframes borderLeftColors {
   0% {
     width: 0;

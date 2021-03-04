@@ -121,6 +121,10 @@ h6 a {
   background-color: #1a2121;
 }
 
+#footer-menu-inner form.w3-content {
+  border: 1px solid #6c8a8a;
+}
+
 #copyright {
   background-color: #0b0e0e;
 }

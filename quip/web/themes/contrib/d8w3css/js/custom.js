@@ -5,6 +5,7 @@
 
 (function ($, Drupal) {
   'use strict';
+
     // Used for fixed menu.
   let origOffsetY;
   let didScroll = false;
@@ -15,56 +16,49 @@
   }
     // Add flex position to the main menu at scroll.
   let scrollWindow = function () {
-    didScroll = true;
-    if (window.scrollY > origOffsetY) {
-      mainNavigation.classList.add('w3-sticky');
+
+  if($("#layout-builder").length){
+      // Remove the match height on layout builder
+      $('.top-region, .main-region, .bottom-region, .footer-region').matchHeight({remove: true});
     }
-    else {
-      if ($('.w3-sticky').length) {
+    didScroll = true;
+    if (mainNavigation){
+      if (window.scrollY > origOffsetY) {
+        mainNavigation.classList.add('w3-sticky');
+      } else {
         mainNavigation.classList.remove('w3-sticky');
       }
     }
+
   };
     // Add and remove classes on window resize.
   let mediaSize = function () {
-    let currentWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    let currentWidth  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     let mainMenuChild = $('#main-navigation-h').css('background-color');
+    const bodyTag = $('body');
     if (currentWidth >= 993) {
       // Add class to the body for large screen.
-      $('body').addClass('large-screen');
-      $('body').removeClass('small-screen');
-      $('body').removeClass('medium-screen');
+      bodyTag.addClass('large-screen').removeClass('small-screen', 'medium-screen');
       $('.ul-parent').removeClass('w3-show');
       $('.ul-child').removeClass('w3-show');
       $('.ul-responsive-h .ul-parent').removeAttr('style');
       $('.ul-responsive-h .ul-child').removeAttr('style');
       $('#main-navigation-h .ul-parent').removeAttr('style');
-      $('#main-navigation-h .ul-child').removeAttr('style');
-      $('#main-navigation-h .ul-child').css('background-color', mainMenuChild);
+      $('#main-navigation-h .ul-child').removeAttr('style').css('background-color', mainMenuChild);
       // Make sure all the inside regions have the same height.
-      $('.top-region').matchHeight({property: 'height'});
-      $('.main-region').matchHeight({property: 'height'});
-      $('.bottom-region').matchHeight({property: 'height'});
-      $('.footer-region').matchHeight({property: 'height'});
+      $('.top-region, .main-region, .bottom-region, .footer-region').matchHeight({property: 'height'});
     }
     else if ((currentWidth >= 601) && (currentWidth <= 992)) {
       // Add class to the body for medium screen.
-      $('body').addClass('medium-screen');
-      $('body').removeClass('large-screen');
-      $('body').removeClass('small-screen');
+      bodyTag.addClass('medium-screen').removeClass('large-screen', 'small-screen');
     }
     else if (currentWidth <= 600) {
             // Add class to the body for small screen.
-      $('body').addClass('small-screen');
-      $('body').removeClass('large-screen');
-      $('body').removeClass('medium-screen');
+      bodyTag.addClass('small-screen').removeClass('large-screen', 'medium-screen');
     }
-    else if (currentWidth <= 992) {
-            // Remove the match height on small screen.
-      $('.top-region').matchHeight({remove: true});
-      $('.main-region').matchHeight({remove: true});
-      $('.bottom-region').matchHeight({remove: true});
-      $('.footer-region').matchHeight({remove: true});
+    else if ( currentWidth <= 992   ) {
+      // Remove the match height on small screen.
+      $('.top-region, .main-region, .bottom-region, .footer-region').matchHeight({remove: true});
     }
   };
 
@@ -219,15 +213,42 @@
 
   Drupal.behaviors.d8w3cssTheme = {
     attach: function (context, settings) {
-            // Change the form color to match the footer color.
-      let footerFormBg = $('#footer-menu').css('background-color');
+
+      // Change the form color to match the footer color.
+      const footerFormBg = $('#footer-menu').css('background-color')
+      const footerFormTxt = $('#footer-menu').css('color');
       $(context)
-            .find('#footer-menu form')
-            .once('#footer-menu form')
-            .css('background-color', footerFormBg);
+        .find('#footer-menu form')
+        .once('#footer-menu form')
+        .css('background-color', footerFormBg).css('color', footerFormTxt);
+     // apply background and color to opened dialog.
+      let layoutBuilderBox = function () {
+        if ($('.ui-dialog').is(':visible')) {
+        const pageTitleBg = $('#page-title').css('background-color');
+        const pageTitleTxt = $('#page-title h1').css('color');
+        const mainContainerBg = $('#main-container').css('background-color');
+        const mainContainerTxt = $('#main-container p').css('color');
+        $(context)
+          .find('.ui-dialog .ui-dialog-titlebar')
+          .once('.ui-dialog .ui-dialog-titlebar')
+          .css('background', pageTitleBg).css('color', pageTitleTxt);
+        $(context)
+          .find('.ui-dialog')
+          .once('.ui-dialog')
+          .css('background', mainContainerBg).css('color', mainContainerTxt);
+        $(context)
+          .find('.ui-dialog .ui-dialog-content')
+          .once('.ui-dialog .ui-dialog-content')
+          .css('background', mainContainerBg).css('color', mainContainerTxt);
+        $(context)
+          .find('.ui-dialog .ui-dialog-buttonpane')
+          .once('.ui-dialog .ui-dialog-buttonpane')
+          .css('background', footerFormBg).css('color', footerFormTxt);
+        }
+      }
 
             // Change the sub menu color as the main menu.
-      let mainMenuChild = $('.main-navigation-wrapper').css('background-color');
+      const mainMenuChild = $('.main-navigation-wrapper').css('background-color');
       $(context)
             .find('.main-navigation-wrapper .ul-child')
             .once('.main-navigation-wrapper .ul-child')
@@ -263,10 +284,13 @@
             .find('#system-theme-settings details > .details-wrapper')
             .once('.details-wrapper')
             .addClass('w3-padding-large w3-left-align');
-      $(context)
-            .find('.d8-fade')
-            .once('.d8-fade')
-            .css('opacity', 0);
+       // Disable top margin if breadcrumb exist.
+      if (document.querySelector('nav.breadcrumb')) {
+        $(context)
+            .find('.main-box')
+            .once('.main-box')
+            .addClass('breadcrumb-found');
+      }
       $(context)
             .find('a > .w3-image')
             .once('a > .w3-image')
@@ -275,11 +299,20 @@
                   $(this).parent().addClass('d8-has-image');
                 }
             );
+      // Disable show on scroll if layout builder is active.
+      if (!document.getElementById("layout-builder")) {
+        $(context)
+          .find('.d8-fade')
+          .once('.d8-fade')
+          .css('opacity', 0);
+        fadeBox();
+        window.addEventListener('scroll', fadeBox);
+      }
+
       mediaSize();
-      fadeBox();
       window.addEventListener('resize', mediaSize);
       window.addEventListener('scroll', scrollWindow);
-      window.addEventListener('scroll', fadeBox);
+
     }
   };
 })(jQuery, Drupal);

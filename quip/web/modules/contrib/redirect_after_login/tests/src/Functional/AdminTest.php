@@ -14,20 +14,6 @@ use Drupal\user\UserInterface;
 class AdminTest extends BrowserTestBase {
 
   /**
-   * Various users for the tests.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $admin_user, $editor_user, $simple_user;
-
-  /**
-   * Various roles for the tests.
-   *
-   * @var \Drupal\user\RoleInterface
-   */
-  protected $admin_role, $editor_role;
-
-  /**
    * The modules to enable.
    *
    * @var array
@@ -37,38 +23,39 @@ class AdminTest extends BrowserTestBase {
   ];
 
   /**
-   * {@inheritdoc}
+   * Account with admin-level privileges.
+   *
+   * @var \Drupal\user\UserInterface
    */
-  protected function setUp() {
-    parent::setUp();
-    // TODO: setup tasks here.
-    $this->admin_role = Role::create([
-      'id' => 'administrator',
-      'label' => 'Administrator',
-    ]);
-    // This role gets all permissions.
-    $this->admin_role->set('is_admin', TRUE)->save();
+  protected $adminUser;
 
-    $this->editor_role = Role::create([
-      'id' => 'editor',
-      'label' => 'Editor',
-    ]);
-    $this->editor_role
-      ->grantPermission('administer redirect_after_login settings')
-      ->save();
+  /**
+   * Account with editor-level privileges.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $editorUser;
 
-    $this->admin_user = $this->drupalCreateUser();
-    $this->admin_user->setUsername('admin_user');
-    $this->admin_user->addRole($this->admin_role->id());
-    $this->admin_user->save();
+  /**
+   * Account with authenticated-level privileges.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $simpleUser;
 
-    $this->editor_user = $this->drupalCreateUser();
-    $this->editor_user->setUsername('editor_user');
-    $this->editor_user->addRole($this->editor_role->id());
-    $this->editor_user->save();
+  /**
+   * Role that grants admin-level privileges.
+   *
+   * @var \Drupal\user\RoleInterface
+   */
+  protected $adminRole;
 
-    $this->simple_user = $this->drupalCreateUser();
-  }
+  /**
+   * Role that grants editor-level privileges.
+   *
+   * @var \Drupal\user\RoleInterface
+   */
+  protected $editorRole;
 
   /**
    * Tests access control for the admin settings path.
@@ -97,6 +84,40 @@ class AdminTest extends BrowserTestBase {
     $this->drupalGet('admin/config/system/redirect');
     $this->assertSession()->statusCodeEquals($status_code);
     $this->drupalLogout();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    // TODO: setup tasks here.
+    $this->admin_role = Role::create([
+      'id'    => 'administrator',
+      'label' => 'Administrator',
+    ]);
+    // This role gets all permissions.
+    $this->admin_role->set('is_admin', TRUE)->save();
+
+    $this->editor_role = Role::create([
+      'id'    => 'editor',
+      'label' => 'Editor',
+    ]);
+    $this->editor_role
+      ->grantPermission('administer redirect_after_login settings')
+      ->save();
+
+    $this->admin_user = $this->drupalCreateUser();
+    $this->admin_user->setUsername('admin_user');
+    $this->admin_user->addRole($this->admin_role->id());
+    $this->admin_user->save();
+
+    $this->editor_user = $this->drupalCreateUser();
+    $this->editor_user->setUsername('editor_user');
+    $this->editor_user->addRole($this->editor_role->id());
+    $this->editor_user->save();
+
+    $this->simple_user = $this->drupalCreateUser();
   }
 
 }

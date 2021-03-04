@@ -4,6 +4,7 @@
  * Allows users to apply customized CSS to themes.
  */
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -36,12 +37,13 @@ function css_editor_page_attachments(array &$page) {
 function css_editor_form_system_theme_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
   $theme = _css_editor_get_edited_theme($form_state);
   if ($theme) {
-    $config = \Drupal::configFactory()->getEditable('css_editor.theme.' . $theme);
+    $config = \Drupal::config('css_editor.theme.' . $theme);
     // Add CSS customization fieldset.
     $form['css_editor'] = array(
       '#type' => 'details',
       '#title' => t('Custom CSS'),
       '#open' => TRUE,
+      '#tree' => TRUE,
     );
     // Switch to enable/disable customization.
     $form['css_editor']['css_enabled'] = array(
@@ -89,7 +91,7 @@ function css_editor_form_system_theme_settings_alter(&$form, FormStateInterface 
     $form['#attached']['library'][] = 'css_editor/codemirror';
     $form['#attached']['library'][] = 'css_editor/css_editor';
     $form['#attached']['drupalSettings']['CSSEditor']['frontPage'] = $preview_url;
-    $form['#submit'][] = '_css_editor_theme_settings_form_submit';
+    array_unshift($form['#submit'], '_css_editor_theme_settings_form_submit');
   }
 }
 
@@ -102,21 +104,24 @@ function _css_editor_theme_settings_form_submit($form, FormStateInterface $form_
     // Save file.
     $path = 'public://css_editor';
     $file = $path . DIRECTORY_SEPARATOR . $theme . '.css';
-    if (file_prepare_directory($path, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      file_unmanaged_save_data($form_state->getValue('css'), $file, FILE_EXISTS_REPLACE);
-      drupal_chmod($file);
+    if (\Drupal::service('file_system')->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
+      \Drupal::service('file_system')->saveData($form_state->getValue(['css_editor', 'css']), $file, FileSystemInterface::EXISTS_REPLACE);
+      \Drupal::service('file_system')->chmod($file);
     }
     // Save settings.
     \Drupal::configFactory()->getEditable('css_editor.theme.' . $theme)
-      ->set('enabled', $form_state->getValue('css_enabled'))
-      ->set('plaintext_enabled', $form_state->getValue('plaintext_enabled'))
-      ->set('autopreview_enabled', $form_state->getValue('autopreview_enabled'))
-      ->set('css', $form_state->getValue('css'))
+      ->set('enabled', $form_state->getValue(['css_editor', 'enabled']))
+      ->set('plaintext_enabled', $form_state->getValue(['css_editor', 'plaintext_enabled']))
+      ->set('autopreview_enabled', $form_state->getValue(['css_editor', 'autopreview_enabled']))
+      ->set('css', $form_state->getValue(['css_editor', 'css']))
       ->set('path', $file)
       ->save();
     // Clear cache.
     drupal_flush_all_caches();
   }
+  // Remove the settings from the form state so the values are not saved in the
+  // theme settings.
+  $form_state->unsetValue('css_editor');
 }
 
 /**
@@ -137,7 +142,7 @@ function _css_editor_get_edited_theme(FormStateInterface $form_state) {
  * @return string|bool
  */
 function _css_editor_get_stylesheet($theme) {
-  $config = \Drupal::configFactory()->getEditable('css_editor.theme.' . $theme);
+  $config = \Drupal::config('css_editor.theme.' . $theme);
   $file = $config->get('path');
   if ($config->get('enabled') && file_exists($file)) {
     return $file;

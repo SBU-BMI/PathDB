@@ -96,7 +96,7 @@ class ShellTest extends TestCase
         $shell->run(null, $this->getOutput());
 
         $this->assertNotContains('__psysh__', $shell->getScopeVariableNames());
-        $this->assertArrayEquals(['one', 'two', 'three', '_', '_e'], $shell->getScopeVariableNames());
+        $this->assertArrayEquals(['one', 'two', 'three', '_'], $shell->getScopeVariableNames());
         $this->assertSame('banana', $shell->getScopeVariable('one'));
         $this->assertSame(123, $shell->getScopeVariable('two'));
         $this->assertSame($three, $shell->getScopeVariable('three'));
@@ -163,8 +163,9 @@ class ShellTest extends TestCase
         $this->assertStringNotContainsString(\PHP_VERSION, $streamContents);
         $this->assertStringNotContainsString(Shell::VERSION, $streamContents);
 
-        // @todo prolly shouldn't have an exit message with raw output, either
-        $this->assertStringContainsString('Goodbye', $streamContents);
+        // There shouldn't be an exit message with non-interactive input
+        $this->assertStringNotContainsString('Goodbye', $streamContents);
+        $this->assertStringNotContainsString('Exiting', $streamContents);
     }
 
     public function testIncludes()
