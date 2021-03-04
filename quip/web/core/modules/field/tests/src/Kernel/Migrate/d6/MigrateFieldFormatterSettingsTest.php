@@ -197,7 +197,7 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal6TestBase {
     $component = $display->getComponent('field_test_datetime');
     $this->assertIdentical($expected, $component);
     // Test that our Id map has the correct data.
-    $this->assertIdentical(['node', 'story', 'teaser', 'field_test'], $this->getMigration('d6_field_formatter_settings')->getIdMap()->lookupDestinationId(['story', 'teaser', 'node', 'field_test']));
+    $this->assertIdentical([['node', 'story', 'teaser', 'field_test']], $this->getMigration('d6_field_formatter_settings')->getIdMap()->lookupDestinationIds(['story', 'teaser', 'node', 'field_test']));
 
     // Test hidden field.
     $this->assertComponentNotExists('node.test_planet.teaser', 'field_test_text_single_checkbox');
@@ -206,7 +206,7 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal6TestBase {
     // reference field.
     $display = EntityViewDisplay::load('node.employee.default');
     $component = $display->getComponent('field_company');
-    $this->assertInternalType('array', $component);
+    $this->assertIsArray($component);
     $this->assertSame('entity_reference_label', $component['type']);
     // The default node reference formatter shows the referenced node's title
     // as a link.
@@ -214,14 +214,14 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal6TestBase {
 
     $display = EntityViewDisplay::load('node.employee.teaser');
     $component = $display->getComponent('field_company');
-    $this->assertInternalType('array', $component);
+    $this->assertIsArray($component);
     $this->assertSame('entity_reference_label', $component['type']);
     // The plain node reference formatter shows the referenced node's title,
     // unlinked.
     $this->assertFalse($component['settings']['link']);
 
     $component = $display->getComponent('field_commander');
-    $this->assertInternalType('array', $component);
+    $this->assertIsArray($component);
     $this->assertSame('entity_reference_label', $component['type']);
     // The default user reference formatter links to the referenced user.
     $this->assertTrue($component['settings']['link']);

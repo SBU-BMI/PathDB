@@ -28,12 +28,12 @@ use Drupal\jsonapi\ResourceType\ResourceType;
  * @internal JSON:API maintains no PHP API. The API is the HTTP API. This class
  *   may change at any time and could break any dependencies on it.
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3032787
+ * @see https://www.drupal.org/project/drupal/issues/3032787
  * @see jsonapi.api.php
  *
  * @see http://jsonapi.org/format/#document-resource-object-relationships
  * @see https://github.com/json-api/json-api/pull/1156#issuecomment-325377995
- * @see https://www.drupal.org/project/jsonapi/issues/2864680
+ * @see https://www.drupal.org/project/drupal/issues/2864680
  */
 class ResourceIdentifier implements ResourceIdentifierInterface {
 
@@ -311,12 +311,15 @@ class ResourceIdentifier implements ResourceIdentifierInterface {
    */
   public static function toResourceIdentifiers(EntityReferenceFieldItemListInterface $items) {
     $relationships = [];
-    foreach ($items as $item) {
+    foreach ($items->filterEmptyItems() as $item) {
       // Create a ResourceIdentifier from the field item. This will make it
       // comparable with all previous field items. Here, it is assumed that the
       // resource identifier is unique so it has no arity. If a parallel
       // relationship is encountered, it will be assigned later.
       $relationship = static::toResourceIdentifier($item);
+      if ($relationship->getResourceType()->isInternal()) {
+        continue;
+      }
       // Now, iterate over the previously seen resource identifiers in reverse
       // order. Reverse order is important so that when a parallel relationship
       // is encountered, it will have the highest arity value so the current
@@ -416,7 +419,8 @@ class ResourceIdentifier implements ResourceIdentifierInterface {
     assert($host_entity instanceof EntityInterface);
     $resource_type = $resource_type_repository->get($host_entity->getEntityTypeId(), $host_entity->bundle());
     assert($resource_type instanceof ResourceType);
-    $relatable_resource_types = $resource_type->getRelatableResourceTypesByField($field->getName());
+    $relatable_resource_types = $resource_type->getRelatableResourceTypesByField($resource_type->getPublicName($field->getName()));
+    assert(!empty($relatable_resource_types));
     $get_metadata = function ($type) {
       return [
         'links' => [

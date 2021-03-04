@@ -22,6 +22,11 @@ class HandlerFilterUserNameTest extends ViewTestBase {
   public static $modules = ['views_ui', 'user_test_views'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Views used by this test.
    *
    * @var array
@@ -85,7 +90,10 @@ class HandlerFilterUserNameTest extends ViewTestBase {
    * Tests using the user interface.
    */
   public function testAdminUserInterface() {
-    $admin_user = $this->drupalCreateUser(['administer views', 'administer site configuration']);
+    $admin_user = $this->drupalCreateUser([
+      'administer views',
+      'administer site configuration',
+    ]);
     $this->drupalLogin($admin_user);
 
     $path = 'admin/structure/views/nojs/handler/test_user_name/default/filter/uid';

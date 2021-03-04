@@ -234,7 +234,7 @@ interface ModuleHandlerInterface {
    *   An array of return values of the hook implementations. If modules return
    *   arrays from their implementations, those are merged into one array
    *   recursively. Note: integer keys in arrays will be lost, as the merge is
-   *   done using array_merge_recursive().
+   *   done using Drupal\Component\Utility\NestedArray::mergeDeepArray().
    */
   public function invokeAll($hook, array $args = []);
 
@@ -284,7 +284,7 @@ interface ModuleHandlerInterface {
    *   An array of return values of the hook implementations. If modules return
    *   arrays from their implementations, those are merged into one array
    *   recursively. Note: integer keys in arrays will be lost, as the merge is
-   *   done using array_merge_recursive().
+   *   done using Drupal\Component\Utility\NestedArray::mergeDeepArray().
    *
    * @see \Drupal\Core\Extension\ModuleHandlerInterface::invokeAll()
    * @see https://www.drupal.org/core/deprecation#how-hook
@@ -310,7 +310,7 @@ interface ModuleHandlerInterface {
    *   $this->alter('mymodule_data', $alterable1, $alterable2, $context);
    * @endcode
    *
-   * Note that objects are always passed by reference in PHP5. If it is absolutely
+   * Note that objects are always passed by reference. If it is absolutely
    * required that no implementation alters a passed object in $context, then an
    * object needs to be cloned:
    * @code

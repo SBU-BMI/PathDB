@@ -6,6 +6,7 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Extension\ExtensionDiscovery;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\Tests\DeprecatedModulesTestTrait;
 
 /**
  * Tests the field type manager.
@@ -14,6 +15,8 @@ use Drupal\entity_test\Entity\EntityTest;
  */
 class FieldTypePluginManagerTest extends FieldKernelTestBase {
 
+  use DeprecatedModulesTestTrait;
+
   /**
    * Tests the default settings convenience methods.
    */
@@ -21,8 +24,8 @@ class FieldTypePluginManagerTest extends FieldKernelTestBase {
     $field_type_manager = \Drupal::service('plugin.manager.field.field_type');
     foreach (['test_field', 'shape', 'hidden_test_field'] as $type) {
       $definition = $field_type_manager->getDefinition($type);
-      $this->assertIdentical($field_type_manager->getDefaultStorageSettings($type), $definition['class']::defaultStorageSettings(), format_string("%type storage settings were returned", ['%type' => $type]));
-      $this->assertIdentical($field_type_manager->getDefaultFieldSettings($type), $definition['class']::defaultFieldSettings(), format_string(" %type field settings were returned", ['%type' => $type]));
+      $this->assertIdentical($field_type_manager->getDefaultStorageSettings($type), $definition['class']::defaultStorageSettings(), new FormattableMarkup("%type storage settings were returned", ['%type' => $type]));
+      $this->assertIdentical($field_type_manager->getDefaultFieldSettings($type), $definition['class']::defaultFieldSettings(), new FormattableMarkup(" %type field settings were returned", ['%type' => $type]));
     }
   }
 
@@ -48,7 +51,7 @@ class FieldTypePluginManagerTest extends FieldKernelTestBase {
 
       $instance = $field_type_manager->createInstance($type, $configuration);
 
-      $this->assertTrue($instance instanceof $class, new FormattableMarkup('Created a @class instance', ['@class' => $class]));
+      $this->assertInstanceOf($class, $instance);
       $this->assertEqual($field_name, $instance->getName(), new FormattableMarkup('Instance name is @name', ['@name' => $field_name]));
     }
   }
@@ -79,7 +82,7 @@ class FieldTypePluginManagerTest extends FieldKernelTestBase {
 
     $instance = $field_type_manager->createInstance($type, $configuration);
 
-    $this->assertTrue($instance instanceof $class, new FormattableMarkup('Created a @class instance', ['@class' => $class]));
+    $this->assertInstanceOf($class, $instance);
     $this->assertEqual($field_name, $instance->getName(), new FormattableMarkup('Instance name is @name', ['@name' => $field_name]));
     $this->assertEqual($instance->getFieldDefinition()->getLabel(), 'Jenny', 'Instance label is Jenny');
     $this->assertEqual($instance->getFieldDefinition()->getDefaultValue($entity), [['value' => 8675309]], 'Instance default_value is 8675309');

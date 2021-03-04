@@ -115,7 +115,7 @@ class RowTest extends UnitTestCase {
     $invalid_values = [
       'title' => 'node X',
     ];
-    $this->setExpectedException(\Exception::class);
+    $this->expectException(\Exception::class);
     $row = new Row($invalid_values, $this->testSourceIds);
   }
 
@@ -130,7 +130,7 @@ class RowTest extends UnitTestCase {
     $row->rehash();
     $this->assertSame($this->testHashMod, $row->getHash(), 'Hash changed correctly.');
     $row->freezeSource();
-    $this->setExpectedException(\Exception::class);
+    $this->expectException(\Exception::class);
     $row->setSourceProperty('title', 'new title');
   }
 
@@ -140,7 +140,8 @@ class RowTest extends UnitTestCase {
   public function testSetFrozenRow() {
     $row = new Row($this->testValues, $this->testSourceIds);
     $row->freezeSource();
-    $this->setExpectedException(\Exception::class, "The source is frozen and can't be changed any more");
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage("The source is frozen and can't be changed any more");
     $row->setSourceProperty('title', 'new title');
   }
 
@@ -404,15 +405,15 @@ class RowTest extends UnitTestCase {
           'destination_value_3',
         ],
       ],
-      'Mix of keys including non-existant' => [
+      'Mix of keys including non-existent' => [
         'keys' => [
           'shared_key_1',
           '@shared_key_1',
           '@@shared_key_2',
           '@@@shared_key_2',
           '@@@@@@@@@shared_key_3',
-          'non_existant_source_key',
-          '@non_existant_destination_key',
+          'non_existent_source_key',
+          '@non_existent_destination_key',
         ],
         'values' => [
           'source_shared_value_1',

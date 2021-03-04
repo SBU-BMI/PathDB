@@ -9,7 +9,6 @@
 
 namespace Drupal\Sniffs\Semantics;
 
-use Drupal\Sniffs\Semantics\FunctionCall;
 use PHP_CodeSniffer\Files\File;
 
 /**
@@ -26,7 +25,7 @@ class LStringTranslatableSniff extends FunctionCall
     /**
      * Returns an array of function names this test wants to listen for.
      *
-     * @return array
+     * @return array<string>
      */
     public function registerFunctionNames()
     {
@@ -59,7 +58,7 @@ class LStringTranslatableSniff extends FunctionCall
         $argument = $this->getArgument(1);
         if ($tokens[$argument['start']]['code'] === T_CONSTANT_ENCAPSED_STRING
             // If the string starts with a HTML tag we don't complain.
-            && $tokens[$argument['start']]['content']{1} !== '<'
+            && $tokens[$argument['start']]['content'][1] !== '<'
         ) {
             $error = 'The $text argument to l() should be enclosed within t() so that it is translatable';
             $phpcsFile->addError($error, $stackPtr, 'LArg');

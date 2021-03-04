@@ -32,6 +32,11 @@ class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'classy';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     $this->entityTypeId = 'menu_link_content';
     $this->bundle = 'menu_link_content';
@@ -68,7 +73,7 @@ class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
    */
   public function testTranslationLinkOnMenuEditForm() {
     $this->drupalGet('admin/structure/menu/manage/tools');
-    $this->assertNoLink(t('Translate'));
+    $this->assertSession()->linkNotExists(t('Translate'));
 
     $menu_link_content = MenuLinkContent::create([
       'menu_name' => 'tools',
@@ -77,7 +82,7 @@ class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
     ]);
     $menu_link_content->save();
     $this->drupalGet('admin/structure/menu/manage/tools');
-    $this->assertLink(t('Translate'));
+    $this->assertSession()->linkExists(t('Translate'));
   }
 
   /**
@@ -88,7 +93,7 @@ class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
     $entityId = $this->createEntity([], 'en');
 
     // Set up Seven as the admin theme to test.
-    $this->container->get('theme_handler')->install(['seven']);
+    $this->container->get('theme_installer')->install(['seven']);
     $edit = [];
     $edit['admin_theme'] = 'seven';
     $this->drupalPostForm('admin/appearance', $edit, t('Save configuration'));

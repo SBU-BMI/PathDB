@@ -177,19 +177,22 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
    */
   public function scan($text) {
     // Matches tokens with the following pattern: {{ $name.$property_path }}
-    // $name and $property_path may not contain {{ }} characters.
+    // $name and $property_path may not contain { or } characters.
     // $name may not contain . or whitespace characters, but $property_path may.
+    // $name may optionally contain a prefix of the form "@service_id:" which
+    // indicates it's a global context variable. In this case, the prefix
+    // starts with @, ends with :, and doesn't contain any whitespace.
     $number_of_tokens = preg_match_all('/
-      \{\{\s*            # {{ - pattern start
-      ([^\s\{\}.|]*)     # $match[1] $name not containing whitespace . | { or }
-      (                  # $match[2] begins
+      \{\{\s*                   # {{ - pattern start
+      ((?:@\S+:)?[^\s\{\}.|]*)  # $match[1] $name not containing whitespace . | { or }, with optional prefix
+      (                         # $match[2] begins
         (
-          (\.|\s*\|\s*)  # . with no spaces on either side, or | as separator
-          [^\s\{\}.|]    # after separator we need at least one character
+          (\.|\s*\|\s*)         # . with no spaces on either side, or | as separator
+          [^\s\{\}.|]           # after separator we need at least one character
         )
-        ([^\{\}]*)       # but then almost anything goes up until pattern end
-      )?                 # $match[2] is optional
-      \s*\}\}            # }} - pattern end
+        ([^\{\}]*)              # but then almost anything goes up until pattern end
+      )?                        # $match[2] is optional
+      \s*\}\}                   # }} - pattern end
       /x', $text, $matches);
 
     $names = $matches[1];

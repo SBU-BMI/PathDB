@@ -37,7 +37,6 @@ class SymfonyTestsListenerTrait
     private $gatheredDeprecations = array();
     private $previousErrorHandler;
     private $testsWithWarnings;
-    private $reportUselessTests;
     private $error;
     private $runsInSeparateProcess = false;
 
@@ -47,9 +46,14 @@ class SymfonyTestsListenerTrait
     public function __construct(array $mockedNamespaces = array())
     {
         if (class_exists('PHPUnit_Util_Blacklist')) {
-            \PHPUnit_Util_Blacklist::$blacklistedClassNames['\Symfony\Bridge\PhpUnit\Legacy\SymfonyTestsListenerTrait'] = 2;
+            \PHPUnit_Util_Blacklist::$blacklistedClassNames[__CLASS__] = 2;
+        } elseif (method_exists('PHPUnit\Util\Blacklist', 'addDirectory')) {
+            eval(" // PHP 5.3 compat
+            (new \PHPUnit\Util\Blacklist())->getBlacklistedDirectories();
+            \PHPUnit\Util\Blacklist::addDirectory(\dirname(__FILE__, 2));
+            ");
         } else {
-            Blacklist::$blacklistedClassNames['\Symfony\Bridge\PhpUnit\Legacy\SymfonyTestsListenerTrait'] = 2;
+            Blacklist::$blacklistedClassNames[__CLASS__] = 2;
         }
 
         $warn = false;
@@ -198,10 +202,6 @@ class SymfonyTestsListenerTrait
     public function startTest($test)
     {
         if (-2 < $this->state && ($test instanceof \PHPUnit\Framework\TestCase || $test instanceof TestCase)) {
-            if (null !== $test->getTestResultObject()) {
-                $this->reportUselessTests = $test->getTestResultObject()->isStrictAboutTestsThatDoNotTestAnything();
-            }
-
             // This event is triggered before the test is re-run in isolation
             if ($this->willBeIsolated($test)) {
                 $this->runsInSeparateProcess = tempnam(sys_get_temp_dir(), 'deprec');
@@ -225,6 +225,10 @@ class SymfonyTestsListenerTrait
                 if (\in_array('dns-sensitive', $groups, true)) {
                     DnsMock::register(\get_class($test));
                 }
+            }
+
+            if (!$test->getTestResultObject()) {
+                return;
             }
 
             $annotations = $Test::parseTestMethodAnnotations(\get_class($test), $test->getName(false));
@@ -266,11 +270,6 @@ class SymfonyTestsListenerTrait
         $className = \get_class($test);
         $classGroups = $Test::getGroups($className);
         $groups = $Test::getGroups($className, $test->getName(false));
-
-        if (null !== $this->reportUselessTests) {
-            $test->getTestResultObject()->beStrictAboutTestsThatDoNotTestAnything($this->reportUselessTests);
-            $this->reportUselessTests = null;
-        }
 
         if ($errored = null !== $this->error) {
             $test->getTestResultObject()->addError($test, $this->error, 0);
@@ -353,7 +352,7 @@ class SymfonyTestsListenerTrait
         if (\is_array($parsedMsg)) {
             $msg = $parsedMsg['deprecation'];
         }
-        if (error_reporting()) {
+        if (error_reporting() & $type) {
             $msg = 'Unsilenced deprecation: '.$msg;
         }
         $this->gatheredDeprecations[] = $msg;

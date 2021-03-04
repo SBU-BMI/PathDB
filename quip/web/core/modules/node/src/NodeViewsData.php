@@ -208,7 +208,7 @@ class NodeViewsData extends EntityViewsData {
       'id' => 'node_nid',
       'numeric' => TRUE,
     ];
-    // @todo the NID field needs different behaviour on revision/non-revision
+    // @todo the NID field needs different behavior on revision/non-revision
     //   tables. It would be neat if this could be encoded in the base field
     //   definition.
     $data['node_field_revision']['nid']['relationship']['id'] = 'standard';
@@ -243,8 +243,12 @@ class NodeViewsData extends EntityViewsData {
 
     $data['node_field_revision']['langcode']['help'] = $this->t('The language the original content is in.');
 
-    $data['node_revision']['revision_uid']['help'] = $this->t('Relate a content revision to the user who created the revision.');
+    $data['node_revision']['revision_uid']['help'] = $this->t('The user who created the revision.');
     $data['node_revision']['revision_uid']['relationship']['label'] = $this->t('revision user');
+    $data['node_revision']['revision_uid']['filter']['id'] = 'user_name';
+
+    $data['node_revision']['table']['join']['node_field_data']['left_field'] = 'vid';
+    $data['node_revision']['table']['join']['node_field_data']['field'] = 'vid';
 
     $data['node_field_revision']['table']['wizard_id'] = 'node_field_revision';
 

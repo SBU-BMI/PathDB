@@ -10,6 +10,11 @@ namespace Drupal\Tests\views\Functional\Wizard;
  */
 class ItemsPerPageTest extends WizardTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
@@ -51,7 +56,7 @@ class ItemsPerPageTest extends WizardTestBase {
     $view['block[items_per_page]'] = 3;
     $this->drupalPostForm('admin/structure/views/add', $view, t('Save and edit'));
     $this->drupalGet($view['page[path]']);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Make sure the page display shows the nodes we expect, and that they
     // appear in the expected order.

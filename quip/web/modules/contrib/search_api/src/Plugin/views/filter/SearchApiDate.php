@@ -63,21 +63,6 @@ class SearchApiDate extends Date {
       return TRUE;
     }
 
-    // Unfortunately, this is necessary due to a bug in our parent filter. See
-    // #2704077.
-    if (!empty($this->options['expose']['identifier'])) {
-      $value = &$input[$this->options['expose']['identifier']];
-      if (!is_array($value)) {
-        $value = [
-          'value' => $value,
-        ];
-      }
-      $value += [
-        'min' => '',
-        'max' => '',
-      ];
-    }
-
     $return = parent::acceptExposedInput($input);
 
     if (!$return) {
@@ -115,7 +100,7 @@ class SearchApiDate extends Date {
    */
   protected function opSimple($field) {
     $value = intval(strtotime($this->value['value'], 0));
-    if (!empty($this->value['type']) && $this->value['type'] == 'offset') {
+    if (($this->value['type'] ?? '') == 'offset') {
       $time = $this->getTimeService()->getRequestTime();
       $value = strtotime($this->value['value'], $time);
     }

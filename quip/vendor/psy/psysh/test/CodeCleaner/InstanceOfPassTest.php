@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,22 +15,31 @@ use Psy\CodeCleaner\InstanceOfPass;
 
 class InstanceOfPassTest extends CodeCleanerTestCase
 {
-    protected function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new InstanceOfPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalidStatement($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()
     {
+        if (\version_compare(\PHP_VERSION, '7.3', '>=')) {
+            return [];
+        }
+
         return [
             ['null instanceof stdClass'],
             ['true instanceof stdClass'],
@@ -43,6 +52,9 @@ class InstanceOfPassTest extends CodeCleanerTestCase
             ['true && false instanceof stdClass'],
             ['"a"."b" instanceof stdClass'],
             ['!5 instanceof stdClass'],
+            ['[1] instanceof stdClass'],
+            ['(1+1) instanceof stdClass'],
+            ['DateTime::ISO8601 instanceof stdClass'],
         ];
     }
 
@@ -60,12 +72,28 @@ class InstanceOfPassTest extends CodeCleanerTestCase
         $data = [
             ['$a instanceof stdClass'],
             ['strtolower("foo") instanceof stdClass'],
-            ['array(1) instanceof stdClass'],
             ['(string) "foo" instanceof stdClass'],
-            ['(1+1) instanceof stdClass'],
             ['"foo ${foo} $bar" instanceof stdClass'],
-            ['DateTime::ISO8601 instanceof stdClass'],
         ];
+
+        if (\version_compare(\PHP_VERSION, '7.3', '>=')) {
+            return \array_merge($data, [
+                ['null instanceof stdClass'],
+                ['true instanceof stdClass'],
+                ['9 instanceof stdClass'],
+                ['1.0 instanceof stdClass'],
+                ['"foo" instanceof stdClass'],
+                ['__DIR__ instanceof stdClass'],
+                ['PHP_SAPI instanceof stdClass'],
+                ['1+1 instanceof stdClass'],
+                ['true && false instanceof stdClass'],
+                ['"a"."b" instanceof stdClass'],
+                ['!5 instanceof stdClass'],
+                ['[1] instanceof stdClass'],
+                ['(1+1) instanceof stdClass'],
+                ['DateTime::ISO8601 instanceof stdClass'],
+            ]);
+        }
 
         return $data;
     }

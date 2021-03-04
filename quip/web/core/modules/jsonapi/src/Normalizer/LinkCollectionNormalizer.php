@@ -16,15 +16,15 @@ use Drupal\jsonapi\Normalizer\Value\CacheableNormalization;
  * than one link for a given key.
  *
  * When normalizing more than one link in a LinkCollection with the same key, a
- * unique and random string is appended to the link's key after a colon (:) to
- * differentiate the links.
+ * unique and random string is appended to the link's key after a double dash
+ * (--) to differentiate the links.
  *
  * This may change with a later version of the JSON:API specification.
  *
  * @internal JSON:API maintains no PHP API since its API is the HTTP API. This
  *   class may change at any time and this will break any dependencies on it.
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3032787
+ * @see https://www.drupal.org/project/drupal/issues/3032787
  * @see jsonapi.api.php
  */
 class LinkCollectionNormalizer extends NormalizerBase {
@@ -72,7 +72,7 @@ class LinkCollectionNormalizer extends NormalizerBase {
     foreach ($object as $key => $links) {
       $is_multiple = count($links) > 1;
       foreach ($links as $link) {
-        $link_key = $is_multiple ? sprintf('%s:%s', $key, $this->hashByHref($link)) : $key;
+        $link_key = $is_multiple ? sprintf('%s--%s', $key, $this->hashByHref($link)) : $key;
         $attributes = $link->getTargetAttributes();
         $normalization = array_merge(['href' => $link->getHref()], !empty($attributes) ? ['meta' => $attributes] : []);
         $normalized[$link_key] = new CacheableNormalization($link, $normalization);

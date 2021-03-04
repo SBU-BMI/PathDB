@@ -22,6 +22,11 @@ class NodeTitleTest extends NodeTestBase {
   public static $modules = ['comment', 'views', 'block'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * A user with permission to bypass access content.
    *
    * @var \Drupal\user\UserInterface
@@ -36,7 +41,12 @@ class NodeTitleTest extends NodeTestBase {
     $this->drupalPlaceBlock('system_breadcrumb_block');
     $this->drupalPlaceBlock('page_title_block');
 
-    $this->adminUser = $this->drupalCreateUser(['administer nodes', 'create article content', 'create page content', 'post comments']);
+    $this->adminUser = $this->drupalCreateUser([
+      'administer nodes',
+      'create article content',
+      'create page content',
+      'post comments',
+    ]);
     $this->drupalLogin($this->adminUser);
     $this->addDefaultCommentField('node', 'page');
   }
@@ -78,7 +88,7 @@ class NodeTitleTest extends NodeTestBase {
     $node = $this->drupalCreateNode($settings);
     // Test that 0 appears as <title>.
     $this->drupalGet('node/' . $node->id());
-    $this->assertTitle(0 . ' | Drupal', 'Page title is equal to 0.', 'Node');
+    $this->assertTitle('0 | Drupal');
     // Test that 0 appears in the template <h1>.
     $xpath = '//h1';
     $this->assertSame('0', $this->xpath($xpath)[0]->getText(), 'Node title is displayed as 0.');

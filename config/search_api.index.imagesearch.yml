@@ -35,7 +35,6 @@ field_settings:
         - field.storage.node.field_collection
       module:
         - taxonomy
-        - taxonomy
   imageid:
     label: 'Image ID'
     datasource_id: 'entity:node'
@@ -105,6 +104,7 @@ processor_settings:
     weights:
       preprocess_index: -20
       preprocess_query: -20
+  language_with_fallback: {  }
   rendered_item: {  }
   tokenizer:
     all_fields: true

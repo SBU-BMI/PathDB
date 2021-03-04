@@ -21,9 +21,17 @@ class ThemeTokenTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
-    $account = $this->drupalCreateUser(['administer blocks', 'view the administration theme']);
+    $account = $this->drupalCreateUser([
+      'administer blocks',
+      'view the administration theme',
+    ]);
     $this->drupalLogin($account);
   }
 
@@ -48,7 +56,7 @@ class ThemeTokenTest extends BrowserTestBase {
     $settings = $this->getDrupalSettings();
     $this->assertNotNull($settings['ajaxPageState']['theme_token']);
     // The CSRF token is a 43 length string.
-    $this->assertTrue(is_string($settings['ajaxPageState']['theme_token']));
+    $this->assertIsString($settings['ajaxPageState']['theme_token']);
     $this->assertEqual(strlen($settings['ajaxPageState']['theme_token']), 43);
   }
 

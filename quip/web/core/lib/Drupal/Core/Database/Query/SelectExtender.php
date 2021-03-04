@@ -25,6 +25,8 @@ class SelectExtender implements SelectInterface {
 
   /**
    * A unique identifier for this query object.
+   *
+   * @var string
    */
   protected $uniqueIdentifier;
 
@@ -526,7 +528,7 @@ class SelectExtender implements SelectInterface {
    * {@inheritdoc}
    */
   public function conditionGroupFactory($conjunction = 'AND') {
-    return new Condition($conjunction);
+    return $this->connection->condition($conjunction);
   }
 
   /**

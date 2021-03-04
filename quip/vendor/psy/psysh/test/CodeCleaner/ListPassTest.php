@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,28 +12,30 @@
 namespace Psy\Test\CodeCleaner;
 
 use Psy\CodeCleaner\ListPass;
+use Psy\Exception\ParseErrorException;
 
 class ListPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ListPass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\ParseErrorException
      */
     public function testProcessInvalidStatement($code, $expectedMessage)
     {
-        if (\method_exists($this, 'setExpectedException')) {
-            $this->setExpectedException('Psy\Exception\ParseErrorException', $expectedMessage);
-        } else {
-            $this->expectExceptionMessage($expectedMessage);
-        }
+        $this->expectException(ParseErrorException::class);
+        $this->expectExceptionMessage($expectedMessage);
 
         $stmts = $this->parse($code);
         $this->traverser->traverse($stmts);
+
+        $this->fail();
     }
 
     public function invalidStatements()
@@ -43,26 +45,26 @@ class ListPassTest extends CodeCleanerTestCase
         $errorEmptyList = 'Cannot use empty list';
         $errorAssocListAssign = 'Syntax error, unexpected T_CONSTANT_ENCAPSED_STRING, expecting \',\' or \')\'';
         $errorNonVariableAssign = 'Assignments can only happen to writable values';
-        $errorPhpParserSyntax = 'PHP Parse error: Syntax error, unexpected';
+        $errorPhpParserSyntax = 'PHP Parse error: ';
 
         $invalidExpr = [
-            ['list() = array()', $errorEmptyList],
-            ['list("a") = array(1)', $errorPhpParserSyntax],
+            ['list() = []', $errorEmptyList],
+            ['list("a") = [1]', $errorPhpParserSyntax],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.1', '<')) {
+        if (\version_compare(\PHP_VERSION, '7.1', '<')) {
             return \array_merge($invalidExpr, [
-                ['list("a" => _) = array("a" => 1)', $errorPhpParserSyntax],
+                ['list("a" => _) = ["a" => 1]', $errorPhpParserSyntax],
                 ['[] = []', $errorShortListAssign],
                 ['[$a] = [1]', $errorShortListAssign],
-                ['list("a" => $a) = array("a" => 1)', $errorAssocListAssign],
+                ['list("a" => $a) = ["a" => 1]', $errorAssocListAssign],
                 ['[$a[0], $a[1]] = [1, 2]', $errorShortListAssign],
                 ['[$a->b, $a->c] = [1, 2]', $errorShortListAssign],
             ]);
         }
 
         return \array_merge($invalidExpr, [
-            ['list("a" => _) = array("a" => 1)', $errorPhpParserSyntax],
+            ['list("a" => _) = ["a" => 1]', $errorPhpParserSyntax],
             ['["a"] = [1]', $errorNonVariableAssign],
             ['[] = []', $errorEmptyList],
             ['[,] = [1,2]', $errorEmptyList],
@@ -83,15 +85,15 @@ class ListPassTest extends CodeCleanerTestCase
     public function validStatements()
     {
         $validExpr = [
-            ['list($a) = array(1)'],
-            ['list($x, $y) = array(1, 2)'],
+            ['list($a) = [1]'],
+            ['list($x, $y) = [1, 2]'],
         ];
 
-        if (\version_compare(PHP_VERSION, '7.1', '>=')) {
+        if (\version_compare(\PHP_VERSION, '7.1', '>=')) {
             return \array_merge($validExpr, [
-                ['[$a] = array(1)'],
+                ['[$a] = [1]'],
                 ['list($b) = [2]'],
-                ['[$x, $y] = array(1, 2)'],
+                ['[$x, $y] = [1, 2]'],
                 ['[$a] = [1]'],
                 ['[$x, $y] = [1, 2]'],
                 ['["_" => $v] = ["_" => 1]'],

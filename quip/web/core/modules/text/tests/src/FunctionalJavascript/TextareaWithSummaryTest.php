@@ -20,12 +20,20 @@ class TextareaWithSummaryTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
     $this->drupalCreateContentType(['type' => 'page']);
 
-    $account = $this->drupalCreateUser(['create page content', 'edit own page content']);
+    $account = $this->drupalCreateUser([
+      'create page content',
+      'edit own page content',
+    ]);
     $this->drupalLogin($account);
   }
 

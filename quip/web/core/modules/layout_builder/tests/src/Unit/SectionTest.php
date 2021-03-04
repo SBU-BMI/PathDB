@@ -59,7 +59,8 @@ class SectionTest extends UnitTestCase {
    * @covers ::getComponent
    */
   public function testGetComponentInvalidUuid() {
-    $this->setExpectedException(\InvalidArgumentException::class, 'Invalid UUID "invalid-uuid"');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Invalid UUID "invalid-uuid"');
     $this->section->getComponent('invalid-uuid');
   }
 
@@ -122,7 +123,8 @@ class SectionTest extends UnitTestCase {
    * @covers ::insertAfterComponent
    */
   public function testInsertAfterComponentValidUuidRegionMismatch() {
-    $this->setExpectedException(\InvalidArgumentException::class, 'Invalid preceding UUID "existing-uuid"');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Invalid preceding UUID "existing-uuid"');
     $this->section->insertAfterComponent('existing-uuid', new SectionComponent('new-uuid', 'ordered-region'));
   }
 
@@ -130,7 +132,8 @@ class SectionTest extends UnitTestCase {
    * @covers ::insertAfterComponent
    */
   public function testInsertAfterComponentInvalidUuid() {
-    $this->setExpectedException(\InvalidArgumentException::class, 'Invalid preceding UUID "invalid-uuid"');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Invalid preceding UUID "invalid-uuid"');
     $this->section->insertAfterComponent('invalid-uuid', new SectionComponent('new-uuid', 'ordered-region'));
   }
 
@@ -169,7 +172,8 @@ class SectionTest extends UnitTestCase {
    * @covers ::insertComponent
    */
   public function testInsertComponentInvalidDelta() {
-    $this->setExpectedException(\OutOfBoundsException::class, 'Invalid delta "7" for the "new-uuid" component');
+    $this->expectException(\OutOfBoundsException::class);
+    $this->expectExceptionMessage('Invalid delta "7" for the "new-uuid" component');
     $this->section->insertComponent(7, new SectionComponent('new-uuid', 'ordered-region'));
   }
 
@@ -310,42 +314,42 @@ class SectionTest extends UnitTestCase {
    * @covers ::unsetThirdPartySetting
    * @dataProvider providerTestUnsetThirdPartySetting
    */
-  public function testUnsetThirdPartySetting() {
-    $this->section->unsetThirdPartySetting('bad_judgement', 'blink_speed');
-    $this->assertSame(['spin_direction' => 'clockwise'], $this->section->getThirdPartySettings('bad_judgement'));
-    $this->section->unsetThirdPartySetting('hunt_and_peck', 'delay');
-    $this->assertSame([], $this->section->getThirdPartySettings('hunt_and_peck'));
-    $this->section->unsetThirdPartySetting('bad_judgement', 'non_existing_key');
-    $this->section->unsetThirdPartySetting('non_existing_provider', 'non_existing_key');
+  public function testUnsetThirdPartySetting($provider, $key, $expected) {
+    $this->section->unsetThirdPartySetting($provider, $key);
+    $this->assertSame($expected, $this->section->getThirdPartySettings($provider));
   }
 
   /**
-   * Provides test data for ::testUnsetThirdPartySettings().
+   * Provides test data for ::testUnsetThirdPartySetting().
    */
   public function providerTestUnsetThirdPartySetting() {
     $data = [];
-    $data[] = [
+    $data['Key with values'] = [
       'bad_judgement',
       'blink_speed',
       [
         'spin_direction' => 'clockwise',
       ],
     ];
-    $data[] = [
+    $data['Key without values'] = [
       'hunt_and_peck',
       'delay',
       [],
     ];
-    $data[] = [
+    $data['Non-existing key'] = [
       'bad_judgement',
       'non_existing_key',
-      [],
+      [
+        'blink_speed' => 'fast',
+        'spin_direction' => 'clockwise',
+      ],
     ];
-    $data[] = [
+    $data['Non-existing provider'] = [
       'non_existing_provider',
       'non_existing_key',
       [],
     ];
+
     return $data;
   }
 

@@ -81,7 +81,7 @@ class CacheTest extends ViewsKernelTestBase {
     // Test the default (non-paged) display.
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(5, count($view->result), 'The number of returned rows match.');
+    $this->assertCount(5, $view->result, 'The number of returned rows match.');
 
     // Add another man to the beatles.
     $record = [
@@ -97,7 +97,7 @@ class CacheTest extends ViewsKernelTestBase {
     $view->destroy();
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(5, count($view->result), 'The number of returned rows match.');
+    $this->assertCount(5, $view->result, 'The number of returned rows match.');
   }
 
   /**
@@ -108,7 +108,7 @@ class CacheTest extends ViewsKernelTestBase {
   public function testTimeResultCachingWithFilter() {
     // Check that we can find the test filter plugin.
     $plugin = $this->container->get('plugin.manager.views.filter')->createInstance('test_filter');
-    $this->assertTrue($plugin instanceof FilterPlugin, 'Test filter plugin found.');
+    $this->assertInstanceOf(FilterPlugin::class, $plugin);
 
     $view = Views::getView('test_filter');
     $view->initDisplay();
@@ -141,7 +141,7 @@ class CacheTest extends ViewsKernelTestBase {
     $dataset = [['name' => 'John']];
 
     // Verify the result.
-    $this->assertEqual(1, count($view->result), 'The number of returned rows match.');
+    $this->assertCount(1, $view->result, 'The number of returned rows match.');
     $this->assertIdenticalResultSet($view, $dataset, [
       'views_test_data_name' => 'name',
     ]);
@@ -172,7 +172,7 @@ class CacheTest extends ViewsKernelTestBase {
     $dataset = [['name' => 'Ringo']];
 
     // Verify the result.
-    $this->assertEqual(1, count($view->result), 'The number of returned rows match.');
+    $this->assertCount(1, $view->result, 'The number of returned rows match.');
     $this->assertIdenticalResultSet($view, $dataset, [
       'views_test_data_name' => 'name',
     ]);
@@ -235,7 +235,7 @@ class CacheTest extends ViewsKernelTestBase {
 
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(5, count($view->result), 'The number of returned rows match.');
+    $this->assertCount(5, $view->result, 'The number of returned rows match.');
 
     // Add another man to the beatles.
     $record = [
@@ -255,7 +255,7 @@ class CacheTest extends ViewsKernelTestBase {
 
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(6, count($view->result), 'The number of returned rows match.');
+    $this->assertCount(6, $view->result, 'The number of returned rows match.');
   }
 
   /**
@@ -291,11 +291,11 @@ class CacheTest extends ViewsKernelTestBase {
       return $renderer->render($output);
     });
 
-    $this->assertTrue(in_array('views_test_data/test', $output['#attached']['library']), 'Make sure libraries are added for cached views.');
+    $this->assertContains('views_test_data/test', $output['#attached']['library'], 'Make sure libraries are added for cached views.');
     $this->assertEqual(['foo' => 'bar'], $output['#attached']['drupalSettings'], 'Make sure drupalSettings are added for cached views.');
     // Note: views_test_data_views_pre_render() adds some cache tags.
     $this->assertEqual(['config:views.view.test_cache_header_storage', 'views_test_data:1'], $output['#cache']['tags']);
-    $this->assertEqual(['non-existing-placeholder-just-for-testing-purposes' => ['#lazy_builder' => ['views_test_data_placeholders', ['bar']]]], $output['#attached']['placeholders']);
+    $this->assertEqual(['non-existing-placeholder-just-for-testing-purposes' => ['#lazy_builder' => ['Drupal\views_test_data\Controller\ViewsTestDataController::placeholderLazyBuilder', ['bar']]]], $output['#attached']['placeholders']);
     $this->assertFalse(!empty($view->build_info['pre_render_called']), 'Make sure hook_views_pre_render is not called for the cached view.');
   }
 
@@ -341,7 +341,7 @@ class CacheTest extends ViewsKernelTestBase {
 
     // Assert there are results, empty results would mean this test case would
     // pass otherwise.
-    $this->assertTrue(count($cache->data['result']), 'Results saved in cached data.');
+    $this->assertGreaterThan(0, count($cache->data['result']), 'Results saved in cached data.');
 
     // Assert each row doesn't contain '_entity' or '_relationship_entities'
     // items.

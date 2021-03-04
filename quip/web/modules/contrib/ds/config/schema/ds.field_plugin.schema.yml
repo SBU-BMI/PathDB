@@ -47,6 +47,14 @@ ds.field_plugin.link:
 ds.field_plugin.user:
   type: ds.field_plugin.entity
 
+ds.field_plugin.mail_link:
+  type: mapping
+  label: 'Mapping for the mail link field settings'
+  mapping:
+    mail_link:
+      type: boolean
+      label: 'Link to mail'
+
 ds.field_plugin.entity:
   type: mapping
   label: 'Mapping for the entity field settings'

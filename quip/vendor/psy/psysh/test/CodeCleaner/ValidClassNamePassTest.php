@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,22 +11,28 @@
 
 namespace Psy\Test\CodeCleaner;
 
+use PhpParser\ParserFactory as OriginalParserFactory;
 use Psy\CodeCleaner\ValidClassNamePass;
 
 class ValidClassNamePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ValidClassNamePass());
     }
 
     /**
      * @dataProvider getInvalid
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalid($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function getInvalid()
@@ -94,7 +100,28 @@ class ValidClassNamePassTest extends CodeCleanerTestCase
             ['class ValidClassNamePassTest implements ArrayAccess, stdClass {}'],
             ['interface ValidClassNamePassTest extends stdClass {}'],
             ['interface ValidClassNamePassTest extends ArrayAccess, stdClass {}'],
+        ];
+    }
 
+    /**
+     * @dataProvider getInvalidLegacy
+     */
+    public function testProcessInvalidLegacy($code)
+    {
+        if (\version_compare(\PHP_VERSION, '7.0', '>=')) {
+            $this->markTestSkipped();
+        }
+
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
+
+        $this->parseAndTraverse($code);
+
+        $this->fail();
+    }
+
+    public function getInvalidLegacy()
+    {
+        return [
             // class instantiations
             ['new Psy_Test_CodeCleaner_ValidClassNamePass_Gamma();'],
             ['
@@ -166,6 +193,7 @@ class ValidClassNamePassTest extends CodeCleanerTestCase
             ['class A {} A::FOO'],
             ['$a = new DateTime; $a::ATOM'],
             ['interface A { const B = 1; } A::B'],
+            ['$foo = true ? A::class : B::class'],
 
             // static call
             ['DateTime::createFromFormat()'],
@@ -303,21 +331,28 @@ class ValidClassNamePassTest extends CodeCleanerTestCase
                         break;
                 }
             '],
+            ['
+                interface A {} A::class
+            '],
+            ['
+                interface A {} A::CLASS
+            '],
+            ['
+                class A {} A::class
+            '],
+            ['
+                A::class
+            '],
+            ['
+                A::CLASS
+            '],
         ];
 
         // Ugh. There's gotta be a better way to test for this.
-        if (\class_exists('PhpParser\ParserFactory')) {
+        if (\class_exists(OriginalParserFactory::class)) {
             // PHP 7.0 anonymous classes, only supported by PHP Parser v2.x
             $valid[] = ['$obj = new class() {}'];
-        }
-
-        if (\version_compare(PHP_VERSION, '5.5', '>=')) {
-            $valid[] = ['interface A {} A::class'];
-            $valid[] = ['interface A {} A::CLASS'];
-            $valid[] = ['class A {} A::class'];
-            $valid[] = ['class A {} A::CLASS'];
-            $valid[] = ['A::class'];
-            $valid[] = ['A::CLASS'];
+            $valid[] = ['new class() {}; new class() {}'];
         }
 
         return $valid;

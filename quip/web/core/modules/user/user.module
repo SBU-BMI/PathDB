@@ -12,12 +12,14 @@ use Drupal\Core\Access\AccessibleInterface;
 use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\image\Plugin\Field\FieldType\ImageItem;
 use Drupal\system\Entity\Action;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -29,7 +31,7 @@ use Drupal\user\UserInterface;
  *
  * Keep this under 191 characters so we can use a unique constraint in MySQL.
  *
- * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ * @deprecated in drupal:8.3.0 and is removed from drupal:9.0.0.
  *   Use \Drupal\user\UserInterface::USERNAME_MAX_LENGTH instead.
  *
  * @see https://www.drupal.org/node/2831620
@@ -39,7 +41,7 @@ const USERNAME_MAX_LENGTH = 60;
 /**
  * Only administrators can create user accounts.
  *
- * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ * @deprecated in drupal:8.3.0 and is removed from drupal:9.0.0.
  *   Use \Drupal\user\UserInterface::REGISTER_ADMINISTRATORS_ONLY instead.
  *
  * @see https://www.drupal.org/node/2831620
@@ -49,7 +51,7 @@ const USER_REGISTER_ADMINISTRATORS_ONLY = 'admin_only';
 /**
  * Visitors can create their own accounts.
  *
- * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ * @deprecated in drupal:8.3.0 and is removed from drupal:9.0.0.
  *   Use \Drupal\user\UserInterface::REGISTER_VISITORS instead.
  *
  * @see https://www.drupal.org/node/2831620
@@ -60,7 +62,7 @@ const USER_REGISTER_VISITORS = 'visitors';
  * Visitors can create accounts, but they don't become active without
  * administrative approval.
  *
- * @deprecated in Drupal 8.3.x and will be removed before Drupal 9.0.0.
+ * @deprecated in drupal:8.3.0 and is removed from drupal:9.0.0.
  *   Use \Drupal\user\UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL
  *   instead.
  *
@@ -149,7 +151,7 @@ function user_js_settings_alter(&$settings, AttachedAssetsInterface $assets) {
  * preprocess stage.
  */
 function user_picture_enabled() {
-  $field_definitions = \Drupal::entityManager()->getFieldDefinitions('user', 'user');
+  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('user', 'user');
   return isset($field_definitions['user_picture']);
 }
 
@@ -185,6 +187,19 @@ function user_entity_extra_field_info() {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_presave() for user entities.
+ *
+ * @todo https://www.drupal.org/project/drupal/issues/3112704 Move to
+ *   \Drupal\user\Entity\User::preSave().
+ */
+function user_user_presave(UserInterface $account) {
+  $config = \Drupal::config('system.date');
+  if ($config->get('timezone.user.configurable') && !$account->getTimeZone() && !$config->get('timezone.user.default')) {
+    $account->timezone = $config->get('timezone.default');
+  }
+}
+
+/**
  * Loads multiple users based on certain conditions.
  *
  * This function should be used whenever you need to load more than one user
@@ -200,7 +215,7 @@ function user_entity_extra_field_info() {
  * @return array
  *   An array of user objects, indexed by uid.
  *
- * @deprecated in Drupal 8.0.0 and will be removed before Drupal 9.0.0. Use
+ * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Use
  *   \Drupal\user\Entity\User::loadMultiple().
  *
  * @see https://www.drupal.org/node/2266845
@@ -208,7 +223,7 @@ function user_entity_extra_field_info() {
 function user_load_multiple(array $uids = NULL, $reset = FALSE) {
   @trigger_error('user_load_multiple() is deprecated in Drupal 8.0.0 and will be removed before Drupal 9.0.0. Use \Drupal\user\Entity\User::loadMultiple(). See https://www.drupal.org/node/2266845', E_USER_DEPRECATED);
   if ($reset) {
-    \Drupal::entityManager()->getStorage('user')->resetCache($uids);
+    \Drupal::entityTypeManager()->getStorage('user')->resetCache($uids);
   }
   return User::loadMultiple($uids);
 }
@@ -226,7 +241,7 @@ function user_load_multiple(array $uids = NULL, $reset = FALSE) {
  *   A fully-loaded user object upon successful user load, or NULL if the user
  *   cannot be loaded.
  *
- * @deprecated iin Drupal 8.0.0 and will be removed before Drupal 9.0.0. Use
+ * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Use
  *   Drupal\user\Entity\User::load().
  *
  * @see https://www.drupal.org/node/2266845
@@ -234,7 +249,7 @@ function user_load_multiple(array $uids = NULL, $reset = FALSE) {
 function user_load($uid, $reset = FALSE) {
   @trigger_error('user_load() is deprecated in Drupal 8.0.0 and will be removed before Drupal 9.0.0. Use \Drupal\user\Entity\User::load(). See https://www.drupal.org/node/2266845', E_USER_DEPRECATED);
   if ($reset) {
-    \Drupal::entityManager()->getStorage('user')->resetCache([$uid]);
+    \Drupal::entityTypeManager()->getStorage('user')->resetCache([$uid]);
   }
   return User::load($uid);
 }
@@ -244,9 +259,9 @@ function user_load($uid, $reset = FALSE) {
  *
  * @param string $mail
  *   String with the account's email address.
- * @return object|bool
- *   A fully-loaded $user object upon successful user load or FALSE if user
- *   cannot be loaded.
+ *
+ * @return \Drupal\user\UserInterface|false
+ *   A user entity upon successful user load, or FALSE if user cannot be loaded.
  *
  * @see \Drupal\user\Entity\User::loadMultiple()
  */
@@ -261,9 +276,9 @@ function user_load_by_mail($mail) {
  *
  * @param string $name
  *   String with the account's user name.
- * @return object|bool
- *   A fully-loaded $user object upon successful user load or FALSE if user
- *   cannot be loaded.
+ *
+ * @return \Drupal\user\UserInterface|false
+ *   A user entity upon successful user load, or FALSE if user cannot be loaded.
  *
  * @see \Drupal\user\Entity\User::loadMultiple()
  */
@@ -296,30 +311,26 @@ function user_validate_name($name) {
 
 /**
  * Generate a random alphanumeric password.
+ *
+ * @param int $length
+ *   The desired password length, in characters.
+ *
+ * @return string
+ *   The generated random password.
  */
 function user_password($length = 10) {
-  // This variable contains the list of allowable characters for the
-  // password. Note that the number 0 and the letter 'O' have been
-  // removed to avoid confusion between the two. The same is true
-  // of 'I', 1, and 'l'.
-  $allowable_characters = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  // This variable contains the list of allowed characters for the password.
+  // Note that the number 0 and the letter 'O' have been removed to avoid
+  // confusion between the two. The same is true of 'I', 1, and 'l'.
+  $allowed_characters = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-  // Zero-based count of characters in the allowable list:
-  $len = strlen($allowable_characters) - 1;
+  // The maximum integer we want from random_int().
+  $max = strlen($allowed_characters) - 1;
 
-  // Declare the password as a blank string.
   $pass = '';
 
-  // Loop the number of times specified by $length.
   for ($i = 0; $i < $length; $i++) {
-    do {
-      // Find a secure random number within the range needed.
-      $index = ord(Crypt::randomBytes(1));
-    } while ($index > $len);
-
-    // Each iteration, pick a random character from the
-    // allowable string and append it to the password:
-    $pass .= $allowable_characters[$index];
+    $pass .= $allowed_characters[random_int(0, $max)];
   }
 
   return $pass;
@@ -404,8 +415,15 @@ function user_user_view(array &$build, UserInterface $account, EntityViewDisplay
  * accessibility.
  */
 function user_user_view_alter(array &$build, UserInterface $account, EntityViewDisplayInterface $display) {
-  if (user_picture_enabled() && !empty($build['user_picture'])) {
+  if (!empty($build['user_picture']) && user_picture_enabled()) {
     foreach (Element::children($build['user_picture']) as $key) {
+      if (!isset($build['user_picture'][$key]['#item']) || !($build['user_picture'][$key]['#item'] instanceof ImageItem)) {
+        // User picture field is provided by standard profile install. If the
+        // display is configured to use a different formatter, the #item render
+        // key may not exist, or may not be an image field.
+        continue;
+      }
+      /** @var \Drupal\image\Plugin\Field\FieldType\ImageItem $item */
       $item = $build['user_picture'][$key]['#item'];
       if (!$item->get('alt')->getValue()) {
         $item->get('alt')->setValue(\Drupal::translation()->translate('Profile picture for user @username', ['@username' => $account->getAccountName()]));
@@ -436,12 +454,13 @@ function user_preprocess_block(&$variables) {
  * @return string
  *   An unsanitized string with the username to display.
  *
- * @deprecated in Drupal 8.0.x-dev, will be removed before Drupal 9.0.0.
- *   Use \Drupal\Core\Session\AccountInterface::getDisplayName().
+ * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0.
+ *   Use $account->label() or $account->getDisplayName() instead
  *
- * @todo Remove usage in https://www.drupal.org/node/2311219.
+ * @see https://www.drupal.org/node/3050794
  */
 function user_format_name(AccountInterface $account) {
+  @trigger_error('user_format_name() is deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Use $account->label() or $account->getDisplayName() instead. See https://www.drupal.org/node/3050794', E_USER_DEPRECATED);
   return $account->getDisplayName();
 }
 
@@ -557,7 +576,7 @@ function user_login_finalize(UserInterface $account) {
   // Update the user table timestamp noting user has logged in.
   // This is also used to invalidate one-time login links.
   $account->setLastLoginTime(REQUEST_TIME);
-  \Drupal::entityManager()
+  \Drupal::entityTypeManager()
     ->getStorage('user')
     ->updateLastLoginTimestamp($account);
 
@@ -577,6 +596,18 @@ function user_user_login(UserInterface $account) {
   // Reset static cache of default variables in template_preprocess() to reflect
   // the new user.
   drupal_static_reset('template_preprocess');
+
+  // If the user has a NULL time zone, notify them to set a time zone.
+  $config = \Drupal::config('system.date');
+  if (!$account->getTimezone() && $config->get('timezone.user.configurable') && $config->get('timezone.user.warn')) {
+    \Drupal::messenger()
+      ->addStatus(t('Configure your <a href=":user-edit">account time zone setting</a>.', [
+        ':user-edit' => $account->toUrl('edit-form', [
+          'query' => \Drupal::destination()->getAsArray(),
+          'fragment' => 'edit-timezone',
+        ])->toString(),
+      ]));
+  }
 }
 
 /**
@@ -864,8 +895,17 @@ function user_cancel_methods() {
  *
  * @param int $uid
  *   A user ID.
+ *
+ * @deprecated in drupal:8.8.0 and is removed from drupal:9.0.0. Use the user
+ *   entity's delete method to delete the user.
+ * @code
+ *   Drupal::entityTypeManager->getStorage('user')->load($uid)->delete();
+ * @endcode
+ *
+ * @see https://www.drupal.org/node/3051463
  */
 function user_delete($uid) {
+  @trigger_error("user_delete() is deprecated in drupal:8.8.0. Use the user entity's delete method to delete the user. See https://www.drupal.org/node/3051463", E_USER_DEPRECATED);
   user_delete_multiple([$uid]);
 }
 
@@ -875,10 +915,18 @@ function user_delete($uid) {
  * @param int[] $uids
  *   An array of user IDs.
  *
- * @see hook_ENTITY_TYPE_predelete()
- * @see hook_ENTITY_TYPE_delete()
+ * @deprecated in drupal:8.8.0 and is removed from drupal:9.0.0. Use the
+ *   entity storage system to delete the users.
+ * @code
+ *   $storage_handler = \Drupal::entityTypeManager()->getStorage('user');
+ *   $users = $storage_handler->loadMultiple($uids);
+ *   $storage_handler->delete($users);
+ * @endcode
+ *
+ * @see https://www.drupal.org/node/3051463
  */
 function user_delete_multiple(array $uids) {
+  @trigger_error("user_delete_multiple() is deprecated in drupal:8.8.0. Use the entity storage system to delete the users. See https://www.drupal.org/node/3051463", E_USER_DEPRECATED);
   entity_delete_multiple('user', $uids);
 }
 
@@ -905,9 +953,17 @@ function user_delete_multiple(array $uids) {
  *
  * @return array
  *   An array as expected by \Drupal\Core\Render\RendererInterface::render().
+ *
+ * @deprecated in drupal:8.7.0 and is removed from drupal:9.0.0. Use
+ *   \Drupal::entityTypeManager()->getViewBuilder('user')->view() instead.
+ *
+ * @see https://www.drupal.org/node/3033656
  */
 function user_view($account, $view_mode = 'full', $langcode = NULL) {
-  return entity_view($account, $view_mode, $langcode);
+  @trigger_error("user_view() is deprecated in Drupal 8.7.0 and will be removed before Drupal 9.0.0. Use \Drupal::entityTypeManager()->getViewBuilder('user')->view() instead. See https://www.drupal.org/node/3033656", E_USER_DEPRECATED);
+  return \Drupal::entityTypeManager()
+    ->getViewBuilder('user')
+    ->view($account, $view_mode, $langcode);
 }
 
 /**
@@ -924,9 +980,18 @@ function user_view($account, $view_mode = 'full', $langcode = NULL) {
  * @return array
  *   An array in the format expected by
  *   \Drupal\Core\Render\RendererInterface::render().
+ *
+ * @deprecated in drupal:8.7.0 and is removed from drupal:9.0.0. Use
+ *   \Drupal::entityTypeManager()->getViewBuilder('user')->viewMultiple()
+ *   instead.
+ *
+ * @see https://www.drupal.org/node/3033656
  */
 function user_view_multiple($accounts, $view_mode = 'full', $langcode = NULL) {
-  return entity_view_multiple($accounts, $view_mode, $langcode);
+  @trigger_error("user_view_multiple() is deprecated in Drupal 8.7.0 and will be removed before Drupal 9.0.0. Use \Drupal::entityTypeManager()->getViewBuilder('user')->viewMultiple() instead. See https://www.drupal.org/node/3033656", E_USER_DEPRECATED);
+  return \Drupal::entityTypeManager()
+    ->getViewBuilder('user')
+    ->viewMultiple($accounts, $view_mode, $langcode);
 }
 
 /**
@@ -1041,7 +1106,7 @@ function user_user_role_insert(RoleInterface $role) {
  */
 function user_user_role_delete(RoleInterface $role) {
   // Delete role references for all users.
-  $user_storage = \Drupal::entityManager()->getStorage('user');
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
   $user_storage->deleteRoleReferences([$role->id()]);
 
   // Ignore the authenticated and anonymous roles or the role is being synced.
@@ -1098,7 +1163,7 @@ function user_roles($membersonly = FALSE, $permission = NULL) {
  *   A fully-loaded role object if a role with the given ID exists, or NULL
  *   otherwise.
  *
- * @deprecated in Drupal 8.x, will be removed before Drupal 9.0.
+ * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0.
  *   Use \Drupal\user\Entity\Role::load().
  */
 function user_role_load($rid) {
@@ -1219,7 +1284,7 @@ function user_role_revoke_permissions($rid, array $permissions = []) {
  *
  * @see user_mail_tokens()
  */
-function _user_mail_notify($op, $account, $langcode = NULL) {
+function _user_mail_notify($op, AccountInterface $account, $langcode = NULL) {
   if (\Drupal::config('user.settings')->get('notify.' . $op)) {
     $params['account'] = $account;
     $langcode = $langcode ? $langcode : $account->getPreferredLangcode();
@@ -1423,4 +1488,59 @@ function template_preprocess_user(&$variables) {
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for \Drupal\system\Form\RegionalForm.
+ */
+function user_form_system_regional_settings_alter(&$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('system.date');
+
+  $form['timezone']['configurable_timezones'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Users may set their own time zone'),
+    '#default_value' => $config->get('timezone.user.configurable'),
+  ];
+
+  $form['timezone']['configurable_timezones_wrapper'] = [
+    '#type' => 'container',
+    '#states' => [
+      // Hide the user configured timezone settings when users are forced to use
+      // the default setting.
+      'invisible' => [
+        'input[name="configurable_timezones"]' => ['checked' => FALSE],
+      ],
+    ],
+  ];
+  $form['timezone']['configurable_timezones_wrapper']['empty_timezone_message'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Remind users at login if their time zone is not set'),
+    '#default_value' => $config->get('timezone.user.warn'),
+    '#description' => t('Only applied if users may set their own time zone.'),
+  ];
+
+  $form['timezone']['configurable_timezones_wrapper']['user_default_timezone'] = [
+    '#type' => 'radios',
+    '#title' => t('Time zone for new users'),
+    '#default_value' => $config->get('timezone.user.default'),
+    '#options' => [
+      UserInterface::TIMEZONE_DEFAULT => t('Default time zone'),
+      UserInterface::TIMEZONE_EMPTY   => t('Empty time zone'),
+      UserInterface::TIMEZONE_SELECT  => t('Users may set their own time zone at registration'),
+    ],
+    '#description' => t('Only applied if users may set their own time zone.'),
+  ];
+
+  $form['#submit'][] = 'user_form_system_regional_settings_submit';
+}
+
+/**
+ * Additional submit handler for \Drupal\system\Form\RegionalForm.
+ */
+function user_form_system_regional_settings_submit($form, FormStateInterface $form_state) {
+  \Drupal::configFactory()->getEditable('system.date')
+    ->set('timezone.user.configurable', $form_state->getValue('configurable_timezones'))
+    ->set('timezone.user.warn', $form_state->getValue('empty_timezone_message'))
+    ->set('timezone.user.default', $form_state->getValue('user_default_timezone'))
+    ->save();
 }

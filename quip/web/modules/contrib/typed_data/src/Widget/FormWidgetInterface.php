@@ -2,7 +2,7 @@
 
 namespace Drupal\typed_data\Widget;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\TypedData\DataDefinitionInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 /**
  * Interface definition for form widget plugins.
  */
-interface FormWidgetInterface extends ConfigurablePluginInterface, PluginInspectionInterface {
+interface FormWidgetInterface extends ConfigurableInterface, PluginInspectionInterface {
 
   /**
    * Returns if the widget can be used for the provided data.
@@ -86,7 +86,7 @@ interface FormWidgetInterface extends ConfigurablePluginInterface, PluginInspect
    * @param \Drupal\Core\TypedData\DataDefinitionInterface $definition
    *   The definition of the edited data.
    *
-   * @return ContextDefinitionInterface[]
+   * @return \Drupal\typed_data\Context\ContextDefinitionInterface[]
    *   An array of context definitions describing the configuration values,
    *   keyed by configuration setting name. The keys must match the actual keys
    *   of the supported configuration.

@@ -28,10 +28,9 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal7TestBase {
     'config_translation',
     'content_translation',
     'language',
+    'path_alias',
     'statistics',
     'taxonomy',
-    // Required for translation migrations.
-    'migrate_drupal_multilingual',
   ];
 
   /**

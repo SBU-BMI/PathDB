@@ -32,13 +32,6 @@ class ScopeIndentSniff implements Sniff
 {
 
     /**
-     * A list of tokenizers this sniff supports.
-     *
-     * @var array
-     */
-    public $supportedTokenizers = ['PHP'];
-
-    /**
      * The number of spaces code should be indented.
      *
      * @var integer
@@ -81,7 +74,7 @@ class ScopeIndentSniff implements Sniff
      * or PHP open/close tags can escape from here and have their own
      * rules elsewhere.
      *
-     * @var int[]
+     * @var array<int, int|string>
      */
     public $ignoreIndentationTokens = [];
 
@@ -91,7 +84,7 @@ class ScopeIndentSniff implements Sniff
      * This is a cached copy of the public version of this var, which
      * can be set in a ruleset file, and some core ignored tokens.
      *
-     * @var int[]
+     * @var array<int|string, bool>
      */
     private $ignoreIndentation = [];
 
@@ -113,7 +106,7 @@ class ScopeIndentSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -133,7 +126,7 @@ class ScopeIndentSniff implements Sniff
      * @param int                         $stackPtr  The position of the current token
      *                                               in the stack passed in $tokens.
      *
-     * @return void
+     * @return void|int
      */
     public function process(File $phpcsFile, $stackPtr)
     {
@@ -159,6 +152,7 @@ class ScopeIndentSniff implements Sniff
         $adjustments     = [];
         $setIndents      = [];
         $disableExactEnd = 0;
+        $tokenIndent     = 0;
 
         $tokens  = $phpcsFile->getTokens();
         $first   = $phpcsFile->findFirstOnLine(T_INLINE_HTML, $stackPtr);
@@ -195,11 +189,6 @@ class ScopeIndentSniff implements Sniff
         $checkAnnotations = $phpcsFile->config->annotations;
 
         for ($i = ($stackPtr + 1); $i < $phpcsFile->numTokens; $i++) {
-            if ($i === false) {
-                // Something has gone very wrong; maybe a parse error.
-                break;
-            }
-
             if ($checkAnnotations === true
                 && $tokens[$i]['code'] === T_PHPCS_SET
                 && isset($tokens[$i]['sniffCode']) === true
@@ -942,7 +931,7 @@ class ScopeIndentSniff implements Sniff
             // Comments starting with a star have an extra whitespace.
             if ($checkToken !== null && $tokens[$checkToken]['code'] === T_COMMENT) {
                 $content = trim($tokens[$checkToken]['content']);
-                if ($content{0} === '*') {
+                if ($content[0] === '*') {
                     $checkIndent += 1;
                 }
             }
@@ -1503,7 +1492,7 @@ class ScopeIndentSniff implements Sniff
         $padding = '';
         if ($length > 0) {
             if ($this->tabIndent === true) {
-                $numTabs = floor($length / $this->tabWidth);
+                $numTabs = (int) floor($length / $this->tabWidth);
                 if ($numTabs > 0) {
                     $numSpaces = ($length - ($numTabs * $this->tabWidth));
                     $padding   = str_repeat("\t", $numTabs).str_repeat(' ', $numSpaces);
@@ -1541,7 +1530,7 @@ class ScopeIndentSniff implements Sniff
                 $padding = ($length + $change);
                 if ($padding > 0) {
                     if ($this->tabIndent === true) {
-                        $numTabs   = floor($padding / $this->tabWidth);
+                        $numTabs   = (int) floor($padding / $this->tabWidth);
                         $numSpaces = ($padding - ($numTabs * $this->tabWidth));
                         $padding   = str_repeat("\t", $numTabs).str_repeat(' ', $numSpaces);
                     } else {

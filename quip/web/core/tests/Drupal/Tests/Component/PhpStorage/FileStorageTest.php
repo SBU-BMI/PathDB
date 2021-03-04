@@ -78,11 +78,11 @@ class FileStorageTest extends PhpStorageTestBase {
     $this->assertTrue($GLOBALS[$random], 'File saved correctly with correct value');
 
     // Make sure directory exists prior to removal.
-    $this->assertTrue(file_exists($this->directory . '/test'), 'File storage directory does not exist.');
+    $this->assertDirectoryExists($this->directory . '/test');
 
     $this->assertTrue($php->deleteAll(), 'Delete all reported success');
     $this->assertFalse($php->load($name));
-    $this->assertFalse(file_exists($this->directory . '/test'), 'File storage directory does not exist after call to deleteAll()');
+    $this->assertDirectoryNotExists($this->directory . '/test');
 
     // Should still return TRUE if directory has already been deleted.
     $this->assertTrue($php->deleteAll(), 'Delete all succeeds with nothing to delete');
@@ -99,13 +99,8 @@ class FileStorageTest extends PhpStorageTestBase {
       'bin' => 'test',
     ]);
     $code = "<?php\n echo 'here';";
-    if (method_exists($this, 'expectException')) {
-      $this->expectException(Warning::class);
-      $this->expectExceptionMessage('mkdir(): Permission Denied');
-    }
-    else {
-      $this->setExpectedException(\PHPUnit_Framework_Error_Warning::class, 'mkdir(): Permission Denied');
-    }
+    $this->expectException(Warning::class);
+    $this->expectExceptionMessage('mkdir(): Permission Denied');
     $storage->save('subdirectory/foo.php', $code);
   }
 

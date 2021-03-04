@@ -20,21 +20,26 @@ class TwigRegistryLoaderTest extends BrowserTestBase {
   public static $modules = ['twig_theme_test', 'block'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * @var \Drupal\Core\Template\TwigEnvironment
    */
   protected $twig;
 
   protected function setUp() {
     parent::setUp();
-    \Drupal::service('theme_handler')->install(['test_theme_twig_registry_loader', 'test_theme_twig_registry_loader_theme', 'test_theme_twig_registry_loader_subtheme']);
+    \Drupal::service('theme_installer')->install(['test_theme_twig_registry_loader', 'test_theme_twig_registry_loader_theme', 'test_theme_twig_registry_loader_subtheme']);
     $this->twig = \Drupal::service('twig');
   }
 
   /**
    * Checks to see if a value is a Twig template.
    */
-  public function assertTwigTemplate($value, $message = '', $group = 'Other') {
-    $this->assertTrue($value instanceof TemplateWrapper, $message, $group);
+  public function assertTwigTemplate($value, $message = '') {
+    $this->assertInstanceOf(TemplateWrapper::class, $value, $message);
   }
 
   /**

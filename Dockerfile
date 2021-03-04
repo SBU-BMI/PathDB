@@ -5,7 +5,7 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 ### update OS
 RUN yum update -y && yum clean all
-RUN yum -y install wget which zip unzip java-1.8.0-openjdk bind-utils epel-release
+RUN yum -y install wget which zip unzip bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73
 RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip php-ldap
@@ -50,6 +50,7 @@ RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nod
 # copy over Docker initialization scripts
 EXPOSE 80
 COPY run.sh /root/run.sh
+COPY savepathdb /root/savepathdb
 COPY mysql.tgz /build
 RUN mkdir /quip/config
 RUN mkdir /quip/config-update

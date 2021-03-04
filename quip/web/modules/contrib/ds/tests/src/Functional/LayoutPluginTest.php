@@ -115,7 +115,7 @@ class LayoutPluginTest extends TestBase {
 
     // Check we don't have empty wrappers.
     $elements = $this->xpath('//div[@class="node node--type-article node--view-mode-full ds-1col clearfix"]/div/p');
-    $this->assertTrue(count($elements) == 1);
+    $this->assertCount(1, $elements);
     $this->assertTrimEqual($elements[0]->getText(), $node->get('body')->value);
 
     // Switch theme.
@@ -128,7 +128,7 @@ class LayoutPluginTest extends TestBase {
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains('id="overridden-ds-1-col-template"');
     $elements = $this->xpath('//div[@class="node node--type-article node--view-mode-full ds-1col clearfix"]/div/p');
-    $this->assertTrue(count($elements) == 1);
+    $this->assertCount(1, $elements);
     $this->assertTrimEqual($elements[0]->getText(), $node->get('body')->value);
 
   }

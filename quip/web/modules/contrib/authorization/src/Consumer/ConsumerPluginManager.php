@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization\Consumer;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -27,8 +29,18 @@ class ConsumerPluginManager extends DefaultPluginManager {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
-  public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_consumer, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/authorization/Consumer', $namespaces, $module_handler, 'Drupal\authorization\Consumer\ConsumerInterface', 'Drupal\authorization\Annotation\AuthorizationConsumer');
+  public function __construct(
+    \Traversable $namespaces,
+    CacheBackendInterface $cache_consumer,
+    ModuleHandlerInterface $module_handler
+  ) {
+    parent::__construct(
+      'Plugin/authorization/Consumer',
+      $namespaces,
+      $module_handler,
+      'Drupal\authorization\Consumer\ConsumerInterface',
+      'Drupal\authorization\Annotation\AuthorizationConsumer'
+    );
     $this->setCacheBackend($cache_consumer, 'authorization_consumers');
     $this->alterInfo('authorization_consumer_info');
   }

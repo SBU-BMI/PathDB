@@ -42,9 +42,9 @@ class MigrateUploadEntityDisplayTest extends MigrateDrupal6TestBase {
     // Assure this doesn't exist.
     $display = EntityViewDisplay::load('node.article.default');
     $component = $display->getComponent('upload');
-    $this->assertTrue(is_null($component));
+    $this->assertNull($component);
 
-    $this->assertIdentical(['node', 'page', 'default', 'upload'], $this->getMigration('d6_upload_entity_display')->getIdMap()->lookupDestinationId(['page']));
+    $this->assertIdentical([['node', 'page', 'default', 'upload']], $this->getMigration('d6_upload_entity_display')->getIdMap()->lookupDestinationIds(['page']));
   }
 
   /**

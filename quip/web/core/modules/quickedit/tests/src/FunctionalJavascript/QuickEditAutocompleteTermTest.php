@@ -32,6 +32,11 @@ class QuickEditAutocompleteTermTest extends WebDriverTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Stores the node used for the tests.
    *
    * @var \Drupal\node\NodeInterface
@@ -97,20 +102,20 @@ class QuickEditAutocompleteTermTest extends WebDriverTestBase {
     ];
     $this->createEntityReferenceField('node', 'article', $this->fieldName, 'Tags', 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
-    entity_get_form_display('node', 'article', 'default')
+    \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article')
       ->setComponent($this->fieldName, [
         'type' => 'entity_reference_autocomplete_tags',
         'weight' => -4,
       ])
       ->save();
 
-    entity_get_display('node', 'article', 'default')
+    \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article')
       ->setComponent($this->fieldName, [
         'type' => 'entity_reference_label',
         'weight' => 10,
       ])
       ->save();
-    entity_get_display('node', 'article', 'teaser')
+    \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article', 'teaser')
       ->setComponent($this->fieldName, [
         'type' => 'entity_reference_label',
         'weight' => 10,
@@ -160,8 +165,8 @@ class QuickEditAutocompleteTermTest extends WebDriverTestBase {
     $tags = $tag_field->getValue();
 
     // Check existing terms.
-    $this->assertTrue(strpos($tags, $this->term1->label()) !== FALSE);
-    $this->assertTrue(strpos($tags, $this->term2->label()) !== FALSE);
+    $this->assertStringContainsString($this->term1->label(), $tags);
+    $this->assertStringContainsString($this->term2->label(), $tags);
 
     // Add new term.
     $new_tag = $this->randomMachineName();

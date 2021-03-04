@@ -43,7 +43,7 @@ class ToolkitGdTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['system', 'simpletest'];
+  public static $modules = ['system'];
 
   /**
    * {@inheritdoc}
@@ -280,7 +280,7 @@ class ToolkitGdTest extends KernelTestBase {
     foreach ($files as $file) {
       foreach ($operations as $op => $values) {
         // Load up a fresh image.
-        $image = $this->imageFactory->get(drupal_get_path('module', 'simpletest') . '/files/' . $file);
+        $image = $this->imageFactory->get('core/tests/fixtures/files/' . $file);
         $toolkit = $image->getToolkit();
         if (!$image->isValid()) {
           $this->fail(new FormattableMarkup('Could not load image %file.', ['%file' => $file]));
@@ -302,6 +302,8 @@ class ToolkitGdTest extends KernelTestBase {
         // been destroyed.
         $new_res = $toolkit->getResource();
         if ($new_res !== $old_res) {
+          // @todo In https://www.drupal.org/node/3133236 convert this to
+          //   $this->assertIsNotResource($old_res).
           $this->assertFalse(is_resource($old_res), new FormattableMarkup("'%operation' destroyed the original resource.", ['%operation' => $values['function']]));
         }
 
@@ -351,14 +353,17 @@ class ToolkitGdTest extends KernelTestBase {
                 $x = 0;
                 $y = 0;
                 break;
+
               case 1:
                 $x = $image->getWidth() - 1;
                 $y = 0;
                 break;
+
               case 2:
                 $x = $image->getWidth() - 1;
                 $y = $image->getHeight() - 1;
                 break;
+
               case 3:
                 $x = 0;
                 $y = $image->getHeight() - 1;
@@ -426,23 +431,27 @@ class ToolkitGdTest extends KernelTestBase {
    */
   public function testResourceDestruction() {
     // Test that an Image object going out of scope releases its GD resource.
-    $image = $this->imageFactory->get(drupal_get_path('module', 'simpletest') . '/files/image-test.png');
+    $image = $this->imageFactory->get('core/tests/fixtures/files/image-test.png');
     $res = $image->getToolkit()->getResource();
-    $this->assertTrue(is_resource($res), 'Successfully loaded image resource.');
+    $this->assertIsResource($res);
     $image = NULL;
+    // @todo In https://www.drupal.org/node/3133236 convert this to
+    //   $this->assertIsNotResource($res).
     $this->assertFalse(is_resource($res), 'Image resource was destroyed after losing scope.');
 
     // Test that 'create_new' operation does not leave orphaned GD resources.
-    $image = $this->imageFactory->get(drupal_get_path('module', 'simpletest') . '/files/image-test.png');
+    $image = $this->imageFactory->get('core/tests/fixtures/files/image-test.png');
     $old_res = $image->getToolkit()->getResource();
     // Check if resource has been created successfully.
-    $this->assertTrue(is_resource($old_res));
+    $this->assertIsResource($old_res);
     $image->createNew(20, 20);
     $new_res = $image->getToolkit()->getResource();
     // Check if the original resource has been destroyed.
+    // @todo In https://www.drupal.org/node/3133236 convert this to
+    //   $this->assertIsNotResource($old_res).
     $this->assertFalse(is_resource($old_res));
     // Check if a new resource has been created successfully.
-    $this->assertTrue(is_resource($new_res));
+    $this->assertIsResource($new_res);
   }
 
   /**
@@ -456,7 +465,7 @@ class ToolkitGdTest extends KernelTestBase {
     // Test loading an indexed GIF image with transparent color set.
     // Color at top-right pixel should be fully transparent.
     $file = 'image-test-transparent-indexed.gif';
-    $image = $this->imageFactory->get(drupal_get_path('module', 'simpletest') . '/files/' . $file);
+    $image = $this->imageFactory->get('core/tests/fixtures/files/' . $file);
     $resource = $image->getToolkit()->getResource();
     $color_index = imagecolorat($resource, $image->getWidth() - 1, 0);
     $color = array_values(imagecolorsforindex($resource, $color_index));
@@ -490,14 +499,14 @@ class ToolkitGdTest extends KernelTestBase {
     // of 6 colors, and setting the transparent color index to 6 (one higher
     // than the largest allowed index), as follows:
     // @code
-    // $image = imagecreatefromgif('core/modules/simpletest/files/image-test.gif');
+    // $image = imagecreatefromgif('core/tests/fixtures/files/image-test.gif');
     // imagecolortransparent($image, 6);
-    // imagegif($image, 'core/modules/simpletest/files/image-test-transparent-out-of-range.gif');
+    // imagegif($image, 'core/tests/fixtures/files/image-test-transparent-out-of-range.gif');
     // @endcode
     // This allows us to test that an image with an out-of-range color index
     // can be loaded correctly.
     $file = 'image-test-transparent-out-of-range.gif';
-    $image = $this->imageFactory->get(drupal_get_path('module', 'simpletest') . '/files/' . $file);
+    $image = $this->imageFactory->get('core/tests/fixtures/files/' . $file);
     $toolkit = $image->getToolkit();
 
     if (!$image->isValid()) {
@@ -522,7 +531,7 @@ class ToolkitGdTest extends KernelTestBase {
     $file = 'image-test.png';
 
     // Load up a fresh image.
-    $image = $this->imageFactory->get(drupal_get_path('module', 'simpletest') . '/files/' . $file);
+    $image = $this->imageFactory->get('core/tests/fixtures/files/' . $file);
     if (!$image->isValid()) {
       $this->fail(new FormattableMarkup('Could not load image %file.', ['%file' => $file]));
     }

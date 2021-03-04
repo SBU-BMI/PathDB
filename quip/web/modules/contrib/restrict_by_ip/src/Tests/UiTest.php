@@ -1,19 +1,14 @@
 <?php
 
 namespace Drupal\restrict_by_ip\Tests;
-use Drupal\simpletest\WebTestBase;
 
 /**
  * Test admin interfaces.
  *
  * @group restrict_by_ip
- *
- * Assumes that local testing environment has IP address of 127.0.0.1.
  */
-class UiTest extends WebTestBase {
+class UiTest extends RestrictByIPWebTestBase {
   private $adminUser;
-
-  public static $modules = ['restrict_by_ip'];
 
   public function setUp() {
     // Enable modules needed for these tests.
@@ -45,7 +40,7 @@ class UiTest extends WebTestBase {
     $pass = $this->randomMachineName(5);
     $form['pass[pass1]'] = $pass;
     $form['pass[pass2]'] = $pass;
-    $form['restrict_by_ip_address'] = '127.0.0.1/32';
+    $form['restrict_by_ip_address'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/people/create', $form, t('Create new account'));
     $user = user_load_by_name($form['name']);
     $this->assertText(t('Created a new user account for @name. No email has been sent.', [
@@ -75,7 +70,7 @@ class UiTest extends WebTestBase {
     $this->assertFieldByName('restrict_by_ip_address', '');
 
     $form = [];
-    $form['restrict_by_ip_address'] = '127.0.0.1/32';
+    $form['restrict_by_ip_address'] = $this->currentIPCIDR;
     $this->drupalPostForm('user/' . $user->id() . '/edit', $form, t('Save'));
     $this->assertText('The changes have been saved.');
     $this->assertFieldByName('restrict_by_ip_address', $form['restrict_by_ip_address']);
@@ -96,7 +91,7 @@ class UiTest extends WebTestBase {
     $user = $this->drupalCreateUser();
     $form = [];
     $form['name'] = $user->label() . ' (' . $user->id() . ')';
-    $form['restriction'] = '127.0.0.1/32';
+    $form['restriction'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/login/user', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_user_' . $user->id(), $form['restriction']);
@@ -108,7 +103,7 @@ class UiTest extends WebTestBase {
     $user = $this->drupalCreateUser();
     $form = [];
     $form['name'] = $user->label() . ' (' . $user->id() . ')';
-    $form['restriction'] = '127.0.0.1/32';
+    $form['restriction'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/login/user', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_user_' . $user->id(), $form['restriction']);
@@ -126,14 +121,14 @@ class UiTest extends WebTestBase {
     $user = $this->drupalCreateUser();
     $form = [];
     $form['name'] = $user->label() . ' (' . $user->id() . ')';
-    $form['restriction'] = '127.0.0.1/32';
+    $form['restriction'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/login/user', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_user_' . $user->id(), $form['restriction']);
 
     // Then update it's IP.
     $form = [];
-    $form['restrict_by_ip_user_' . $user->id()] = '10.0.0.1/32';
+    $form['restrict_by_ip_user_' . $user->id()] = $this->outOfRangeCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/login/user', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_user_' . $user->id(), $form['restrict_by_ip_user_' . $user->id()]);
@@ -145,7 +140,7 @@ class UiTest extends WebTestBase {
     $user = $this->drupalCreateUser();
     $form = [];
     $form['name'] = $user->label() . ' (' . $user->id() . ')';
-    $form['restriction'] = '127.0.0.1/32';
+    $form['restriction'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/login/user', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_user_' . $user->id(), $form['restriction']);
@@ -179,7 +174,7 @@ class UiTest extends WebTestBase {
   public function testLoginByIpSettingsSubmit() {
     $form = [];
     $form['restrict_by_ip_error_page'] = $this->randomMachineName(5);
-    $form['restrict_by_ip_login_range'] = '127.0.0.1/32';
+    $form['restrict_by_ip_login_range'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/login', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_error_page', $form['restrict_by_ip_error_page']);
@@ -203,7 +198,7 @@ class UiTest extends WebTestBase {
     $this->drupalCreateRole([], 'test');
 
     $form = [];
-    $form['restrict_by_ip_role_test'] = '127.0.0.1/32';
+    $form['restrict_by_ip_role_test'] = $this->currentIPCIDR;
     $this->drupalPostForm('admin/config/people/restrict_by_ip/role', $form, t('Save configuration'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldByName('restrict_by_ip_role_test', $form['restrict_by_ip_role_test']);

@@ -13,6 +13,11 @@ use Drupal\node\Entity\Node;
 class InlineBlockTest extends InlineBlockTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Tests adding and editing of inline blocks.
    */
   public function testInlineBlocks() {
@@ -136,7 +141,7 @@ class InlineBlockTest extends InlineBlockTestBase {
     $this->drupalGet('node/1');
     $assert_session->pageTextContains('The block body');
     $blocks = $this->blockStorage->loadMultiple();
-    $this->assertEquals(count($blocks), 1);
+    $this->assertCount(1, $blocks);
     /* @var \Drupal\Core\Entity\ContentEntityBase $block */
     $block = array_pop($blocks);
     $revision_id = $block->getRevisionId();
@@ -158,7 +163,7 @@ class InlineBlockTest extends InlineBlockTestBase {
       // When discarding the original block body should appear.
       $assert_session->pageTextContains('The block body');
 
-      $this->assertEquals(count($blocks), 1);
+      $this->assertCount(1, $blocks);
       $block = array_pop($blocks);
       $this->assertEquals($block->getRevisionId(), $revision_id);
       $this->assertEquals($block->get('body')->getValue()[0]['value'], 'The block body');
@@ -465,7 +470,7 @@ class InlineBlockTest extends InlineBlockTestBase {
     $layout_default_path = 'admin/structure/types/manage/bundle_with_section_field/display/default/layout';
     $this->drupalGet($layout_default_path);
     // Add a basic block with the body field set.
-    $page->clickLink('Add Block');
+    $page->clickLink('Add block');
     $assert_session->assertWaitOnAjaxRequest();
     // Confirm that with no block content types the link does not appear.
     $assert_session->linkNotExists('Create custom block');
@@ -474,7 +479,7 @@ class InlineBlockTest extends InlineBlockTestBase {
 
     $this->drupalGet($layout_default_path);
     // Add a basic block with the body field set.
-    $page->clickLink('Add Block');
+    $page->clickLink('Add block');
     $assert_session->assertWaitOnAjaxRequest();
     // Confirm with only 1 type the "Create custom block" link goes directly t
     // block add form.
@@ -487,7 +492,7 @@ class InlineBlockTest extends InlineBlockTestBase {
 
     $this->drupalGet($layout_default_path);
     // Add a basic block with the body field set.
-    $page->clickLink('Add Block');
+    $page->clickLink('Add block');
     // Confirm that, when more than 1 type exists, "Create custom block" shows a
     // list of block types.
     $assert_session->assertWaitOnAjaxRequest();
@@ -519,7 +524,7 @@ class InlineBlockTest extends InlineBlockTestBase {
 
       $this->drupalLogin($this->drupalCreateUser($permissions));
       $this->drupalGet(static::FIELD_UI_PREFIX . '/display/default/layout');
-      $page->clickLink('Add Block');
+      $page->clickLink('Add block');
       $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-off-canvas .block-categories'));
       if ($expected) {
         $assert_session->linkExists('Create custom block');
@@ -542,7 +547,6 @@ class InlineBlockTest extends InlineBlockTestBase {
    * Tests 'create and edit custom blocks' permission to edit an existing block.
    */
   public function testEditInlineBlocksPermission() {
-    $assert_session = $this->assertSession();
 
     LayoutBuilderEntityViewDisplay::load('node.bundle_with_section_field.default')
       ->enableLayoutBuilder()

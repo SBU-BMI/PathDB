@@ -13,6 +13,11 @@ use Drupal\user\Entity\User;
 class InstallerTranslationTest extends InstallerTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Overrides the language code in which to install Drupal.
    *
    * @var string
@@ -65,7 +70,7 @@ class InstallerTranslationTest extends InstallerTestBase {
    */
   public function testInstaller() {
     $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Verify German was configured but not English.
     $this->drupalGet('admin/config/regional/language');
@@ -84,7 +89,7 @@ class InstallerTranslationTest extends InstallerTestBase {
 
     // Ensure that we can enable basic_auth on a non-english site.
     $this->drupalPostForm('admin/modules', ['modules[basic_auth][enable]' => TRUE], t('Install'));
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Assert that the theme CSS was added to the page.
     $edit = ['preprocess_css' => FALSE];
@@ -129,6 +134,7 @@ class InstallerTranslationTest extends InstallerTestBase {
    *
    * @param string $langcode
    *   The language code.
+   *
    * @return string
    *   Contents for the test .po file.
    */

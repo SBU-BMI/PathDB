@@ -5,19 +5,13 @@ namespace Drupal\auto_entitylabel;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Utility\Token;
 
 /**
  * Provides an content entity decorator for automatic label generation.
  */
 class EntityDecorator implements EntityDecoratorInterface {
-
-  /**
-   * The content entity that is decorated.
-   *
-   * @var \Drupal\Core\Entity\ContentEntityInterface
-   */
-  protected $entity;
 
   /**
    * Config factory.
@@ -29,7 +23,7 @@ class EntityDecorator implements EntityDecoratorInterface {
   /**
    * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManager
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
@@ -39,6 +33,13 @@ class EntityDecorator implements EntityDecoratorInterface {
    * @var \Drupal\Core\Utility\Token
    */
   protected $token;
+
+  /**
+   * Module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * Automatic label configuration for the entity.
@@ -56,19 +57,32 @@ class EntityDecorator implements EntityDecoratorInterface {
    *   Entity type manager.
    * @param \Drupal\Core\Utility\Token $token
    *   Token manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   Module handler service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, Token $token) {
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    EntityTypeManagerInterface $entity_type_manager,
+    Token $token,
+    ModuleHandlerInterface $module_handler
+  ) {
     $this->configFactory = $config_factory;
     $this->entityTypeManager = $entity_type_manager;
     $this->token = $token;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
    * {@inheritdoc}
    */
   public function decorate(ContentEntityInterface $entity) {
-    $this->entity = new AutoEntityLabelManager($entity, $this->configFactory, $this->entityTypeManager, $this->token);
-    return $this->entity;
+    return new AutoEntityLabelManager(
+      $entity,
+      $this->configFactory,
+      $this->entityTypeManager,
+      $this->token,
+      $this->moduleHandler
+    );
   }
 
 }

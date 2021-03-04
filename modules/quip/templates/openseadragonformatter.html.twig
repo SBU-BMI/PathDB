@@ -1,47 +1,41 @@
-{{ attach_library('openseadragon/openseadragon') }}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.3.0/openseadragon.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="/openseadragon/openseadragon.min.js"></script>
 <div id="openseadragon1">{{ url }}</div>
-<div id="osdcontent"></div>
+<div id="osdcontent" class="openseadragon-viewer"></div>
 <script type="text/javascript">
-    $(document).ready(function () {
+window.addEventListener('load', 
+  function() { 
         var tilesize = 256;
         var height = 67341;
         var width = 107519;
         var cool = "{{ url }}";
         var rcool = "{{ height }}";
         console.log("Inject : "+cool+" and ("+rcool+")");
+        var filepath = "/data/images/tcga_data/luad/TCGA-05-4244-01Z-00-DX1.d4ff32cd-38cf-40ea-8213-45c2b100ac01.svs_files/";
 
-        // SVS base image
-        var filepath = "/data/images/Hawaii/batch2/BC_201_1_1.svs_files/"; // Must have trailing slash.
-
-        var viewer = OpenSeadragon({
-            id: "content",
-            prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@2.3/build/openseadragon/images/",
-            tileSources: {
-
-                height: height,
-                width: width,
-                tileSize: tilesize,
-                minLevel: 7,
-                maxLevel: 17,
-
-                getTileUrl: function (level, x, y) {
-
-                    return "http://quip3.bmi.stonybrook.edu/fcgi-bin/iipsrv.fcgi?DeepZoom=" + filepath
-                        + level + "/" + x + "_" + y + ".jpg"
-
-                }
-            }
-        });
+var p = "http://imagebox.ebremer.com/iiif/?iiif=https://s3.amazonaws.com//ebremeribox/image.svs";
+    var viewer1 = OpenSeadragon({
+        id: "osdcontent",
+        preserveViewport: true,
+        visibilityRatio:    1,
+        minZoomLevel:       1,
+        defaultZoomLevel:   1,
+        prefixUrl: "/openseadragon/images/",
+        tileSources: {
+                "@context": "http://iiif.io/api/image/2/context.json",
+                "@id": p,
+                "height": 91462,
+                "width": 191352,
+                "profile": [ "http://iiif.io/api/image/2/level2.json" ],
+                "protocol": "http://iiif.io/api/image",
+                "tiles": [{
+                          "scaleFactors": [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576],
+                "width": 256
+            }]
+        }
     });
 
-    $(window).on("load", function () {
-        var div = document.getElementById("content");
-        var w = window.innerWidth/3;
-        var h = window.innerHeight/3;
-        div.setAttribute("style", "width: " + w + "px; height: " + h + "px;");
-    });
 
+
+  }, false);
 </script>
 

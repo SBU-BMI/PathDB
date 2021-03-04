@@ -40,7 +40,7 @@ class DownloadTest extends FileTestBase {
     // Test destructive download.
     $actual_destination = $this->doTransform($destination_uri);
     $this->assertSame($destination_uri, $actual_destination, 'Import returned a destination that was not renamed');
-    $this->assertFileNotExists('public://existing_file_0.txt', 'Import did not rename the file');
+    $this->assertFileNotExists('public://existing_file_0.txt');
   }
 
   /**
@@ -53,7 +53,7 @@ class DownloadTest extends FileTestBase {
     // Test non-destructive download.
     $actual_destination = $this->doTransform($destination_uri, ['file_exists' => 'rename']);
     $this->assertSame('public://another_existing_file_0.txt', $actual_destination, 'Import returned a renamed destination');
-    $this->assertFileExists($actual_destination, 'Downloaded file was created');
+    $this->assertFileExists($actual_destination);
   }
 
   /**
@@ -100,14 +100,14 @@ class DownloadTest extends FileTestBase {
    */
   protected function doTransform($destination_uri, $configuration = []) {
     // Prepare a mock HTTP client.
-    $this->container->set('http_client', $this->getMock(Client::class));
+    $this->container->set('http_client', $this->createMock(Client::class));
 
     // Instantiate the plugin statically so it can pull dependencies out of
     // the container.
     $plugin = Download::create($this->container, $configuration, 'download', []);
 
     // Execute the transformation.
-    $executable = $this->getMock(MigrateExecutableInterface::class);
+    $executable = $this->createMock(MigrateExecutableInterface::class);
     $row = new Row([], []);
 
     // Return the downloaded file's local URI.

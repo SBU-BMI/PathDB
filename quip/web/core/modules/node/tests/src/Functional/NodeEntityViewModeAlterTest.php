@@ -20,10 +20,18 @@ class NodeEntityViewModeAlterTest extends NodeTestBase {
   public static $modules = ['node_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Create a "Basic page" node and verify its consistency in the database.
    */
   public function testNodeViewModeChange() {
-    $web_user = $this->drupalCreateUser(['create page content', 'edit own page content']);
+    $web_user = $this->drupalCreateUser([
+      'create page content',
+      'edit own page content',
+    ]);
     $this->drupalLogin($web_user);
 
     // Create a node.

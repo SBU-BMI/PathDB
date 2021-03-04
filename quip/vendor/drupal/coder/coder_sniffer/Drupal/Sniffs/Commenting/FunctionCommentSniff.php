@@ -27,7 +27,7 @@ class FunctionCommentSniff implements Sniff
     /**
      * A map of invalid data types to valid ones for param and return documentation.
      *
-     * @var array
+     * @var array<string, string>
      */
     public static $invalidTypes = [
         'Array'     => 'array',
@@ -54,7 +54,7 @@ class FunctionCommentSniff implements Sniff
     /**
      * An array of variable types for param/var we will check.
      *
-     * @var array(string)
+     * @var array<string>
      */
     public $allowedTypes = [
         'array',
@@ -68,7 +68,7 @@ class FunctionCommentSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -195,6 +195,7 @@ class FunctionCommentSniff implements Sniff
         $methodName      = strtolower(ltrim($methodName, '_'));
 
         $return = null;
+        $end    = $stackPtr;
         foreach ($tokens[$commentStart]['comment_tags'] as $pos => $tag) {
             if ($tokens[$tag]['content'] === '@return') {
                 if ($return !== null) {
@@ -236,10 +237,6 @@ class FunctionCommentSniff implements Sniff
                     $typeNames      = explode('|', $type);
                     $suggestedNames = [];
                     $hasNull        = false;
-                    $hasMultiple    = false;
-                    if (count($typeNames) > 0) {
-                        $hasMultiple = true;
-                    }
 
                     foreach ($typeNames as $i => $typeName) {
                         if (strtolower($typeName) === 'null') {
@@ -278,7 +275,7 @@ class FunctionCommentSniff implements Sniff
                             $searchStart        = $stackPtr;
                             $foundNonVoidReturn = false;
                             do {
-                                $returnToken = $phpcsFile->findNext([T_RETURN, T_YIELD], $searchStart, $endToken);
+                                $returnToken = $phpcsFile->findNext([T_RETURN, T_YIELD, T_YIELD_FROM], $searchStart, $endToken);
                                 if ($returnToken === false && $foundReturnToken === false) {
                                     $error = '@return doc comment specified, but function has no return statement';
                                     $phpcsFile->addError($error, $return, 'InvalidNoReturn');
@@ -438,7 +435,7 @@ class FunctionCommentSniff implements Sniff
                 }
 
                 // Starts with a capital letter and ends with a fullstop.
-                $firstChar = $comment{0};
+                $firstChar = $comment[0];
                 if (strtoupper($firstChar) !== $firstChar) {
                     $error = '@throws tag comment must start with a capital letter';
                     $phpcsFile->addError($error, $throwStart, 'ThrowsNotCapital');
@@ -541,19 +538,24 @@ class FunctionCommentSniff implements Sniff
                     $skipTags = [
                         '@code',
                         '@endcode',
+                        '@link',
                     ];
                     $skipPos  = $pos;
-                    while (isset($tokens[$commentStart]['comment_tags'][($skipPos + 1)]) === true
-                        && in_array($tokens[$tokens[$commentStart]['comment_tags'][($skipPos + 1)]]['content'], $skipTags) === true
-                    ) {
+                    while (isset($tokens[$commentStart]['comment_tags'][($skipPos + 1)]) === true) {
                         $skipPos++;
+                        if (in_array($tokens[$tokens[$commentStart]['comment_tags'][$skipPos]]['content'], $skipTags) === false
+                            // Stop when we reached the next tag on the outer @param level.
+                            && $tokens[$tokens[$commentStart]['comment_tags'][$skipPos]]['column'] === $tokens[$tag]['column']
+                        ) {
+                            break;
+                        }
                     }
 
-                    if ($skipPos === $pos) {
-                        $skipPos++;
+                    if ($tokens[$tokens[$commentStart]['comment_tags'][$skipPos]]['column'] === ($tokens[$tag]['column'] + 2)) {
+                        $end = $tokens[$commentStart]['comment_closer'];
+                    } else {
+                        $end = $tokens[$commentStart]['comment_tags'][$skipPos];
                     }
-
-                    $end = $tokens[$commentStart]['comment_tags'][$skipPos];
                 } else {
                     $end = $tokens[$commentStart]['comment_closer'];
                 }//end if
@@ -563,6 +565,13 @@ class FunctionCommentSniff implements Sniff
                         $indent = 0;
                         if ($tokens[($i - 1)]['code'] === T_DOC_COMMENT_WHITESPACE) {
                             $indent = strlen($tokens[($i - 1)]['content']);
+                            // There can be @code or @link tags within an @param comment.
+                            if ($tokens[($i - 2)]['code'] === T_DOC_COMMENT_TAG) {
+                                $indent = 0;
+                                if ($tokens[($i - 3)]['code'] === T_DOC_COMMENT_WHITESPACE) {
+                                    $indent = strlen($tokens[($i - 3)]['content']);
+                                }
+                            }
                         }
 
                         $comment       .= ' '.$tokens[$i]['content'];
@@ -578,7 +587,7 @@ class FunctionCommentSniff implements Sniff
                                 $phpcsFile->fixer->replaceToken(($i - 1), '   ');
                             }
                         }
-                    }
+                    }//end if
                 }//end for
 
                 // The first line of the comment must be indented no more than 3
@@ -706,6 +715,8 @@ class FunctionCommentSniff implements Sniff
                 }
             }
 
+            $suggestedName = '';
+            $typeName      = '';
             if (count($typeNames) === 1) {
                 $typeName      = $param['type'];
                 $suggestedName = static::suggestType($typeName);
@@ -1037,8 +1048,6 @@ class FunctionCommentSniff implements Sniff
             // We found a use statement that aliases the used type hint!
             return true;
         }//end while
-
-        return false;
 
     }//end isAliasedType()
 

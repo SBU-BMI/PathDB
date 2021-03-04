@@ -24,6 +24,11 @@ class TaggedWithTest extends WizardTestBase {
   public static $modules = ['taxonomy'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Node type with an autocomplete tagging field.
    *
    * @var \Drupal\node\NodeTypeInterface
@@ -91,19 +96,21 @@ class TaggedWithTest extends WizardTestBase {
     ];
     $this->createEntityReferenceField('node', $this->nodeTypeWithTags->id(), $this->tagFieldName, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
-    entity_get_form_display('node', $this->nodeTypeWithTags->id(), 'default')
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+    $display_repository->getFormDisplay('node', $this->nodeTypeWithTags->id())
       ->setComponent($this->tagFieldName, [
         'type' => 'entity_reference_autocomplete_tags',
       ])
       ->save();
 
-    entity_get_display('node', $this->nodeTypeWithTags->id(), 'default')
+    $display_repository->getViewDisplay('node', $this->nodeTypeWithTags->id())
       ->setComponent($this->tagFieldName, [
         'type' => 'entity_reference_label',
         'weight' => 10,
       ])
       ->save();
-    entity_get_display('node', $this->nodeTypeWithTags->id(), 'teaser')
+    $display_repository->getViewDisplay('node', $this->nodeTypeWithTags->id(), 'teaser')
       ->setComponent('field_views_testing_tags', [
         'type' => 'entity_reference_label',
         'weight' => 10,
@@ -151,7 +158,7 @@ class TaggedWithTest extends WizardTestBase {
     // Visit the page and check that the nodes we expect are present and the
     // ones we don't expect are absent.
     $this->drupalGet($view1['page[path]']);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
     $this->assertNoText($node_no_tags_title);
@@ -161,7 +168,7 @@ class TaggedWithTest extends WizardTestBase {
     $view2 = [];
     $view2['show[type]'] = $this->nodeTypeWithTags->id();
     $this->drupalPostForm('admin/structure/views/add', $view2, t('Update "of type" choice'));
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $view2['label'] = $this->randomMachineName(16);
     $view2['id'] = strtolower($this->randomMachineName(16));
     $view2['description'] = $this->randomMachineName(16);
@@ -170,7 +177,7 @@ class TaggedWithTest extends WizardTestBase {
     $view2['page[title]'] = $this->randomMachineName(16);
     $view2['page[path]'] = $this->randomMachineName(16);
     $this->drupalPostForm(NULL, $view2, t('Save and edit'));
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->drupalGet($view2['page[path]']);
     $this->assertNoText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
@@ -212,7 +219,8 @@ class TaggedWithTest extends WizardTestBase {
         ],
       ],
     ])->save();
-    entity_get_form_display('node', $this->nodeTypeWithoutTags->id(), 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay('node', $this->nodeTypeWithoutTags->id())
       ->setComponent($this->tagFieldName, [
         'type' => 'entity_reference_autocomplete_tags',
       ])

@@ -20,6 +20,11 @@ class NodeAccessGrantsCacheContextTest extends NodeTestBase {
   public static $modules = ['node_access_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * User with permission to view content.
    */
   protected $accessUser;
@@ -45,9 +50,19 @@ class NodeAccessGrantsCacheContextTest extends NodeTestBase {
 
     // Create user with simple node access permission. The 'node test view'
     // permission is implemented and granted by the node_access_test module.
-    $this->accessUser = $this->drupalCreateUser(['access content overview', 'access content', 'node test view']);
-    $this->noAccessUser = $this->drupalCreateUser(['access content overview', 'access content']);
-    $this->noAccessUser2 = $this->drupalCreateUser(['access content overview', 'access content']);
+    $this->accessUser = $this->drupalCreateUser([
+      'access content overview',
+      'access content',
+      'node test view',
+    ]);
+    $this->noAccessUser = $this->drupalCreateUser([
+      'access content overview',
+      'access content',
+    ]);
+    $this->noAccessUser2 = $this->drupalCreateUser([
+      'access content overview',
+      'access content',
+    ]);
 
     $this->userMapping = [
       1 => $this->rootUser,
@@ -67,7 +82,6 @@ class NodeAccessGrantsCacheContextTest extends NodeTestBase {
       if ($uid > 0) {
         $this->drupalLogin($this->userMapping[$uid]);
       }
-      $this->pass('Asserting cache context for user ' . $uid . '.');
       $this->assertIdentical($context, $this->container->get('cache_context.user.node_grants')->getContext('view'));
     }
     $this->drupalLogout();

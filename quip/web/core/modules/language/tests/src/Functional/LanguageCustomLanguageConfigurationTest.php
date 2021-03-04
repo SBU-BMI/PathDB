@@ -22,12 +22,20 @@ class LanguageCustomLanguageConfigurationTest extends BrowserTestBase {
   public static $modules = ['language'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Functional tests for adding, editing and deleting languages.
    */
   public function testLanguageConfiguration() {
 
     // Create user with permissions to add and remove languages.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'access administration pages']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'access administration pages',
+    ]);
     $this->drupalLogin($admin_user);
 
     // Add custom language.

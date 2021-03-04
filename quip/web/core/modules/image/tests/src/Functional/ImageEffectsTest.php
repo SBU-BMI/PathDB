@@ -20,6 +20,11 @@ class ImageEffectsTest extends ToolkitTestBase {
   public static $modules = ['image', 'image_test', 'image_module_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The image effect manager.
    *
    * @var \Drupal\image\ImageEffectManager
@@ -145,7 +150,7 @@ class ImageEffectsTest extends ToolkitTestBase {
 
     // Check the parameters.
     $calls = $this->imageTestGetAllCalls();
-    $this->assertEqual(count($calls['desaturate'][0]), 0, 'No parameters were passed.');
+    $this->assertCount(0, $calls['desaturate'][0], 'No parameters were passed.');
   }
 
   /**

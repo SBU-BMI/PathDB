@@ -27,6 +27,11 @@ class CommentTokenReplaceTest extends CommentTestBase {
   public static $modules = ['taxonomy'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Creates a comment, then tests the tokens generated from it.
    */
   public function testCommentTokenReplacement() {
@@ -129,7 +134,7 @@ class CommentTokenReplaceTest extends CommentTestBase {
     $metadata_tests['[comment:author:name]'] = $bubbleable_metadata;
 
     // Test to make sure that we generated something for each token.
-    $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
+    $this->assertNotContains(0, array_map('strlen', $tests), 'No empty tokens generated.');
 
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
@@ -143,7 +148,7 @@ class CommentTokenReplaceTest extends CommentTestBase {
     $comment->setOwnerId(0)->setAuthorName($author_name);
     $input = '[comment:author]';
     $output = $token_service->replace($input, ['comment' => $comment], ['langcode' => $language_interface->getId()]);
-    $this->assertEqual($output, Html::escape($author_name), format_string('Comment author token %token replaced.', ['%token' => $input]));
+    $this->assertEqual($output, Html::escape($author_name), new FormattableMarkup('Comment author token %token replaced.', ['%token' => $input]));
     // Add comment field to user and term entities.
     $this->addDefaultCommentField('user', 'user', 'comment', CommentItemInterface::OPEN, 'comment_user');
     $this->addDefaultCommentField('taxonomy_term', 'tags', 'comment', CommentItemInterface::OPEN, 'comment_term');
@@ -181,7 +186,7 @@ class CommentTokenReplaceTest extends CommentTestBase {
 
     foreach ($tests as $input => $expected) {
       $output = $token_service->replace($input, ['entity' => $node, 'node' => $node, 'user' => $user, 'term' => $term], ['langcode' => $language_interface->getId()]);
-      $this->assertEqual($output, $expected, format_string('Comment token %token replaced.', ['%token' => $input]));
+      $this->assertEqual($output, $expected, new FormattableMarkup('Comment token %token replaced.', ['%token' => $input]));
     }
   }
 

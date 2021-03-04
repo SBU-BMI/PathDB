@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,11 +13,14 @@ namespace Psy\Test;
 
 use Psy\Sudo;
 
-class SudoTest extends \PHPUnit\Framework\TestCase
+class SudoTest extends TestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
-        if (\version_compare(PHP_VERSION, '7.1.0', '<')) {
+        if (\version_compare(\PHP_VERSION, '7.1.0', '<')) {
             $this->markTestSkipped('YOLO');
         }
     }

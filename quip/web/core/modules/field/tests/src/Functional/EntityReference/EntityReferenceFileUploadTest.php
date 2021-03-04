@@ -20,6 +20,11 @@ class EntityReferenceFileUploadTest extends BrowserTestBase {
   public static $modules = ['entity_reference', 'node', 'file'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The name of a content type that will reference $referencedType.
    *
    * @var string
@@ -95,11 +100,14 @@ class EntityReferenceFileUploadTest extends BrowserTestBase {
       'label' => $this->randomMachineName() . '_label',
     ])->save();
 
-    entity_get_display('node', $referencing->id(), 'default')
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+
+    $display_repository->getViewDisplay('node', $referencing->id())
       ->setComponent('test_field')
       ->setComponent($file_field_name)
       ->save();
-    entity_get_form_display('node', $referencing->id(), 'default')
+    $display_repository->getFormDisplay('node', $referencing->id())
       ->setComponent('test_field', [
         'type' => 'entity_reference_autocomplete',
       ])
@@ -113,19 +121,22 @@ class EntityReferenceFileUploadTest extends BrowserTestBase {
    * Tests that the autocomplete input element does not cause ajax fatal.
    */
   public function testFileUpload() {
-    $user1 = $this->drupalCreateUser(['access content', "create $this->referencingType content"]);
+    $user1 = $this->drupalCreateUser([
+      'access content',
+      "create $this->referencingType content",
+    ]);
     $this->drupalLogin($user1);
 
     $test_file = current($this->getTestFiles('text'));
     $edit['files[file_field_0]'] = \Drupal::service('file_system')->realpath($test_file->uri);
     $this->drupalPostForm('node/add/' . $this->referencingType, $edit, 'Upload');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $edit = [
       'title[0][value]' => $this->randomMachineName(),
       'test_field[0][target_id]' => $this->nodeId,
     ];
     $this->drupalPostForm(NULL, $edit, 'Save');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 
 }

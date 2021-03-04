@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Commenting;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class FunctionCommentThrowTagSniff implements Sniff
@@ -132,7 +132,7 @@ class FunctionCommentThrowTagSniff implements Sniff
                 }//end if
             } else if ($tokens[$nextToken]['code'] === T_VARIABLE) {
                 // Find the nearest catch block in this scope and, if the caught var
-                // matches our rethrown var, use the exception types being caught as
+                // matches our re-thrown var, use the exception types being caught as
                 // exception types that are being thrown as well.
                 $catch = $phpcsFile->findPrevious(
                     T_CATCH,

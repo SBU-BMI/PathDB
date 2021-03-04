@@ -10,6 +10,11 @@ namespace Drupal\Tests\options\Functional;
 class OptionsSelectDynamicValuesTest extends OptionsDynamicValuesTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests the 'options_select' widget (single select).
    */
   public function testSelectListDynamic() {
@@ -17,7 +22,10 @@ class OptionsSelectDynamicValuesTest extends OptionsDynamicValuesTestBase {
     $this->entity->save();
 
     // Create a web user.
-    $web_user = $this->drupalCreateUser(['view test entity', 'administer entity_test content']);
+    $web_user = $this->drupalCreateUser([
+      'view test entity',
+      'administer entity_test content',
+    ]);
     $this->drupalLogin($web_user);
 
     // Display form.
@@ -27,7 +35,7 @@ class OptionsSelectDynamicValuesTest extends OptionsDynamicValuesTestBase {
     foreach ($options as $option) {
       $value = $option->getValue();
       if ($value != '_none') {
-        $this->assertTrue(array_search($value, $this->test));
+        $this->assertContains($value, $this->test);
       }
     }
   }

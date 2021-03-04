@@ -10,6 +10,11 @@ namespace Drupal\Tests\block_content\Functional\Views;
 class BlockContentIntegrationTest extends BlockContentTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Views used by this test.
    *
    * @var array
@@ -37,10 +42,10 @@ class BlockContentIntegrationTest extends BlockContentTestBase {
     }
 
     $this->drupalGet('test-block_content-view');
-    $this->assertResponse(404);
+    $this->assertSession()->statusCodeEquals(404);
 
     $this->drupalGet('test-block_content-view/all');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertIds($all_ids);
     /* @var \Drupal\block_content\Entity\BlockContentType[] $types*/
     foreach ($types as $type) {

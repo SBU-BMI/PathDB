@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\language\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationUI;
 use Drupal\Tests\BrowserTestBase;
@@ -23,9 +24,19 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
-    $admin_user = $this->drupalCreateUser(['administer languages', 'access administration pages', 'view the administration theme', 'administer modules']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'access administration pages',
+      'view the administration theme',
+      'administer modules',
+    ]);
     $this->drupalLogin($admin_user);
     $this->drupalPostForm('admin/config/regional/language/add', ['predefined_langcode' => 'it'], t('Add language'));
   }
@@ -79,7 +90,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
 
     $type = LanguageInterface::TYPE_CONTENT;
     $language_types = $this->languageManager()->getLanguageTypes();
-    $this->assertTrue(in_array($type, $language_types), 'Content language type is configurable.');
+    $this->assertContains($type, $language_types, 'Content language type is configurable.');
 
     // Enable some core and custom language negotiation methods. The test
     // language type is supposed to be configurable.
@@ -112,10 +123,10 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
     foreach ($this->languageManager()->getLanguageTypes() as $type) {
       $form_field = $type . '[enabled][test_language_negotiation_method_ts]';
       if ($type == $test_type) {
-        $this->assertFieldByName($form_field, NULL, format_string('Type-specific test language negotiation method available for %type.', ['%type' => $type]));
+        $this->assertFieldByName($form_field, NULL, new FormattableMarkup('Type-specific test language negotiation method available for %type.', ['%type' => $type]));
       }
       else {
-        $this->assertNoFieldByName($form_field, NULL, format_string('Type-specific test language negotiation method unavailable for %type.', ['%type' => $type]));
+        $this->assertNoFieldByName($form_field, NULL, new FormattableMarkup('Type-specific test language negotiation method unavailable for %type.', ['%type' => $type]));
       }
     }
 
@@ -125,7 +136,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
     foreach ($this->languageManager()->getDefinedLanguageTypes() as $type) {
       $langcode = $last[$type];
       $value = $type == LanguageInterface::TYPE_CONTENT || strpos($type, 'test') !== FALSE ? 'it' : 'en';
-      $this->assertEqual($langcode, $value, format_string('The negotiated language for %type is %language', ['%type' => $type, '%language' => $value]));
+      $this->assertEqual($langcode, $value, new FormattableMarkup('The negotiated language for %type is %language', ['%type' => $type, '%language' => $value]));
     }
 
     // Uninstall language_test and check that everything is set back to the
@@ -135,7 +146,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
 
     // Check that only the core language types are available.
     foreach ($this->languageManager()->getDefinedLanguageTypes() as $type) {
-      $this->assertTrue(strpos($type, 'test') === FALSE, format_string('The %type language is still available', ['%type' => $type]));
+      $this->assertStringNotContainsString('test', $type, new FormattableMarkup('The %type language is still available', ['%type' => $type]));
     }
 
     // Check that fixed language types are properly configured, even those
@@ -161,7 +172,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
       if (!in_array($type, $configurable) && isset($info['fixed'])) {
         $negotiation = $this->config('language.types')->get('negotiation.' . $type . '.enabled');
         $equal = array_keys($negotiation) === array_values($info['fixed']);
-        $this->assertTrue($equal, format_string('language negotiation for %type is properly set up', ['%type' => $type]));
+        $this->assertTrue($equal, new FormattableMarkup('language negotiation for %type is properly set up', ['%type' => $type]));
       }
     }
   }

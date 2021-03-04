@@ -164,7 +164,7 @@ class Facet extends ConfigEntityBase implements FacetInterface {
    *
    * @var bool
    */
-  protected $exclude;
+  protected $exclude = FALSE;
 
   /**
    * The field identifier.
@@ -995,6 +995,15 @@ class Facet extends ConfigEntityBase implements FacetInterface {
 
     // Now rebuild the cache to force a fresh set of data.
     $container->get('plugin.manager.block')->clearCachedDefinitions();
+  }
+
+  /**
+   * Remove the facet lazy built data when the facet is serialized.
+   */
+  public function __sleep() {
+    unset($this->facet_source_instance);
+    unset($this->processors);
+    return parent::__sleep();
   }
 
 }

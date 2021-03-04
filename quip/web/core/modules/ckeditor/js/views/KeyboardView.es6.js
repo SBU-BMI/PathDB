@@ -28,7 +28,7 @@
       },
 
       /**
-       * @inheritdoc
+       * {@inheritdoc}
        */
       render() {},
 
@@ -197,11 +197,6 @@
             // that action was canceled.
             if (!result && $originalGroup) {
               $originalGroup.find('.ckeditor-buttons').append($button);
-            }
-            // Otherwise refresh the sortables to acknowledge the new button
-            // positions.
-            else {
-              view.$el.find('.ui-sortable').sortable('refresh');
             }
             // Refocus the target button so that the user can continue from a
             // known place.

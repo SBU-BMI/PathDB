@@ -1,4 +1,7 @@
 /* custom work */
+.w3-active-pager {
+  background-color: #f4faf4 !important;
+}
 .w3-button:hover {
   /* w3-theme-l4 background color */
   background-color: #dbefdc !important;

@@ -18,7 +18,7 @@ use Drupal\simpletest\KernelTestBase;
  * @see DatabaseBackendUnitTestCase
  *   For a full working implementation.
  *
- * @deprecated as of Drupal 8.2.x, will be removed before Drupal 9.0.0. Use
+ * @deprecated in drupal:8.2.0 and is removed from drupal:9.0.0. Use
  *    \Drupal\KernelTests\Core\Cache\GenericCacheBackendUnitTestBase instead.
  */
 abstract class GenericCacheBackendUnitTestBase extends KernelTestBase {
@@ -512,18 +512,18 @@ abstract class GenericCacheBackendUnitTestBase extends KernelTestBase {
 
     $cids = $reference;
     $ret = $backend->getMultiple($cids);
-    $this->assertEqual(count($ret), 4, 'Four items returned.');
+    $this->assertCount(4, $ret, 'Four items returned.');
 
     $backend->invalidate('test1');
     $backend->invalidateMultiple(['test2', 'test3']);
 
     $cids = $reference;
     $ret = $backend->getMultiple($cids);
-    $this->assertEqual(count($ret), 1, 'Only one item element returned.');
+    $this->assertCount(1, $ret, 'Only one item element returned.');
 
     $cids = $reference;
     $ret = $backend->getMultiple($cids, TRUE);
-    $this->assertEqual(count($ret), 4, 'Four items returned.');
+    $this->assertCount(4, $ret, 'Four items returned.');
 
     // Calling invalidateMultiple() with an empty array should not cause an
     // error.

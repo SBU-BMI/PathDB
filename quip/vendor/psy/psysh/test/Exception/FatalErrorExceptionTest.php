@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,17 +11,18 @@
 
 namespace Psy\Test\Exception;
 
+use Psy\Exception\Exception;
 use Psy\Exception\FatalErrorException;
 
-class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
+class FatalErrorExceptionTest extends \Psy\Test\TestCase
 {
     public function testInstance()
     {
         $e = new FatalErrorException();
 
-        $this->assertInstanceOf('Psy\Exception\Exception', $e);
-        $this->assertInstanceOf('ErrorException', $e);
-        $this->assertInstanceOf('Psy\Exception\FatalErrorException', $e);
+        $this->assertInstanceOf(Exception::class, $e);
+        $this->assertInstanceOf(\ErrorException::class, $e);
+        $this->assertInstanceOf(FatalErrorException::class, $e);
     }
 
     public function testMessage()
@@ -29,9 +30,9 @@ class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
         $e = new FatalErrorException('{msg}', 0, 0, '{filename}', 13);
 
         $this->assertSame('{msg}', $e->getRawMessage());
-        $this->assertContains('{msg}', $e->getMessage());
-        $this->assertContains('{filename}', $e->getMessage());
-        $this->assertContains('line 13', $e->getMessage());
+        $this->assertStringContainsString('{msg}', $e->getMessage());
+        $this->assertStringContainsString('{filename}', $e->getMessage());
+        $this->assertStringContainsString('line 13', $e->getMessage());
     }
 
     public function testMessageWithNoFilename()
@@ -39,13 +40,24 @@ class FatalErrorExceptionTest extends \PHPUnit\Framework\TestCase
         $e = new FatalErrorException('{msg}');
 
         $this->assertSame('{msg}', $e->getRawMessage());
-        $this->assertContains('{msg}', $e->getMessage());
-        $this->assertContains('eval()\'d code', $e->getMessage());
+        $this->assertStringContainsString('{msg}', $e->getMessage());
+        $this->assertStringContainsString('eval()\'d code', $e->getMessage());
     }
 
     public function testNegativeOneLineNumberIgnored()
     {
+        if (\defined('HHVM_VERSION')) {
+            $this->markTestSkipped('HHVM does not support the line number argument, apparently.');
+        }
+
         $e = new FatalErrorException('{msg}', 0, 1, null, -1);
-        $this->assertEquals(0, $e->getLine());
+
+        // In PHP 8.0+, the line number will be (as of the time of this change) 53, because it's
+        // the line where the exception was first constructed. In older PHP versions, it'll be 0.
+        $this->assertNotEquals(-1, $e->getLine());
+
+        if (\version_compare(\PHP_VERSION, '8.0', '<')) {
+            $this->assertEquals(0, $e->getLine());
+        }
     }
 }

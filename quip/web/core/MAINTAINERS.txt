@@ -36,9 +36,10 @@ Framework managers
 
 Release managers
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
-- Chris McCafferty 'cilefen' https://www.drupal.org/u/cilefen
 - Jess Myrbo 'xjm' https://www.drupal.org/u/xjm
 
+Committer team facilitators
+- Pamela Barone 'pameeela' https://www.drupal.org/u/pameeela
 
 Subsystem maintainers
 ---------------------
@@ -144,7 +145,6 @@ Contact
 
 Content Moderation
 - Sam Becker 'Sam152' https://www.drupal.org/u/sam152
-- Tim Millwood 'timmillwood' https://www.drupal.org/u/timmillwood
 
 Content Translation
 - Francesco Placella 'plach' https://www.drupal.org/u/plach
@@ -231,6 +231,10 @@ Hypertext Application Language (HAL)
 Help
 - ?
 
+Help Topics
+- Amber Matz 'Amber Himes Matz' https://www.drupal.org/u/amber-himes-matz
+- Andrey Postnikov 'andypost' https://www.drupal.org/u/andypost
+
 Image
 - Claudiu Cristea 'claudiu.cristea' https://www.drupal.org/u/claudiu.cristea
 
@@ -245,7 +249,6 @@ Interface Translation (locale)
 
 JavaScript
 - Théodore Biadala 'nod_' https://www.drupal.org/u/nod_
-- Matthew Grill 'alwaysworking' https://www.drupal.org/u/alwaysworking
 - Sally Young 'justafish' https://www.drupal.org/u/justafish
 
 JSON:API
@@ -280,6 +283,10 @@ Media
 - Christian Fritsch 'chr.fritsch' https://www.drupal.org/u/chr.fritsch
 - Adam Globus-Hoenich 'phenaproxima' https://www.drupal.org/u/phenaproxima
 
+  Media Library
+  - Sean Blommaert 'seanB' https://www.drupal.org/u/seanb
+  - Adam Globus-Hoenich 'phenaproxima' https://www.drupal.org/u/phenaproxima
+
 Menu
 - Daniel Wehner 'dawehner' https://www.drupal.org/u/dawehner
 - Peter Wolanin 'pwolanin' https://www.drupal.org/u/pwolanin
@@ -292,13 +299,14 @@ Menu UI
 - ?
 
 Migrate
+- Benji Fisher 'benjifisher' https://www.drupal.org/u/benjifisher
 - Adam Globus-Hoenich 'phenaproxima' https://www.drupal.org/u/phenaproxima
 - Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 - Michael Lutz 'mikelutz' https://www.drupal.org/u/mikelutz
 - Vicki Spagnolo 'quietone' https://www.drupal.org/u/quietone
 
 Node
-- Tim Millwood 'timmillwood' https://www.drupal.org/u/timmillwood
+- ?
 
 Node Access
 - Ken Rickard 'agentrickard' https://www.drupal.org/u/agentrickard
@@ -313,6 +321,9 @@ Page Cache
 - Fabian Franz 'Fabianx' https://www.drupal.org/u/fabianx
 
 Path
+- Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
+
+Path Alias
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
 
 Plugin
@@ -371,7 +382,7 @@ Stark
 - John Albin Wilkins 'JohnAlbin' https://www.drupal.org/u/johnalbin
 
 Statistics
-- Tim Millwood 'timmillwood' https://www.drupal.org/u/timmillwood
+- ?
 
 Syslog
 - Mariano D'Agostino 'dagmar' https://www.drupal.org/u/dagmar
@@ -445,6 +456,7 @@ Topic maintainers
 -----------------
 
 Accessibility
+- Rain Breaw Michaels 'rainbreaw' https://www.drupal.org/u/rainbreaw
 - Mike Gifford 'mgifford' https://www.drupal.org/u/mgifford
 - Andrew Macpherson 'andrewmacpherson' https://www.drupal.org/u/andrewmacpherson
 
@@ -493,9 +505,7 @@ API-first Initiative
 - Gabe Sullice 'gabesullice' https://www.drupal.org/u/gabesullice
 
 Admin UI & JavaScript Modernisation Initiative
-- Angela Byron 'webchick' https://www.drupal.org/u/webchick
 - Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
-- Matthew Grill 'alwaysworking' https://www.drupal.org/u/alwaysworking
 - Sally Young 'justafish' https://www.drupal.org/u/justafish
 
 Layout Initiative
@@ -531,7 +541,6 @@ participate in mentoring.
 - Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 - Tara King 'sparklingrobots' https://www.drupal.org/u/sparklingrobots
 - Rachel Lawson 'rachel_norfolk' https://www.drupal.org/u/rachel_norfolk
-- Valery Lourie 'valthebald' https://www.drupal.org/u/valthebald
 - Elli Ludwigson 'ekl1773' https://www.drupal.org/u/ekl1773
 - Jess Myrbo 'xjm' https://www.drupal.org/u/xjm
 - Matthew Radcliffe 'mradcliffe' https://www.drupal.org/u/mradcliffe

@@ -4,6 +4,8 @@ namespace Drupal\Core\StringTranslation\Translator;
 
 use Drupal\Component\Gettext\PoStreamReader;
 use Drupal\Component\Gettext\PoMemoryWriter;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * File based string translation.
@@ -23,14 +25,28 @@ class FileTranslation extends StaticTranslation {
   protected $directory;
 
   /**
+   * The file system.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
    * Constructs a StaticTranslation object.
    *
    * @param string $directory
    *   The directory to retrieve file translations from.
+   * @param \Drupal\Core\File\FileSystemInterface $file_system
+   *   The file system service.
    */
-  public function __construct($directory) {
+  public function __construct($directory, FileSystemInterface $file_system = NULL) {
     parent::__construct();
     $this->directory = $directory;
+    if (!isset($file_system)) {
+      @trigger_error('Calling FileTranslation::__construct() without the $file_system argument is deprecated in drupal:8.8.0. The $file_system argument will be required in drupal:9.0.0. See https://www.drupal.org/node/3038437', E_USER_DEPRECATED);
+      $file_system = \Drupal::service('file_system');
+    }
+    $this->fileSystem = $file_system;
   }
 
   /**
@@ -65,12 +81,15 @@ class FileTranslation extends StaticTranslation {
    *
    * @return array
    *   An associative array of file information objects keyed by file URIs as
-   *   returned by file_scan_directory().
+   *   returned by FileSystemInterface::scanDirectory().
    *
-   * @see file_scan_directory()
+   * @see \Drupal\Core\File\FileSystemInterface::scanDirectory()
    */
   public function findTranslationFiles($langcode = NULL) {
-    $files = file_scan_directory($this->directory, $this->getTranslationFilesPattern($langcode), ['recurse' => FALSE]);
+    $files = [];
+    if (is_dir($this->directory)) {
+      $files = $this->fileSystem->scanDirectory($this->directory, $this->getTranslationFilesPattern($langcode), ['recurse' => FALSE]);
+    }
     return $files;
   }
 
@@ -88,7 +107,7 @@ class FileTranslation extends StaticTranslation {
     // The file name matches: drupal-[release version].[language code].po
     // When provided the $langcode is use as language code. If not provided all
     // language codes will match.
-    return '!drupal-[0-9a-z\.-]+\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!';
+    return '!drupal-[0-9]+\.[0-9]+\.([0-9]+|x)(-[a-z]+[0-9]*)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : LanguageInterface::VALID_LANGCODE_REGEX) . '\.po$!';
   }
 
   /**

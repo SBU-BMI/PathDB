@@ -36,8 +36,68 @@ class MigrationTest extends KernelTestBase {
    */
   public function testGetProcessPluginsException() {
     $migration = \Drupal::service('plugin.manager.migration')->createStubMigration([]);
-    $this->setExpectedException(MigrateException::class, 'Invalid process configuration for foobar');
+    $this->expectException(MigrateException::class);
+    $this->expectExceptionMessage('Invalid process configuration for foobar');
     $migration->getProcessPlugins(['foobar' => ['plugin' => 'get']]);
+  }
+
+  /**
+   * Tests Migration::getProcessPlugins()
+   *
+   * @param array $process
+   *   The migration process pipeline.
+   *
+   * @covers ::getProcessPlugins
+   *
+   * @dataProvider getProcessPluginsExceptionMessageProvider
+   */
+  public function testGetProcessPluginsExceptionMessage(array $process) {
+    // Test with an invalid process pipeline.
+    $plugin_definition = [
+      'id' => 'foo',
+      'process' => $process,
+    ];
+
+    reset($process);
+    $destination = key(($process));
+
+    $migration = \Drupal::service('plugin.manager.migration')
+      ->createStubMigration($plugin_definition);
+    $this->expectException(MigrateException::class);
+    $this->expectExceptionMessage("Invalid process for destination '$destination' in migration 'foo'");
+    $migration->getProcessPlugins();
+  }
+
+  /**
+   * Provides data for testing invalid process pipeline.
+   */
+  public function getProcessPluginsExceptionMessageProvider() {
+    return [
+      [
+        'Null' =>
+          [
+            'dest' => NULL,
+          ],
+      ],
+      [
+        'boolean' =>
+          [
+            'dest' => TRUE,
+          ],
+      ],
+      [
+        'integer' =>
+          [
+            'dest' => 2370,
+          ],
+      ],
+      [
+        'float' =>
+          [
+            'dest' => 1.61,
+          ],
+      ],
+    ];
   }
 
   /**
@@ -123,7 +183,8 @@ class MigrationTest extends KernelTestBase {
    */
   public function testGetDestinationPlugin() {
     $migration = \Drupal::service('plugin.manager.migration')->createStubMigration(['destination' => ['no_stub' => TRUE]]);
-    $this->setExpectedException(MigrateSkipRowException::class, "Stub requested but not made because no_stub configuration is set.");
+    $this->expectException(MigrateSkipRowException::class);
+    $this->expectExceptionMessage("Stub requested but not made because no_stub configuration is set.");
     $migration->getDestinationPlugin(TRUE);
   }
 

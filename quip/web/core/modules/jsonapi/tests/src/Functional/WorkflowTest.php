@@ -20,6 +20,11 @@ class WorkflowTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $entityTypeId = 'workflow';
 
   /**
@@ -47,7 +52,7 @@ class WorkflowTest extends ResourceTestBase {
   protected function createEntity() {
     $workflow = Workflow::create([
       'id' => 'rest_workflow',
-      'label' => 'REST Worklow',
+      'label' => 'REST Workflow',
       'type' => 'workflow_type_complex_test',
     ]);
     $workflow
@@ -91,7 +96,7 @@ class WorkflowTest extends ResourceTestBase {
               'workflow_type_test',
             ],
           ],
-          'label' => 'REST Worklow',
+          'label' => 'REST Workflow',
           'langcode' => 'en',
           'status' => TRUE,
           'workflow_type' => 'workflow_type_complex_test',

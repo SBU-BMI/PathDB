@@ -17,8 +17,11 @@
     "jQuery": true,
     "_": true,
     "matchMedia": true,
+    "Cookies": true,
     "Backbone": true,
     "Modernizr": true,
+    "Popper": true,
+    "Sortable": true,
     "CKEDITOR": true
   },
   "rules": {

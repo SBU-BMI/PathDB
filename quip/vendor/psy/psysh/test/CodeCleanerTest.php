@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,7 @@ namespace Psy\Test;
 
 use Psy\CodeCleaner;
 
-class CodeCleanerTest extends \PHPUnit\Framework\TestCase
+class CodeCleanerTest extends TestCase
 {
     /**
      * @dataProvider semicolonCodeProvider
@@ -43,7 +43,7 @@ class CodeCleanerTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnclosedStatements(array $lines, $isUnclosed)
     {
-        $cc  = new CodeCleaner();
+        $cc = new CodeCleaner();
         $res = $cc->clean($lines);
 
         if ($isUnclosed) {
@@ -83,7 +83,7 @@ class CodeCleanerTest extends \PHPUnit\Framework\TestCase
             $this->markTestSkipped('HHVM not supported.');
         }
 
-        $cc  = new CodeCleaner();
+        $cc = new CodeCleaner();
         $res = $cc->clean($lines);
 
         $this->assertFalse($res);
@@ -102,12 +102,15 @@ class CodeCleanerTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider invalidStatementsProvider
-     * @expectedException \Psy\Exception\ParseErrorException
      */
     public function testInvalidStatementsThrowParseErrors($code)
     {
+        $this->expectException(\Psy\Exception\ParseErrorException::class);
+
         $cc = new CodeCleaner();
         $cc->clean([$code]);
+
+        $this->fail();
     }
 
     public function invalidStatementsProvider()

@@ -20,6 +20,11 @@ class ColorTest extends BrowserTestBase {
   public static $modules = ['color', 'color_test', 'block', 'file'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with administrative permissions.
    *
    * @var \Drupal\user\UserInterface
@@ -65,7 +70,7 @@ class ColorTest extends BrowserTestBase {
         'scheme_color' => '#3b3b3b',
       ],
     ];
-    \Drupal::service('theme_handler')->install(array_keys($this->themes));
+    \Drupal::service('theme_installer')->install(array_keys($this->themes));
 
     // Array filled with valid and not valid color values.
     $this->colorTests = [
@@ -107,7 +112,7 @@ class ColorTest extends BrowserTestBase {
 
     $this->drupalLogin($this->bigUser);
     $this->drupalGet($settings_path);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertUniqueText('Color set');
     $edit['scheme'] = '';
     $edit[$test_values['palette_input']] = '#123456';
@@ -115,14 +120,15 @@ class ColorTest extends BrowserTestBase {
 
     $this->drupalGet('<front>');
     $stylesheets = $this->config('color.theme.' . $theme)->get('stylesheets');
+    // Make sure the color stylesheet is included in the content.
     foreach ($stylesheets as $stylesheet) {
-      $this->assertPattern('|' . file_url_transform_relative(file_create_url($stylesheet)) . '|', 'Make sure the color stylesheet is included in the content. (' . $theme . ')');
+      $this->assertPattern('|' . file_url_transform_relative(file_create_url($stylesheet)) . '|');
       $stylesheet_content = implode("\n", file($stylesheet));
-      $this->assertTrue(strpos($stylesheet_content, 'color: #123456') !== FALSE, 'Make sure the color we changed is in the color stylesheet. (' . $theme . ')');
+      $this->assertStringContainsString('color: #123456', $stylesheet_content, 'Make sure the color we changed is in the color stylesheet. (' . $theme . ')');
     }
 
     $this->drupalGet($settings_path);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $edit['scheme'] = $test_values['scheme'];
     $this->drupalPostForm($settings_path, $edit, t('Save configuration'));
 
@@ -130,7 +136,7 @@ class ColorTest extends BrowserTestBase {
     $stylesheets = $this->config('color.theme.' . $theme)->get('stylesheets');
     foreach ($stylesheets as $stylesheet) {
       $stylesheet_content = implode("\n", file($stylesheet));
-      $this->assertTrue(strpos($stylesheet_content, 'color: ' . $test_values['scheme_color']) !== FALSE, 'Make sure the color we changed is in the color stylesheet. (' . $theme . ')');
+      $this->assertStringContainsString('color: ' . $test_values['scheme_color'], $stylesheet_content, 'Make sure the color we changed is in the color stylesheet. (' . $theme . ')');
     }
 
     // Test with aggregated CSS turned on.
@@ -143,7 +149,7 @@ class ColorTest extends BrowserTestBase {
     foreach ($stylesheets as $uri) {
       $stylesheet_content .= implode("\n", file(\Drupal::service('file_system')->realpath($uri)));
     }
-    $this->assertTrue(strpos($stylesheet_content, 'public://') === FALSE, 'Make sure the color paths have been translated to local paths. (' . $theme . ')');
+    $this->assertStringNotContainsString('public://', $stylesheet_content, 'Make sure the color paths have been translated to local paths. (' . $theme . ')');
     $config->set('css.preprocess', 0);
     $config->save();
   }

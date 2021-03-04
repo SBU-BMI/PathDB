@@ -16,6 +16,11 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected $langcode = 'de';
 
   /**
@@ -30,9 +35,11 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
    */
   protected function prepareEnvironment() {
     parent::prepareEnvironment();
+    // We set core_version_requirement to '*' for the test so that it does not
+    // need to be updated between major versions.
     $this->info = [
       'type' => 'profile',
-      'core' => \Drupal::CORE_COMPATIBILITY,
+      'core_version_requirement' => '*',
       'name' => 'Distribution profile',
       'distribution' => [
         'name' => 'My Distribution',
@@ -96,7 +103,7 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
    */
   public function testInstalled() {
     $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Confirm that we are logged-in after installation.
     $this->assertText($this->rootUser->getDisplayName());
@@ -112,6 +119,7 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
    *
    * @param string $langcode
    *   The language code.
+   *
    * @return string
    *   Contents for the test .po file.
    */

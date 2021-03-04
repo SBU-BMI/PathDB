@@ -1,6 +1,14 @@
 CONTENTS OF THIS FILE
 ---------------------
+* Description
 * Installation
+
+DESCRIPTION
+-----------
+
+By default, Drupal allows creation of identical terms in the same vocabulary
+Taxonomy unique prohibits saving a taxonomy term when a term with the same name exists in the same vocabulary.
+You can configure it individually for each vocabulary, and you can set custom error messages if a duplicate is found
 
 INSTALLATION
 ------------

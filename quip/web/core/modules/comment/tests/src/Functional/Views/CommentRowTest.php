@@ -10,6 +10,11 @@ namespace Drupal\Tests\comment\Functional\Views;
 class CommentRowTest extends CommentTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Views used by this test.
    *
    * @var array
@@ -23,7 +28,7 @@ class CommentRowTest extends CommentTestBase {
     $this->drupalGet('test-comment-row');
 
     $result = $this->xpath('//article[contains(@class, "comment")]');
-    $this->assertEqual(1, count($result), 'One rendered comment found.');
+    $this->assertCount(1, $result, 'One rendered comment found.');
   }
 
 }

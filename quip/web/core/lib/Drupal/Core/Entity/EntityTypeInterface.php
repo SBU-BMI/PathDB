@@ -157,8 +157,9 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    *
    * @param string $handler_type
    *   The type of handler to check.
-   * @param bool $nested
-   *   (optional) If this handler has a nested definition. Defaults to FALSE.
+   * @param string|false $nested
+   *   (optional) The nested handler definition key, or FALSE if the handler
+   *   does not have a nested definition. Defaults to FALSE.
    *
    * @return bool
    *   TRUE if a handler of this type exists, FALSE otherwise.
@@ -168,11 +169,14 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
   /**
    * @param string $handler_type
    *   The handler type to get.
+   * @param string|false $nested
+   *   (optional) The nested handler definition key, or FALSE if the handler
+   *   does not have a nested definition. Defaults to FALSE.
    *
    * @return array|string|null
    *   The handlers for a given type, or NULL if none exist.
    */
-  public function getHandlerClass($handler_type);
+  public function getHandlerClass($handler_type, $nested = FALSE);
 
   /**
    * Gets an array of handlers.
@@ -228,8 +232,9 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * @param string $operation
    *   The name of the operation to use, e.g., 'default'.
    *
-   * @return string
-   *   The class for this operation's form for this entity type.
+   * @return string|null
+   *   The class for this operation's form for this entity type or NULL if the
+   *   entity type does not have a form class for this operation.
    *
    * @see \Drupal\Core\Entity\EntityFormBuilderInterface
    */
@@ -364,9 +369,11 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * @return bool
    *   TRUE if the entity type is a subclass of the class or interface.
    *
-   * @deprecated in Drupal 8.3.0 and will be removed before Drupal 9.0.0.
+   * @deprecated in drupal:8.3.0 and is removed from drupal:10.0.0.
    *   Use Drupal\Core\Entity\EntityTypeInterface::entityClassImplements()
    *   instead.
+   *
+   * @see https://www.drupal.org/node/2842808
    */
   public function isSubclassOf($class);
 
@@ -488,15 +495,12 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * @return callable|null
    *   The callback, or NULL if none exists.
    *
-   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
-   *   Use Drupal\Core\Entity\EntityInterface::label() for complex label
-   *   generation as needed.
+   * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Override the
+   *   EntityInterface::label() method instead for dynamic labels.
    *
    * @see \Drupal\Core\Entity\EntityInterface::label()
    * @see \Drupal\Core\Entity\EntityTypeInterface::setLabelCallback()
    * @see \Drupal\Core\Entity\EntityTypeInterface::hasLabelCallback()
-   *
-   * @todo Remove usages of label_callback https://www.drupal.org/node/2450793.
    */
   public function getLabelCallback();
 
@@ -508,8 +512,8 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    *
    * @return $this
    *
-   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
-   *   Use EntityInterface::label() for complex label generation as needed.
+   * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Override the
+   *   EntityInterface::label() method instead for dynamic labels.
    *
    * @see \Drupal\Core\Entity\EntityInterface::label()
    * @see \Drupal\Core\Entity\EntityTypeInterface::getLabelCallback()
@@ -522,8 +526,8 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    *
    * @return bool
    *
-   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
-   *   Use EntityInterface::label() for complex label generation as needed.
+   * @deprecated in drupal:8.0.0 and is removed from drupal:9.0.0. Override the
+   *   EntityInterface::label() method instead for dynamic labels.
    *
    * @see \Drupal\Core\Entity\EntityInterface::label()
    * @see \Drupal\Core\Entity\EntityTypeInterface::getLabelCallback()
@@ -662,6 +666,10 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * @return string
    *   The lowercase form of the human-readable entity type name.
    *
+   * @deprecated in drupal:8.8.0 and is removed from drupal:9.0.0.
+   *   Instead, you should call getSingularLabel().
+   *   See https://www.drupal.org/node/3075567
+   *
    * @see \Drupal\Core\Entity\EntityTypeInterface::getLabel()
    */
   public function getLowercaseLabel();
@@ -686,6 +694,9 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * the entity type. For example: "opportunity" (with the plural as
    * "opportunities"), "child" (with the plural as "children"), or "content
    * item" (with the plural as "content items").
+   *
+   * Think of it as an "in a full sentence, this is what we call this" label. As
+   * a consequence, the English version is lowercase.
    *
    * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
    *   The singular label.

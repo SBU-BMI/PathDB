@@ -3,9 +3,13 @@
 namespace Drupal\facets\Plugin\facets\url_processor;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Url;
+use Drupal\facets\Event\QueryStringCreated;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
@@ -28,11 +32,33 @@ class QueryString extends UrlProcessorPluginBase {
   protected $urlAlias;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $eventDispatcher) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $request, $entity_type_manager);
+    $this->eventDispatcher = $eventDispatcher;
     $this->initializeActiveFilters();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('request_stack')->getMasterRequest(),
+      $container->get('entity_type.manager'),
+      $container->get('event_dispatcher')
+    );
   }
 
   /**
@@ -57,40 +83,19 @@ class QueryString extends UrlProcessorPluginBase {
     // Set the url alias from the facet object.
     $this->urlAlias = $facet->getUrlAlias();
 
-    $request = $this->request;
-    $facet_path = $facet->getFacetSource()->getPath();
-    if ($facet_path) {
-      $request = Request::create($facet_path);
-      $request->attributes->set('_format', $this->request->get('_format'));
-    }
+    $facet_source_path = $facet->getFacetSource()->getPath();
+    $request = $this->getRequestByFacetSourcePath($facet_source_path);
+    $requestUrl = $this->getUrlForRequest($facet_source_path, $request);
 
-    // Try to grab any route params from the original request.
-    // In case of request path not having a matching route, Url generator will
-    // fail with.
-    try {
-      $routeParameters = Url::createFromRequest($this->request)
-        ->getRouteParameters();
-
-      $requestUrl = Url::createFromRequest($request);
-    }
-    catch (ResourceNotFoundException $e) {
-      $routeParameters = [];
-
-      // Bypass exception if no path available.
-      // Should be unreachable in default FacetSource implementations,
-      // but you never know.
-      if (!$facet_path) {
-        throw $e;
+    $original_filter_params = [];
+    foreach ($this->getActiveFilters() as $facet_id => $values) {
+      $values = array_filter($values, static function ($it) {
+        return $it !== NULL;
+      });
+      foreach ($values as $value) {
+        $original_filter_params[] = $this->getUrlAliasByFacetId($facet_id, $facet->getFacetSourceId()) . ":" . $value;
       }
-
-      $requestUrl = Url::fromUserInput($facet_path, [
-        'query' => [
-          '_format' => $this->request->get('_format'),
-        ],
-      ]);
     }
-
-    $requestUrl->setOption('attributes', ['rel' => 'nofollow']);
 
     /** @var \Drupal\facets\Result\ResultInterface[] $results */
     foreach ($results as &$result) {
@@ -110,13 +115,7 @@ class QueryString extends UrlProcessorPluginBase {
       }
       $result_get_params = clone $get_params;
 
-      $filter_params = [];
-      foreach ($this->getActiveFilters() as $facet_id => $values) {
-        $values = array_filter($values);
-        foreach ($values as $value) {
-          $filter_params[] = $this->getUrlAliasByFacetId($facet_id, $facet->getFacetSourceId()) . ":" . $value;
-        }
-      }
+      $filter_params = $original_filter_params;
 
       // If the value is active, remove the filter string from the parameters.
       if ($result->isActive()) {
@@ -180,6 +179,10 @@ class QueryString extends UrlProcessorPluginBase {
           }
         }
       }
+
+      // Allow other modules to alter the result url built.
+      $this->eventDispatcher->dispatch(QueryStringCreated::NAME, new QueryStringCreated($result_get_params, $filter_params, $result, $this->activeFilters, $facet));
+
       asort($filter_params, \SORT_NATURAL);
       $result_get_params->set($this->filterKey, array_values($filter_params));
       if (!empty($routeParameters)) {
@@ -193,6 +196,9 @@ class QueryString extends UrlProcessorPluginBase {
         // See https://www.drupal.org/node/2898189.
         unset($new_url_params['page']);
 
+        // Remove core wrapper format (e.g. render-as-ajax-response) paremeters.
+        unset($new_url_params[MainContentViewSubscriber::WRAPPER_FORMAT]);
+
         // Set the new url parameters.
         $url->setOption('query', $new_url_params);
       }
@@ -205,6 +211,85 @@ class QueryString extends UrlProcessorPluginBase {
       $get_params->set('page', $current_page);
     }
     return $results;
+  }
+
+  /**
+   * Gets a request object based on the facet source path.
+   *
+   * If the facet's source has a path, we construct a request object based on
+   * that path, as it may be different than the current request's. This method
+   * statically caches the request object based on the facet source path so that
+   * subsequent calls to this processer do not recreate the same request object.
+   *
+   * @param string $facet_source_path
+   *   The facet source path.
+   *
+   * @return \Symfony\Component\HttpFoundation\Request
+   *   The request.
+   */
+  protected function getRequestByFacetSourcePath($facet_source_path) {
+    $requestsByPath = &drupal_static(__CLASS__ . __FUNCTION__, []);
+    if (!$facet_source_path) {
+      return $this->request;
+    }
+
+    if (array_key_exists($facet_source_path, $requestsByPath)) {
+      return $requestsByPath[$facet_source_path];
+    }
+
+    $request = Request::create($facet_source_path);
+    $request->attributes->set('_format', $this->request->get('_format'));
+    $requestsByPath[$facet_source_path] = $request;
+    return $request;
+  }
+
+  /**
+   * Gets the URL object for a request.
+   *
+   * This method statically caches the URL object for a request based on the
+   * facet source path. This reduces subsequent calls to the processor from
+   * having to regenerate the URL object.
+   *
+   * @param string $facet_source_path
+   *   The facet source path.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL.
+   */
+  protected function getUrlForRequest($facet_source_path, Request $request) {
+    /** @var \Drupal\Core\Url[] $requestUrlsByPath */
+    $requestUrlsByPath = &drupal_static(__CLASS__ . __FUNCTION__, []);
+
+    if (array_key_exists($facet_source_path, $requestUrlsByPath)) {
+      return $requestUrlsByPath[$facet_source_path];
+    }
+
+    // Try to grab any route params from the original request.
+    // In case of request path not having a matching route, Url generator will
+    // fail with.
+    try {
+      $requestUrl = Url::createFromRequest($request);
+    }
+    catch (ResourceNotFoundException $e) {
+      // Bypass exception if no path available.
+      // Should be unreachable in default FacetSource implementations,
+      // but you never know.
+      if (!$facet_source_path) {
+        throw $e;
+      }
+
+      $requestUrl = Url::fromUserInput($facet_source_path, [
+        'query' => [
+          '_format' => $this->request->get('_format'),
+        ],
+      ]);
+    }
+
+    $requestUrl->setOption('attributes', ['rel' => 'nofollow']);
+    $requestUrlsByPath[$facet_source_path] = $requestUrl;
+    return $requestUrl;
   }
 
   /**

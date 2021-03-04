@@ -125,9 +125,10 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
    *
    * The default value is expressed as a numerically indexed array of items,
    * each item being an array of key/value pairs matching the set of 'columns'
-   * defined by the "field schema" for the field type, as exposed in
-   * hook_field_schema(). If the number of items exceeds the cardinality of the
-   * field, extraneous items will be ignored.
+   * defined by the "field schema" for the field type, as exposed in the class
+   * implementing \Drupal\Core\Field\FieldItemInterface::schema() method. If the
+   * number of items exceeds the cardinality of the field, extraneous items will
+   * be ignored.
    *
    * This property is overlooked if the $default_value_callback is non-empty.
    *
@@ -381,7 +382,7 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
   }
 
   /**
-   * [@inheritdoc}
+   * {@inheritdoc}
    */
   public function setRequired($required) {
     $this->required = $required;
@@ -440,7 +441,7 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
    *
    * Using the Serialize interface and serialize() / unserialize() methods
    * breaks entity forms in PHP 5.4.
-   * @todo Investigate in https://www.drupal.org/node/2074253.
+   * @todo Investigate in https://www.drupal.org/node/1977206.
    */
   public function __sleep() {
     // Only serialize necessary properties, excluding those that can be

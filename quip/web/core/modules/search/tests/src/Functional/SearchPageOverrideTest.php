@@ -20,6 +20,11 @@ class SearchPageOverrideTest extends BrowserTestBase {
   protected static $modules = ['search', 'search_extra_type'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to administer search.
    *
    * @var \Drupal\user\UserInterface
@@ -30,7 +35,10 @@ class SearchPageOverrideTest extends BrowserTestBase {
     parent::setUp();
 
     // Log in as a user that can create and search content.
-    $this->searchUser = $this->drupalCreateUser(['search content', 'administer search']);
+    $this->searchUser = $this->drupalCreateUser([
+      'search content',
+      'administer search',
+    ]);
     $this->drupalLogin($this->searchUser);
   }
 

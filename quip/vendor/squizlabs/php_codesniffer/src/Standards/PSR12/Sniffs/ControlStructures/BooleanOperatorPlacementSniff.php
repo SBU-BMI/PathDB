@@ -9,12 +9,20 @@
 
 namespace PHP_CodeSniffer\Standards\PSR12\Sniffs\ControlStructures;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Util\Tokens;
+use PHP_CodeSniffer\Sniffs\Sniff;
 
 class BooleanOperatorPlacementSniff implements Sniff
 {
+
+    /**
+     * Used to restrict the placement of the boolean operator.
+     *
+     * Allowed value are "first" or "last".
+     *
+     * @var string|null
+     */
+    public $allowOnly = null;
 
 
     /**
@@ -66,8 +74,13 @@ class BooleanOperatorPlacementSniff implements Sniff
             T_BOOLEAN_OR,
         ];
 
+        if ($this->allowOnly === 'first' || $this->allowOnly === 'last') {
+            $position = $this->allowOnly;
+        } else {
+            $position = null;
+        }
+
         $operator  = $parenOpener;
-        $position  = null;
         $error     = false;
         $operators = [];
 
@@ -77,25 +90,10 @@ class BooleanOperatorPlacementSniff implements Sniff
                 break;
             }
 
-            $operators[] = $operator;
-
             $prev = $phpcsFile->findPrevious(T_WHITESPACE, ($operator - 1), $parenOpener, true);
             if ($prev === false) {
                 // Parse error.
                 return;
-            }
-
-            if ($tokens[$prev]['line'] < $tokens[$operator]['line']) {
-                // The boolean operator is the first content on the line.
-                if ($position === null) {
-                    $position = 'first';
-                }
-
-                if ($position !== 'first') {
-                    $error = true;
-                }
-
-                continue;
             }
 
             $next = $phpcsFile->findNext(T_WHITESPACE, ($operator + 1), $parenCloser, true);
@@ -104,8 +102,44 @@ class BooleanOperatorPlacementSniff implements Sniff
                 return;
             }
 
+            $firstOnLine = false;
+            $lastOnLine  = false;
+
+            if ($tokens[$prev]['line'] < $tokens[$operator]['line']) {
+                // The boolean operator is the first content on the line.
+                $firstOnLine = true;
+            }
+
             if ($tokens[$next]['line'] > $tokens[$operator]['line']) {
                 // The boolean operator is the last content on the line.
+                $lastOnLine = true;
+            }
+
+            if ($firstOnLine === true && $lastOnLine === true) {
+                // The operator is the only content on the line.
+                // Don't record it because we can't determine
+                // placement information from looking at it.
+                continue;
+            }
+
+            $operators[] = $operator;
+
+            if ($firstOnLine === false && $lastOnLine === false) {
+                // It's in the middle of content, so we can't determine
+                // placement information from looking at it, but we may
+                // still need to process it.
+                continue;
+            }
+
+            if ($firstOnLine === true) {
+                if ($position === null) {
+                    $position = 'first';
+                }
+
+                if ($position !== 'first') {
+                    $error = true;
+                }
+            } else {
                 if ($position === null) {
                     $position = 'last';
                 }
@@ -113,8 +147,6 @@ class BooleanOperatorPlacementSniff implements Sniff
                 if ($position !== 'last') {
                     $error = true;
                 }
-
-                continue;
             }
         } while ($operator !== false);
 
@@ -122,8 +154,18 @@ class BooleanOperatorPlacementSniff implements Sniff
             return;
         }
 
-        $error = 'Boolean operators between conditions must be at the beginning or end of the line, but not both';
-        $fix   = $phpcsFile->addFixableError($error, $stackPtr, 'FoundMixed');
+        switch ($this->allowOnly) {
+        case 'first':
+            $error = 'Boolean operators between conditions must be at the beginning of the line';
+            break;
+        case 'last':
+            $error = 'Boolean operators between conditions must be at the end of the line';
+            break;
+        default:
+            $error = 'Boolean operators between conditions must be at the beginning or end of the line, but not both';
+        }
+
+        $fix = $phpcsFile->addFixableError($error, $stackPtr, 'FoundMixed');
         if ($fix === false) {
             return;
         }

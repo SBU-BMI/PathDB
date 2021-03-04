@@ -11,6 +11,7 @@ dependencies:
     - field.field.node.test_content.field_ief
     - field.field.node.test_content.field_link
     - field.field.node.test_content.field_select_list
+    - field.field.node.test_content.field_select_list_numeric
     - field.field.node.test_content.field_tags
     - field.field.node.test_content.field_telephone
     - field.field.node.test_content.field_text
@@ -101,6 +102,13 @@ content:
     region: content
   field_select_list:
     weight: 8
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_select_list_numeric:
+    weight: 11
     label: above
     settings: {  }
     third_party_settings: {  }

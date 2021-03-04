@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\PEAR\Sniffs\Functions;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class FunctionCallSignatureSniff implements Sniff
@@ -66,6 +66,7 @@ class FunctionCallSignatureSniff implements Sniff
 
         $tokens[] = T_VARIABLE;
         $tokens[] = T_CLOSE_CURLY_BRACKET;
+        $tokens[] = T_CLOSE_SQUARE_BRACKET;
         $tokens[] = T_CLOSE_PARENTHESIS;
 
         return $tokens;
@@ -234,7 +235,7 @@ class FunctionCallSignatureSniff implements Sniff
             }
 
             if ($spaceAfterOpen !== $requiredSpacesAfterOpen) {
-                $error = 'Expected %s spaces after opening bracket; %s found';
+                $error = 'Expected %s spaces after opening parenthesis; %s found';
                 $data  = [
                     $requiredSpacesAfterOpen,
                     $spaceAfterOpen,
@@ -266,7 +267,7 @@ class FunctionCallSignatureSniff implements Sniff
         }
 
         if ($spaceBeforeClose !== $requiredSpacesBeforeClose) {
-            $error = 'Expected %s spaces before closing bracket; %s found';
+            $error = 'Expected %s spaces before closing parenthesis; %s found';
             $data  = [
                 $requiredSpacesBeforeClose,
                 $spaceBeforeClose,
@@ -449,6 +450,8 @@ class FunctionCallSignatureSniff implements Sniff
             }
         }//end if
 
+        $i = $phpcsFile->findNext(Tokens::$emptyTokens, ($openBracket + 1), null, true);
+
         if ($tokens[($i - 1)]['code'] === T_WHITESPACE
             && $tokens[($i - 1)]['line'] === $tokens[$i]['line']
         ) {
@@ -548,9 +551,14 @@ class FunctionCallSignatureSniff implements Sniff
 
                         $fix = $phpcsFile->addFixableError($error, $i, 'Indent', $data);
                         if ($fix === true) {
+                            $phpcsFile->fixer->beginChangeset();
+
                             $padding = str_repeat(' ', $expectedIndent);
                             if ($foundIndent === 0) {
                                 $phpcsFile->fixer->addContentBefore($i, $padding);
+                                if (isset($tokens[$i]['scope_opener']) === true) {
+                                    $phpcsFile->fixer->changeCodeBlockIndent($i, $tokens[$i]['scope_closer'], $expectedIndent);
+                                }
                             } else {
                                 if ($tokens[$i]['code'] === T_COMMENT) {
                                     $comment = $padding.ltrim($tokens[$i]['content']);
@@ -558,8 +566,14 @@ class FunctionCallSignatureSniff implements Sniff
                                 } else {
                                     $phpcsFile->fixer->replaceToken($i, $padding);
                                 }
+
+                                if (isset($tokens[($i + 1)]['scope_opener']) === true) {
+                                    $phpcsFile->fixer->changeCodeBlockIndent(($i + 1), $tokens[($i + 1)]['scope_closer'], ($expectedIndent - $foundIndent));
+                                }
                             }
-                        }
+
+                            $phpcsFile->fixer->endChangeset();
+                        }//end if
                     }//end if
                 } else {
                     $nextCode = $i;
@@ -572,7 +586,7 @@ class FunctionCallSignatureSniff implements Sniff
             }//end if
 
             // If we are within an argument we should be ignoring commas
-            // as these are not signaling the end of an argument.
+            // as these are not signalling the end of an argument.
             if ($inArg === false && $tokens[$i]['code'] === T_COMMA) {
                 $next = $phpcsFile->findNext(Tokens::$emptyTokens, ($i + 1), $closeBracket, true);
                 if ($next === false) {

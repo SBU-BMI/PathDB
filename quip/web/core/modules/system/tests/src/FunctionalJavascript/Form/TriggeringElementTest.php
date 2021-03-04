@@ -17,7 +17,12 @@ class TriggeringElementTest extends WebDriverTestBase {
   protected static $modules = ['form_test'];
 
   /**
-   * Tests the the triggering element when no button information is included.
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * Tests the triggering element when no button information is included.
    *
    * Test the determination of the triggering element when no button
    * information is included in the POST data, as is sometimes the case when

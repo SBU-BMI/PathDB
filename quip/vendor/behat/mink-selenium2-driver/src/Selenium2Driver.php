@@ -29,7 +29,7 @@ class Selenium2Driver extends CoreDriver
 {
     /**
      * Whether the browser has been started
-     * @var Boolean
+     * @var boolean
      */
     private $started = false;
 
@@ -254,7 +254,7 @@ class Selenium2Driver extends CoreDriver
      *
      * @param string  $xpath  the xpath to search with
      * @param string  $script the script to execute
-     * @param Boolean $sync   whether to run the script synchronously (default is TRUE)
+     * @param boolean $sync   whether to run the script synchronously (default is TRUE)
      *
      * @return mixed
      */
@@ -271,7 +271,7 @@ class Selenium2Driver extends CoreDriver
      *
      * @param Element $element the webdriver element
      * @param string  $script  the script to execute
-     * @param Boolean $sync    whether to run the script synchronously (default is TRUE)
+     * @param boolean $sync    whether to run the script synchronously (default is TRUE)
      *
      * @return mixed
      */
@@ -439,9 +439,19 @@ class Selenium2Driver extends CoreDriver
             return;
         }
 
+        // PHP 7.4 changed the way it encodes cookies to better respect the spec.
+        // This assumes that the server and the Mink client run on the same version (or
+        // at least the same side of the behavior change), so that the server and Mink
+        // consider the same value.
+        if (\PHP_VERSION_ID >= 70400) {
+            $encodedValue = rawurlencode($value);
+        } else {
+            $encodedValue = urlencode($value);
+        }
+
         $cookieArray = array(
             'name'   => $name,
-            'value'  => urlencode($value),
+            'value'  => $encodedValue,
             'secure' => false, // thanks, chibimagic!
         );
 
@@ -456,6 +466,14 @@ class Selenium2Driver extends CoreDriver
         $cookies = $this->wdSession->getAllCookies();
         foreach ($cookies as $cookie) {
             if ($cookie['name'] === $name) {
+                // PHP 7.4 changed the way it encodes cookies to better respect the spec.
+                // This assumes that the server and the Mink client run on the same version (or
+                // at least the same side of the behavior change), so that the server and Mink
+                // consider the same value.
+                if (\PHP_VERSION_ID >= 70400) {
+                    return rawurldecode($cookie['value']);
+                }
+
                 return urldecode($cookie['value']);
             }
         }
@@ -954,14 +972,17 @@ JS;
      */
     public function wait($timeout, $condition)
     {
-        $script = "return $condition;";
+        $script = 'return (' . rtrim($condition, " \t\n\r;") . ');';
         $start = microtime(true);
         $end = $start + $timeout / 1000.0;
 
         do {
             $result = $this->wdSession->execute(array('script' => $script, 'args' => array()));
-            usleep(100000);
-        } while (microtime(true) < $end && !$result);
+            if ($result) {
+              break;
+            }
+            usleep(10000);
+        } while (microtime(true) < $end);
 
         return (bool) $result;
     }
@@ -1174,7 +1195,7 @@ JS;
         $tempFilename = tempnam('', 'WebDriverZip');
 
         $archive = new \ZipArchive();
-        $result = $archive->open($tempFilename, \ZipArchive::CREATE);
+        $result = $archive->open($tempFilename, \ZipArchive::OVERWRITE);
         if (!$result) {
           throw new DriverException('Zip archive could not be created. Error ' . $result);
         }

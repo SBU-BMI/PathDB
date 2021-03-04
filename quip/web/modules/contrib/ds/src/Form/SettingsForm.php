@@ -118,6 +118,18 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('field_template'),
     ];
 
+    $form['fs1']['ft-layout-builder'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable field templates in Layout Builder'),
+      '#description' => $this->t('Enable field templates on Layout Builder field blocks. Note that disabling this after having configured layout builder field templates will require a cache clear.'),
+      '#default_value' => $config->get('ft-layout-builder'),
+      '#states' => [
+        'visible' => [
+          'input[name="fs1[field_template]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     $theme_functions = Ds::getFieldLayoutOptions();
     $url = new Url('ds.classes');
     $description = $this->t('<br/>Default will output the field as defined in Drupal Core.<br/>' .
@@ -184,6 +196,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('field_template', $values['fs1']['field_template'])
       ->set('ft-default', $values['fs1']['ft-default'])
       ->set('ft-show-colon', $values['fs1']['ft-show-colon'])
+      ->set('ft-layout-builder', $values['fs1']['ft-layout-builder'])
       ->set('use_field_names', $values['fs3']['use_field_names'])
       ->save();
 

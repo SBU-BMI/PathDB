@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Console\Tests\Helper;
 
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -175,19 +176,20 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         // Acm<NEWLINE>
         // Ac<BACKSPACE><BACKSPACE>s<TAB>Test<NEWLINE>
         // <NEWLINE>
-        // <UP ARROW><UP ARROW><NEWLINE>
-        // <UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><TAB>Test<NEWLINE>
+        // <UP ARROW><UP ARROW><UP ARROW><NEWLINE>
+        // <UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><TAB>Test<NEWLINE>
         // <DOWN ARROW><NEWLINE>
         // S<BACKSPACE><BACKSPACE><DOWN ARROW><DOWN ARROW><NEWLINE>
         // F00<BACKSPACE><BACKSPACE>oo<TAB><NEWLINE>
-        $inputStream = $this->getInputStream("Acm\nAc\177\177s\tTest\n\n\033[A\033[A\n\033[A\033[A\033[A\033[A\033[A\tTest\n\033[B\nS\177\177\033[B\033[B\nF00\177\177oo\t\n");
+        // F⭐<TAB><BACKSPACE><BACKSPACE>⭐<TAB><NEWLINE>
+        $inputStream = $this->getInputStream("Acm\nAc\177\177s\tTest\n\n\033[A\033[A\033[A\n\033[A\033[A\033[A\033[A\033[A\033[A\033[A\tTest\n\033[B\nS\177\177\033[B\033[B\nF00\177\177oo\t\nF⭐\t\177\177⭐\t\n");
 
         $dialog = new QuestionHelper();
         $helperSet = new HelperSet([new FormatterHelper()]);
         $dialog->setHelperSet($helperSet);
 
         $question = new Question('Please select a bundle', 'FrameworkBundle');
-        $question->setAutocompleterValues(['AcmeDemoBundle', 'AsseticBundle', 'SecurityBundle', 'FooBundle']);
+        $question->setAutocompleterValues(['AcmeDemoBundle', 'AsseticBundle', 'SecurityBundle', 'FooBundle', 'F⭐Y']);
 
         $this->assertEquals('AcmeDemoBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
         $this->assertEquals('AsseticBundleTest', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
@@ -197,6 +199,7 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         $this->assertEquals('AcmeDemoBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
         $this->assertEquals('AsseticBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
         $this->assertEquals('FooBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
+        $this->assertEquals('F⭐Y', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
     }
 
     public function testAskWithAutocompleteWithNonSequentialKeys()
@@ -522,7 +525,7 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
     public function testAmbiguousChoiceFromChoicelist()
     {
         $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('The provided answer is ambiguous. Value should be one of env_2 or env_3.');
+        $this->expectExceptionMessage('The provided answer is ambiguous. Value should be one of "env_2" or "env_3".');
         $possibleChoices = [
             'env_1' => 'My first environment',
             'env_2' => 'My environment',
@@ -680,12 +683,13 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         // Acm<NEWLINE>
         // Ac<BACKSPACE><BACKSPACE>s<TAB>Test<NEWLINE>
         // <NEWLINE>
-        // <UP ARROW><UP ARROW><NEWLINE>
-        // <UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><TAB>Test<NEWLINE>
+        // <UP ARROW><UP ARROW><UP ARROW><NEWLINE>
+        // <UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><UP ARROW><TAB>Test<NEWLINE>
         // <DOWN ARROW><NEWLINE>
         // S<BACKSPACE><BACKSPACE><DOWN ARROW><DOWN ARROW><NEWLINE>
         // F00<BACKSPACE><BACKSPACE>oo<TAB><NEWLINE>
-        $inputStream = $this->getInputStream("Acm\nAc\177\177s\tTest\n\n\033[A\033[A\n\033[A\033[A\033[A\033[A\033[A\tTest\n\033[B\nS\177\177\033[B\033[B\nF00\177\177oo\t\n");
+        // F⭐<TAB><BACKSPACE><BACKSPACE>⭐<TAB><NEWLINE>
+        $inputStream = $this->getInputStream("Acm\nAc\177\177s\tTest\n\n\033[A\033[A\033[A\n\033[A\033[A\033[A\033[A\033[A\033[A\033[A\tTest\n\033[B\nS\177\177\033[B\033[B\nF00\177\177oo\t\nF⭐\t⭐\t\n");
 
         $dialog = new QuestionHelper();
         $dialog->setInputStream($inputStream);
@@ -693,7 +697,7 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         $dialog->setHelperSet($helperSet);
 
         $question = new Question('Please select a bundle', 'FrameworkBundle');
-        $question->setAutocompleterValues(['AcmeDemoBundle', 'AsseticBundle', 'SecurityBundle', 'FooBundle']);
+        $question->setAutocompleterValues(['AcmeDemoBundle', 'AsseticBundle', 'SecurityBundle', 'FooBundle', 'F⭐Y']);
 
         $this->assertEquals('AcmeDemoBundle', $dialog->ask($this->createInputInterfaceMock(), $this->createOutputInterface(), $question));
         $this->assertEquals('AsseticBundleTest', $dialog->ask($this->createInputInterfaceMock(), $this->createOutputInterface(), $question));
@@ -703,6 +707,7 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         $this->assertEquals('AcmeDemoBundle', $dialog->ask($this->createInputInterfaceMock(), $this->createOutputInterface(), $question));
         $this->assertEquals('AsseticBundle', $dialog->ask($this->createInputInterfaceMock(), $this->createOutputInterface(), $question));
         $this->assertEquals('FooBundle', $dialog->ask($this->createInputInterfaceMock(), $this->createOutputInterface(), $question));
+        $this->assertEquals('F⭐Y', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
     }
 
     /**
@@ -887,7 +892,7 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
     public function testLegacyAmbiguousChoiceFromChoicelist()
     {
         $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('The provided answer is ambiguous. Value should be one of env_2 or env_3.');
+        $this->expectExceptionMessage('The provided answer is ambiguous. Value should be one of "env_2" or "env_3".');
         $possibleChoices = [
             'env_1' => 'My first environment',
             'env_2' => 'My environment',
@@ -1007,6 +1012,35 @@ class QuestionHelperTest extends AbstractQuestionHelperTest
         $this->assertEquals('AcmeDemoBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
         $this->assertEquals('AsseticBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
         $this->assertEquals('FooBundle', $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question));
+    }
+
+    public function testDisableStty()
+    {
+        if (!Terminal::hasSttyAvailable()) {
+            $this->markTestSkipped('`stty` is required to test autocomplete functionality');
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid');
+
+        QuestionHelper::disableStty();
+        $dialog = new QuestionHelper();
+        $dialog->setHelperSet(new HelperSet([new FormatterHelper()]));
+
+        $question = new ChoiceQuestion('Please select a bundle', [1 => 'AcmeDemoBundle', 4 => 'AsseticBundle']);
+        $question->setMaxAttempts(1);
+
+        // <UP ARROW><UP ARROW><NEWLINE><DOWN ARROW><DOWN ARROW><NEWLINE>
+        // Gives `AcmeDemoBundle` with stty
+        $inputStream = $this->getInputStream("\033[A\033[A\n\033[B\033[B\n");
+
+        try {
+            $dialog->ask($this->createStreamableInputInterfaceMock($inputStream), $this->createOutputInterface(), $question);
+        } finally {
+            $reflection = new \ReflectionProperty(QuestionHelper::class, 'stty');
+            $reflection->setAccessible(true);
+            $reflection->setValue(null, true);
+        }
     }
 
     public function testTraversableMultiselectAutocomplete()

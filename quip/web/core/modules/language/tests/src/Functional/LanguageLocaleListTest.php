@@ -22,6 +22,11 @@ class LanguageLocaleListTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     // Add a default locale storage for all these tests.
@@ -33,7 +38,10 @@ class LanguageLocaleListTest extends BrowserTestBase {
    */
   public function testLanguageLocaleList() {
     // User to add and remove language.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'access administration pages']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'access administration pages',
+    ]);
     $this->drupalLogin($admin_user);
 
     // Add predefined language.

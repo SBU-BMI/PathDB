@@ -17,7 +17,12 @@ class TwigNamespaceTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['twig_theme_test', 'twig_namespace_a', 'twig_namespace_b', 'node'];
+  public static $modules = [
+    'twig_theme_test',
+    'twig_namespace_a',
+    'twig_namespace_b',
+    'node',
+  ];
 
   /**
    * @var \Drupal\Core\Template\TwigEnvironment
@@ -26,15 +31,15 @@ class TwigNamespaceTest extends KernelTestBase {
 
   protected function setUp() {
     parent::setUp();
-    \Drupal::service('theme_handler')->install(['test_theme', 'bartik']);
+    \Drupal::service('theme_installer')->install(['test_theme', 'bartik']);
     $this->twig = \Drupal::service('twig');
   }
 
   /**
    * Checks to see if a value is a twig template.
    */
-  public function assertTwigTemplate($value, $message = '', $group = 'Other') {
-    $this->assertTrue($value instanceof TemplateWrapper, $message, $group);
+  public function assertTwigTemplate($value, $message = '') {
+    $this->assertInstanceOf(TemplateWrapper::class, $value, $message);
   }
 
   /**

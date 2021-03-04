@@ -102,7 +102,9 @@
     if (xmlhttp.status) {
       statusCode = `\n${Drupal.t('An AJAX HTTP error occurred.')}\n${Drupal.t(
         'HTTP Result Code: !status',
-        { '!status': xmlhttp.status },
+        {
+          '!status': xmlhttp.status,
+        },
       )}`;
     } else {
       statusCode = `\n${Drupal.t(
@@ -419,8 +421,10 @@
     this.element = element;
 
     /**
-     * @deprecated in Drupal 8.5.0 and will be removed before Drupal 9.0.0.
-     * Use elementSettings.
+     * @deprecated in drupal:8.5.0 and is removed from drupal:10.0.0.
+     *   Use elementSettings.
+     *
+     * @see https://www.drupal.org/node/2928117
      *
      * @type {Drupal.Ajax~elementSettings}
      */
@@ -555,6 +559,7 @@
         }
       },
       dataType: 'json',
+      jsonp: false,
       type: 'POST',
     };
 
@@ -655,9 +660,7 @@
       // the complete response.
       this.ajaxing = false;
       window.alert(
-        `An error occurred while attempting to process ${this.options.url}: ${
-          e.message
-        }`,
+        `An error occurred while attempting to process ${this.options.url}: ${e.message}`,
       );
       // For consistency, return a rejected Deferred (i.e., jqXHR's superclass)
       // so that calling code can take appropriate action.
@@ -750,9 +753,7 @@
       // the complete response.
       ajax.ajaxing = false;
       window.alert(
-        `An error occurred while attempting to process ${ajax.options.url}: ${
-          e.message
-        }`,
+        `An error occurred while attempting to process ${ajax.options.url}: ${e.message}`,
       );
     }
   };
@@ -908,6 +909,17 @@
     `<div class="message">${message}</div>`;
 
   /**
+   * Provide a wrapper for the AJAX progress bar element.
+   *
+   * @param {jQuery} $element
+   *   Progress bar element.
+   * @return {string}
+   *   The HTML markup for the progress bar.
+   */
+  Drupal.theme.ajaxProgressBar = $element =>
+    $('<div class="ajax-progress ajax-progress-bar"></div>').append($element);
+
+  /**
    * Sets the progress bar progress indicator.
    */
   Drupal.Ajax.prototype.setProgressIndicatorBar = function() {
@@ -926,8 +938,8 @@
         this.progress.interval || 1500,
       );
     }
-    this.progress.element = $(progressBar.element).addClass(
-      'ajax-progress ajax-progress-bar',
+    this.progress.element = $(
+      Drupal.theme('ajaxProgressBar', progressBar.element),
     );
     this.progress.object = progressBar;
     $(this.element).after(this.progress.element);
@@ -948,7 +960,7 @@
    */
   Drupal.Ajax.prototype.setProgressIndicatorFullscreen = function() {
     this.progress.element = $(Drupal.theme('ajaxProgressIndicatorFullscreen'));
-    $('body').after(this.progress.element);
+    $('body').append(this.progress.element);
   };
 
   /**
@@ -1110,24 +1122,26 @@
    * @param {object} response
    *   The response from the Ajax request.
    *
-   * @deprecated in Drupal 8.6.x and will be removed before Drupal 9.0.0.
-   *   Use data with desired wrapper. See https://www.drupal.org/node/2974880.
+   * @deprecated in drupal:8.6.0 and is removed from drupal:10.0.0.
+   *   Use data with desired wrapper.
+   *
+   * @see https://www.drupal.org/node/2940704
    *
    * @todo Add deprecation warning after it is possible. For more information
    *   see: https://www.drupal.org/project/drupal/issues/2973400
-   *
-   * @see https://www.drupal.org/node/2940704
    */
   Drupal.theme.ajaxWrapperNewContent = ($newContent, ajax, response) =>
     (response.effect || ajax.effect) !== 'none' &&
     $newContent.filter(
       i =>
-        !// We can not consider HTML comments or whitespace text as separate
-        // roots, since they do not cause visual regression with effect.
-        (
-          $newContent[i].nodeName === '#comment' ||
-          ($newContent[i].nodeName === '#text' &&
-            /^(\s|\n|\r)*$/.test($newContent[i].textContent))
+        !(
+          // We can not consider HTML comments or whitespace text as separate
+          // roots, since they do not cause visual regression with effect.
+          (
+            $newContent[i].nodeName === '#comment' ||
+            ($newContent[i].nodeName === '#text' &&
+              /^(\s|\n|\r)*$/.test($newContent[i].textContent))
+          )
         ),
     ).length > 1
       ? Drupal.theme('ajaxWrapperMultipleRootElements', $newContent)
@@ -1139,13 +1153,13 @@
    * @param {jQuery} $elements
    *   Response elements after parsing.
    *
-   * @deprecated in Drupal 8.6.x and will be removed before Drupal 9.0.0.
-   *   Use data with desired wrapper. See https://www.drupal.org/node/2974880.
+   * @deprecated in drupal:8.6.0 and is removed from drupal:10.0.0.
+   *   Use data with desired wrapper.
+   *
+   * @see https://www.drupal.org/node/2940704
    *
    * @todo Add deprecation warning after it is possible. For more information
    *   see: https://www.drupal.org/project/drupal/issues/2973400
-   *
-   * @see https://www.drupal.org/node/2940704
    */
   Drupal.theme.ajaxWrapperMultipleRootElements = $elements =>
     $('<div></div>').append($elements);
@@ -1525,10 +1539,6 @@
     /**
      * Command to add css.
      *
-     * Uses the proprietary addImport method if available as browsers which
-     * support that method ignore @import statements in dynamically added
-     * stylesheets.
-     *
      * @param {Drupal.Ajax} [ajax]
      *   {@link Drupal.Ajax} object created by {@link Drupal.ajax}.
      * @param {object} response
@@ -1539,21 +1549,33 @@
      *   The XMLHttpRequest status.
      */
     add_css(ajax, response, status) {
-      // Add the styles in the normal way.
       $('head').prepend(response.data);
-      // Add imports in the styles using the addImport method if available.
-      let match;
-      const importMatch = /^@import url\("(.*)"\);$/gim;
-      if (
-        document.styleSheets[0].addImport &&
-        importMatch.test(response.data)
-      ) {
-        importMatch.lastIndex = 0;
-        do {
-          match = importMatch.exec(response.data);
-          document.styleSheets[0].addImport(match[1]);
-        } while (match);
+    },
+
+    /**
+     * Command to add a message to the message area.
+     *
+     * @param {Drupal.Ajax} [ajax]
+     *   {@link Drupal.Ajax} object created by {@link Drupal.ajax}.
+     * @param {object} response
+     *   The response from the Ajax request.
+     * @param {string} response.messageWrapperQuerySelector
+     *   The zone where to add the message. If null, the default will be used.
+     * @param {string} response.message
+     *   The message text.
+     * @param {string} response.messageOptions
+     *   The options argument for Drupal.Message().add().
+     * @param {bool} response.clearPrevious
+     *   If true, clear previous messages.
+     */
+    message(ajax, response) {
+      const messages = new Drupal.Message(
+        document.querySelector(response.messageWrapperQuerySelector),
+      );
+      if (response.clearPrevious) {
+        messages.clear();
       }
+      messages.add(response.message, response.messageOptions);
     },
   };
 })(jQuery, window, Drupal, drupalSettings);

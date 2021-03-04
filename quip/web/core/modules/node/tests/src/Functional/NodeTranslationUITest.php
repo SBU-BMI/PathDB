@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\node\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Tests\content_translation\Functional\ContentTranslationUITestBase;
 use Drupal\Core\Language\LanguageInterface;
@@ -15,6 +17,11 @@ use Drupal\language\Entity\ConfigurableLanguage;
  * @group node
  */
 class NodeTranslationUITest extends ContentTranslationUITestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {inheritdoc}
@@ -39,7 +46,15 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
    *
    * @var array
    */
-  public static $modules = ['block', 'language', 'content_translation', 'node', 'datetime', 'field_ui', 'help'];
+  public static $modules = [
+    'block',
+    'language',
+    'content_translation',
+    'node',
+    'datetime',
+    'field_ui',
+    'help',
+  ];
 
   /**
    * The profile to install as a basis for testing.
@@ -231,7 +246,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $article = $this->drupalCreateNode(['type' => 'article', 'langcode' => $this->langcodes[0]]);
 
     // Set up Seven as the admin theme and use it for node editing.
-    $this->container->get('theme_handler')->install(['seven']);
+    $this->container->get('theme_installer')->install(['seven']);
     $edit = [];
     $edit['admin_theme'] = 'seven';
     $edit['use_admin_theme'] = TRUE;
@@ -246,7 +261,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $this->assertNoRaw('core/themes/seven/css/base/elements.css', 'Translation uses frontend theme if edit is frontend.');
 
     // Assert presence of translation page itself (vs. DisabledBundle below).
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -264,12 +279,12 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     ]);
 
     // Make sure that nothing was inserted into the {content_translation} table.
-    $rows = db_query('SELECT nid, count(nid) AS count FROM {node_field_data} WHERE type <> :type GROUP BY nid HAVING count(nid) >= 2', [':type' => $this->bundle])->fetchAll();
-    $this->assertEqual(0, count($rows));
+    $rows = Database::getConnection()->query('SELECT nid, count(nid) AS count FROM {node_field_data} WHERE type <> :type GROUP BY nid HAVING count(nid) >= 2', [':type' => $this->bundle])->fetchAll();
+    $this->assertCount(0, $rows);
 
     // Ensure the translation tab is not accessible.
     $this->drupalGet('node/' . $node->id() . '/translations');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
   }
 
   /**
@@ -279,7 +294,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $default_langcode = $this->langcodes[0];
     $values[$default_langcode] = $this->getNewEntityValues($default_langcode);
     $this->entityId = $this->createEntity($values[$default_langcode], $default_langcode);
-    $node = \Drupal::entityManager()->getStorage($this->entityTypeId)->load($this->entityId);
+    $node = \Drupal::entityTypeManager()->getStorage($this->entityTypeId)->load($this->entityId);
     $node->setPromoted(TRUE);
 
     // Create translations.
@@ -298,7 +313,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $this->doTestTranslations('node', $values);
 
     // Enable the translation language renderer.
-    $view = \Drupal::entityManager()->getStorage('view')->load('frontpage');
+    $view = \Drupal::entityTypeManager()->getStorage('view')->load('frontpage');
     $display = &$view->getDisplay('default');
     $display['display_options']['rendering_language'] = '***LANGUAGE_entity_translation***';
     $view->save();
@@ -356,7 +371,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $this->doTestTranslations('node/' . $node->id(), $values);
 
     // Test that the node page has the correct alternate hreflang links.
-    $this->doTestAlternateHreflangLinks($node->toUrl());
+    $this->doTestAlternateHreflangLinks($node);
   }
 
   /**
@@ -371,31 +386,42 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $languages = $this->container->get('language_manager')->getLanguages();
     foreach ($this->langcodes as $langcode) {
       $this->drupalGet($path, ['language' => $languages[$langcode]]);
-      $this->assertText($values[$langcode]['title'][0]['value'], format_string('The %langcode node translation is correctly displayed.', ['%langcode' => $langcode]));
+      $this->assertText($values[$langcode]['title'][0]['value'], new FormattableMarkup('The %langcode node translation is correctly displayed.', ['%langcode' => $langcode]));
     }
   }
 
   /**
    * Tests that the given path provides the correct alternate hreflang links.
    *
-   * @param \Drupal\Core\Url $url
-   *   The path to be tested.
+   * @param \Drupal\node\Entity\Node $node
+   *   The node to be tested.
    */
-  protected function doTestAlternateHreflangLinks(Url $url) {
+  protected function doTestAlternateHreflangLinks(Node $node) {
+    $url = $node->toUrl();
     $languages = $this->container->get('language_manager')->getLanguages();
     $url->setAbsolute();
     $urls = [];
+    $translations = [];
     foreach ($this->langcodes as $langcode) {
       $language_url = clone $url;
       $urls[$langcode] = $language_url->setOption('language', $languages[$langcode]);
+      $translations[$langcode] = $node->getTranslation($langcode);
     }
     foreach ($this->langcodes as $langcode) {
-      $this->drupalGet($urls[$langcode]);
-      foreach ($urls as $alternate_langcode => $language_url) {
-        // Retrieve desired link elements from the HTML head.
-        $links = $this->xpath('head/link[@rel = "alternate" and @href = :href and @hreflang = :hreflang]',
-          [':href' => $language_url->toString(), ':hreflang' => $alternate_langcode]);
-        $this->assert(isset($links[0]), format_string('The %langcode node translation has the correct alternate hreflang link for %alternate_langcode: %link.', ['%langcode' => $langcode, '%alternate_langcode' => $alternate_langcode, '%link' => $url->toString()]));
+      // Skip unpublished translations.
+      if ($translations[$langcode]->isPublished()) {
+        $this->drupalGet($urls[$langcode]);
+        foreach ($urls as $alternate_langcode => $language_url) {
+          // Retrieve desired link elements from the HTML head.
+          $links = $this->xpath('head/link[@rel = "alternate" and @href = :href and @hreflang = :hreflang]',
+             [':href' => $language_url->toString(), ':hreflang' => $alternate_langcode]);
+          if ($translations[$alternate_langcode]->isPublished()) {
+            $this->assert(isset($links[0]), new FormattableMarkup('The %langcode node translation has the correct alternate hreflang link for %alternate_langcode: %link.', ['%langcode' => $langcode, '%alternate_langcode' => $alternate_langcode, '%link' => $url->toString()]));
+          }
+          else {
+            $this->assertFalse(isset($links[0]), new FormattableMarkup('The %langcode node translation has an hreflang link for unpublished %alternate_langcode translation: %link.', ['%langcode' => $langcode, '%alternate_langcode' => $alternate_langcode, '%link' => $url->toString()]));
+          }
+        }
       }
     }
   }
@@ -485,7 +511,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     // Should be different from regular node URL.
     $this->assertNotIdentical($original_revision_url, $original_revision->toUrl()->toString());
     $this->drupalGet($original_revision_url);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Contents should be in English, of correct revision.
     $this->assertText('First rev en title');
@@ -498,7 +524,7 @@ class NodeTranslationUITest extends ContentTranslationUITestBase {
     $this->assertNotIdentical($url_fr, $original_revision->toUrl()->toString());
     $this->assertNotIdentical($url_fr, $original_revision_url);
     $this->drupalGet($url_fr);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Contents should be in French, of correct revision.
     $this->assertText('First rev fr title');

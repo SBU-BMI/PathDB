@@ -1,18 +1,22 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization\Plugin;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface as DrupalConfigurablePluginInterface;
+use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\DerivativeInspectionInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Describes a configurable Authorization plugin.
  */
-interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInterface, DerivativeInspectionInterface, DrupalConfigurablePluginInterface, PluginFormInterface, ContainerFactoryPluginInterface {
+interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInterface, DerivativeInspectionInterface, ConfigurableInterface, DependentPluginInterface, PluginFormInterface, ContainerFactoryPluginInterface {
 
   /**
    * Returns the label for use on the administration pages.
@@ -20,7 +24,7 @@ interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInter
    * @return string
    *   The administration label.
    */
-  public function label();
+  public function label(): TranslatableMarkup;
 
   /**
    * Returns the plugin's description.
@@ -29,7 +33,7 @@ interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInter
    *   A string describing the plugin. Might contain HTML and should be already
    *   sanitized for output.
    */
-  public function getDescription();
+  public function getDescription(): string;
 
   /**
    * Builds the authorization form row.
@@ -65,7 +69,7 @@ interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInter
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  public function validateRowForm(array &$form, FormStateInterface $form_state);
+  public function validateRowForm(array &$form, FormStateInterface $form_state): void;
 
   /**
    * Submits the authorization form row.
@@ -75,7 +79,7 @@ interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInter
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  public function submitRowForm(array &$form, FormStateInterface $form_state);
+  public function submitRowForm(array &$form, FormStateInterface $form_state): void;
 
   /**
    * Tokens for the relevant plugin.
@@ -83,6 +87,6 @@ interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInter
    * @return array
    *   Placeholders for string replacement.
    */
-  public function getTokens();
+  public function getTokens(): array;
 
 }

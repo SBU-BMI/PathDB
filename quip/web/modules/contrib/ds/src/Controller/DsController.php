@@ -4,6 +4,7 @@ namespace Drupal\ds\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\field_ui\FieldUI;
@@ -54,7 +55,7 @@ class DsController extends ControllerBase {
         $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
         foreach ($bundles as $bundle_type => $bundle) {
           $row = [];
-          $operations = [];
+          $operations = '';
           $row[] = [
             'data' => [
               '#plain_text' => $bundle['label'],
@@ -65,20 +66,23 @@ class DsController extends ControllerBase {
             // Get the manage display URI.
             $route = FieldUI::getOverviewRouteInfo($entity_type, $bundle_type);
             if ($route) {
-              $operations['manage_display'] = [
-                'title' => $this->t('Manage display'),
-                'url' => new Url("entity.entity_view_display.$entity_type.default", $route->getRouteParameters()),
-              ];
+              try {
+                $operations = Link::fromTextAndUrl($this->t('Manage display'), Url::fromRoute("entity.entity_view_display.$entity_type.default", $route->getRouteParameters()))->toString();
+              }
+              catch (\Exception $ignored) { }
             }
           }
 
           // Add operation links.
           if (!empty($operations)) {
+            // Simulate a drop button. Not using operations because we are
+            // catching exceptions from the route generation, sometimes they
+            // simply fatal.
+            // @see https://www.drupal.org/project/ds/issues/3036765
             $row[] = [
               'data' => [
-                '#type' => 'operations',
-                '#subtype' => 'ds',
-                '#links' => $operations,
+                '#type' => 'markup',
+                '#markup' => '<div class="dropbutton-wrapper dropbutton-single"><div class="dropbutton-widget"><ul class="dropbutton"><li class="manage-display dropbutton-action">' . $operations . '</li></ul></div></div>',
               ],
             ];
           }
@@ -137,7 +141,6 @@ class DsController extends ControllerBase {
     // Get the manage display URI.
     $route = FieldUI::getOverviewRouteInfo($entity_type_id, $entity->bundle());
 
-    /* @var $entity_display EntityDisplayBase */
     $entity_display = EntityViewDisplay::load($entity_type_id . '.' . $entity->bundle() . '.' . $view_mode);
 
     $route_parameters = $route->getRouteParameters();

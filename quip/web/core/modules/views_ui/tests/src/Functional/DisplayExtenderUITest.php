@@ -19,6 +19,11 @@ class DisplayExtenderUITest extends UITestBase {
   public static $testViews = ['test_view'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests the display extender UI.
    */
   public function testDisplayExtenderUI() {
@@ -33,7 +38,7 @@ class DisplayExtenderUITest extends UITestBase {
 
     $random_text = $this->randomMachineName();
     $this->drupalPostForm($display_option_url, ['test_extender_test_option' => $random_text], t('Apply'));
-    $this->assertLink($random_text);
+    $this->assertSession()->linkExists($random_text);
     $this->drupalPostForm(NULL, [], t('Save'));
     $view = Views::getView($view->storage->id());
     $view->initDisplay();

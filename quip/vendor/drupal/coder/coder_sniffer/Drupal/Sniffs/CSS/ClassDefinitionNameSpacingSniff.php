@@ -28,7 +28,7 @@ class ClassDefinitionNameSpacingSniff implements Sniff
     /**
      * A list of tokenizers this sniff supports.
      *
-     * @var array
+     * @var array<string>
      */
     public $supportedTokenizers = ['CSS'];
 
@@ -36,7 +36,7 @@ class ClassDefinitionNameSpacingSniff implements Sniff
     /**
      * Returns the token types that this sniff is interested in.
      *
-     * @return int[]
+     * @return array<int, int|string>
      */
     public function register()
     {

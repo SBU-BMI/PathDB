@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,23 +12,27 @@
 namespace Psy\Test\VersionUpdater;
 
 use Psy\Shell;
+use Psy\VersionUpdater\GitHubChecker;
 
-class GitHubCheckerTest extends \PHPUnit\Framework\TestCase
+class GitHubCheckerTest extends \Psy\Test\TestCase
 {
     /**
      * @dataProvider malformedResults
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Unable to check for updates
      *
      * @param mixed $input
      */
     public function testExceptionInvocation($input)
     {
-        $checker = $this->getMockBuilder('Psy\\VersionUpdater\\GitHubChecker')
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unable to check for updates');
+
+        $checker = $this->getMockBuilder(GitHubChecker::class)
             ->setMethods(['fetchLatestRelease'])
             ->getMock();
         $checker->expects($this->once())->method('fetchLatestRelease')->willReturn($input);
         $checker->isLatest();
+
+        $this->fail();
     }
 
     /**
@@ -39,7 +43,7 @@ class GitHubCheckerTest extends \PHPUnit\Framework\TestCase
      */
     public function testDataSetResults($assertion, $input)
     {
-        $checker = $this->getMockBuilder('Psy\\VersionUpdater\\GitHubChecker')
+        $checker = $this->getMockBuilder(GitHubChecker::class)
             ->setMethods(['fetchLatestRelease'])
             ->getMock();
         $checker->expects($this->once())->method('fetchLatestRelease')->willReturn($input);
@@ -53,7 +57,7 @@ class GitHubCheckerTest extends \PHPUnit\Framework\TestCase
     {
         return [
             [false, \json_decode('{"tag_name":"v9.0.0"}')],
-            [true, \json_decode('{"tag_name":"v' . Shell::VERSION . '"}')],
+            [true, \json_decode('{"tag_name":"v'.Shell::VERSION.'"}')],
             [true, \json_decode('{"tag_name":"v0.0.1"}')],
             [true, \json_decode('{"tag_name":"v0.4.1-alpha"}')],
             [true, \json_decode('{"tag_name":"v0.4.2-beta3"}')],

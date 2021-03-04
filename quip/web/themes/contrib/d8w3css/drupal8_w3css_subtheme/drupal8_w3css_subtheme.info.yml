@@ -1,10 +1,11 @@
-name: Drupal8 W3CSS Subtheme
+name: Drupal8 W3CSS Sub-theme
 type: theme
 base theme: drupal8_w3css_theme
-description: 'drupal8 w3css subtheme is an empty theme for your customization.'
-
+core_version_requirement: ^8 || ^9
+description: 'drupal8 w3css sub-theme is an empty theme for your customization.'
+core: '8.x'
 libraries:
-  - drupal8_w3css_subtheme/global-components
+  - drupal8_w3css_subtheme/d8w3css-subtheme-global
 
 #Regions
 regions:
@@ -39,10 +40,7 @@ features:
   node_user_picture: true
   slogan: true
 
-# core: '8.x'
-
-# Information added by Drupal.org packaging script on 2019-03-06
-version: '8.x-1.15'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2021-01-17
+version: '8.x-1.19'
 project: 'd8w3css'
-datestamp: 1551854886
+datestamp: 1610924536

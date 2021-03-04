@@ -5,8 +5,8 @@ namespace Drupal\Tests\facets\Functional;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\search_api\Item\Field;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
-use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Tests the hierarchical facets implementation.

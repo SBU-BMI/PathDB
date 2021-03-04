@@ -19,6 +19,11 @@ class NodeQueryAlterTest extends NodeTestBase {
   public static $modules = ['node_access_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * User with permission to view content.
    */
   protected $accessUser;
@@ -41,9 +46,19 @@ class NodeQueryAlterTest extends NodeTestBase {
 
     // Create user with simple node access permission. The 'node test view'
     // permission is implemented and granted by the node_access_test module.
-    $this->accessUser = $this->drupalCreateUser(['access content overview', 'access content', 'node test view']);
-    $this->noAccessUser = $this->drupalCreateUser(['access content overview', 'access content']);
-    $this->noAccessUser2 = $this->drupalCreateUser(['access content overview', 'access content']);
+    $this->accessUser = $this->drupalCreateUser([
+      'access content overview',
+      'access content',
+      'node test view',
+    ]);
+    $this->noAccessUser = $this->drupalCreateUser([
+      'access content overview',
+      'access content',
+    ]);
+    $this->noAccessUser2 = $this->drupalCreateUser([
+      'access content overview',
+      'access content',
+    ]);
   }
 
   /**
@@ -62,10 +77,10 @@ class NodeQueryAlterTest extends NodeTestBase {
       $query->addMetaData('account', $this->accessUser);
 
       $result = $query->execute()->fetchAll();
-      $this->assertEqual(count($result), 4, 'User with access can see correct nodes');
+      $this->assertCount(4, $result, 'User with access can see correct nodes');
     }
     catch (\Exception $e) {
-      $this->fail(t('Altered query is malformed'));
+      $this->fail('Altered query is malformed');
     }
   }
 
@@ -80,7 +95,7 @@ class NodeQueryAlterTest extends NodeTestBase {
         ->allRevisions()
         ->execute();
 
-      $this->assertEqual(count($result), 4, 'User with access can see correct nodes');
+      $this->assertCount(4, $result, 'User with access can see correct nodes');
     }
     catch (\Exception $e) {
       $this->fail('Altered query is malformed');
@@ -103,10 +118,10 @@ class NodeQueryAlterTest extends NodeTestBase {
       $query->addMetaData('account', $this->noAccessUser);
 
       $result = $query->execute()->fetchAll();
-      $this->assertEqual(count($result), 0, 'User with no access cannot see nodes');
+      $this->assertCount(0, $result, 'User with no access cannot see nodes');
     }
     catch (\Exception $e) {
-      $this->fail(t('Altered query is malformed'));
+      $this->fail('Altered query is malformed');
     }
   }
 
@@ -126,12 +141,12 @@ class NodeQueryAlterTest extends NodeTestBase {
       $query->addMetaData('account', $this->accessUser);
 
       $result = $query->execute()->fetchAll();
-      $this->assertEqual(count($result), 0, 'User with view-only access cannot edit nodes');
+      $this->assertCount(0, $result, 'User with view-only access cannot edit nodes');
     }
     catch (\Exception $e) {
       $this->fail($e->getMessage());
       $this->fail((string) $query);
-      $this->fail(t('Altered query is malformed'));
+      $this->fail('Altered query is malformed');
     }
   }
 
@@ -167,10 +182,10 @@ class NodeQueryAlterTest extends NodeTestBase {
       $query->addMetaData('account', $this->noAccessUser);
 
       $result = $query->execute()->fetchAll();
-      $this->assertEqual(count($result), 0, 'User view privileges are not overridden');
+      $this->assertCount(0, $result, 'User view privileges are not overridden');
     }
     catch (\Exception $e) {
-      $this->fail(t('Altered query is malformed'));
+      $this->fail('Altered query is malformed');
     }
 
     // Have node_test_node_grants return a node_access_all privilege,
@@ -189,10 +204,10 @@ class NodeQueryAlterTest extends NodeTestBase {
       $query->addMetaData('account', $this->noAccessUser);
 
       $result = $query->execute()->fetchAll();
-      $this->assertEqual(count($result), 4, 'User view privileges are overridden');
+      $this->assertCount(4, $result, 'User view privileges are overridden');
     }
     catch (\Exception $e) {
-      $this->fail(t('Altered query is malformed'));
+      $this->fail('Altered query is malformed');
     }
     \Drupal::state()->delete('node_access_test.no_access_uid');
   }

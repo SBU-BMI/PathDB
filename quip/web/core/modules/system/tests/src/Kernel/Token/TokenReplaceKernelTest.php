@@ -48,7 +48,7 @@ class TokenReplaceKernelTest extends TokenReplaceKernelTestBase {
       $input = $test['prefix'] . '[site:name]' . $test['suffix'];
       $expected = $test['prefix'] . 'Drupal' . $test['suffix'];
       $output = $this->tokenService->replace($input, [], ['langcode' => $this->interfaceLanguage->getId()]);
-      $this->assertTrue($output == $expected, format_string('Token recognized in string %string', ['%string' => $input]));
+      $this->assertTrue($output == $expected, new FormattableMarkup('Token recognized in string %string', ['%string' => $input]));
     }
 
     // Test token replacement when the string contains no tokens.
@@ -118,7 +118,7 @@ class TokenReplaceKernelTest extends TokenReplaceKernelTestBase {
     $metadata_tests['[site:login-url]'] = $bubbleable_metadata;
 
     // Test to make sure that we generated something for each token.
-    $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
+    $this->assertNotContains(0, array_map('strlen', $tests), 'No empty tokens generated.');
 
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
@@ -146,11 +146,11 @@ class TokenReplaceKernelTest extends TokenReplaceKernelTestBase {
     $tests['[date:raw]'] = Xss::filter($date);
 
     // Test to make sure that we generated something for each token.
-    $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
+    $this->assertNotContains(0, array_map('strlen', $tests), 'No empty tokens generated.');
 
     foreach ($tests as $input => $expected) {
       $output = $this->tokenService->replace($input, ['date' => $date], ['langcode' => $this->interfaceLanguage->getId()]);
-      $this->assertEqual($output, $expected, format_string('Date token %token replaced.', ['%token' => $input]));
+      $this->assertEqual($output, $expected, new FormattableMarkup('Date token %token replaced.', ['%token' => $input]));
     }
   }
 

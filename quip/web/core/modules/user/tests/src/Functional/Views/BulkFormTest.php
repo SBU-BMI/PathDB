@@ -22,6 +22,11 @@ class BulkFormTest extends UserTestBase {
   public static $modules = ['views_ui'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Views used by this test.
    *
    * @var array
@@ -34,7 +39,7 @@ class BulkFormTest extends UserTestBase {
   public function testBulkForm() {
     // Log in as a user without 'administer users'.
     $this->drupalLogin($this->drupalCreateUser(['administer permissions']));
-    $user_storage = $this->container->get('entity.manager')->getStorage('user');
+    $user_storage = $this->container->get('entity_type.manager')->getStorage('user');
 
     // Create an user which actually can change users.
     $this->drupalLogin($this->drupalCreateUser(['administer users']));
@@ -109,7 +114,11 @@ class BulkFormTest extends UserTestBase {
     $this->assertTrue($anonymous_account->isBlocked(), 'Ensure the anonymous user got blocked.');
 
     // Test the list of available actions with a value that contains a dot.
-    $this->drupalLogin($this->drupalCreateUser(['administer permissions', 'administer views', 'administer users']));
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer permissions',
+      'administer views',
+      'administer users',
+    ]));
     $action_id = 'user_add_role_action.' . $role;
     $edit = [
       'options[include_exclude]' => 'exclude',

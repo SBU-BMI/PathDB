@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,26 +15,31 @@ use Psy\CodeCleaner\PassableByReferencePass;
 
 class PassableByReferencePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new PassableByReferencePass());
     }
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()
     {
         return [
-            ['array_pop(array())'],
-            ['array_pop(array($foo))'],
-            ['array_shift(array())'],
+            ['array_pop([])'],
+            ['array_pop([$foo])'],
+            ['array_shift([])'],
         ];
     }
 
@@ -49,13 +54,19 @@ class PassableByReferencePassTest extends CodeCleanerTestCase
 
     public function validStatements()
     {
-        return [
+        $stmts = [
             ['array_pop(json_decode("[]"))'],
             ['array_pop($foo)'],
             ['array_pop($foo->bar)'],
             ['array_pop($foo::baz)'],
             ['array_pop(Foo::qux)'],
         ];
+
+        if (\version_compare(\PHP_VERSION, '5.6', '>=')) {
+            $stmts[] = ['end(...[$a])'];
+        }
+
+        return $stmts;
     }
 
     /**
@@ -86,18 +97,20 @@ class PassableByReferencePassTest extends CodeCleanerTestCase
 
     /**
      * @dataProvider invalidArrayMultisort
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testInvalidArrayMultisort($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidArrayMultisort()
     {
         return [
             ['array_multisort(1)'],
-            ['array_multisort(array(1, 2, 3))'],
+            ['array_multisort([1, 2, 3])'],
             ['array_multisort($a, SORT_NATURAL, SORT_ASC, SORT_NATURAL, $b)'],
         ];
     }

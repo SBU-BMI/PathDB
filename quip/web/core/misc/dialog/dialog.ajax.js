@@ -11,7 +11,7 @@
       var $context = $(context);
 
       if (!$('#drupal-modal').length) {
-        $('<div id="drupal-modal" class="ui-front"/>').hide().appendTo('body');
+        $('<div id="drupal-modal" class="ui-front"></div>').hide().appendTo('body');
       }
 
       var $dialog = $context.closest('.ui-dialog-content');
@@ -38,14 +38,7 @@
       var buttons = [];
       var $buttons = $dialog.find('.form-actions input[type=submit], .form-actions a.button');
       $buttons.each(function () {
-        var $originalButton = $(this).css({
-          display: 'block',
-          width: 0,
-          height: 0,
-          padding: 0,
-          border: 0,
-          overflow: 'hidden'
-        });
+        var $originalButton = $(this).css({ display: 'none' });
         buttons.push({
           text: $originalButton.html() || $originalButton.attr('value'),
           class: $originalButton.attr('class'),
@@ -69,7 +62,7 @@
     }
     var $dialog = $(response.selector);
     if (!$dialog.length) {
-      $dialog = $('<div id="' + response.selector.replace(/^#/, '') + '" class="ui-front"/>').appendTo('body');
+      $dialog = $('<div id="' + response.selector.replace(/^#/, '') + '" class="ui-front"></div>').appendTo('body');
     }
 
     if (!ajax.wrapper) {

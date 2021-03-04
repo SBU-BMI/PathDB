@@ -2274,6 +2274,20 @@ $connection->insert('content_field_image')
   'field_image_list' => '1',
   'field_image_data' => 'a:2:{s:3:"alt";s:0:"";s:5:"title";s:0:"";}',
 ))
+->values(array(
+  'vid' => '5',
+  'nid' => '1',
+  'field_image_fid' => '2',
+  'field_image_list' => '1',
+  'field_image_data' => 'a:2:{s:3:"alt";s:0:"";s:5:"title";s:0:"";}',
+))
+->values(array(
+  'vid' => '2001',
+  'nid' => '1',
+  'field_image_fid' => '2',
+  'field_image_list' => '1',
+  'field_image_data' => 'a:2:{s:3:"alt";s:0:"";s:5:"title";s:0:"";}',
+))
 ->execute();
 $connection->schema()->createTable('content_field_multivalue', array(
   'fields' => array(
@@ -2390,12 +2404,6 @@ $connection->insert('content_field_test')
   'field_test_format' => '1',
 ))
 ->values(array(
-  'vid' => '2',
-  'nid' => '1',
-  'field_test_value' => 'This is a shared text field',
-  'field_test_format' => '1',
-))
-->values(array(
   'vid' => '3',
   'nid' => '2',
   'field_test_value' => NULL,
@@ -2403,14 +2411,20 @@ $connection->insert('content_field_test')
 ))
 ->values(array(
   'vid' => '5',
-  'nid' => '2',
-  'field_test_value' => NULL,
-  'field_test_format' => NULL,
+  'nid' => '1',
+  'field_test_value' => 'This is a shared text field',
+  'field_test_format' => '1',
 ))
 ->values(array(
   'vid' => '12',
   'nid' => '9',
   'field_test_value' => 'text for default value',
+  'field_test_format' => '1',
+))
+->values(array(
+  'vid' => '2001',
+  'nid' => '1',
+  'field_test_value' => 'This is a shared text field',
   'field_test_format' => '1',
 ))
 ->execute();
@@ -2470,12 +2484,17 @@ $connection->insert('content_field_test_text_single_checkbox')
 ))
 ->values(array(
   'vid' => '5',
-  'nid' => '2',
-  'field_test_text_single_checkbox_value' => NULL,
+  'nid' => '1',
+  'field_test_text_single_checkbox_value' => '0',
 ))
 ->values(array(
   'vid' => '12',
   'nid' => '9',
+  'field_test_text_single_checkbox_value' => '0',
+))
+->values(array(
+  'vid' => '2001',
+  'nid' => '1',
   'field_test_text_single_checkbox_value' => '0',
 ))
 ->execute();
@@ -2534,10 +2553,10 @@ $connection->insert('content_field_test_two')
   'field_test_two_value' => '10',
 ))
 ->values(array(
-  'vid' => '2',
+  'vid' => '1',
   'nid' => '1',
-  'delta' => '0',
-  'field_test_two_value' => NULL,
+  'delta' => '1',
+  'field_test_two_value' => '20',
 ))
 ->values(array(
   'vid' => '3',
@@ -2547,9 +2566,15 @@ $connection->insert('content_field_test_two')
 ))
 ->values(array(
   'vid' => '5',
-  'nid' => '2',
+  'nid' => '1',
   'delta' => '0',
-  'field_test_two_value' => NULL,
+  'field_test_two_value' => '10',
+))
+->values(array(
+  'vid' => '5',
+  'nid' => '1',
+  'delta' => '1',
+  'field_test_two_value' => '20',
 ))
 ->values(array(
   'vid' => '12',
@@ -2558,7 +2583,13 @@ $connection->insert('content_field_test_two')
   'field_test_two_value' => NULL,
 ))
 ->values(array(
-  'vid' => '1',
+  'vid' => '2001',
+  'nid' => '1',
+  'delta' => '0',
+  'field_test_two_value' => '10',
+))
+->values(array(
+  'vid' => '2001',
   'nid' => '1',
   'delta' => '1',
   'field_test_two_value' => '20',
@@ -3940,38 +3971,6 @@ $connection->insert('content_type_story')
   'field_test_string_selectlist_value' => NULL,
 ))
 ->values(array(
-  'nid' => '1',
-  'vid' => '2',
-  'uid' => '1',
-  'field_test_three_value' => '42.42',
-  'field_test_identical1_value' => '1',
-  'field_test_identical2_value' => '1',
-  'field_test_link_url' => 'https://www.drupal.org/project/drupal',
-  'field_test_link_title' => 'Drupal project page',
-  'field_test_link_attributes' => 's:32:"a:1:{s:6:"target";s:6:"_blank";}";',
-  'field_test_date_value' => '2013-01-02T04:05:00',
-  'field_test_datestamp_value' => '1391357160',
-  'field_test_datetime_value' => '2015-03-04 06:07:00',
-  'field_test_email_email' => 'PrincessRuwenne@example.com',
-  'field_test_filefield_fid' => NULL,
-  'field_test_filefield_list' => NULL,
-  'field_test_filefield_data' => NULL,
-  'field_test_four_value' => NULL,
-  'field_test_integer_selectlist_value' => NULL,
-  'field_test_float_single_checkbox_value' => NULL,
-  'field_test_decimal_radio_buttons_value' => NULL,
-  'field_test_phone_value' => NULL,
-  'field_test_exclude_unset_value' => NULL,
-  'field_test_exclude_unset_format' => NULL,
-  'field_test_imagefield_fid' => NULL,
-  'field_test_imagefield_list' => NULL,
-  'field_test_imagefield_data' => NULL,
-  'field_test_text_single_checkbox2_value' => NULL,
-  'field_test_datestamp_value2' => NULL,
-  'field_test_datetime_value2' => NULL,
-  'field_test_string_selectlist_value' => NULL,
-))
-->values(array(
   'nid' => '2',
   'vid' => '3',
   'uid' => '1',
@@ -4004,33 +4003,33 @@ $connection->insert('content_type_story')
   'field_test_string_selectlist_value' => NULL,
 ))
 ->values(array(
-  'nid' => '2',
+  'nid' => '1',
   'vid' => '5',
   'uid' => '1',
-  'field_test_three_value' => '23.20',
+  'field_test_three_value' => '42.42',
   'field_test_identical1_value' => '1',
   'field_test_identical2_value' => '1',
-  'field_test_link_url' => 'http://groups.drupal.org/',
-  'field_test_link_title' => 'Drupal Groups',
-  'field_test_link_attributes' => 's:6:"a:0:{}";',
-  'field_test_date_value' => NULL,
-  'field_test_datestamp_value' => NULL,
-  'field_test_datetime_value' => NULL,
-  'field_test_email_email' => NULL,
-  'field_test_filefield_fid' => NULL,
-  'field_test_filefield_list' => NULL,
-  'field_test_filefield_data' => NULL,
+  'field_test_link_url' => 'https://www.drupal.org/project/drupal',
+  'field_test_link_title' => 'Drupal project page',
+  'field_test_link_attributes' => 's:32:"a:1:{s:6:"target";s:6:"_blank";}";',
+  'field_test_date_value' => '2013-01-02T04:05:00',
+  'field_test_datestamp_value' => '1391357160',
+  'field_test_datetime_value' => '2015-03-04 06:07:00',
+  'field_test_email_email' => 'PrincessRuwenne@example.com',
+  'field_test_filefield_fid' => '5',
+  'field_test_filefield_list' => '1',
+  'field_test_filefield_data' => 'a:1:{s:11:"description";s:4:"desc";}',
   'field_test_four_value' => NULL,
-  'field_test_integer_selectlist_value' => NULL,
-  'field_test_float_single_checkbox_value' => NULL,
+  'field_test_integer_selectlist_value' => '3412',
+  'field_test_float_single_checkbox_value' => '3',
   'field_test_decimal_radio_buttons_value' => NULL,
   'field_test_phone_value' => NULL,
-  'field_test_exclude_unset_value' => NULL,
-  'field_test_exclude_unset_format' => NULL,
+  'field_test_exclude_unset_value' => 'This is a field with exclude unset.',
+  'field_test_exclude_unset_format' => '1',
   'field_test_imagefield_fid' => NULL,
   'field_test_imagefield_list' => NULL,
   'field_test_imagefield_data' => NULL,
-  'field_test_text_single_checkbox2_value' => NULL,
+  'field_test_text_single_checkbox2_value' => 'Hello',
   'field_test_datestamp_value2' => NULL,
   'field_test_datetime_value2' => NULL,
   'field_test_string_selectlist_value' => NULL,
@@ -4065,6 +4064,38 @@ $connection->insert('content_type_story')
   'field_test_text_single_checkbox2_value' => 'Off',
   'field_test_datestamp_value2' => '1391357160',
   'field_test_datetime_value2' => '2015-03-04 06:07:00',
+  'field_test_string_selectlist_value' => NULL,
+))
+->values(array(
+  'nid' => '1',
+  'vid' => '2001',
+  'uid' => '1',
+  'field_test_three_value' => '42.42',
+  'field_test_identical1_value' => '1',
+  'field_test_identical2_value' => '1',
+  'field_test_link_url' => 'https://www.drupal.org/project/drupal',
+  'field_test_link_title' => 'Drupal project page',
+  'field_test_link_attributes' => 's:32:"a:1:{s:6:"target";s:6:"_blank";}";',
+  'field_test_date_value' => '2013-01-02T04:05:00',
+  'field_test_datestamp_value' => '1391357160',
+  'field_test_datetime_value' => '2015-03-04 06:07:00',
+  'field_test_email_email' => 'PrincessRuwenne@example.com',
+  'field_test_filefield_fid' => '5',
+  'field_test_filefield_list' => '1',
+  'field_test_filefield_data' => 'a:1:{s:11:"description";s:4:"desc";}',
+  'field_test_four_value' => NULL,
+  'field_test_integer_selectlist_value' => '3412',
+  'field_test_float_single_checkbox_value' => '3',
+  'field_test_decimal_radio_buttons_value' => NULL,
+  'field_test_phone_value' => NULL,
+  'field_test_exclude_unset_value' => 'This is a field with exclude unset.',
+  'field_test_exclude_unset_format' => '1',
+  'field_test_imagefield_fid' => NULL,
+  'field_test_imagefield_list' => NULL,
+  'field_test_imagefield_data' => NULL,
+  'field_test_text_single_checkbox2_value' => 'Hello',
+  'field_test_datestamp_value2' => NULL,
+  'field_test_datetime_value2' => NULL,
   'field_test_string_selectlist_value' => NULL,
 ))
 ->execute();
@@ -8353,7 +8384,7 @@ $connection->insert('files')
   'fid' => '1',
   'uid' => '1',
   'filename' => 'Image1.png',
-  'filepath' => 'core/modules/simpletest/files/image-1.png',
+  'filepath' => 'core/tests/fixtures/files/image-1.png',
   'filemime' => 'image/png',
   'filesize' => '39325',
   'status' => '1',
@@ -8363,7 +8394,7 @@ $connection->insert('files')
   'fid' => '2',
   'uid' => '1',
   'filename' => 'Image2.jpg',
-  'filepath' => 'core/modules/simpletest/files/image-2.jpg',
+  'filepath' => 'core/tests/fixtures/files/image-2.jpg',
   'filemime' => 'image/jpeg',
   'filesize' => '1831',
   'status' => '1',
@@ -8373,7 +8404,7 @@ $connection->insert('files')
   'fid' => '3',
   'uid' => '1',
   'filename' => 'Image-test.gif',
-  'filepath' => 'core/modules/simpletest/files/image-test.gif',
+  'filepath' => 'core/tests/fixtures/files/image-test.gif',
   'filemime' => 'image/jpeg',
   'filesize' => '183',
   'status' => '1',
@@ -8383,7 +8414,7 @@ $connection->insert('files')
   'fid' => '5',
   'uid' => '1',
   'filename' => 'html-1.txt',
-  'filepath' => 'core/modules/simpletest/files/html-1.txt',
+  'filepath' => 'core/tests/fixtures/files/html-1.txt',
   'filemime' => 'text/plain',
   'filesize' => '24',
   'status' => '1',
@@ -33179,8 +33210,8 @@ $connection->insert('menu_links')
   'menu_name' => 'navigation',
   'mlid' => '411',
   'plid' => '0',
-  'link_path' => 'core/modules/simpletest/files/imagecache',
-  'router_path' => 'core/modules/simpletest/files/imagecache',
+  'link_path' => 'core/tests/fixtures/files/imagecache',
+  'router_path' => 'core/tests/fixtures/files/imagecache',
   'link_title' => '',
   'options' => 'a:0:{}',
   'module' => 'system',
@@ -42853,7 +42884,7 @@ $connection->insert('menu_router')
   'file' => 'sites/all/modules/cck/includes/content.node_form.inc',
 ))
 ->values(array(
-  'path' => 'core/modules/simpletest/files/imagecache',
+  'path' => 'core/tests/fixtures/files/imagecache',
   'load_functions' => '',
   'to_arg_functions' => '',
   'access_callback' => '_imagecache_menu_access_public_files',
@@ -42863,7 +42894,7 @@ $connection->insert('menu_router')
   'fit' => '31',
   'number_parts' => '5',
   'tab_parent' => '',
-  'tab_root' => 'core/modules/simpletest/files/imagecache',
+  'tab_root' => 'core/tests/fixtures/files/imagecache',
   'title' => '',
   'title_callback' => 't',
   'title_arguments' => '',
@@ -44470,13 +44501,13 @@ $connection->insert('node')
 ))
 ->values(array(
   'nid' => '1',
-  'vid' => '1',
+  'vid' => '2001',
   'type' => 'story',
   'language' => '',
-  'title' => 'Test title',
+  'title' => 'Test title rev 3',
   'uid' => '1',
   'status' => '1',
-  'created' => '1388271197',
+  'created' => '1390095702',
   'changed' => '1420861423',
   'comment' => '0',
   'promote' => '0',
@@ -44507,7 +44538,7 @@ $connection->insert('node')
   'vid' => '4',
   'type' => 'test_planet',
   'language' => '',
-  'title' => 'Test planet title 3',
+  'title' => 'Test page title rev 4',
   'uid' => '1',
   'status' => '1',
   'created' => '1388271527',
@@ -44524,7 +44555,7 @@ $connection->insert('node')
   'vid' => '6',
   'type' => 'test_planet',
   'language' => '',
-  'title' => '',
+  'title' => 'Node 4',
   'uid' => '1',
   'status' => '1',
   'created' => '1388271527',
@@ -44541,7 +44572,7 @@ $connection->insert('node')
   'vid' => '7',
   'type' => 'test_planet',
   'language' => '',
-  'title' => '',
+  'title' => 'Node 5',
   'uid' => '1',
   'status' => '1',
   'created' => '1388271527',
@@ -44558,7 +44589,7 @@ $connection->insert('node')
   'vid' => '8',
   'type' => 'test_planet',
   'language' => '',
-  'title' => '',
+  'title' => 'Node 6',
   'uid' => '1',
   'status' => '1',
   'created' => '1388271527',
@@ -44575,7 +44606,7 @@ $connection->insert('node')
   'vid' => '9',
   'type' => 'test_planet',
   'language' => '',
-  'title' => '',
+  'title' => 'Node 7',
   'uid' => '1',
   'status' => '1',
   'created' => '1388271527',
@@ -44592,7 +44623,7 @@ $connection->insert('node')
   'vid' => '10',
   'type' => 'test_planet',
   'language' => '',
-  'title' => '',
+  'title' => 'Node 8',
   'uid' => '1',
   'status' => '1',
   'created' => '1388271527',
@@ -45288,7 +45319,7 @@ $connection->insert('node_revisions')
   'body' => 'test',
   'teaser' => 'test',
   'log' => '',
-  'timestamp' => '1420861423',
+  'timestamp' => '1390095702',
   'format' => '1',
 ))
 ->values(array(
@@ -45317,10 +45348,10 @@ $connection->insert('node_revisions')
   'nid' => '1',
   'vid' => '5',
   'uid' => '1',
-  'title' => 'Test title rev 3',
-  'body' => 'body test rev 3',
-  'teaser' => 'teaser test rev 3',
-  'log' => 'modified rev 3',
+  'title' => 'Test title rev 2',
+  'body' => 'body test rev 2',
+  'teaser' => 'teaser test rev 2',
+  'log' => 'modified rev 2',
   'timestamp' => '1390095703',
   'format' => '1',
 ))
@@ -45526,11 +45557,11 @@ $connection->insert('node_revisions')
   'nid' => '1',
   'vid' => '2001',
   'uid' => '2',
-  'title' => 'Test title rev 2',
-  'body' => 'body test rev 2',
-  'teaser' => 'teaser test rev 2',
-  'log' => 'modified rev 2',
-  'timestamp' => '1390095702',
+  'title' => 'Test title rev 3',
+  'body' => 'body test rev 3',
+  'teaser' => 'teaser test rev 3',
+  'log' => 'modified rev 3',
+  'timestamp' => '1420861423',
   'format' => '1',
 ))
 ->values(array(
@@ -48086,6 +48117,16 @@ $connection->insert('term_node')
 ->values(array(
   'nid' => '1',
   'vid' => '2001',
+  'tid' => '1',
+))
+->values(array(
+  'nid' => '1',
+  'vid' => '2001',
+  'tid' => '2',
+))
+->values(array(
+  'nid' => '1',
+  'vid' => '2001',
   'tid' => '4',
 ))
 ->values(array(
@@ -48284,12 +48325,28 @@ $connection->insert('upload')
   'weight' => '1',
 ))
 ->values(array(
+  'fid' => '1',
+  'nid' => '1',
+  'vid' => '5',
+  'description' => 'file 1-1-1',
+  'list' => '0',
+  'weight' => '-1',
+))
+->values(array(
   'fid' => '3',
   'nid' => '12',
   'vid' => '15',
   'description' => 'file 12-15-3',
   'list' => '0',
   'weight' => '0',
+))
+->values(array(
+  'fid' => '1',
+  'nid' => '1',
+  'vid' => '2001',
+  'description' => 'file 1-1-1',
+  'list' => '0',
+  'weight' => '-1',
 ))
 ->execute();
 $connection->schema()->createTable('url_alias', array(
@@ -48593,7 +48650,7 @@ $connection->insert('users')
   'status' => '1',
   'timezone' => '3600',
   'language' => 'fr',
-  'picture' => 'core/modules/simpletest/files/image-test.jpg',
+  'picture' => 'core/tests/fixtures/files/image-test.jpg',
   'init' => 'doe@example.com',
   'data' => 'a:2:{s:7:"contact";i:1;s:13:"form_build_id";s:48:"form-qu_DMjE-Vfg01arT5J4VbuBCkOgx_LeySJx4qrPOSuA";}',
   'timezone_name' => 'Europe/Berlin',
@@ -48618,7 +48675,7 @@ $connection->insert('users')
   'status' => '1',
   'timezone' => '7200',
   'language' => 'ro',
-  'picture' => 'core/modules/simpletest/files/image-test.png',
+  'picture' => 'core/tests/fixtures/files/image-test.png',
   'init' => 'roe@example.com',
   'data' => 'a:2:{s:7:"contact";i:0;s:13:"form_build_id";s:48:"form-1TxjbL2_1dEHIxEu2Db6OvEsSN1x9ILH1VCgnvsO6LE";}',
   'timezone_name' => 'Europe/Helsinki',
@@ -49575,7 +49632,7 @@ $connection->insert('variable')
 ))
 ->values(array(
   'name' => 'file_directory_path',
-  'value' => 's:29:"core/modules/simpletest/files";',
+  'value' => 's:25:"core/tests/fixtures/files";',
 ))
 ->values(array(
   'name' => 'file_directory_temp',
@@ -49670,19 +49727,11 @@ $connection->insert('variable')
   'value' => 'i:0;',
 ))
 ->values(array(
-  'name' => 'i18n_newnode_current_employee',
-  'value' => 'i:0;',
-))
-->values(array(
-  'name' => 'i18n_node_employee',
-  'value' => 's:1:"1";',
-))
-->values(array(
-  'name' => 'i18n_required_node_employee',
-  'value' => 'i:0;',
-))
-->values(array(
   'name' => 'i18n_lock_node_sponsor',
+  'value' => 'i:0;',
+))
+->values(array(
+  'name' => 'i18n_newnode_current_employee',
   'value' => 'i:0;',
 ))
 ->values(array(
@@ -49690,8 +49739,16 @@ $connection->insert('variable')
   'value' => 'i:0;',
 ))
 ->values(array(
+  'name' => 'i18n_node_employee',
+  'value' => 's:1:"1";',
+))
+->values(array(
   'name' => 'i18n_node_sponsor',
   'value' => 'i:1;',
+))
+->values(array(
+  'name' => 'i18n_required_node_employee',
+  'value' => 'i:0;',
 ))
 ->values(array(
   'name' => 'i18n_required_node_sponsor',

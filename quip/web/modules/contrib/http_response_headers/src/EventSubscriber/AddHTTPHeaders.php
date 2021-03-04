@@ -52,13 +52,11 @@ class AddHTTPHeaders implements EventSubscriberInterface {
           if (!empty($header->get('value'))) {
             // Must remove the existing header if settings a new value.
             if ($response->headers->has($header->get('name'))) {
-              \Drupal::logger('http_response_headers')->notice('header removed the readded' . $header->get('name'));
               $response->headers->remove($header->get('name'));
             }
             $response->headers->set($header->get('name'), $header->get('value'));
           }
           else {
-            \Drupal::logger('http_response_headers')->notice('header removed' . $header->get('name'));
             $response->headers->remove($header->get('name'));
           }
         }

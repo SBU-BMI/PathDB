@@ -81,6 +81,7 @@ class ModerationStateFieldItemList extends FieldItemList {
       // being reverted.
       ->condition('content_entity_revision_id', $entity->isNewRevision() ? $entity->getLoadedRevisionId() : $entity->getRevisionId())
       ->condition('workflow', $moderation_info->getWorkflowForEntity($entity)->id())
+      ->condition('langcode', $entity->language()->getId())
       ->allRevisions()
       ->sort('revision_id', 'DESC')
       ->execute();
@@ -157,11 +158,13 @@ class ModerationStateFieldItemList extends FieldItemList {
 
       // This entity is default if it is new, the default revision state, or the
       // default revision is not published.
-      $update_default_revision = $entity->isNew()
-        || $current_state->isDefaultRevisionState()
-        || !$content_moderation_info->isDefaultRevisionPublished($entity);
+      if (!$entity->isSyncing()) {
+        $update_default_revision = $entity->isNew()
+          || $current_state->isDefaultRevisionState()
+          || !$content_moderation_info->isDefaultRevisionPublished($entity);
 
-      $entity->isDefaultRevision($update_default_revision);
+        $entity->isDefaultRevision($update_default_revision);
+      }
 
       // Update publishing status if it can be updated and if it needs updating.
       $published_state = $current_state->isPublishedState();

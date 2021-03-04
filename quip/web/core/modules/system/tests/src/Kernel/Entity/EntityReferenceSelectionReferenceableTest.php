@@ -41,7 +41,14 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'entity_reference', 'node', 'entity_test'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'entity_reference',
+    'node',
+    'entity_test',
+  ];
 
   /**
    * {@inheritdoc}
@@ -53,7 +60,7 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
     $this->installEntitySchema('node');
 
     /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
-    $storage = $this->container->get('entity.manager')
+    $storage = $this->container->get('entity_type.manager')
       ->getStorage('entity_test_no_label');
 
     // Create a new node-type.
@@ -119,7 +126,7 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
       // entity labels.
       // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface::getReferenceableEntities()
       $item = is_string($item) ? Html::escape($item) : $item;
-      $this->assertTrue(array_search($item, $referenceables[$this->bundle]) !== FALSE);
+      $this->assertContains($item, $referenceables[$this->bundle]);
     }
 
     // Test ::countReferenceableEntities().

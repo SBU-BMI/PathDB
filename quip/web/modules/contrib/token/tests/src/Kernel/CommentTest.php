@@ -35,7 +35,7 @@ class CommentTest extends KernelTestBase {
     $this->installEntitySchema('comment');
     $this->installSchema('comment', ['comment_entity_statistics']);
 
-    $node_type = NodeType::create(['type' => 'page', 'name' => t('Page')]);
+    $node_type = NodeType::create(['type' => 'page', 'name' => 'Page']);
     $node_type->save();
 
     $this->installConfig(['comment']);
@@ -62,7 +62,7 @@ class CommentTest extends KernelTestBase {
     $parent_comment->save();
 
     // Fix http://example.com/index.php/comment/1 fails 'url:path' test.
-    $parent_comment_path = $parent_comment->url();
+    $parent_comment_path = $parent_comment->toUrl()->toString();
 
     $tokens = [
       'url' => $parent_comment->toUrl('canonical', ['fragment' => "comment-{$parent_comment->id()}"])->setAbsolute()->toString(),

@@ -19,6 +19,11 @@ class GetRdfNamespacesTest extends BrowserTestBase {
   public static $modules = ['rdf', 'rdf_test_namespaces'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests getting RDF namespaces.
    */
   public function testGetRdfNamespaces() {
@@ -56,7 +61,7 @@ class GetRdfNamespacesTest extends BrowserTestBase {
       $this->fail('Expected exception not thrown for conflicting namespace declaration.');
     }
     catch (\Exception $e) {
-      $this->pass('Expected exception thrown: ' . $e->getMessage());
+      // Expected exception; just continue testing.
     }
   }
 

@@ -3,10 +3,12 @@ platform:
     - x64
 clone_folder: c:\projects\php-project-workspace
 
+# php_ver_target can be used as regular expression
+# e.g. '7\.' will be used as pattern '\|7\.' on value 'php|7.1.2'
 environment:
     matrix:
         - dependencies: current
-          php_ver_target: 5.5
+          php_ver_target: 7\.
 
 cache:
     - '%LOCALAPPDATA%\Composer\files -> composer.lock'
@@ -22,12 +24,12 @@ init:
     - SET COMPOSER_NO_INTERACTION=1
     - SET PHP=1 # This var is connected to PHP install cache
     - SET ANSICON=121x90 (121x90)
+    - SET SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT=1
 
 ## Install PHP and composer, and run the appropriate composer command
 install:
     - IF EXIST c:\tools\php (SET PHP=0) # Checks for the PHP install being cached
-    # see https://windows.php.net/downloads/releases/archives/ for previous PHP releases, using PHP 5.5.38
-    - ps: appveyor-retry cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version 5.5.38
+    - ps: appveyor-retry cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version ((choco search php --exact --all-versions -r | select-string -pattern "\|$env:php_ver_target" | sort { [version]($_ -split '\|' | select -last 1) } -Descending | Select-Object -first 1) -replace '[php|]','')
     - cd c:\tools\php
     - IF %PHP%==1 copy php.ini-production php.ini /Y
     - IF %PHP%==1 echo date.timezone="UTC" >> php.ini
@@ -37,10 +39,10 @@ install:
     - IF %PHP%==1 echo extension=php_fileinfo.dll >> php.ini
     - IF %PHP%==1 echo extension=php_bz2.dll >> php.ini
     - IF %PHP%==1 echo @php %%~dp0composer.phar %%* > composer.bat
-    - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
+    - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer-1.phar -FileName composer.phar
     - cd c:\projects\php-project-workspace
 # Remove xdebug dependency as performance testing is not relevant at this point.
-    - composer remove --dev ext-xdebug
+    - composer remove --dev --no-update ext-xdebug
     - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --profile -n
     - IF %dependencies%==current appveyor-retry composer install --no-progress --profile
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --profile -n
@@ -49,4 +51,4 @@ install:
 ## Run the actual test
 test_script:
     - cd c:\projects\php-project-workspace
-    - vendor/bin/phpunit
+    - vendor/bin/simple-phpunit

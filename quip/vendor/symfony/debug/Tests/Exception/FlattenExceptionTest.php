@@ -147,9 +147,9 @@ class FlattenExceptionTest extends TestCase
 
         $flattened = FlattenException::create($exception)->getPrevious();
 
-        $this->assertEquals($flattened->getMessage(), 'Parse error: Oh noes!', 'The message is copied from the original exception.');
-        $this->assertEquals($flattened->getCode(), 42, 'The code is copied from the original exception.');
-        $this->assertEquals($flattened->getClass(), 'Symfony\Component\Debug\Exception\FatalThrowableError', 'The class is set to the class of the original exception');
+        $this->assertEquals('Parse error: Oh noes!', $flattened->getMessage(), 'The message is copied from the original exception.');
+        $this->assertEquals(42, $flattened->getCode(), 'The code is copied from the original exception.');
+        $this->assertEquals('Symfony\Component\Debug\Exception\FatalThrowableError', $flattened->getClass(), 'The class is set to the class of the original exception');
     }
 
     /**
@@ -199,6 +199,10 @@ class FlattenExceptionTest extends TestCase
 
     public function testArguments()
     {
+        if (\PHP_VERSION_ID >= 70400) {
+            $this->markTestSkipped('PHP 7.4 removes arguments from exception traces.');
+        }
+
         $dh = opendir(__DIR__);
         $fh = tmpfile();
 
@@ -220,8 +224,8 @@ class FlattenExceptionTest extends TestCase
             0.0,
             '0',
             '',
-            INF,
-            NAN,
+            \INF,
+            \NAN,
         ]);
 
         $flattened = FlattenException::create($exception);
@@ -252,15 +256,19 @@ class FlattenExceptionTest extends TestCase
         $this->assertSame(['float', 0.0], $array[$i++]);
         $this->assertSame(['string', '0'], $array[$i++]);
         $this->assertSame(['string', ''], $array[$i++]);
-        $this->assertSame(['float', INF], $array[$i++]);
+        $this->assertSame(['float', \INF], $array[$i++]);
 
         // assertEquals() does not like NAN values.
-        $this->assertEquals($array[$i][0], 'float');
+        $this->assertEquals('float', $array[$i][0]);
         $this->assertNan($array[$i][1]);
     }
 
     public function testRecursionInArguments()
     {
+        if (\PHP_VERSION_ID >= 70400) {
+            $this->markTestSkipped('PHP 7.4 removes arguments from exception traces.');
+        }
+
         $a = null;
         $a = ['foo', [2, &$a]];
         $exception = $this->createException($a);
@@ -272,6 +280,10 @@ class FlattenExceptionTest extends TestCase
 
     public function testTooBigArray()
     {
+        if (\PHP_VERSION_ID >= 70400) {
+            $this->markTestSkipped('PHP 7.4 removes arguments from exception traces.');
+        }
+
         $a = [];
         for ($i = 0; $i < 20; ++$i) {
             for ($j = 0; $j < 50; ++$j) {

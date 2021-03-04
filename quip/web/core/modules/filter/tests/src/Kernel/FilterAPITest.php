@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\filter\Kernel;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\TypedData\OptionsProviderInterface;
@@ -291,7 +292,7 @@ class FilterAPITest extends EntityKernelTestBase {
       '#text' => '<p>Hello, world!</p>',
       '#format' => 'element_test',
     ];
-    drupal_render_root($build);
+    \Drupal::service('renderer')->renderRoot($build);
 
     // Verify the attachments and cacheability metadata.
     $expected_attachments = [
@@ -334,7 +335,7 @@ class FilterAPITest extends EntityKernelTestBase {
     $definition = DataDefinition::create('filter_format');
     $data = \Drupal::typedDataManager()->create($definition);
 
-    $this->assertTrue($data instanceof OptionsProviderInterface, 'Typed data object implements \Drupal\Core\TypedData\OptionsProviderInterface');
+    $this->assertInstanceOf(OptionsProviderInterface::class, $data);
 
     $filtered_html_user = $this->createUser(['uid' => 2], [
       FilterFormat::load('filtered_html')->getPermissionName(),
@@ -373,7 +374,7 @@ class FilterAPITest extends EntityKernelTestBase {
 
     $data->setValue('plain_text');
     $violations = $data->validate();
-    $this->assertEqual(count($violations), 0, "No validation violation for format 'plain_text' found");
+    $this->assertCount(0, $violations, "No validation violation for format 'plain_text' found");
 
     // Anonymous doesn't have access to the 'filtered_html' format.
     $data->setValue('filtered_html');
@@ -383,7 +384,7 @@ class FilterAPITest extends EntityKernelTestBase {
     // Set user with access to 'filtered_html' format.
     \Drupal::currentUser()->setAccount($filtered_html_user);
     $violations = $data->validate();
-    $this->assertEqual(count($violations), 0, "No validation violation for accessible format 'filtered_html' found.");
+    $this->assertCount(0, $violations, "No validation violation for accessible format 'filtered_html' found.");
 
     $allowed_values = $data->getSettableValues($filtered_html_user);
     $this->assertEqual($allowed_values, ['filtered_html', 'plain_text']);
@@ -455,7 +456,7 @@ class FilterAPITest extends EntityKernelTestBase {
         break;
       }
     }
-    $this->assertTrue($filter_format_violation_found, format_string('Validation violation for invalid value "%invalid_value" found', ['%invalid_value' => $invalid_value]));
+    $this->assertTrue($filter_format_violation_found, new FormattableMarkup('Validation violation for invalid value "%invalid_value" found', ['%invalid_value' => $invalid_value]));
   }
 
   /**
@@ -487,8 +488,8 @@ class FilterAPITest extends EntityKernelTestBase {
     $this->assertTrue(isset($filters['filter_test_restrict_tags_and_attributes']), 'The filter plugin filter_test_restrict_tags_and_attributes is configured by the filtered_html filter format.');
 
     drupal_static_reset('filter_formats');
-    \Drupal::entityManager()->getStorage('filter_format')->resetCache();
-    $module_data = \Drupal::service('extension.list.module')->reset()->getList();
+    \Drupal::entityTypeManager()->getStorage('filter_format')->resetCache();
+    $module_data = \Drupal::service('extension.list.module')->getList();
     $this->assertFalse(isset($module_data['filter_test']->info['required']), 'The filter_test module is required.');
 
     // Verify that a dependency exists on the module that provides the filter
@@ -500,7 +501,7 @@ class FilterAPITest extends EntityKernelTestBase {
 
     // Verify the filter format still exists but the dependency and filter is
     // gone.
-    \Drupal::entityManager()->getStorage('filter_format')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('filter_format')->resetCache();
     $filter_format = FilterFormat::load('filtered_html');
     $this->assertEqual([], $filter_format->getDependencies());
     // Use the get method since the FilterFormat::filters() method only returns

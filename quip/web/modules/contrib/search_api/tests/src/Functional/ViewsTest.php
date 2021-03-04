@@ -309,6 +309,9 @@ class ViewsTest extends SearchApiBrowserTestBase {
 
     $this->regressionTests();
 
+    // Check special functionality that requires editing the view.
+    $this->checkExposedSearchFields();
+
     // Make sure there was a display plugin created for this view.
     /** @var \Drupal\search_api\Display\DisplayInterface[] $displays */
     $displays = \Drupal::getContainer()
@@ -321,7 +324,8 @@ class ViewsTest extends SearchApiBrowserTestBase {
     $this->assertArrayHasKey('views_rest:search_api_test_view__rest_export_1', $displays, 'A display plugin was created for the test view block display.');
     $this->assertEquals('/search-api-test', $displays[$display_id]->getPath(), 'Display returns the correct path.');
     $view_url = Url::fromUserInput('/search-api-test')->toString();
-    $this->assertEquals($view_url, $displays[$display_id]->getUrl()->toString(), 'Display returns the correct URL.');
+    $display_url = Url::fromUserInput($displays[$display_id]->getPath())->toString();
+    $this->assertEquals($view_url, $display_url, 'Display returns the correct URL.');
     $this->assertNull($displays['views_block:search_api_test_view__block_1']->getPath(), 'Block display returns the correct path.');
     $this->assertEquals('/search-api-rest-test', $displays['views_rest:search_api_test_view__rest_export_1']->getPath(), 'REST display returns the correct path.');
 
@@ -372,6 +376,7 @@ class ViewsTest extends SearchApiBrowserTestBase {
   protected function regressionTests() {
     $this->regressionTest2869121();
     $this->regressionTest3031991();
+    $this->regressionTest3136277();
   }
 
   /**
@@ -417,7 +422,7 @@ class ViewsTest extends SearchApiBrowserTestBase {
 
     Block::create([
       'id' => 'search_api_test_view',
-      'theme' => 'classy',
+      'theme' => $this->defaultTheme,
       'weight' => -20,
       'plugin' => 'views_exposed_filter_block:search_api_test_view-page_1',
       'region' => 'content',
@@ -432,7 +437,7 @@ class ViewsTest extends SearchApiBrowserTestBase {
       \Drupal::getContainer()->get('cache.page')->deleteAll();
       \Drupal::getContainer()->get('cache.dynamic_page_cache')->deleteAll();
       $this->submitForm([], 'Search');
-      $this->assertSession()->addressEquals('search-api-test');
+      $this->assertSession()->addressMatches('#^/search-api-test#');
       $this->assertSession()->responseNotContains('Error message');
       $this->assertSession()->pageTextNotContains('search results');
       // Make sure the Views cache was used, none of the two page caches.
@@ -455,6 +460,59 @@ class ViewsTest extends SearchApiBrowserTestBase {
       'search_api_fulltext_2_op' => 'not',
     ];
     $this->checkResults($query, [4], 'Search with multiple fulltext filters');
+  }
+
+  /**
+   * Tests that query preprocessing works correctly for block views.
+   *
+   * @see https://www.drupal.org/node/3136277
+   */
+  protected function regressionTest3136277() {
+    $block = $this->drupalPlaceBlock('views_block:search_api_test_block_view-block_1', [
+      'region' => 'content',
+    ]);
+    /** @var \Drupal\search_api\IndexInterface $index */
+    $index = Index::load($this->indexId);
+    $processor = \Drupal::getContainer()
+      ->get('search_api.plugin_helper')
+      ->createProcessorPlugin($index, 'ignorecase');
+    $index->addProcessor($processor)->save();
+
+    $this->drupalGet('<front>');
+    $this->assertSession()->pageTextContains('Search API Test Block View: Found 4 items');
+
+    $index->removeProcessor('ignorecase')->save();
+    $block->delete();
+  }
+
+  /**
+   * Verifies that exposed fulltext fields work correctly.
+   */
+  protected function checkExposedSearchFields() {
+    $key = 'display.default.display_options.filters.search_api_fulltext.expose.expose_fields';
+    $view = \Drupal::configFactory()
+      ->getEditable('views.view.search_api_test_view');
+    $view->set($key, TRUE);
+    $view->save();
+
+    $query = [
+      'search_api_fulltext' => 'foo',
+      'search_api_fulltext_searched_fields' => [
+        'name',
+      ],
+    ];
+    $this->checkResults($query, [1, 2, 4], 'Search for results in name field only');
+
+    $query = [
+      'search_api_fulltext' => 'foo',
+      'search_api_fulltext_searched_fields' => [
+        'body',
+      ],
+    ];
+    $this->checkResults($query, [5], 'Search for results in body field only');
+
+    $view->set($key, FALSE);
+    $view->save();
   }
 
   /**
@@ -988,7 +1046,7 @@ class ViewsTest extends SearchApiBrowserTestBase {
   public function testHighlighting() {
     // Add the Highlight processor to the search index.
     $index = Index::load('database_search_index');
-    $processor = $this->container
+    $processor = \Drupal::getContainer()
       ->get('search_api.plugin_helper')
       ->createProcessorPlugin($index, 'highlight');
     $index->addProcessor($processor);
@@ -1005,6 +1063,38 @@ class ViewsTest extends SearchApiBrowserTestBase {
     $options['query']['search_api_fulltext'] = 'bar';
     $this->drupalGet($path, $options);
     $this->assertSession()->responseContains('foo <strong>bar</strong> baz');
+  }
+
+  /**
+   * Verifies that our row plugin is available without clearing cache.
+   */
+  public function testCreatingIndexClearsRowPluginCache() {
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer search_api',
+      'access administration pages',
+      'administer views',
+    ]));
+
+    $index_id = 'my_custom_index';
+    Index::create([
+      'name' => 'My custom index',
+      'id' => $index_id,
+      'status' => TRUE,
+      'datasource_settings' => [
+        'entity:node' => [],
+        'entity:user' => [],
+      ],
+    ])->save();
+
+    $this->drupalGet('/admin/structure/views/add');
+    $this->submitForm([
+      'label' => 'Test view',
+      'id' => 'test',
+      'show[wizard_key]' => "standard:search_api_index_$index_id",
+    ], 'Save and edit');
+
+    $this->drupalGet('/admin/structure/views/nojs/display/test/default/row');
+    $this->assertSession()->elementExists('css', '#edit-row-type [value="search_api"]');
   }
 
 }

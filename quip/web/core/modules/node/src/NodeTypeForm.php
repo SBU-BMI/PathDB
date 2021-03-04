@@ -148,7 +148,7 @@ class NodeTypeForm extends BundleEntityFormBase {
       'status' => $node->status->value,
       'promote' => $node->promote->value,
       'sticky' => $node->sticky->value,
-      'revision' => $type->isNewRevision(),
+      'revision' => $type->shouldCreateNewRevision(),
     ];
     // Prepare workflow options to be used for 'checkboxes' form element.
     $keys = array_keys(array_filter($workflow_options));
@@ -163,7 +163,7 @@ class NodeTypeForm extends BundleEntityFormBase {
         'sticky' => t('Sticky at top of lists'),
         'revision' => t('Create new revision'),
       ],
-      '#description' => t('Users with the <em>Administer content</em> permission will be able to override these options.'),
+      '#description' => t('Users with sufficient access rights will be able to override these options.'),
     ];
     if ($this->moduleHandler->moduleExists('language')) {
       $form['language'] = [

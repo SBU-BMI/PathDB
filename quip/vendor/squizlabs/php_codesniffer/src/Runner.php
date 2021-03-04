@@ -12,14 +12,14 @@
 
 namespace PHP_CodeSniffer;
 
-use PHP_CodeSniffer\Files\FileList;
-use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Exceptions\DeepExitException;
+use PHP_CodeSniffer\Exceptions\RuntimeException;
 use PHP_CodeSniffer\Files\DummyFile;
+use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Files\FileList;
 use PHP_CodeSniffer\Util\Cache;
 use PHP_CodeSniffer\Util\Common;
 use PHP_CodeSniffer\Util\Standards;
-use PHP_CodeSniffer\Exceptions\RuntimeException;
-use PHP_CodeSniffer\Exceptions\DeepExitException;
 
 class Runner
 {
@@ -874,7 +874,10 @@ class Runner
 
         $percent = round(($numProcessed / $numFiles) * 100);
         $padding = (strlen($numFiles) - strlen($numProcessed));
-        if ($numProcessed === $numFiles && $numFiles > $numPerLine) {
+        if ($numProcessed === $numFiles
+            && $numFiles > $numPerLine
+            && ($numProcessed % $numPerLine) !== 0
+        ) {
             $padding += ($numPerLine - ($numFiles - (floor($numFiles / $numPerLine) * $numPerLine)));
         }
 

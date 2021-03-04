@@ -149,3 +149,61 @@ class ClassName
      */
     use ThirdTrait;
 }
+
+class MyExample
+{
+    use Trait1;
+    protected $a = 1;
+    use Trait2;
+    public function foo {
+        $shortArgs_longVars = function ($arg) use (
+            $longVar1,
+        ): string {
+           // body
+        };
+    }
+    use A, B, C {
+        B::smallTalk insteadof A;
+    }
+
+    // comment here
+    use Trait3;
+
+}
+
+class Foo implements Bar
+{
+    /*
+     * Comment here;
+     */
+    use Baz;
+}
+
+class Foo implements Bar
+{
+    // Comment here;
+    use Baz;
+}
+
+class Foo implements Bar
+{
+    /**
+     * Comment here;
+     */
+    /**
+     * Another Comment here;
+     */
+    use Baz;
+}
+
+class Foo implements Bar
+{
+    /**
+     * Comment here;
+     */
+    public $foo;
+    /**
+     * Comment here;
+     */
+    use Baz;
+}

@@ -1,6 +1,6 @@
 uuid: 4d12d7be-9cc0-45cb-ba37-bd0b5b98f8e6
 langcode: en
-status: true
+status: false
 dependencies:
   config:
     - core.entity_view_mode.node.full
@@ -26,57 +26,9 @@ dependencies:
     - node.type.wsi
   module:
     - datetime
-    - ds
     - field_group
     - user
 third_party_settings:
-  ds:
-    layout:
-      id: ds_2col_stacked
-      library: ds/ds_2col_stacked
-      disable_css: false
-      entity_classes: all_classes
-      settings:
-        wrappers:
-          header: div
-          left: div
-          right: div
-          footer: div
-        outer_wrapper: div
-        attributes: ''
-        link_attribute: ''
-        link_custom: ''
-        classes:
-          layout_class: {  }
-    regions:
-      header:
-        - links
-        - node_title
-        - field_collection
-        - studyid
-        - clinicaltrialsubjectid
-        - imageid
-        - patientid
-        - group_tabbers
-        - imagedvolumeheight
-        - imagedvolumewidth
-        - acquisitiondatetime
-        - referencepixelphysicalvaluex
-        - referencepixelphysicalvaluey
-        - lossyimagecompression
-        - group_image
-        - lossyimagecompressionmethod
-        - group_subject
-        - group_specimen
-        - lossyimagecompressionratio
-        - manufacturer
-        - md5
-    fields:
-      node_title:
-        plugin_id: node_title
-        weight: 1
-        label: hidden
-        formatter: default
   field_group:
     group_tabbers:
       children:
@@ -84,14 +36,14 @@ third_party_settings:
         - group_subject
         - group_specimen
       parent_name: ''
-      weight: 7
+      weight: 6
       format_type: tabs
       format_settings:
         id: ''
         classes: ''
         direction: horizontal
       label: Tabbers
-      region: hidden
+      region: header
     group_image:
       children:
         - imagedvolumeheight
@@ -113,7 +65,7 @@ third_party_settings:
         formatter: open
         description: ''
       label: Image
-      region: hidden
+      region: header
     group_specimen:
       children: {  }
       parent_name: group_tabbers
@@ -125,7 +77,7 @@ third_party_settings:
         formatter: closed
         description: ''
       label: Specimen
-      region: hidden
+      region: header
     group_subject:
       children:
         - patientid
@@ -138,7 +90,7 @@ third_party_settings:
         formatter: closed
         description: ''
       label: Subject
-      region: hidden
+      region: header
 id: node.wsi.full
 targetEntityType: node
 bundle: wsi
@@ -168,6 +120,11 @@ content:
     label: inline
     settings:
       link: false
+    third_party_settings: {  }
+  flag_blah222:
+    weight: 1
+    region: header
+    settings: {  }
     third_party_settings: {  }
   imagedvolumeheight:
     type: number_decimal
@@ -283,6 +240,7 @@ content:
       link_to_entity: false
     third_party_settings: {  }
 hidden:
+  content_moderation_control: true
   field_bulk_upload: true
   field_iip_path: true
   field_utarget: true

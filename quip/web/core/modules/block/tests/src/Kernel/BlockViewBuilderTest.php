@@ -83,7 +83,8 @@ class BlockViewBuilderTest extends KernelTestBase {
 
     // Test the rendering of a block.
     $entity = Block::load('test_block1');
-    $output = entity_view($entity, 'block');
+    $builder = \Drupal::entityTypeManager()->getViewBuilder('block');
+    $output = $builder->view($entity, 'block');
     $expected = [];
     $expected[] = '<div id="block-test-block1">';
     $expected[] = '  ';
@@ -107,7 +108,7 @@ class BlockViewBuilderTest extends KernelTestBase {
       ],
     ]);
     $entity->save();
-    $output = entity_view($entity, 'block');
+    $output = $builder->view($entity, 'block');
     $expected = [];
     $expected[] = '<div id="block-test-block2">';
     $expected[] = '  ';
@@ -155,7 +156,7 @@ class BlockViewBuilderTest extends KernelTestBase {
     $build = $this->getBlockRenderArray();
     $cid = 'entity_view:block:test_block:' . implode(':', \Drupal::service('cache_contexts_manager')->convertTokensToKeys(['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'user.permissions'])->getKeys());
     $this->renderer->renderRoot($build);
-    $this->assertTrue($this->container->get('cache.render')->get($cid), 'The block render element has been cached.');
+    $this->assertNotEmpty($this->container->get('cache.render')->get($cid), 'The block render element has been cached.');
 
     // Re-save the block and check that the cache entry has been deleted.
     $this->block->save();
@@ -169,7 +170,7 @@ class BlockViewBuilderTest extends KernelTestBase {
     $build['#block'] = $this->block;
 
     $this->renderer->renderRoot($build);
-    $this->assertTrue($this->container->get('cache.render')->get($cid), 'The block render element has been cached.');
+    $this->assertNotEmpty($this->container->get('cache.render')->get($cid), 'The block render element has been cached.');
     $this->block->delete();
     $this->assertFalse($this->container->get('cache.render')->get($cid), 'The block render cache entry has been cleared when the block was deleted.');
 
@@ -291,7 +292,6 @@ class BlockViewBuilderTest extends KernelTestBase {
 
     // Check that the expected cacheability metadata is present in:
     // - the built render array;
-    $this->pass('Built render array');
     $build = $this->getBlockRenderArray();
     $this->assertIdentical($expected_keys, $build['#cache']['keys']);
     $this->assertIdentical($expected_contexts, $build['#cache']['contexts']);
@@ -299,14 +299,12 @@ class BlockViewBuilderTest extends KernelTestBase {
     $this->assertIdentical($expected_max_age, $build['#cache']['max-age']);
     $this->assertFalse(isset($build['#create_placeholder']));
     // - the rendered render array;
-    $this->pass('Rendered render array');
     $this->renderer->renderRoot($build);
     // - the render cache item.
-    $this->pass('Render cache item');
     $final_cache_contexts = Cache::mergeContexts($expected_contexts, $required_cache_contexts);
     $cid = implode(':', $expected_keys) . ':' . implode(':', \Drupal::service('cache_contexts_manager')->convertTokensToKeys($final_cache_contexts)->getKeys());
     $cache_item = $this->container->get('cache.render')->get($cid);
-    $this->assertTrue($cache_item, 'The block render element has been cached with the expected cache ID.');
+    $this->assertNotEmpty($cache_item, 'The block render element has been cached with the expected cache ID.');
     $this->assertIdentical(Cache::mergeTags($expected_tags, ['rendered']), $cache_item->tags);
     $this->assertIdentical($final_cache_contexts, $cache_item->data['#cache']['contexts']);
     $this->assertIdentical($expected_tags, $cache_item->data['#cache']['tags']);

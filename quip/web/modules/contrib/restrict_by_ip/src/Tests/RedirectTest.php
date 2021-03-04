@@ -1,42 +1,23 @@
 <?php
 
 namespace Drupal\restrict_by_ip\Tests;
-use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests user is redirected when login denied.
  *
  * @group restrict_by_ip
- *
- * Assumes that local testing environment has IP address of 127.0.0.1.
  */
-class RedirectTest extends WebTestBase {
-
-  /**
-   * @var \Drupal\user\Entity\User
-   */
-  private $regularUser;
+class RedirectTest extends RestrictByIPWebTestBase {
 
   /**
    * @var \Drupal\node\Entity\Node
    */
   private $loginDeniedNode;
 
-  /**
-   * @var \Drupal\Core\Config\Config
-   */
-  private $conf;
-
   public static $modules = ['restrict_by_ip', 'node'];
 
   public function setUp() {
-    // Enable modules needed for these tests.
     parent::setUp();
-
-    // Create a user that we'll use to test logins.
-    $this->regularUser = $this->drupalCreateUser();
-
-    $this->conf = $this->config('restrict_by_ip.settings');
 
     // Create a page users will get redirected to when denied login.
     $type = $this->drupalCreateContentType();
@@ -48,7 +29,7 @@ class RedirectTest extends WebTestBase {
   // parameter is present.
   public function testIpDifferGlobalNoDestination() {
     // Add global IP range.
-    $this->conf->set('login_range', '10.0.0.0/8')->save();
+    $this->conf->set('login_range', $this->outOfRangeCIDR)->save();
     $this->assertRedirected();
   }
 
@@ -56,7 +37,7 @@ class RedirectTest extends WebTestBase {
   // is present.
   public function testIpDifferUserNoDestination() {
     // Add out of range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '10.0.0.0/8')->save();
+    $this->conf->set('user.' . $this->regularUser->id(), $this->outOfRangeCIDR)->save();
     $this->assertRedirected();
   }
 
@@ -64,7 +45,7 @@ class RedirectTest extends WebTestBase {
   // is present.
   public function testIpDifferGlobalWithDestination() {
     // Add global IP range.
-    $this->conf->set('login_range', '10.0.0.0/8')->save();
+    $this->conf->set('login_range', $this->outOfRangeCIDR)->save();
     $this->assertRedirected('node');
   }
 
@@ -72,7 +53,7 @@ class RedirectTest extends WebTestBase {
   // is present.
   public function testIpDifferUserWithDestination() {
     // Add out of range user IP.
-    $this->conf->set('user.' . $this->regularUser->id(), '10.0.0.0/8')->save();
+    $this->conf->set('user.' . $this->regularUser->id(), $this->outOfRangeCIDR)->save();
     $this->assertRedirected('node');
   }
 

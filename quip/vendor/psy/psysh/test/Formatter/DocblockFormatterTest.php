@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,7 @@ namespace Psy\Test\Formatter;
 
 use Psy\Formatter\DocblockFormatter;
 
-class DocblockFormatterTest extends \PHPUnit\Framework\TestCase
+class DocblockFormatterTest extends \Psy\Test\TestCase
 {
     /**
      * This is a docblock!
@@ -23,7 +23,7 @@ class DocblockFormatterTest extends \PHPUnit\Framework\TestCase
      * @throws InvalidArgumentException if $foo is empty
      *
      * @param mixed $foo It's a foo thing
-     * @param int   $bar This is definitely bar
+     * @param int   $bar
      *
      * @return string A string of no consequence
      */
@@ -47,7 +47,7 @@ class DocblockFormatterTest extends \PHPUnit\Framework\TestCase
 
 <comment>Param:</comment>
   <info>mixed </info> <strong>\$foo </strong> It's a foo thing
-  <info>int   </info> <strong>\$bar </strong> This is definitely bar
+  <info>int   </info> <strong>\$bar </strong>
 
 <comment>Return:</comment>
   <info>string </info> A string of no consequence

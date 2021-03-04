@@ -1,4 +1,12 @@
 /* Global settings */
+* {
+  box-sizing: border-box;
+  outline: none;
+}
+[type=checkbox],
+[type=radio] {
+  box-shadow: none;
+}
 a:hover {
   opacity: 0.60;
 }
@@ -150,15 +158,13 @@ a:hover > img.w3-image {
   clear: none!important;
   float: left;
 }
-.field--label-above > .field__label,
+.field__items > .field__item,
 .field--label-inline > .field__label {
-  font-size: 13px;
-  line-height: 30px;
+  margin-right: 10px;
 }
 .field--label-inline .field__label::after {
   content: ':';
 }
-
 .field--name-field-tags .field__item,
 ul.links li {
   border: none!important;
@@ -189,4 +195,77 @@ ul.links li a {
 }
 .site-slogan {
   padding-left: 16px;
+}
+table td ul {
+  margin: 0;
+}
+table td li {
+  list-style: none;
+}
+table ul.dropbutton li.w3-left.dropbutton-action {
+  float: none!important;
+  z-index: 1;
+  margin-right: 0!important;
+  line-height: 26px;
+}
+table ul.dropbutton {
+  background-color: white;
+  border: 1px solid #e8e8e8;
+  padding: 0 10px!important;
+  border-radius: 10px;
+}
+table ul.dropbutton li:first-child {
+  margin-right: 10px!important;
+}
+table ul.dropbutton li.dropbutton-toggle {
+  margin-right: 0!important;
+  margin-left: 10px;
+}
+table ul.dropbutton li a {
+  line-height: 26px;
+}
+.node-preview-container {
+  position: relative;
+  background-color: #dfd;
+  color: #2196f3;
+}
+.node-preview-container > form {
+  background-color: #dff;
+  border: 1px solid white;
+}
+.node-preview-container > form select {
+  border: 2px solid #fdd!important;
+}
+.node-preview-container .node-preview-backlink {
+  width: 100%;
+  display: block;
+  float: left;
+  text-align: right;
+  color: #3f51b5;
+}
+.node-preview-container .form-item-view-mode {
+  width: 100%;
+  display: block;
+  margin: 0;
+}
+fieldset,
+.w3-border {
+  border-color: #eaeaea!important;
+}
+.w3-table td,
+.w3-table th,
+.w3-table-all td,
+.w3-table-all th {
+  vertical-align: middle;
+}
+td .form-type-radio,
+td .form-type-checkbox {
+  margin: 0!important;
+}
+.ui-dialog,
+.ui-dialog > div {
+  border-width: 0!important;
+}
+body .ui-dialog {
+  z-index: 1001!important;
 }

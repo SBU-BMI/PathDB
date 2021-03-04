@@ -22,11 +22,21 @@ class LocaleContentTest extends BrowserTestBase {
   public static $modules = ['node', 'locale'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Verifies that machine name fields are always LTR.
    */
   public function testMachineNameLTR() {
     // User to add and remove language.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'administer content types', 'access administration pages', 'administer site configuration']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'administer content types',
+      'access administration pages',
+      'administer site configuration',
+    ]);
 
     // Log in as admin.
     $this->drupalLogin($admin_user);
@@ -58,9 +68,17 @@ class LocaleContentTest extends BrowserTestBase {
     $type2 = $this->drupalCreateContentType();
 
     // User to add and remove language.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'administer content types', 'access administration pages']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'administer content types',
+      'access administration pages',
+    ]);
     // User to create a node.
-    $web_user = $this->drupalCreateUser(["create {$type1->id()} content", "create {$type2->id()} content", "edit any {$type2->id()} content"]);
+    $web_user = $this->drupalCreateUser([
+      "create {$type1->id()} content",
+      "create {$type2->id()} content",
+      "edit any {$type2->id()} content",
+    ]);
 
     // Add custom language.
     $this->drupalLogin($admin_user);
@@ -135,9 +153,16 @@ class LocaleContentTest extends BrowserTestBase {
     $type = $this->drupalCreateContentType();
 
     // User to add and remove language.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'administer content types', 'access administration pages']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'administer content types',
+      'access administration pages',
+    ]);
     // User to create a node.
-    $web_user = $this->drupalCreateUser(["create {$type->id()} content", "edit own {$type->id()} content"]);
+    $web_user = $this->drupalCreateUser([
+      "create {$type->id()} content",
+      "edit own {$type->id()} content",
+    ]);
 
     // Log in as admin.
     $this->drupalLogin($admin_user);

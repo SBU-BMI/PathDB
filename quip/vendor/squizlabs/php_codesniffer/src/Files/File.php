@@ -1294,7 +1294,7 @@ class File
      *        )
      * </code>
      *
-     * Parameters with default values have an additional array indexs of:
+     * Parameters with default values have an additional array indexes of:
      *         'default'             => string,  // The full content of the default value.
      *         'default_token'       => integer, // The stack pointer to the start of the default value.
      *         'default_equal_token' => integer, // The stack pointer to the equals sign.
@@ -1304,15 +1304,17 @@ class File
      *
      * @return array
      * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If the specified $stackPtr is not of
-     *                                                      type T_FUNCTION, T_CLOSURE, or T_USE.
+     *                                                      type T_FUNCTION, T_CLOSURE, T_USE,
+     *                                                      or T_FN.
      */
     public function getMethodParameters($stackPtr)
     {
         if ($this->tokens[$stackPtr]['code'] !== T_FUNCTION
             && $this->tokens[$stackPtr]['code'] !== T_CLOSURE
             && $this->tokens[$stackPtr]['code'] !== T_USE
+            && $this->tokens[$stackPtr]['code'] !== T_FN
         ) {
-            throw new RuntimeException('$stackPtr must be of type T_FUNCTION or T_CLOSURE or T_USE');
+            throw new RuntimeException('$stackPtr must be of type T_FUNCTION or T_CLOSURE or T_USE or T_FN');
         }
 
         if ($this->tokens[$stackPtr]['code'] === T_USE) {
@@ -1439,6 +1441,7 @@ class File
                     $typeHintEndToken = $i;
                 }
                 break;
+            case T_NAMESPACE:
             case T_NS_SEPARATOR:
                 // Part of a type hint or default value.
                 if ($defaultStart === null) {
@@ -1492,16 +1495,18 @@ class File
                 }
 
                 // Reset the vars, as we are about to process the next parameter.
-                $defaultStart    = null;
-                $equalToken      = null;
-                $paramStart      = ($i + 1);
-                $passByReference = false;
-                $referenceToken  = false;
-                $variableLength  = false;
-                $variadicToken   = false;
-                $typeHint        = '';
-                $typeHintToken   = false;
-                $nullableType    = false;
+                $currVar          = null;
+                $paramStart       = ($i + 1);
+                $defaultStart     = null;
+                $equalToken       = null;
+                $passByReference  = false;
+                $referenceToken   = false;
+                $variableLength   = false;
+                $variadicToken    = false;
+                $typeHint         = '';
+                $typeHintToken    = false;
+                $typeHintEndToken = false;
+                $nullableType     = false;
 
                 $paramCount++;
                 break;
@@ -1541,14 +1546,15 @@ class File
      *
      * @return array
      * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If the specified position is not a
-     *                                                      T_FUNCTION token.
+     *                                                      T_FUNCTION, T_CLOSURE, or T_FN token.
      */
     public function getMethodProperties($stackPtr)
     {
         if ($this->tokens[$stackPtr]['code'] !== T_FUNCTION
             && $this->tokens[$stackPtr]['code'] !== T_CLOSURE
+            && $this->tokens[$stackPtr]['code'] !== T_FN
         ) {
-            throw new RuntimeException('$stackPtr must be of type T_FUNCTION or T_CLOSURE');
+            throw new RuntimeException('$stackPtr must be of type T_FUNCTION or T_CLOSURE or T_FN');
         }
 
         if ($this->tokens[$stackPtr]['code'] === T_FUNCTION) {
@@ -1624,6 +1630,8 @@ class File
                 T_CALLABLE     => T_CALLABLE,
                 T_SELF         => T_SELF,
                 T_PARENT       => T_PARENT,
+                T_STATIC       => T_STATIC,
+                T_NAMESPACE    => T_NAMESPACE,
                 T_NS_SEPARATOR => T_NS_SEPARATOR,
             ];
 
@@ -1648,8 +1656,14 @@ class File
                 }
             }
 
-            $end     = $this->findNext([T_OPEN_CURLY_BRACKET, T_SEMICOLON], $this->tokens[$stackPtr]['parenthesis_closer']);
-            $hasBody = $this->tokens[$end]['code'] === T_OPEN_CURLY_BRACKET;
+            if ($this->tokens[$stackPtr]['code'] === T_FN) {
+                $bodyToken = T_FN_ARROW;
+            } else {
+                $bodyToken = T_OPEN_CURLY_BRACKET;
+            }
+
+            $end     = $this->findNext([$bodyToken, T_SEMICOLON], $this->tokens[$stackPtr]['parenthesis_closer']);
+            $hasBody = $this->tokens[$end]['code'] === $bodyToken;
         }//end if
 
         if ($returnType !== '' && $nullableReturnType === true) {
@@ -1681,7 +1695,7 @@ class File
      *    'scope'           => string,  // Public, private, or protected.
      *    'scope_specified' => boolean, // TRUE if the scope was explicitly specified.
      *    'is_static'       => boolean, // TRUE if the static keyword was found.
-     *    'type'            => string,  // The type of the var (empty if no type specifed).
+     *    'type'            => string,  // The type of the var (empty if no type specified).
      *    'type_token'      => integer, // The stack pointer to the start of the type
      *                                  // or FALSE if there is no type.
      *    'type_end_token'  => integer, // The stack pointer to the end of the type
@@ -1801,6 +1815,7 @@ class File
                 T_CALLABLE     => T_CALLABLE,
                 T_SELF         => T_SELF,
                 T_PARENT       => T_PARENT,
+                T_NAMESPACE    => T_NAMESPACE,
                 T_NS_SEPARATOR => T_NS_SEPARATOR,
             ];
 
@@ -1924,7 +1939,10 @@ class File
             true
         );
 
-        if ($this->tokens[$tokenBefore]['code'] === T_FUNCTION) {
+        if ($this->tokens[$tokenBefore]['code'] === T_FUNCTION
+            || $this->tokens[$tokenBefore]['code'] === T_CLOSURE
+            || $this->tokens[$tokenBefore]['code'] === T_FN
+        ) {
             // Function returns a reference.
             return true;
         }
@@ -1963,22 +1981,11 @@ class File
                 $owner = $this->tokens[$this->tokens[$lastBracket]['parenthesis_owner']];
                 if ($owner['code'] === T_FUNCTION
                     || $owner['code'] === T_CLOSURE
+                    || $owner['code'] === T_FN
                 ) {
                     $params = $this->getMethodParameters($this->tokens[$lastBracket]['parenthesis_owner']);
                     foreach ($params as $param) {
-                        $varToken = $tokenAfter;
-                        if ($param['variable_length'] === true) {
-                            $varToken = $this->findNext(
-                                (Util\Tokens::$emptyTokens + [T_ELLIPSIS]),
-                                ($stackPtr + 1),
-                                null,
-                                true
-                            );
-                        }
-
-                        if ($param['token'] === $varToken
-                            && $param['pass_by_reference'] === true
-                        ) {
+                        if ($param['reference_token'] === $stackPtr) {
                             // Function parameter declared to be passed by reference.
                             return true;
                         }
@@ -2088,19 +2095,19 @@ class File
      * @param int|string|array $types   The type(s) of tokens to search for.
      * @param int              $start   The position to start searching from in the
      *                                  token stack.
-     * @param int              $end     The end position to fail if no token is found.
+     * @param int|null         $end     The end position to fail if no token is found.
      *                                  if not specified or null, end will default to
      *                                  the start of the token stack.
      * @param bool             $exclude If true, find the previous token that is NOT of
      *                                  the types specified in $types.
-     * @param string           $value   The value that the token(s) must be equal to.
+     * @param string|null      $value   The value that the token(s) must be equal to.
      *                                  If value is omitted, tokens with any value will
      *                                  be returned.
      * @param bool             $local   If true, tokens outside the current statement
      *                                  will not be checked. IE. checking will stop
      *                                  at the previous semi-colon found.
      *
-     * @return int|bool
+     * @return int|false
      * @see    findNext()
      */
     public function findPrevious(
@@ -2169,19 +2176,19 @@ class File
      * @param int|string|array $types   The type(s) of tokens to search for.
      * @param int              $start   The position to start searching from in the
      *                                  token stack.
-     * @param int              $end     The end position to fail if no token is found.
+     * @param int|null         $end     The end position to fail if no token is found.
      *                                  if not specified or null, end will default to
      *                                  the end of the token stack.
      * @param bool             $exclude If true, find the next token that is NOT of
      *                                  a type specified in $types.
-     * @param string           $value   The value that the token(s) must be equal to.
+     * @param string|null      $value   The value that the token(s) must be equal to.
      *                                  If value is omitted, tokens with any value will
      *                                  be returned.
      * @param bool             $local   If true, tokens outside the current statement
      *                                  will not be checked. i.e., checking will stop
      *                                  at the next semi-colon found.
      *
-     * @return int|bool
+     * @return int|false
      * @see    findPrevious()
      */
     public function findNext(
@@ -2228,8 +2235,8 @@ class File
     /**
      * Returns the position of the first non-whitespace token in a statement.
      *
-     * @param int       $start  The position to start searching from in the token stack.
-     * @param int|array $ignore Token types that should not be considered stop points.
+     * @param int              $start  The position to start searching from in the token stack.
+     * @param int|string|array $ignore Token types that should not be considered stop points.
      *
      * @return int
      */
@@ -2262,6 +2269,9 @@ class File
 
             if (isset($this->tokens[$i]['scope_opener']) === true
                 && $i === $this->tokens[$i]['scope_closer']
+                && $this->tokens[$i]['code'] !== T_CLOSE_PARENTHESIS
+                && $this->tokens[$i]['code'] !== T_END_NOWDOC
+                && $this->tokens[$i]['code'] !== T_END_HEREDOC
             ) {
                 // Found the end of the previous scope block.
                 return $lastNotEmpty;
@@ -2291,8 +2301,8 @@ class File
     /**
      * Returns the position of the last non-whitespace token in a statement.
      *
-     * @param int       $start  The position to start searching from in the token stack.
-     * @param int|array $ignore Token types that should not be considered stop points.
+     * @param int              $start  The position to start searching from in the token stack.
+     * @param int|string|array $ignore Token types that should not be considered stop points.
      *
      * @return int
      */
@@ -2319,7 +2329,6 @@ class File
         }
 
         $lastNotEmpty = $start;
-
         for ($i = $start; $i < $this->numTokens; $i++) {
             if ($i !== $start && isset($endTokens[$this->tokens[$i]['code']]) === true) {
                 // Found the end of the statement.
@@ -2341,6 +2350,12 @@ class File
                 && ($i === $this->tokens[$i]['scope_opener']
                 || $i === $this->tokens[$i]['scope_condition'])
             ) {
+                if ($this->tokens[$i]['code'] === T_FN) {
+                    $lastNotEmpty = $this->tokens[$i]['scope_closer'];
+                    $i            = ($this->tokens[$i]['scope_closer'] - 1);
+                    continue;
+                }
+
                 if ($i === $start && isset(Util\Tokens::$scopeOpeners[$this->tokens[$i]['code']]) === true) {
                     return $this->tokens[$i]['scope_closer'];
                 }
@@ -2359,7 +2374,7 @@ class File
                 if ($end !== false) {
                     $i = $end;
                 }
-            }
+            }//end if
 
             if (isset(Util\Tokens::$emptyTokens[$this->tokens[$i]['code']]) === false) {
                 $lastNotEmpty = $i;
@@ -2386,7 +2401,7 @@ class File
      *                                  If value is omitted, tokens with any value will
      *                                  be returned.
      *
-     * @return int | bool
+     * @return int|false
      */
     public function findFirstOnLine($types, $start, $exclude=false, $value=null)
     {
@@ -2472,10 +2487,14 @@ class File
      *
      * @param int        $stackPtr The position of the token we are checking.
      * @param int|string $type     The type of token to search for.
+     * @param bool       $first    If TRUE, will return the matched condition
+     *                             furthest away from the passed token.
+     *                             If FALSE, will return the matched condition
+     *                             closest to the passed token.
      *
-     * @return int
+     * @return int|false
      */
-    public function getCondition($stackPtr, $type)
+    public function getCondition($stackPtr, $type, $first=true)
     {
         // Check for the existence of the token.
         if (isset($this->tokens[$stackPtr]) === false) {
@@ -2488,6 +2507,10 @@ class File
         }
 
         $conditions = $this->tokens[$stackPtr]['conditions'];
+        if ($first === false) {
+            $conditions = array_reverse($conditions, true);
+        }
+
         foreach ($conditions as $token => $condition) {
             if ($condition === $type) {
                 return $token;

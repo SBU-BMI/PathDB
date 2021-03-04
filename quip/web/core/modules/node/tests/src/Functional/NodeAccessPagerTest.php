@@ -23,13 +23,22 @@ class NodeAccessPagerTest extends BrowserTestBase {
    */
   public static $modules = ['node_access_test', 'comment', 'forum'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected function setUp() {
     parent::setUp();
 
     node_access_rebuild();
     $this->drupalCreateContentType(['type' => 'page', 'name' => t('Basic page')]);
     $this->addDefaultCommentField('node', 'page');
-    $this->webUser = $this->drupalCreateUser(['access content', 'access comments', 'node test view']);
+    $this->webUser = $this->drupalCreateUser([
+      'access content',
+      'access comments',
+      'node test view',
+    ]);
   }
 
   /**
@@ -71,12 +80,12 @@ class NodeAccessPagerTest extends BrowserTestBase {
   public function testForumPager() {
     // Look up the forums vocabulary ID.
     $vid = $this->config('forum.settings')->get('vocabulary');
-    $this->assertTrue($vid, 'Forum navigation vocabulary ID is set.');
+    $this->assertNotEmpty($vid, 'Forum navigation vocabulary ID is set.');
 
     // Look up the general discussion term.
-    $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid, 0, 1);
+    $tree = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree($vid, 0, 1);
     $tid = reset($tree)->tid;
-    $this->assertTrue($tid, 'General discussion term is found in the forum vocabulary.');
+    $this->assertNotEmpty($tid, 'General discussion term is found in the forum vocabulary.');
 
     // Create 30 nodes.
     for ($i = 0; $i < 30; $i++) {

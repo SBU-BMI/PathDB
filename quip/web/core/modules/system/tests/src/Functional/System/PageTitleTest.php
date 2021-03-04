@@ -21,6 +21,11 @@ class PageTitleTest extends BrowserTestBase {
    */
   public static $modules = ['node', 'test_page_test', 'form_test', 'block'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
   protected $contentUser;
   protected $savedTitle;
 
@@ -34,7 +39,13 @@ class PageTitleTest extends BrowserTestBase {
 
     $this->drupalPlaceBlock('page_title_block');
 
-    $this->contentUser = $this->drupalCreateUser(['create page content', 'access content', 'administer themes', 'administer site configuration', 'link to any page']);
+    $this->contentUser = $this->drupalCreateUser([
+      'create page content',
+      'access content',
+      'administer themes',
+      'administer site configuration',
+      'link to any page',
+    ]);
     $this->drupalLogin($this->contentUser);
   }
 

@@ -22,7 +22,13 @@ class RawStringFormatterTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['field', 'text', 'entity_test', 'system', 'filter', 'user'];
+  public static $modules = [
+    'field', 'text',
+    'entity_test',
+    'system',
+    'filter',
+    'user',
+  ];
 
   /**
    * @var string
@@ -73,7 +79,8 @@ class RawStringFormatterTest extends KernelTestBase {
     ]);
     $instance->save();
 
-    $this->display = entity_get_display($this->entityType, $this->bundle, 'default')
+    $this->display = \Drupal::service('entity_display.repository')
+      ->getViewDisplay($this->entityType, $this->bundle)
       ->setComponent($this->fieldName, [
         'type' => 'string',
         'settings' => [],

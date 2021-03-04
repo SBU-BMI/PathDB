@@ -34,6 +34,11 @@ class CacheWebTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
@@ -64,8 +69,8 @@ class CacheWebTest extends ViewTestBase {
     $this->assertFalse($render_cache->get($cache_element));
 
     $this->drupalGet('test-display');
-    $this->assertResponse(200);
-    $this->assertTrue($render_cache->get($cache_element));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertNotEmpty($render_cache->get($cache_element));
     $cache_tags = [
       'config:user.role.anonymous',
       'config:views.view.test_display',
@@ -75,8 +80,8 @@ class CacheWebTest extends ViewTestBase {
     $this->assertCacheTags($cache_tags);
 
     $this->drupalGet('test-display');
-    $this->assertResponse(200);
-    $this->assertTrue($render_cache->get($cache_element));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertNotEmpty($render_cache->get($cache_element));
     $this->assertCacheTags($cache_tags);
   }
 

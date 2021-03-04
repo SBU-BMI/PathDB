@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,11 +13,14 @@ namespace Psy\Test\Readline;
 
 use Psy\Readline\Libedit;
 
-class LibeditTest extends \PHPUnit\Framework\TestCase
+class LibeditTest extends \Psy\Test\TestCase
 {
     private $historyFile;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         if (!Libedit::isSupported()) {
             $this->markTestSkipped('Libedit not enabled');
@@ -25,7 +28,7 @@ class LibeditTest extends \PHPUnit\Framework\TestCase
 
         $this->historyFile = \tempnam(\sys_get_temp_dir(), 'psysh_test_history');
         if (false === \file_put_contents($this->historyFile, "_HiStOrY_V2_\n")) {
-            $this->fail('Unable to write history file: ' . $this->historyFile);
+            $this->fail('Unable to write history file: '.$this->historyFile);
         }
         // Calling readline_read_history before readline_clear_history
         // avoids segfault with PHP 5.5.7 & libedit v3.1
@@ -33,11 +36,24 @@ class LibeditTest extends \PHPUnit\Framework\TestCase
         \readline_clear_history();
     }
 
-    public function tearDown()
+    /**
+     * @after
+     */
+    public function removeHistoryFile()
     {
         if (\is_file($this->historyFile)) {
             \unlink($this->historyFile);
         }
+    }
+
+    public function testReadlineName()
+    {
+        if (\defined('HHVM_VERSION')) {
+            $this->markTestSkipped();
+        }
+
+        $readline = new Libedit($this->historyFile);
+        $this->assertEquals(\readline_info('readline_name'), 'psysh');
     }
 
     public function testHistory()
@@ -97,7 +113,7 @@ class LibeditTest extends \PHPUnit\Framework\TestCase
         \file_put_contents(
             $this->historyFile,
             "This is an entry\n\0This is a comment\nThis is an entry\0With a comment\n",
-            FILE_APPEND
+            \FILE_APPEND
         );
         $this->assertSame([
             'This is an entry',
@@ -116,7 +132,7 @@ class LibeditTest extends \PHPUnit\Framework\TestCase
         \file_put_contents(
             $this->historyFile,
             "foo\rbar\nbaz\r\nw00t",
-            FILE_APPEND
+            \FILE_APPEND
         );
         $this->assertSame([
             "foo\rbar",

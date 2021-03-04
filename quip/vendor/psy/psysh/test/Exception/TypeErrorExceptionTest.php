@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,16 +11,17 @@
 
 namespace Psy\Test\Exception;
 
+use Psy\Exception\Exception;
 use Psy\Exception\TypeErrorException;
 
-class TypeErrorExceptionTest extends \PHPUnit\Framework\TestCase
+class TypeErrorExceptionTest extends \Psy\Test\TestCase
 {
     public function testException()
     {
         $e = new TypeErrorException('{{message}}', 13);
 
-        $this->assertInstanceOf('Psy\Exception\Exception', $e);
-        $this->assertInstanceOf('Psy\Exception\TypeErrorException', $e);
+        $this->assertInstanceOf(Exception::class, $e);
+        $this->assertInstanceOf(TypeErrorException::class, $e);
 
         $this->assertEquals('TypeError: {{message}}', $e->getMessage());
         $this->assertEquals('{{message}}', $e->getRawMessage());
@@ -37,14 +38,14 @@ class TypeErrorExceptionTest extends \PHPUnit\Framework\TestCase
 
     public function testFromTypeError()
     {
-        if (\version_compare(PHP_VERSION, '7.0.0', '<')) {
+        if (\version_compare(\PHP_VERSION, '7.0.0', '<')) {
             $this->markTestSkipped();
         }
 
         $previous = new \TypeError('{{message}}', 13);
         $e = TypeErrorException::fromTypeError($previous);
 
-        $this->assertInstanceOf('Psy\Exception\TypeErrorException', $e);
+        $this->assertInstanceOf(TypeErrorException::class, $e);
         $this->assertEquals('TypeError: {{message}}', $e->getMessage());
         $this->assertEquals('{{message}}', $e->getRawMessage());
         $this->assertEquals(13, $e->getCode());

@@ -3,6 +3,7 @@
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Config\Entity\ConfigEntityStorage;
@@ -30,6 +31,11 @@ class ConfigEntityTest extends BrowserTestBase {
   public static $modules = ['config_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests CRUD operations.
    */
   public function testCRUD() {
@@ -37,7 +43,6 @@ class ConfigEntityTest extends BrowserTestBase {
     // Verify default properties on a newly created empty entity.
     $storage = \Drupal::entityTypeManager()->getStorage('config_test');
     $empty = $storage->create();
-    $this->assertTrue($empty->uuid());
     $this->assertIdentical($empty->label, NULL);
     $this->assertIdentical($empty->style, NULL);
     $this->assertIdentical($empty->language()->getId(), $default_langcode);
@@ -47,11 +52,11 @@ class ConfigEntityTest extends BrowserTestBase {
     $this->assertIdentical($empty->getOriginalId(), NULL);
     $this->assertIdentical($empty->bundle(), 'config_test');
     $this->assertIdentical($empty->id(), NULL);
-    $this->assertTrue($empty->uuid());
+    $this->assertTrue(Uuid::isValid($empty->uuid()));
     $this->assertIdentical($empty->label(), NULL);
 
     $this->assertIdentical($empty->get('id'), NULL);
-    $this->assertTrue($empty->get('uuid'));
+    $this->assertTrue(Uuid::isValid($empty->get('uuid')));
     $this->assertIdentical($empty->get('label'), NULL);
     $this->assertIdentical($empty->get('style'), NULL);
     $this->assertIdentical($empty->language()->getId(), $default_langcode);
@@ -64,7 +69,7 @@ class ConfigEntityTest extends BrowserTestBase {
       $this->fail('EntityMalformedException was thrown.');
     }
     catch (EntityMalformedException $e) {
-      $this->pass('EntityMalformedException was thrown.');
+      // Expected exception; just continue testing.
     }
 
     // Verify that an empty entity cannot be saved.
@@ -73,7 +78,7 @@ class ConfigEntityTest extends BrowserTestBase {
       $this->fail('EntityMalformedException was thrown.');
     }
     catch (EntityMalformedException $e) {
-      $this->pass('EntityMalformedException was thrown.');
+      // Expected exception; just continue testing.
     }
 
     // Verify that an entity with an empty ID string is considered empty, too.
@@ -86,7 +91,7 @@ class ConfigEntityTest extends BrowserTestBase {
       $this->fail('EntityMalformedException was thrown.');
     }
     catch (EntityMalformedException $e) {
-      $this->pass('EntityMalformedException was thrown.');
+      // Expected exception; just continue testing.
     }
 
     // Verify properties on a newly created entity.
@@ -95,7 +100,6 @@ class ConfigEntityTest extends BrowserTestBase {
       'label' => $this->randomString(),
       'style' => $this->randomMachineName(),
     ]);
-    $this->assertTrue($config_test->uuid());
     $this->assertNotEqual($config_test->uuid(), $empty->uuid());
     $this->assertIdentical($config_test->label, $expected['label']);
     $this->assertIdentical($config_test->style, $expected['style']);
@@ -105,14 +109,13 @@ class ConfigEntityTest extends BrowserTestBase {
     $this->assertIdentical($config_test->isNew(), TRUE);
     $this->assertIdentical($config_test->getOriginalId(), $expected['id']);
     $this->assertIdentical($config_test->id(), $expected['id']);
-    $this->assertTrue($config_test->uuid());
+    $this->assertTrue(Uuid::isValid($config_test->uuid()));
     $expected['uuid'] = $config_test->uuid();
     $this->assertIdentical($config_test->label(), $expected['label']);
 
     // Verify that the entity can be saved.
     try {
       $status = $config_test->save();
-      $this->pass('EntityMalformedException was not thrown.');
     }
     catch (EntityMalformedException $e) {
       $this->fail('EntityMalformedException was not thrown.');
@@ -147,9 +150,6 @@ class ConfigEntityTest extends BrowserTestBase {
     ]);
     try {
       $id_length_config_test->save();
-      $this->pass(new FormattableMarkup("config_test entity with ID length @length was saved.", [
-        '@length' => strlen($id_length_config_test->id()),
-      ]));
     }
     catch (ConfigEntityIdLengthException $e) {
       $this->fail($e->getMessage());
@@ -161,9 +161,6 @@ class ConfigEntityTest extends BrowserTestBase {
     ]);
     try {
       $id_length_config_test->save();
-      $this->pass(new FormattableMarkup("config_test entity with ID length @length was saved.", [
-        '@length' => strlen($id_length_config_test->id()),
-      ]));
     }
     catch (ConfigEntityIdLengthException $e) {
       $this->fail($e->getMessage());
@@ -181,10 +178,7 @@ class ConfigEntityTest extends BrowserTestBase {
       ]));
     }
     catch (ConfigEntityIdLengthException $e) {
-      $this->pass(new FormattableMarkup("config_test entity with ID length @length exceeding the maximum allowed length of @max failed to save", [
-        '@length' => strlen($id_length_config_test->id()),
-        '@max' => static::MAX_ID_LENGTH,
-      ]));
+      // Expected exception; just continue testing.
     }
 
     // Ensure that creating an entity with the same id as an existing one is not
@@ -198,7 +192,7 @@ class ConfigEntityTest extends BrowserTestBase {
       $this->fail('Not possible to overwrite an entity entity.');
     }
     catch (EntityStorageException $e) {
-      $this->pass('Not possible to overwrite an entity entity.');
+      // Expected exception; just continue testing.
     }
 
     // Verify that renaming the ID returns correct status and properties.
@@ -225,22 +219,24 @@ class ConfigEntityTest extends BrowserTestBase {
     // Test config entity prepopulation.
     \Drupal::state()->set('config_test.prepopulate', TRUE);
     $config_test = $storage->create(['foo' => 'bar']);
-    $this->assertEqual($config_test->get('foo'), 'baz', 'Initial value correctly populated');
+    $this->assertEquals('baz', $config_test->get('foo'), 'Initial value correctly populated');
   }
 
   /**
    * Tests CRUD operations through the UI.
    */
   public function testCRUDUI() {
-    $this->drupalLogin($this->drupalCreateUser(['administer site configuration']));
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer site configuration',
+    ]));
 
     $id = strtolower($this->randomMachineName());
     $label1 = $this->randomMachineName();
     $label2 = $this->randomMachineName();
     $label3 = $this->randomMachineName();
-    $message_insert = format_string('%label configuration has been created.', ['%label' => $label1]);
-    $message_update = format_string('%label configuration has been updated.', ['%label' => $label2]);
-    $message_delete = format_string('The test configuration %label has been deleted.', ['%label' => $label2]);
+    $message_insert = new FormattableMarkup('%label configuration has been created.', ['%label' => $label1]);
+    $message_update = new FormattableMarkup('%label configuration has been updated.', ['%label' => $label2]);
+    $message_delete = new FormattableMarkup('The test configuration %label has been deleted.', ['%label' => $label2]);
 
     // Create a configuration entity.
     $edit = [
@@ -249,7 +245,7 @@ class ConfigEntityTest extends BrowserTestBase {
     ];
     $this->drupalPostForm('admin/structure/config_test/add', $edit, 'Save');
     $this->assertUrl('admin/structure/config_test');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertRaw($message_insert);
     $this->assertNoRaw($message_update);
     $this->assertLinkByHref("admin/structure/config_test/manage/$id");
@@ -260,7 +256,7 @@ class ConfigEntityTest extends BrowserTestBase {
     ];
     $this->drupalPostForm("admin/structure/config_test/manage/$id", $edit, 'Save');
     $this->assertUrl('admin/structure/config_test');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertNoRaw($message_insert);
     $this->assertRaw($message_update);
     $this->assertLinkByHref("admin/structure/config_test/manage/$id");
@@ -272,7 +268,7 @@ class ConfigEntityTest extends BrowserTestBase {
     $this->assertUrl("admin/structure/config_test/manage/$id/delete");
     $this->drupalPostForm(NULL, [], 'Delete');
     $this->assertUrl('admin/structure/config_test');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertNoRaw($message_update);
     $this->assertRaw($message_delete);
     $this->assertNoText($label1);
@@ -285,7 +281,7 @@ class ConfigEntityTest extends BrowserTestBase {
     ];
     $this->drupalPostForm('admin/structure/config_test/add', $edit, 'Save');
     $this->assertUrl('admin/structure/config_test');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertText($label1);
     $this->assertLinkByHref("admin/structure/config_test/manage/$id");
 
@@ -296,7 +292,7 @@ class ConfigEntityTest extends BrowserTestBase {
     ];
     $this->drupalPostForm("admin/structure/config_test/manage/$id", $edit, 'Save');
     $this->assertUrl('admin/structure/config_test');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertNoText($label1);
     $this->assertNoText($label2);
     $this->assertText($label3);
@@ -310,8 +306,8 @@ class ConfigEntityTest extends BrowserTestBase {
       'label' => '0',
     ];
     $this->drupalPostForm('admin/structure/config_test/add', $edit, 'Save');
-    $this->assertResponse(200);
-    $message_insert = format_string('%label configuration has been created.', ['%label' => $edit['label']]);
+    $this->assertSession()->statusCodeEquals(200);
+    $message_insert = new FormattableMarkup('%label configuration has been created.', ['%label' => $edit['label']]);
     $this->assertRaw($message_insert);
     $this->assertLinkByHref('admin/structure/config_test/manage/0');
     $this->assertLinkByHref('admin/structure/config_test/manage/0/delete');
@@ -345,8 +341,8 @@ class ConfigEntityTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, $edit, 'Save');
 
     $entity = $storage->load($id);
-    $this->assertEqual($entity->get('size'), 'custom');
-    $this->assertEqual($entity->get('size_value'), 'medium');
+    $this->assertEquals('custom', $entity->get('size'));
+    $this->assertEquals('medium', $entity->get('size_value'));
   }
 
 }

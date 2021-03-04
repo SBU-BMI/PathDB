@@ -157,6 +157,7 @@ class SwitchField extends DsFieldBase {
     $settings = isset($settings['vms']) ? $settings['vms'] : [];
     $view_modes = $this->entityDisplayRepository->getViewModes($entity_type);
 
+    $summary = [];
     $summary[] = 'View mode labels';
 
     foreach ($view_modes as $key => $value) {

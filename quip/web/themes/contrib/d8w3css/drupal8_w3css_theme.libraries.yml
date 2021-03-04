@@ -1,13 +1,13 @@
 w3-css:
   remote: https://www.w3schools.com/w3css/
-  version: 4
+  version: 4.13
   license:
     name: MIT
     url: https://www.w3schools.com/w3css/w3css_downloads.asp
     gpl-compatible: true
   css:
-    theme:
-      https://www.w3schools.com/w3css/4/w3.css: { type: external, minified: true }
+    base:
+      css/w3-css/w3.css: {}
       css/w3-css/w3css-color-libraries.css: {}
 font-awesome:
   remote: https://fortawesome.github.io/Font-Awesome/
@@ -17,21 +17,42 @@ font-awesome:
     url: https://fortawesome.github.io/Font-Awesome/license/
     gpl-compatible: true
   css:
-    theme:
+    base:
       https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css: { type: external, minified: true }
+
+d8w3css-font-awesome-local:
+  Version: 4.7.0
+  css:
+    base:
+      css/font/font-awesome.4.7.0.css: {}
+
+d8w3css-google-font-external:
+  Version: VERSION
+  css:
+    base:
+      'https://fonts.googleapis.com/css?family=Montserrat': { type: external, minified: true }
+
+d8w3css-google-font-local:
+  Version: VERSION
+  css:
+    base:
+      css/font/google-font.css: {}
+
 global-components:
   Version: VERSION
   css:
-    theme:
-      'https://fonts.googleapis.com/css?family=Montserrat': { type: external, minified: true }
+    base:
       css/custom/base.css: {}
       css/custom/w3-custom-classes.css: {}
+    layout:
       css/custom/layout.css: {}
+    component:
       css/custom/components.css: {}
+    theme:
       css/custom/theme.css: {}
       css/custom/responsive.css: {}
   js:
-    js/jquery.matchHeight.js: {}
+    js/jquery.matchHeight.js: {preprocess: false }
     js/custom.js: {}
   dependencies:
     - core/jquery
@@ -39,22 +60,12 @@ global-components:
     - core/drupal
     - core/drupalSettings
     - core/jquery.once
-w3-css-theme-custom:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme-custom/w3-theme-custom.css: {}
 w3-css-theme-amber:
   Version: VERSION
   css:
     theme:
       css/w3-css-theme/w3-theme-amber.css: {}
       css/w3-css-theme/w3-theme-amber-custom.css: {}
-w3-css-theme-black:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-black.css: {}
 w3-css-theme-blue:
   Version: VERSION
   css:
@@ -79,11 +90,6 @@ w3-css-theme-cyan:
     theme:
       css/w3-css-theme/w3-theme-cyan.css: {}
       css/w3-css-theme/w3-theme-cyan-custom.css: {}
-w3-css-theme-dark-grey:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-dark-grey.css: {}
 w3-css-theme-deep-orange:
   Version: VERSION
   css:
@@ -102,23 +108,12 @@ w3-css-theme-green:
     theme:
       css/w3-css-theme/w3-theme-green.css: {}
       css/w3-css-theme/w3-theme-green-custom.css: {}
-w3-css-theme-grey:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-grey.css: {}
 w3-css-theme-indigo:
   Version: VERSION
   css:
     theme:
       css/w3-css-theme/w3-theme-indigo.css: {}
       css/w3-css-theme/w3-theme-indigo-custom.css: {}
-w3-css-theme-blue:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-blue.css: {}
-      css/w3-css-theme/w3-theme-blue-csutom.css: {}
 w3-css-theme-khaki:
   Version: VERSION
   css:
@@ -149,12 +144,7 @@ w3-css-theme-orange:
     theme:
       css/w3-css-theme/w3-theme-orange.css: {}
       css/w3-css-theme/w3-theme-orange-custom.css: {}
-w3-css-theme-blue:
-  Version: VERSION
-  css:
-    theme:
-      css/w3-css-theme/w3-theme-blue.css: {}
-      css/w3-css-theme/w3-theme-blue-custom.css: {}
+
 w3-css-theme-pink:
   Version: VERSION
   css:
@@ -185,3 +175,175 @@ w3-css-theme-yellow:
     theme:
       css/w3-css-theme/w3-theme-yellow.css: {}
       css/w3-css-theme/w3-theme-yellow-custom.css: {}
+w3-css-theme-black:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-black.css: {}
+w3-css-theme-dark-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-dark-grey.css: {}
+w3-css-theme-grey:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme/w3-theme-grey.css: {}
+
+# My custom predefined color themes.
+w3-css-theme-custom:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-custom.css: {}
+w3-css-theme-00000:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00000.css: {}
+w3-css-theme-00001:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00001.css: {}
+w3-css-theme-00002:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00002.css: {}
+w3-css-theme-00003:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00003.css: {}
+w3-css-theme-00004:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00004.css: {}
+w3-css-theme-00005:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00005.css: {}
+w3-css-theme-00006:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00006.css: {}
+w3-css-theme-00007:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00007.css: {}
+w3-css-theme-00008:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00008.css: {}
+w3-css-theme-00009:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00009.css: {}
+w3-css-theme-00010:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00010.css: {}
+w3-css-theme-00011:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00011.css: {}
+w3-css-theme-00012:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00012.css: {}
+w3-css-theme-00013:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00013.css: {}
+w3-css-theme-00014:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00014.css: {}
+w3-css-theme-00015:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00015.css: {}
+w3-css-theme-00016:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00016.css: {}
+w3-css-theme-00017:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00017.css: {}
+w3-css-theme-00018:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00018.css: {}
+w3-css-theme-00019:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00019.css: {}
+w3-css-theme-00020:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00020.css: {}
+w3-css-theme-00021:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00021.css: {}
+w3-css-theme-00022:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00022.css: {}
+w3-css-theme-00023:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00023.css: {}
+w3-css-theme-00024:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00024.css: {}
+w3-css-theme-00025:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00025.css: {}
+w3-css-theme-00026:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00026.css: {}
+w3-css-theme-00027:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00027.css: {}
+w3-css-theme-00028:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00028.css: {}
+w3-css-theme-00029:
+  Version: VERSION
+  css:
+    theme:
+      css/w3-css-theme-custom/w3-theme-00029.css: {}

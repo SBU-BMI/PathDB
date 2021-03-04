@@ -20,6 +20,11 @@ class ViewsUITourTest extends TourTestBase {
   protected $adminUser;
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * String translation storage object.
    *
    * @var \Drupal\locale\StringStorageInterface
@@ -35,7 +40,10 @@ class ViewsUITourTest extends TourTestBase {
 
   protected function setUp() {
     parent::setUp();
-    $this->adminUser = $this->drupalCreateUser(['administer views', 'access tour']);
+    $this->adminUser = $this->drupalCreateUser([
+      'administer views',
+      'access tour',
+    ]);
     $this->drupalLogin($this->adminUser);
   }
 

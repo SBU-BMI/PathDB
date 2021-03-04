@@ -26,6 +26,11 @@ class UserAdminTest extends BrowserTestBase {
   public static $modules = ['taxonomy', 'views'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Registers a user and deletes it.
    */
   public function testUserAdmin() {
@@ -41,7 +46,7 @@ class UserAdminTest extends BrowserTestBase {
     $user_c->name = 'User C';
     $user_c->save();
 
-    $user_storage = $this->container->get('entity.manager')->getStorage('user');
+    $user_storage = $this->container->get('entity_type.manager')->getStorage('user');
 
     // Create admin user to delete registered user.
     $admin_user = $this->drupalCreateUser(['administer users']);
@@ -71,12 +76,12 @@ class UserAdminTest extends BrowserTestBase {
     // Filter the users by name/email.
     $this->drupalGet('admin/people', ['query' => ['user' => $user_a->getAccountName()]]);
     $result = $this->xpath('//table/tbody/tr');
-    $this->assertEqual(1, count($result), 'Filter by username returned the right amount.');
+    $this->assertCount(1, $result, 'Filter by username returned the right amount.');
     $this->assertEqual($user_a->getAccountName(), $result[0]->find('xpath', '/td[2]/a')->getText(), 'Filter by username returned the right user.');
 
     $this->drupalGet('admin/people', ['query' => ['user' => $user_a->getEmail()]]);
     $result = $this->xpath('//table/tbody/tr');
-    $this->assertEqual(1, count($result), 'Filter by username returned the right amount.');
+    $this->assertCount(1, $result, 'Filter by username returned the right amount.');
     $this->assertEqual($user_a->getAccountName(), $result[0]->find('xpath', '/td[2]/a')->getText(), 'Filter by username returned the right user.');
 
     // Filter the users by permission 'administer taxonomy'.
@@ -157,7 +162,10 @@ class UserAdminTest extends BrowserTestBase {
    */
   public function testNotificationEmailAddress() {
     // Test that the Notification Email address field is on the config page.
-    $admin_user = $this->drupalCreateUser(['administer users', 'administer account settings']);
+    $admin_user = $this->drupalCreateUser([
+      'administer users',
+      'administer account settings',
+    ]);
     $this->drupalLogin($admin_user);
     $this->drupalGet('admin/config/people/accounts');
     $this->assertRaw('id="edit-mail-notification-address"', 'Notification Email address field exists');
@@ -191,7 +199,7 @@ class UserAdminTest extends BrowserTestBase {
       'from' => $server_address,
       'subject' => $subject,
     ]);
-    $this->assertTrue(count($admin_mail), 'New user mail to admin is sent to configured Notification Email address');
+    $this->assertCount(1, $admin_mail, 'New user mail to admin is sent to configured Notification Email address');
     // Ensure that user notification mail is sent from the configured
     // Notification Email address.
     $user_mail = $this->drupalGetMails([
@@ -200,7 +208,7 @@ class UserAdminTest extends BrowserTestBase {
       'reply-to' => $notify_address,
       'subject' => $subject,
     ]);
-    $this->assertTrue(count($user_mail), 'New user mail to user is sent from configured Notification Email address');
+    $this->assertCount(1, $user_mail, 'New user mail to user is sent from configured Notification Email address');
   }
 
 }

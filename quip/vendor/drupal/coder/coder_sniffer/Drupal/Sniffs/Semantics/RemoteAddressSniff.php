@@ -27,7 +27,7 @@ class RemoteAddressSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -39,9 +39,9 @@ class RemoteAddressSniff implements Sniff
     /**
      * Processes this test, when one of its tokens is encountered.
      *
-     * @param \HP_CodeSniffer\Files\File $phpcsFile The current file being processed.
-     * @param int                        $stackPtr  The position of the current token
-     *                                              in the stack passed in $tokens.
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile The current file being processed.
+     * @param int                         $stackPtr  The position of the current token
+     *                                               in the stack passed in $tokens.
      *
      * @return void
      */

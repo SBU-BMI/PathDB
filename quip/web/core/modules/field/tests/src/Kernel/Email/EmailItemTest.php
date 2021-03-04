@@ -32,7 +32,8 @@ class EmailItemTest extends FieldKernelTestBase {
     ])->save();
 
     // Create a form display for the default form mode.
-    entity_get_form_display('entity_test', 'entity_test', 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay('entity_test', 'entity_test')
       ->setComponent('field_email', [
         'type' => 'email_default',
       ])
@@ -53,8 +54,8 @@ class EmailItemTest extends FieldKernelTestBase {
     // Verify entity has been created properly.
     $id = $entity->id();
     $entity = EntityTest::load($id);
-    $this->assertTrue($entity->field_email instanceof FieldItemListInterface, 'Field implements interface.');
-    $this->assertTrue($entity->field_email[0] instanceof FieldItemInterface, 'Field item implements interface.');
+    $this->assertInstanceOf(FieldItemListInterface::class, $entity->field_email);
+    $this->assertInstanceOf(FieldItemInterface::class, $entity->field_email[0]);
     $this->assertEqual($entity->field_email->value, $value);
     $this->assertEqual($entity->field_email[0]->value, $value);
 

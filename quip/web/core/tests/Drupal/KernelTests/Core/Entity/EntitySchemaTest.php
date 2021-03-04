@@ -46,7 +46,7 @@ class EntitySchemaTest extends EntityKernelTestBase {
   public function testCustomFieldCreateDelete() {
     // Install the module which adds the field.
     $this->installModule('entity_schema_test');
-    $storage_definitions = $this->entityManager->getFieldStorageDefinitions('entity_test_update');
+    $storage_definitions = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('entity_test_update');
     $this->assertNotNull($storage_definitions['custom_base_field'], 'Base field definition found.');
     $this->assertNotNull($storage_definitions['custom_bundle_field'], 'Bundle field definition found.');
 
@@ -215,7 +215,7 @@ class EntitySchemaTest extends EntityKernelTestBase {
 
     // Now test updating a field with data.
     /* @var \Drupal\Core\Entity\FieldableEntityStorageInterface $storage */
-    $storage = $this->entityManager->getStorage($entity_type_id);
+    $storage = $this->entityTypeManager->getStorage($entity_type_id);
     // The schema of ID fields is incorrectly recreated as 'int' instead of
     // 'serial', so we manually have to specify an ID.
     // @todo Remove this in https://www.drupal.org/project/drupal/issues/2928906
@@ -306,11 +306,12 @@ class EntitySchemaTest extends EntityKernelTestBase {
     $this->installModule('entity_schema_test');
     $this->updateEntityType(TRUE);
     $fields = ['revision_log', 'uuid'];
+    $entity_field_manager = \Drupal::service('entity_field.manager');
     foreach ($fields as $field_name) {
-      $original_definition = $this->entityManager->getBaseFieldDefinitions('entity_test_update')[$field_name];
+      $original_definition = $entity_field_manager->getBaseFieldDefinitions('entity_test_update')[$field_name];
       $new_definition = clone $original_definition;
       $new_definition->setLabel($original_definition->getLabel() . ', the other one');
-      $this->assertTrue($this->entityManager->getStorage('entity_test_update')
+      $this->assertTrue($this->entityTypeManager->getStorage('entity_test_update')
         ->requiresFieldDataMigration($new_definition, $original_definition));
     }
   }
@@ -322,12 +323,12 @@ class EntitySchemaTest extends EntityKernelTestBase {
     // Find all the entity types provided by the entity_test module and install
     // the schema for them.
     $entity_type_ids = [];
-    $entities = \Drupal::entityManager()->getDefinitions();
+    $entities = \Drupal::entityTypeManager()->getDefinitions();
     foreach ($entities as $entity_type_id => $definition) {
       if ($definition->getProvider() == 'entity_test') {
         $this->installEntitySchema($entity_type_id);
         $entity_type_ids[] = $entity_type_id;
-      };
+      }
     }
 
     // Get a list of all the entities in the schema.
@@ -368,6 +369,65 @@ class EntitySchemaTest extends EntityKernelTestBase {
 
     // Ensure that all storage definitions have been removed from the schema.
     $this->assertEqual($entity_type_id_count, 0, 'After uninstalling entity_test module the schema should not contains fields from entities provided by the module.');
+  }
+
+  /**
+   * Tests the installed storage schema for identifier fields.
+   */
+  public function testIdentifierSchema() {
+    $this->installEntitySchema('entity_test_rev');
+
+    $key_value_store = \Drupal::keyValue('entity.storage_schema.sql');
+    $id_schema = $key_value_store->get('entity_test_rev.field_schema_data.id', []);
+    $revision_id_schema = $key_value_store->get('entity_test_rev.field_schema_data.revision_id', []);
+
+    $expected_id_schema = [
+      'entity_test_rev' => [
+        'fields' => [
+          'id' => [
+            'type' => 'serial',
+            'unsigned' => TRUE,
+            'size' => 'normal',
+            'not null' => TRUE,
+          ],
+        ],
+      ],
+      'entity_test_rev_revision' => [
+        'fields' => [
+          'id' => [
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'size' => 'normal',
+            'not null' => TRUE,
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($expected_id_schema, $id_schema);
+
+    $expected_revision_id_schema = [
+      'entity_test_rev' => [
+        'fields' => [
+          'revision_id' => [
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'size' => 'normal',
+            'not null' => FALSE,
+          ],
+        ],
+      ],
+      'entity_test_rev_revision' => [
+        'fields' => [
+          'revision_id' => [
+            'type' => 'serial',
+            'unsigned' => TRUE,
+            'size' => 'normal',
+            'not null' => TRUE,
+          ],
+        ],
+      ],
+    ];
+    $this->assertEquals($expected_revision_id_schema, $revision_id_schema);
   }
 
 }

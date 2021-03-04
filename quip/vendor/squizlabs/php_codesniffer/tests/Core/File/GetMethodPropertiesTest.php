@@ -361,6 +361,121 @@ class GetMethodPropertiesTest extends AbstractMethodUnitTest
 
 
     /**
+     * Test a static arrow function.
+     *
+     * @return void
+     */
+    public function testArrowFunction()
+    {
+        $expected = [
+            'scope'                => 'public',
+            'scope_specified'      => false,
+            'return_type'          => 'int',
+            'nullable_return_type' => false,
+            'is_abstract'          => false,
+            'is_final'             => false,
+            'is_static'            => true,
+            'has_body'             => true,
+        ];
+
+        $this->getMethodPropertiesTestHelper('/* '.__FUNCTION__.' */', $expected);
+
+    }//end testArrowFunction()
+
+
+    /**
+     * Test a function with return type "static".
+     *
+     * @return void
+     */
+    public function testReturnTypeStatic()
+    {
+        $expected = [
+            'scope'                => 'private',
+            'scope_specified'      => true,
+            'return_type'          => 'static',
+            'nullable_return_type' => false,
+            'is_abstract'          => false,
+            'is_final'             => false,
+            'is_static'            => false,
+            'has_body'             => true,
+        ];
+
+        $this->getMethodPropertiesTestHelper('/* '.__FUNCTION__.' */', $expected);
+
+    }//end testReturnTypeStatic()
+
+
+    /**
+     * Test a function with return type "mixed".
+     *
+     * @return void
+     */
+    public function testPHP8MixedTypeHint()
+    {
+        $expected = [
+            'scope'                => 'public',
+            'scope_specified'      => false,
+            'return_type'          => 'mixed',
+            'nullable_return_type' => false,
+            'is_abstract'          => false,
+            'is_final'             => false,
+            'is_static'            => false,
+            'has_body'             => true,
+        ];
+
+        $this->getMethodPropertiesTestHelper('/* '.__FUNCTION__.' */', $expected);
+
+    }//end testPHP8MixedTypeHint()
+
+
+    /**
+     * Test a function with return type "mixed" and nullability.
+     *
+     * @return void
+     */
+    public function testPHP8MixedTypeHintNullable()
+    {
+        $expected = [
+            'scope'                => 'public',
+            'scope_specified'      => false,
+            'return_type'          => '?mixed',
+            'nullable_return_type' => true,
+            'is_abstract'          => false,
+            'is_final'             => false,
+            'is_static'            => false,
+            'has_body'             => true,
+        ];
+
+        $this->getMethodPropertiesTestHelper('/* '.__FUNCTION__.' */', $expected);
+
+    }//end testPHP8MixedTypeHintNullable()
+
+
+    /**
+     * Test a function with return type using the namespace operator.
+     *
+     * @return void
+     */
+    public function testNamespaceOperatorTypeHint()
+    {
+        $expected = [
+            'scope'                => 'public',
+            'scope_specified'      => false,
+            'return_type'          => '?namespace\Name',
+            'nullable_return_type' => true,
+            'is_abstract'          => false,
+            'is_final'             => false,
+            'is_static'            => false,
+            'has_body'             => true,
+        ];
+
+        $this->getMethodPropertiesTestHelper('/* '.__FUNCTION__.' */', $expected);
+
+    }//end testNamespaceOperatorTypeHint()
+
+
+    /**
      * Test helper.
      *
      * @param string $commentString The comment which preceeds the test.
@@ -370,7 +485,7 @@ class GetMethodPropertiesTest extends AbstractMethodUnitTest
      */
     private function getMethodPropertiesTestHelper($commentString, $expected)
     {
-        $function = $this->getTargetToken($commentString, [T_FUNCTION, T_CLOSURE]);
+        $function = $this->getTargetToken($commentString, [T_FUNCTION, T_CLOSURE, T_FN]);
         $found    = self::$phpcsFile->getMethodProperties($function);
 
         $this->assertArraySubset($expected, $found, true);

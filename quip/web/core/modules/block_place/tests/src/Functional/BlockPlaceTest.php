@@ -9,6 +9,7 @@ use Drupal\Tests\BrowserTestBase;
  * Tests the placing a block.
  *
  * @group block_place
+ * @group legacy
  */
 class BlockPlaceTest extends BrowserTestBase {
 
@@ -18,6 +19,11 @@ class BlockPlaceTest extends BrowserTestBase {
    * @var array
    */
   public static $modules = ['block', 'block_place', 'toolbar'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Tests placing blocks as an admin.
@@ -43,7 +49,7 @@ class BlockPlaceTest extends BrowserTestBase {
     foreach ($visible_regions as $region => $name) {
       $block_library_url->setOption('query', ['region' => $region]);
       $links = $this->xpath('//a[contains(@href, :href)]', [':href' => $block_library_url->toString()]);
-      $this->assertEquals(1, count($links));
+      $this->assertCount(1, $links);
 
       list(, $query_string) = explode('?', $links[0]->getAttribute('href'), 2);
       parse_str($query_string, $query_parts);
@@ -51,7 +57,7 @@ class BlockPlaceTest extends BrowserTestBase {
 
       // Get the text inside the div->a->span->em.
       $demo_block = $this->xpath('//div[@class="block-place-region"]/a/span[text()="Place block in the "]/em[text()="' . $name . '"]');
-      $this->assertEquals(1, count($demo_block));
+      $this->assertCount(1, $demo_block);
     }
   }
 

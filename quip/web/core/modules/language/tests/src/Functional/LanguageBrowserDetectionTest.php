@@ -15,12 +15,20 @@ class LanguageBrowserDetectionTest extends BrowserTestBase {
   public static $modules = ['language'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests for adding, editing and deleting mappings between browser language
    * codes and Drupal language codes.
    */
   public function testUIBrowserLanguageMappings() {
     // User to manage languages.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'access administration pages']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'access administration pages',
+    ]);
     $this->drupalLogin($admin_user);
 
     // Check that the configure link exists.

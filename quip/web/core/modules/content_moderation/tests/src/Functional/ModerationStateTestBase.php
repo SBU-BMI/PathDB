@@ -112,10 +112,6 @@ abstract class ModerationStateTestBase extends BrowserTestBase {
     $this->drupalGet('admin/structure/types');
     $this->clickLink('Add content type');
 
-    // Check that the 'Create new revision' checkbox is checked and disabled.
-    $this->assertSession()->checkboxChecked('options[revision]');
-    $this->assertSession()->fieldDisabled('options[revision]');
-
     $edit = [
       'name' => $content_type_name,
       'type' => $content_type_id,
@@ -123,7 +119,7 @@ abstract class ModerationStateTestBase extends BrowserTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save content type'));
 
     // Check the content type has been set to create new revisions.
-    $this->assertTrue(NodeType::load($content_type_id)->isNewRevision());
+    $this->assertTrue(NodeType::load($content_type_id)->shouldCreateNewRevision());
 
     if ($moderated) {
       $this->enableModerationThroughUi($content_type_id, $workflow_id);

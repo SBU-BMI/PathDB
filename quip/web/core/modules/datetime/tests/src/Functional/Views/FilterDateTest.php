@@ -27,6 +27,11 @@ class FilterDateTest extends BrowserTestBase {
   protected $fieldName = 'field_date';
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Nodes to test.
    *
    * @var \Drupal\node\NodeInterface[]
@@ -135,13 +140,13 @@ class FilterDateTest extends BrowserTestBase {
     $this->getSession()->getPage()->findField($this->fieldName . '_value')->selectOption(1);
     $this->getSession()->getPage()->pressButton('Apply');
     $results = $this->cssSelect('.view-content .field-content');
-    $this->assertEquals(1, count($results));
+    $this->assertCount(1, $results);
 
     // Filter the Preview by 'not empty'.
     $this->getSession()->getPage()->findField($this->fieldName . '_value')->selectOption(2);
     $this->getSession()->getPage()->pressButton('Apply');
     $results = $this->cssSelect('.view-content .field-content');
-    $this->assertEquals(3, count($results));
+    $this->assertCount(3, $results);
   }
 
 }

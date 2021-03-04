@@ -3,6 +3,7 @@
 namespace Drupal\KernelTests\Core\Config;
 
 use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -55,7 +56,7 @@ class ConfigFileContentTest extends KernelTestBase {
 
     // Verify a configuration object is returned.
     $this->assertEqual($config->getName(), $name);
-    $this->assertTrue($config, 'Config object created.');
+    $this->assertNotEmpty($config, 'Config object created.');
 
     // Verify the configuration object is empty.
     $this->assertEqual($config->get(), [], 'New config object is empty.');
@@ -92,12 +93,12 @@ class ConfigFileContentTest extends KernelTestBase {
 
     // Verify the database entry exists.
     $data = $storage->read($name);
-    $this->assertTrue($data);
+    $this->assertNotEmpty($data);
 
     // Read top level value.
     $config = $this->config($name);
     $this->assertEqual($config->getName(), $name);
-    $this->assertTrue($config, 'Config object created.');
+    $this->assertNotEmpty($config, 'Config object created.');
     $this->assertEqual($config->get($key), 'bar', 'Top level configuration value found.');
 
     // Read nested value.
@@ -110,10 +111,10 @@ class ConfigFileContentTest extends KernelTestBase {
     $this->assertEqual($config->get($nested_array_key), $array_value, 'Nested array configuration value found.');
 
     // Read a top level value that doesn't exist.
-    $this->assertNull($config->get('i_dont_exist'), 'Non-existent top level value returned NULL.');
+    $this->assertNull($config->get('i_do_not_exist'), 'Non-existent top level value returned NULL.');
 
     // Read a nested value that doesn't exist.
-    $this->assertNull($config->get('i.dont.exist'), 'Non-existent nested value returned NULL.');
+    $this->assertNull($config->get('i.do.not.exist'), 'Non-existent nested value returned NULL.');
 
     // Read false value.
     $this->assertFalse($config->get($false_key), "Boolean FALSE value returned the FALSE.");
@@ -158,17 +159,17 @@ class ConfigFileContentTest extends KernelTestBase {
     // Get file listing for all files starting with 'foo'. Should return
     // two elements.
     $files = $storage->listAll('foo');
-    $this->assertEqual(count($files), 2, 'Two files listed with the prefix \'foo\'.');
+    $this->assertCount(2, $files, 'Two files listed with the prefix \'foo\'.');
 
     // Get file listing for all files starting with 'biff'. Should return
     // one element.
     $files = $storage->listAll('biff');
-    $this->assertEqual(count($files), 1, 'One file listed with the prefix \'biff\'.');
+    $this->assertCount(1, $files, 'One file listed with the prefix \'biff\'.');
 
     // Get file listing for all files starting with 'foo.bar'. Should return
     // one element.
     $files = $storage->listAll('foo.bar');
-    $this->assertEqual(count($files), 1, 'One file listed with the prefix \'foo.bar\'.');
+    $this->assertCount(1, $files, 'One file listed with the prefix \'foo.bar\'.');
 
     // Get file listing for all files starting with 'bar'. Should return
     // an empty array.
@@ -205,7 +206,7 @@ class ConfigFileContentTest extends KernelTestBase {
     ];
 
     // Encode and write, and reload and decode the configuration data.
-    $filestorage = new FileStorage(config_get_config_directory(CONFIG_SYNC_DIRECTORY));
+    $filestorage = new FileStorage(Settings::get('config_sync_directory'));
     $filestorage->write($name, $config_data);
     $config_parsed = $filestorage->read($name);
 

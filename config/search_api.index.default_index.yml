@@ -2,16 +2,16 @@ uuid: e79e1ec0-9815-4b53-b5c9-3112550dac6b
 langcode: en
 status: true
 dependencies:
-  module:
-    - node
-    - taxonomy
-    - search_api
   config:
     - field.storage.node.clinicaltrialsubjectid
-    - field.storage.node.field_collection
     - field.storage.node.imageid
+    - field.storage.node.field_collection
     - field.storage.node.studyid
     - search_api.server.default_server
+  module:
+    - taxonomy
+    - node
+    - search_api
 _core:
   default_config_hash: GLmLegZGHtMF6annRqgjizJAoiAip-IT-XOsDMCZfog
 id: default_index
@@ -44,7 +44,6 @@ field_settings:
       config:
         - field.storage.node.field_collection
       module:
-        - taxonomy
         - taxonomy
   node_grants:
     label: 'Node access information'
@@ -113,6 +112,7 @@ processor_settings:
     weights:
       preprocess_index: -48
       preprocess_query: -50
+  language_with_fallback: {  }
   rendered_item:
     weights:
       add_properties: 0

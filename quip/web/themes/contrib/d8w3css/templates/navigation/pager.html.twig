@@ -57,7 +57,7 @@
       {% endif %}
       {# Now generate the actual pager piece. #}
       {% for key, item in items.pages %}
-        <li class="w3-button pager__item{{ current == key ? ' is-active' : '' }}">
+        <li class="w3-button pager__item{{ current == key ? ' w3-light-gray w3-active-pager is-active' : '' }}">
           {% if current == key %}
             {% set title = 'Current page'|t %}
           {% else %}

@@ -2,7 +2,7 @@
 
 namespace Drupal\ds\Plugin\DsField;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,15 +18,20 @@ class BundleField extends DsFieldBase {
   /**
    * The EntityDisplayRepository service.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
-  protected $entityTypeManager;
+  protected $entityTypeBundleInfo;
 
   /**
    * Constructs a Display Suite field plugin.
+   *
+   * @param $configuration
+   * @param $plugin_id
+   * @param $plugin_definition
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    */
-  public function __construct($configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct($configuration, $plugin_id, $plugin_definition, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+    $this->entityTypeBundleInfo = $entity_type_bundle_info;
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -39,7 +44,7 @@ class BundleField extends DsFieldBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity.manager')
+      $container->get('entity_type.bundle.info')
     );
   }
 
@@ -49,7 +54,7 @@ class BundleField extends DsFieldBase {
   public function build() {
     $config = $this->getConfiguration();
     $entity = $this->entity();
-    $bundles_info = $this->entityTypeManager->getBundleInfo($config['field']['entity_type']);
+    $bundles_info = $this->entityTypeBundleInfo->getBundleInfo($config['field']['entity_type']);
     $output = $bundles_info[$entity->bundle()]['label'];
 
     return [

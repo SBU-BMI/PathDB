@@ -24,7 +24,12 @@ class RestExportTest extends ViewsKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['rest_test_views', 'serialization', 'rest', 'entity_test'];
+  public static $modules = [
+    'rest_test_views',
+    'serialization',
+    'rest',
+    'entity_test',
+  ];
 
   /**
    * {@inheritdoc}
@@ -51,7 +56,7 @@ class RestExportTest extends ViewsKernelTestBase {
 
     // No custom header should be set yet.
     $response = RestExport::buildResponse('test_serializer_display_entity', 'rest_export_1', []);
-    $this->assertFalse($response->headers->get('Custom-Header'));
+    $this->assertEmpty($response->headers->get('Custom-Header'));
 
     // Clear render cache.
     /** @var \Drupal\Core\Cache\MemoryBackend $render_cache */

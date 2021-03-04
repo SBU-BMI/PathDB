@@ -5,7 +5,8 @@ namespace Drupal\views\Plugin\views\display;
 use Drupal\Core\Url;
 use Drupal\Component\Plugin\Discovery\CachedDiscoveryInterface;
 use Drupal\Core\Block\BlockManagerInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\Block\ViewsBlock;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,6 +31,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @see \Drupal\views\Plugin\Derivative\ViewsBlock
  */
 class Block extends DisplayPluginBase {
+  use DeprecatedServicePropertyTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $deprecatedProperties = ['entityManager' => 'entity.manager'];
 
   /**
    * Whether the display allows attachments.
@@ -39,11 +46,11 @@ class Block extends DisplayPluginBase {
   protected $usesAttachments = TRUE;
 
   /**
-   * The entity manager.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * The block manager.
@@ -61,15 +68,15 @@ class Block extends DisplayPluginBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity manager.
    * @param \Drupal\Core\Block\BlockManagerInterface $block_manager
    *   The block manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, BlockManagerInterface $block_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, BlockManagerInterface $block_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    $this->entityManager = $entity_manager;
+    $this->entityTypeManager = $entity_type_manager;
     $this->blockManager = $block_manager;
   }
 
@@ -81,7 +88,7 @@ class Block extends DisplayPluginBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('plugin.manager.block')
     );
   }
@@ -200,6 +207,7 @@ class Block extends DisplayPluginBase {
           '#default_value' => $this->getOption('block_description'),
         ];
         break;
+
       case 'block_category':
         $form['#title'] .= $this->t('Block category');
         $form['block_category'] = [
@@ -209,6 +217,7 @@ class Block extends DisplayPluginBase {
           '#default_value' => $this->getOption('block_category'),
         ];
         break;
+
       case 'block_hide_empty':
         $form['#title'] .= $this->t('Block empty settings');
 
@@ -219,6 +228,7 @@ class Block extends DisplayPluginBase {
           '#default_value' => $this->getOption('block_hide_empty'),
         ];
         break;
+
       case 'exposed_form_options':
         $this->view->initHandlers();
         if (!$this->usesExposed() && parent::usesExposed()) {
@@ -228,6 +238,7 @@ class Block extends DisplayPluginBase {
           ];
         }
         break;
+
       case 'allow':
         $form['#title'] .= $this->t('Allow settings in the block configuration');
 
@@ -295,10 +306,18 @@ class Block extends DisplayPluginBase {
             '#title' => $this->t('Items per block'),
             '#options' => [
               'none' => $this->t('@count (default setting)', ['@count' => $this->getPlugin('pager')->getItemsPerPage()]),
+              1 => 1,
+              2 => 2,
+              3 => 3,
+              4 => 4,
               5 => 5,
+              6 => 6,
               10 => 10,
+              12 => 12,
               20 => 20,
+              24 => 24,
               40 => 40,
+              48 => 48,
             ],
             '#default_value' => $block_configuration['items_per_page'],
           ];
@@ -372,9 +391,9 @@ class Block extends DisplayPluginBase {
   public function remove() {
     parent::remove();
 
-    if ($this->entityManager->hasDefinition('block')) {
+    if ($this->entityTypeManager->hasDefinition('block')) {
       $plugin_id = 'views_block:' . $this->view->storage->id() . '-' . $this->display['id'];
-      foreach ($this->entityManager->getStorage('block')->loadByProperties(['plugin' => $plugin_id]) as $block) {
+      foreach ($this->entityTypeManager->getStorage('block')->loadByProperties(['plugin' => $plugin_id]) as $block) {
         $block->delete();
       }
     }

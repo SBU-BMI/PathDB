@@ -15,6 +15,11 @@ use Drupal\Tests\BrowserTestBase;
 class HtmlToTextTest extends BrowserTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Converts a string to its PHP source equivalent for display in test messages.
    *
    * @param $text
@@ -52,15 +57,12 @@ class HtmlToTextTest extends BrowserTestBase {
     $tested_tags = implode(', ', array_unique($matches[1]));
     $message .= ' (' . $tested_tags . ')';
     $result = MailFormatHelper::htmlToText($html, $allowed_tags);
-    $pass = $this->assertEqual($result, $text, Html::escape($message));
+    $this->assertEqual($result, $text, Html::escape($message));
     $verbose = 'html = <pre>' . $this->stringToHtml($html)
       . '</pre><br />result = <pre>' . $this->stringToHtml($result)
       . '</pre><br />expected = <pre>' . $this->stringToHtml($text)
       . '</pre>';
     $this->verbose($verbose);
-    if (!$pass) {
-      $this->pass("Previous test verbose info:<br />$verbose");
-    }
   }
 
   /**
@@ -237,10 +239,7 @@ class HtmlToTextTest extends BrowserTestBase {
 EOT;
     $input = str_replace(["\r", "\n"], '', $input);
     $output = MailFormatHelper::htmlToText($input);
-    $pass = $this->assertFalse(
-      preg_match('/\][^\n]*\[/s', $output),
-      'Block-level HTML tags should force newlines'
-    );
+    $pass = $this->assertNotRegExp('/\][^\n]*\[/s', $output, 'Block-level HTML tags should force newlines');
     if (!$pass) {
       $this->verbose($this->stringToHtml($output));
     }

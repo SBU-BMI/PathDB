@@ -205,10 +205,10 @@ class PermissionHandler implements PermissionHandlerInterface {
 
     uasort($all_permissions, function (array $permission_a, array $permission_b) use ($modules) {
       if ($modules[$permission_a['provider']] == $modules[$permission_b['provider']]) {
-        return $permission_a['title'] > $permission_b['title'];
+        return $permission_a['title'] <=> $permission_b['title'];
       }
       else {
-        return $modules[$permission_a['provider']] > $modules[$permission_b['provider']];
+        return $modules[$permission_a['provider']] <=> $modules[$permission_b['provider']];
       }
     });
     return $all_permissions;
@@ -227,15 +227,6 @@ class PermissionHandler implements PermissionHandlerInterface {
     }
     asort($modules);
     return $modules;
-  }
-
-  /**
-   * Wraps system_rebuild_module_data()
-   *
-   * @return \Drupal\Core\Extension\Extension[]
-   */
-  protected function systemRebuildModuleData() {
-    return system_rebuild_module_data();
   }
 
 }

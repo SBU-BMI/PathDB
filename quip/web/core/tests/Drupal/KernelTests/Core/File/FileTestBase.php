@@ -70,13 +70,10 @@ abstract class FileTestBase extends KernelTestBase {
 
     mkdir($this->siteDirectory, 0775);
     mkdir($this->siteDirectory . '/files', 0775);
-    mkdir($this->siteDirectory . '/files/config/' . CONFIG_SYNC_DIRECTORY, 0775, TRUE);
+    mkdir($this->siteDirectory . '/files/config/sync', 0775, TRUE);
 
     $this->setSetting('file_public_path', $public_file_directory);
-
-    $GLOBALS['config_directories'] = [
-      CONFIG_SYNC_DIRECTORY => $this->siteDirectory . '/files/config/sync',
-    ];
+    $this->setSetting('config_sync_directory', $this->siteDirectory . '/files/config/sync');
   }
 
   /**
@@ -156,15 +153,17 @@ abstract class FileTestBase extends KernelTestBase {
    * @param $path
    *   Optional string with a directory path. If none is provided, a random
    *   name in the site's files directory will be used.
+   *
    * @return
    *   The path to the directory.
    */
   public function createDirectory($path = NULL) {
     // A directory to operate on.
     if (!isset($path)) {
-      $path = file_default_scheme() . '://' . $this->randomMachineName();
+      $path = 'public://' . $this->randomMachineName();
     }
-    $this->assertTrue(\Drupal::service('file_system')->mkdir($path) && is_dir($path), 'Directory was created successfully.');
+    $this->assertTrue(\Drupal::service('file_system')->mkdir($path));
+    $this->assertDirectoryExists($path);
     return $path;
   }
 
@@ -180,6 +179,7 @@ abstract class FileTestBase extends KernelTestBase {
    * @param $scheme
    *   Optional string indicating the stream scheme to use. Drupal core includes
    *   public, private, and temporary. The public wrapper is the default.
+   *
    * @return
    *   File URI.
    */
@@ -190,7 +190,7 @@ abstract class FileTestBase extends KernelTestBase {
       $filepath = 'Файл для тестирования ' . $this->randomMachineName();
     }
     if (!isset($scheme)) {
-      $scheme = file_default_scheme();
+      $scheme = 'public';
     }
     $filepath = $scheme . '://' . $filepath;
 
@@ -199,7 +199,7 @@ abstract class FileTestBase extends KernelTestBase {
     }
 
     file_put_contents($filepath, $contents);
-    $this->assertTrue(is_file($filepath), t('The test file exists on the disk.'), 'Create test file');
+    $this->assertFileExists($filepath);
     return $filepath;
   }
 

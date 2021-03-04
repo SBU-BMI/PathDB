@@ -13,10 +13,20 @@ class LocaleUpdateDevelopmentReleaseTest extends BrowserTestBase {
 
   public static $modules = ['locale', 'locale_test_development_release'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected function setUp() {
     parent::setUp();
     module_load_include('compare.inc', 'locale');
-    $admin_user = $this->drupalCreateUser(['administer modules', 'administer languages', 'access administration pages', 'translate interface']);
+    $admin_user = $this->drupalCreateUser([
+      'administer modules',
+      'administer languages',
+      'access administration pages',
+      'translate interface',
+    ]);
     $this->drupalLogin($admin_user);
     $this->drupalPostForm('admin/config/regional/language/add', ['predefined_langcode' => 'hu'], t('Add language'));
   }

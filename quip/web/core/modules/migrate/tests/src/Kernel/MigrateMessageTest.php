@@ -8,6 +8,7 @@ use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateIdMapMessageEvent;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\MigrateMessageInterface;
+use Drupal\migrate\Plugin\migrate\id_map\Sql;
 
 /**
  * Tests whether idmap messages are sent to message interface when requested.
@@ -80,7 +81,7 @@ class MigrateMessageTest extends KernelTestBase implements MigrateMessageInterfa
     // We don't ask for messages to be teed, so don't expect any.
     $executable = new MigrateExecutable($this->migration, $this);
     $executable->import();
-    $this->assertIdentical(count($this->messages), 0);
+    $this->assertCount(0, $this->messages);
   }
 
   /**
@@ -92,8 +93,33 @@ class MigrateMessageTest extends KernelTestBase implements MigrateMessageInterfa
       [$this, 'mapMessageRecorder']);
     $executable = new MigrateExecutable($this->migration, $this);
     $executable->import();
-    $this->assertIdentical(count($this->messages), 1);
+    $this->assertCount(1, $this->messages);
     $this->assertIdentical(reset($this->messages), "source_message: 'a message' is not an array");
+  }
+
+  /**
+   * Tests the return value of getMessages().
+   *
+   * This method returns an iterator of StdClass objects. Check that these
+   * objects have the expected keys.
+   */
+  public function testGetMessages() {
+    $expected_message = (object) [
+      'src_name' => 'source_message',
+      'dest_config_name' => NULL,
+      'msgid' => '1',
+      Sql::SOURCE_IDS_HASH => '170cde81762e22552d1b1578cf3804c89afefe9efbc7cc835185d7141060b032',
+      'level' => '1',
+      'message' => "'a message' is not an array",
+    ];
+    $executable = new MigrateExecutable($this->migration, $this);
+    $executable->import();
+    $count = 0;
+    foreach ($this->migration->getIdMap()->getMessages() as $message) {
+      ++$count;
+      $this->assertEqual($message, $expected_message);
+    }
+    $this->assertEqual($count, 1);
   }
 
   /**

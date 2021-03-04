@@ -48,8 +48,8 @@ class NodeViewBuilderTest extends EntityKernelTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->storage = $this->entityManager->getStorage('node');
-    $this->viewBuilder = $this->entityManager->getViewBuilder('node');
+    $this->storage = $this->entityTypeManager->getStorage('node');
+    $this->viewBuilder = $this->entityTypeManager->getViewBuilder('node');
     $this->renderer = $this->container->get('renderer');
 
     $type = NodeType::create([
@@ -91,11 +91,11 @@ class NodeViewBuilderTest extends EntityKernelTestBase {
 
     $build = $this->viewBuilder->view($node, 'teaser');
     $output = (string) $this->renderer->renderPlain($build);
-    $this->assertContains("title=\"$title\"", $output);
+    $this->assertStringContainsString("title=\"$title\"", $output);
 
     $build = $this->viewBuilder->view($pending_revision, 'teaser');
     $output = (string) $this->renderer->renderPlain($build);
-    $this->assertContains("title=\"$draft_title\"", $output);
+    $this->assertStringContainsString("title=\"$draft_title\"", $output);
   }
 
 }

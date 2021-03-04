@@ -80,7 +80,7 @@ class TextField extends FieldPluginBase {
             'method' => 'process',
           ],
           [
-            'plugin' => 'migration',
+            'plugin' => 'migration_lookup',
             'migration' => [
               'd6_filter_format',
               'd7_filter_format',
@@ -123,8 +123,10 @@ class TextField extends FieldPluginBase {
       case 'optionwidgets_buttons':
       case 'optionwidgets_select':
         return 'list_string';
+
       case 'optionwidgets_onoff':
         return 'boolean';
+
       default:
         return parent::getFieldType($row);
     }

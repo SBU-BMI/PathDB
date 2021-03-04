@@ -18,8 +18,6 @@ class MigrateNodeCounterTest extends MigrateDrupal7TestBase {
     'content_translation',
     'language',
     'menu_ui',
-    // Required for translation migrations.
-    'migrate_drupal_multilingual',
     'node',
     'statistics',
     'text',
@@ -74,10 +72,9 @@ class MigrateNodeCounterTest extends MigrateDrupal7TestBase {
   protected function assertNodeCounter($nid, $total_count, $day_count, $timestamp) {
     /** @var \Drupal\statistics\StatisticsViewsResult $statistics */
     $statistics = $this->container->get('statistics.storage.node')->fetchView($nid);
-    // @todo Remove casting after https://www.drupal.org/node/2926069 lands.
-    $this->assertSame($total_count, (int) $statistics->getTotalCount());
-    $this->assertSame($day_count, (int) $statistics->getDayCount());
-    $this->assertSame($timestamp, (int) $statistics->getTimestamp());
+    $this->assertSame($total_count, $statistics->getTotalCount());
+    $this->assertSame($day_count, $statistics->getDayCount());
+    $this->assertSame($timestamp, $statistics->getTimestamp());
   }
 
 }

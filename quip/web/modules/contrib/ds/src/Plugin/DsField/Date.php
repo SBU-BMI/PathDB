@@ -69,12 +69,12 @@ abstract class Date extends DsFieldBase {
       ->loadMultiple();
 
     $date_formatters = [];
-    foreach ($date_types as $machine_name => $value) {
-      /* @var $value \Drupal\Core\Datetime\DateFormatterInterface */
-      if ($value->isLocked()) {
+    foreach ($date_types as $machine_name => $entity) {
+      /* @var $entity \Drupal\Core\Datetime\DateFormatterInterface */
+      if ($entity->isLocked()) {
         continue;
       }
-      $date_formatters['ds_post_date_' . $machine_name] = $this->t($value->id());
+      $date_formatters['ds_post_date_' . $machine_name] = $entity->label() . ' (' . $this->dateFormatter->format(REQUEST_TIME, $entity->id()) . ')';
     }
 
     return $date_formatters;

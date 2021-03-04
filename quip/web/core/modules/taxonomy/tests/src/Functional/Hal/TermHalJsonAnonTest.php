@@ -23,6 +23,11 @@ class TermHalJsonAnonTest extends TermResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $format = 'hal_json';
 
   /**
@@ -60,6 +65,7 @@ class TermHalJsonAnonTest extends TermResourceTestBase {
           NULL,
         ];
         break;
+
       case [2]:
         $expected_parent_normalization_links = [
           [
@@ -82,6 +88,7 @@ class TermHalJsonAnonTest extends TermResourceTestBase {
           ],
         ];
         break;
+
       case [0, 2]:
         $expected_parent_normalization_links = [
           NULL,
@@ -106,6 +113,7 @@ class TermHalJsonAnonTest extends TermResourceTestBase {
           ],
         ];
         break;
+
       case [3, 2]:
         $expected_parent_normalization_links = [
           [

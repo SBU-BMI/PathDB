@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,10 @@ use Psy\CodeCleaner\LeavePsyshAlonePass;
 
 class LeavePsyshAlonePassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new LeavePsyshAlonePass());
     }
@@ -50,11 +53,13 @@ class LeavePsyshAlonePassTest extends CodeCleanerTestCase
 
     /**
      * @dataProvider invalidStatements
-     * @expectedException \Psy\Exception\RuntimeException
      */
     public function testProcessStatementFails($code)
     {
+        $this->expectException(\Psy\Exception\RuntimeException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function invalidStatements()

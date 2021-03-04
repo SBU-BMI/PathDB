@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\locale\Functional;
 
+use Drupal\Core\Database\Database;
 use Drupal\Core\Language\LanguageInterface;
 
 /**
@@ -14,11 +15,22 @@ class LocaleUpdateTest extends LocaleUpdateBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     module_load_include('compare.inc', 'locale');
     module_load_include('fetch.inc', 'locale');
-    $admin_user = $this->drupalCreateUser(['administer modules', 'administer site configuration', 'administer languages', 'access administration pages', 'translate interface']);
+    $admin_user = $this->drupalCreateUser([
+      'administer modules',
+      'administer site configuration',
+      'administer languages',
+      'access administration pages',
+      'translate interface',
+    ]);
     $this->drupalLogin($admin_user);
     // We use German as test language. This language must match the translation
     // file that come with the locale_test module (test.de.po) and can therefore
@@ -346,14 +358,23 @@ class LocaleUpdateTest extends LocaleUpdateBase {
     $this->assertTranslation('Extraday', 'extra dag', 'nl');
 
     // Check if the language data is added to the database.
-    $result = db_query("SELECT project FROM {locale_file} WHERE langcode='nl'")->fetchField();
-    $this->assertTrue($result, 'Files added to file history');
+    $connection = Database::getConnection();
+    $result = $connection->select('locale_file', 'lf')
+      ->fields('lf', ['project'])
+      ->condition('langcode', 'nl')
+      ->execute()
+      ->fetchField();
+    $this->assertNotEmpty($result, 'Files added to file history');
 
     // Remove a language.
     $this->drupalPostForm('admin/config/regional/language/delete/nl', [], t('Delete'));
 
     // Check if the language data is removed from the database.
-    $result = db_query("SELECT project FROM {locale_file} WHERE langcode='nl'")->fetchField();
+    $result = $connection->select('locale_file', 'lf')
+      ->fields('lf', ['project'])
+      ->condition('langcode', 'nl')
+      ->execute()
+      ->fetchField();
     $this->assertFalse($result, 'Files removed from file history');
 
     // Check that the Dutch translation is gone.

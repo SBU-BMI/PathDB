@@ -53,23 +53,24 @@
         ]
       %}
      {% if menu_level == 0 and item.is_expanded %}
-        <li{{ item.attributes.addClass(item_classes) }}>
-        <a href="#" class="w3-button tMenu-v toggle-parent">{{ item.title }} <span class="fa fa-chevron-down"></span></a>
+        <li{{ item.attributes.addClass(item_classes) }} role="none">
+        <a href="#" class="w3-button tMenu-v toggle-parent" role="menuitem" aria-haspopup="true">{{ item.title }} <span class="fa fa-chevron-down"></span></a>
       {% elseif menu_level != 0 and item.is_expanded %}
-        <li{{ item.attributes.addClass(item_classes) }}>
-        <a href="#" class="w3-button tMenu-v toggle-child">{{ item.title }} <span class=" fa fa-chevron-down"></span></a>
+        <li{{ item.attributes.addClass(item_classes) }} role="none">
+        <a href="#" class="w3-button tMenu-v toggle-child" role="menuitem" aria-haspopup="true">{{ item.title }} <span class=" fa fa-chevron-down"></span></a>
       {% else %}
       {%
         set link_classes = [
           'w3-button li-link li-link-' ~ menu_name|clean_class,
         ]
       %}
-      <li{{ item.attributes.addClass(item_classes) }}>
+      <li{{ item.attributes.addClass(item_classes) }} role="none">
         {{
           link(
             item.title,
             item.url,
-            item.attributes.removeClass(item_classes).addClass(link_classes)
+            item.attributes.removeClass(item_classes).addClass(link_classes),
+            item.attributes.setAttribute("role", "menuitem")
           )
         }}
       {% endif %}

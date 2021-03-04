@@ -3,7 +3,7 @@
 namespace Drupal\Tests\taxonomy\Kernel\Views;
 
 use Drupal\Core\Render\RenderContext;
-use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
+use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\user\Entity\User;
 use Drupal\views\Tests\ViewTestData;
@@ -24,7 +24,12 @@ class TaxonomyFieldVidTest extends ViewsKernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['taxonomy', 'taxonomy_test_views', 'text', 'filter'];
+  public static $modules = [
+    'taxonomy',
+    'taxonomy_test_views',
+    'text',
+    'filter',
+  ];
 
   /**
    * Views used by this test.

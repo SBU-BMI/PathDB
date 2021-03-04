@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,10 @@ class NamespacePassTest extends CodeCleanerTestCase
 {
     private $cleaner;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->cleaner = new CodeCleaner();
         $this->setPass(new NamespacePass($this->cleaner));

@@ -76,27 +76,27 @@ class FieldImportDeleteTest extends FieldKernelTestBase {
     $this->assertTrue($sync->delete($field_config_name_2b), new FormattableMarkup('Deleted field: @field', ['@field' => $field_config_name_2b]));
 
     $deletes = $this->configImporter()->getUnprocessedConfiguration('delete');
-    $this->assertEqual(count($deletes), 5, 'Importing configuration will delete 3 fields and 2 field storages.');
+    $this->assertCount(5, $deletes, 'Importing configuration will delete 3 fields and 2 field storages.');
 
     // Import the content of the sync directory.
     $this->configImporter()->import();
 
     // Check that the field storages and fields are gone.
-    \Drupal::entityManager()->getStorage('field_storage_config')->resetCache([$field_storage_id]);
+    \Drupal::entityTypeManager()->getStorage('field_storage_config')->resetCache([$field_storage_id]);
     $field_storage = FieldStorageConfig::load($field_storage_id);
-    $this->assertFalse($field_storage, 'The field storage was deleted.');
-    \Drupal::entityManager()->getStorage('field_storage_config')->resetCache([$field_storage_id_2]);
+    $this->assertNull($field_storage, 'The field storage was deleted.');
+    \Drupal::entityTypeManager()->getStorage('field_storage_config')->resetCache([$field_storage_id_2]);
     $field_storage_2 = FieldStorageConfig::load($field_storage_id_2);
-    $this->assertFalse($field_storage_2, 'The second field storage was deleted.');
-    \Drupal::entityManager()->getStorage('field_config')->resetCache([$field_id]);
+    $this->assertNull($field_storage_2, 'The second field storage was deleted.');
+    \Drupal::entityTypeManager()->getStorage('field_config')->resetCache([$field_id]);
     $field = FieldConfig::load($field_id);
-    $this->assertFalse($field, 'The field was deleted.');
-    \Drupal::entityManager()->getStorage('field_config')->resetCache([$field_id_2a]);
+    $this->assertNull($field, 'The field was deleted.');
+    \Drupal::entityTypeManager()->getStorage('field_config')->resetCache([$field_id_2a]);
     $field_2a = FieldConfig::load($field_id_2a);
-    $this->assertFalse($field_2a, 'The second field on test bundle was deleted.');
-    \Drupal::entityManager()->getStorage('field_config')->resetCache([$field_id_2b]);
+    $this->assertNull($field_2a, 'The second field on test bundle was deleted.');
+    \Drupal::entityTypeManager()->getStorage('field_config')->resetCache([$field_id_2b]);
     $field_2b = FieldConfig::load($field_id_2b);
-    $this->assertFalse($field_2b, 'The second field on test bundle 2 was deleted.');
+    $this->assertNull($field_2b, 'The second field on test bundle 2 was deleted.');
 
     // Check that all config files are gone.
     $active = $this->container->get('config.storage');

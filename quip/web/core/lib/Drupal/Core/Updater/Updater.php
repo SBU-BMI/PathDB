@@ -64,7 +64,7 @@ class Updater {
       $updater = self::getUpdaterFromDirectory($source);
     }
     else {
-      throw new UpdaterException(t('Unable to determine the type of the source directory.'));
+      throw new UpdaterException('Unable to determine the type of the source directory.');
     }
     return new $updater($source, $root);
   }
@@ -89,7 +89,7 @@ class Updater {
         return $class;
       }
     }
-    throw new UpdaterException(t('Cannot determine the type of project.'));
+    throw new UpdaterException('Cannot determine the type of project.');
   }
 
   /**
@@ -106,12 +106,17 @@ class Updater {
    *   Path to the info file.
    */
   public static function findInfoFile($directory) {
-    $info_files = file_scan_directory($directory, '/.*\.info.yml$/');
+    /** @var \Drupal\Core\File\FileSystemInterface $file_system */
+    $file_system = \Drupal::service('file_system');
+    $info_files = [];
+    if (is_dir($directory)) {
+      $info_files = $file_system->scanDirectory($directory, '/.*\.info.yml$/');
+    }
     if (!$info_files) {
       return FALSE;
     }
     foreach ($info_files as $info_file) {
-      if (mb_substr($info_file->filename, 0, -9) == \Drupal::service('file_system')->basename($directory)) {
+      if (mb_substr($info_file->filename, 0, -9) == $file_system->basename($directory)) {
         // Info file Has the same name as the directory, return it.
         return $info_file->uri;
       }
@@ -137,7 +142,7 @@ class Updater {
     $info_file = static::findInfoFile($directory);
     $info = \Drupal::service('info_parser')->parse($info_file);
     if (empty($info)) {
-      throw new UpdaterException(t('Unable to parse info file: %info_file.', ['%info_file' => $info_file]));
+      throw new UpdaterException("Unable to parse info file: '$info_file'.");
     }
 
     return $info;
@@ -173,7 +178,7 @@ class Updater {
     $info_file = self::findInfoFile($directory);
     $info = \Drupal::service('info_parser')->parse($info_file);
     if (empty($info)) {
-      throw new UpdaterException(t('Unable to parse info file: %info_file.', ['%info_file' => $info_file]));
+      throw new UpdaterException("Unable to parse info file: '$info_file'.");
     }
     return $info['name'];
   }
@@ -223,7 +228,7 @@ class Updater {
 
       if (!$this->name) {
         // This is bad, don't want to delete the install directory.
-        throw new UpdaterException(t('Fatal error in update, cowardly refusing to wipe out the install directory.'));
+        throw new UpdaterException('Fatal error in update, cowardly refusing to wipe out the install directory.');
       }
 
       // Make sure the installation parent directory exists and is writable.
@@ -248,7 +253,7 @@ class Updater {
       return $this->postUpdateTasks();
     }
     catch (FileTransferException $e) {
-      throw new UpdaterFileTransferException(t('File Transfer failed, reason: @reason', ['@reason' => strtr($e->getMessage(), $e->arguments)]));
+      throw new UpdaterFileTransferException("File Transfer failed, reason: '" . strtr($e->getMessage(), $e->arguments) . "'");
     }
   }
 
@@ -286,7 +291,7 @@ class Updater {
       return $this->postInstallTasks();
     }
     catch (FileTransferException $e) {
-      throw new UpdaterFileTransferException(t('File Transfer failed, reason: @reason', ['@reason' => strtr($e->getMessage(), $e->arguments)]));
+      throw new UpdaterFileTransferException("File Transfer failed, reason: '" . strtr($e->getMessage(), $e->arguments) . "'");
     }
   }
 

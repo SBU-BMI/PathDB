@@ -6,7 +6,7 @@ dependencies:
   - drupal:taxonomy
 core_version_requirement: ^8 || ^9
 
-# Information added by Drupal.org packaging script on 2019-10-30
-version: '8.x-2.2'
+# Information added by Drupal.org packaging script on 2020-06-02
+version: '8.x-2.3'
 project: 'taxonomy_unique'
-datestamp: 1572430393
+datestamp: 1591087099

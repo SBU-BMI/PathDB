@@ -23,7 +23,17 @@ class UserTranslationUITest extends ContentTranslationUITestBase {
    *
    * @var array
    */
-  public static $modules = ['language', 'content_translation', 'user', 'views'];
+  public static $modules = [
+    'language',
+    'content_translation',
+    'user',
+    'views',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
 
   protected function setUp() {
     $this->entityTypeId = 'user';
@@ -31,7 +41,7 @@ class UserTranslationUITest extends ContentTranslationUITestBase {
     $this->name = $this->randomMachineName();
     parent::setUp();
 
-    \Drupal::entityManager()->getStorage('user')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('user')->resetCache();
   }
 
   /**

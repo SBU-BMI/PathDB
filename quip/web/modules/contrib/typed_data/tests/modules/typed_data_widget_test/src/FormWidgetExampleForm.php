@@ -71,6 +71,12 @@ class FormWidgetExampleForm extends FormBase {
           ->setDefaultValue('default')
           ->addConstraint('Length', ['max' => 8]);
 
+      case 'textarea':
+        return ContextDefinition::create('text')
+          ->setLabel('Example text area')
+          ->setDefaultValue("default line one\nline two")
+          ->setDescription('This is the long textarea example description.');
+
       case 'select':
         return ContextDefinition::create('filter_format')
           ->setLabel('Filter format')

@@ -86,18 +86,18 @@ class LayoutClassesTest extends TestBase {
     $entity_display = $entity_manager->getStorage('entity_view_display')->load('node.article.default');
     $data = $entity_display->getThirdPartySettings('ds');
 
-    $this->assertTrue(!empty($data), t('Configuration found for layout settings for node article'));
-    $this->assertTrue(in_array('ds_extras_extra_test_field', $data['regions']['header']), t('Extra field is in header'));
-    $this->assertTrue(in_array('node_post_date', $data['regions']['header']), t('Post date is in header'));
-    $this->assertTrue(in_array('dynamic_token_field:node-test_field', $data['regions']['left']), t('Test field is in left'));
-    $this->assertTrue(in_array('node_author', $data['regions']['left']), t('Author is in left'));
-    $this->assertTrue(in_array('node_links', $data['regions']['left']), t('Links is in left'));
-    $this->assertTrue(in_array('dynamic_block_field:node-test_block_field', $data['regions']['left']), t('Test block field is in left'));
-    $this->assertTrue(in_array('body', $data['regions']['right']), t('Body is in right'));
-    $this->assertTrue(in_array('class_name_1', $data['layout']['settings']['classes']['header']), t('Class name 1 is in header'));
-    $this->assertTrue(empty($data['layout']['settings']['classes']['left']), t('Left has no classes'));
-    $this->assertTrue(empty($data['layout']['settings']['classes']['right']), t('Right has classes'));
-    $this->assertTrue(in_array('class_name_2', $data['layout']['settings']['classes']['footer']), t('Class name 2 is in header'));
+    $this->assertNotEmpty($data, t('Configuration found for layout settings for node article'));
+    $this->assertNotEmpty(in_array('ds_extras_extra_test_field', $data['regions']['header']), t('Extra field is in header'));
+    $this->assertNotEmpty(in_array('node_post_date', $data['regions']['header']), t('Post date is in header'));
+    $this->assertNotEmpty(in_array('dynamic_token_field:node-test_field', $data['regions']['left']), t('Test field is in left'));
+    $this->assertNotEmpty(in_array('node_author', $data['regions']['left']), t('Author is in left'));
+    $this->assertNotEmpty(in_array('node_links', $data['regions']['left']), t('Links is in left'));
+    $this->assertNotEmpty(in_array('dynamic_block_field:node-test_block_field', $data['regions']['left']), t('Test block field is in left'));
+    $this->assertNotEmpty(in_array('body', $data['regions']['right']), t('Body is in right'));
+    $this->assertNotEmpty(in_array('class_name_1', $data['layout']['settings']['classes']['header']), t('Class name 1 is in header'));
+    $this->assertEmpty($data['layout']['settings']['classes']['left'], t('Left has no classes'));
+    $this->assertEmpty($data['layout']['settings']['classes']['right'], t('Right has classes'));
+    $this->assertNotEmpty(in_array('class_name_2', $data['layout']['settings']['classes']['footer']), t('Class name 2 is in header'));
 
     // Create a article node and verify settings.
     $settings = [
@@ -132,12 +132,15 @@ class LayoutClassesTest extends TestBase {
       'layout_configuration[region_wrapper][header]' => 'header',
       'layout_configuration[region_wrapper][right]' => 'footer',
       'layout_configuration[region_wrapper][outer_wrapper]' => 'article',
+      'layout_configuration[region_wrapper][attributes]' => 'class|test-class,role|testing-role',
     ];
     $this->dsConfigureUi($wrappers);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains('<header class="class_name_1 group-header');
     $this->assertSession()->responseContains('<footer class="group-right');
     $this->assertSession()->responseContains('<article');
+    $this->assertSession()->responseContains('test-class');
+    $this->assertSession()->responseContains('testing-role');
 
     // Remove all the node classes.
     $edit = ['entity_classes' => 'no_classes'];
@@ -189,7 +192,7 @@ class LayoutClassesTest extends TestBase {
     ];
     $this->dsConfigureUi($fields, 'admin/structure/types/manage/article/display/full');
 
-    // Change layout via admin/structure/ds/layout-change.
+    // Change layout via admin/structure/ds/change-layout.
     // First verify that header and footer are not here.
     $this->drupalGet('admin/structure/types/manage/article/display/full');
     $this->assertSession()->responseNotContains('<td colspan="8">' . t('Header') . '</td>');
@@ -213,10 +216,16 @@ class LayoutClassesTest extends TestBase {
     /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $entity_display */
     $entity_display = EntityViewDisplay::load('node.article.full');
     $data = $entity_display->getThirdPartySettings('ds');
+    $this->assertEquals('ds/ds_2col_stacked', $data['layout']['library']);
+    $this->assertEquals(5, count($data['layout']['settings']['wrappers']));
     $this->assertTrue(in_array('node_author', $data['regions']['header']), t('Author is in header'));
     $this->assertTrue(in_array('node_links', $data['regions']['header']), t('Links field is in header'));
     $this->assertTrue(in_array('body', $data['regions']['footer']), t('Body field is in footer'));
     $this->assertTrue(in_array('dynamic_token_field:node-test_field', $data['regions']['footer']), t('Test field is in footer'));
+
+    // Check regions of fields.
+    $body = $entity_display->getComponent('body');
+    $this->assertEquals($body['region'], 'footer');
 
     // Test that a default view mode with no layout is not affected by a
     // disabled view mode.
@@ -224,11 +233,11 @@ class LayoutClassesTest extends TestBase {
       'ds_layout' => '_none',
       'display_modes_custom[full]' => FALSE,
     ];
-    $this->drupalPostForm('admin/structure/types/manage/article/display', $edit,'Save');
+    $this->drupalPostForm('admin/structure/types/manage/article/display', $edit, 'Save');
 
     $elements = $this->xpath('//*[@id="edit-fields-body-region"]');
 
-    $this->assertTrue($elements[0]->find('xpath', '//option[@value = "content" and @selected = "selected"]'));
+    $this->assertNotEmpty($elements[0]->find('xpath', '//option[@value = "content" and @selected = "selected"]'));
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->pageTextNotContains('Test code field on node 1');
   }

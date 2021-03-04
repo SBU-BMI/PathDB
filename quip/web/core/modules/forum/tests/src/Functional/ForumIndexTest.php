@@ -18,11 +18,22 @@ class ForumIndexTest extends BrowserTestBase {
    */
   public static $modules = ['taxonomy', 'comment', 'forum'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected function setUp() {
     parent::setUp();
 
     // Create a test user.
-    $web_user = $this->drupalCreateUser(['create forum content', 'edit own forum content', 'edit any forum content', 'administer nodes', 'administer forums']);
+    $web_user = $this->drupalCreateUser([
+      'create forum content',
+      'edit own forum content',
+      'edit any forum content',
+      'administer nodes',
+      'administer forums',
+    ]);
     $this->drupalLogin($web_user);
   }
 

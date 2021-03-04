@@ -35,7 +35,8 @@ class BooleanItemTest extends FieldKernelTestBase {
     ])->save();
 
     // Create a form display for the default form mode.
-    entity_get_form_display('entity_test', 'entity_test', 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay('entity_test', 'entity_test')
       ->setComponent('field_boolean', [
         'type' => 'boolean_checkbox',
       ])
@@ -56,8 +57,8 @@ class BooleanItemTest extends FieldKernelTestBase {
     // Verify entity has been created properly.
     $id = $entity->id();
     $entity = EntityTest::load($id);
-    $this->assertTrue($entity->field_boolean instanceof FieldItemListInterface, 'Field implements interface.');
-    $this->assertTrue($entity->field_boolean[0] instanceof FieldItemInterface, 'Field item implements interface.');
+    $this->assertInstanceOf(FieldItemListInterface::class, $entity->field_boolean);
+    $this->assertInstanceOf(FieldItemInterface::class, $entity->field_boolean[0]);
     $this->assertEqual($entity->field_boolean->value, $value);
     $this->assertEqual($entity->field_boolean[0]->value, $value);
 

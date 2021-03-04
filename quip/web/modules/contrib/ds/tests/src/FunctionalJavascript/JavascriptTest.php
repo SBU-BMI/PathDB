@@ -12,6 +12,8 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
  */
 class JavascriptTest extends WebDriverTestBase {
 
+  protected $defaultTheme = 'stark';
+
   /**
    * {@inheritdoc}
    */

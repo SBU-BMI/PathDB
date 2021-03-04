@@ -4,6 +4,7 @@ namespace Drupal\Tests\block_content\Functional;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
+use Drupal\Core\Database\Database;
 use Drupal\Tests\content_translation\Functional\ContentTranslationUITestBase;
 
 /**
@@ -25,6 +26,11 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
     'field_ui',
     'block_content',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
 
   /**
    * {@inheritdoc}
@@ -132,19 +138,17 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
     // as in the original language.
     $default_langcode = $this->langcodes[0];
     $values = $this->getNewEntityValues($default_langcode);
-    $storage = \Drupal::entityManager()->getStorage($this->entityTypeId);
+    $storage = \Drupal::entityTypeManager()->getStorage($this->entityTypeId);
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = $storage->create(['type' => 'basic'] + $values);
     $entity->save();
     $entity->addTranslation('it', $values);
 
     try {
-      $message = 'Blocks can have translations with the same "info" value.';
       $entity->save();
-      $this->pass($message);
     }
     catch (\Exception $e) {
-      $this->fail($message);
+      $this->fail('Blocks can have translations with the same "info" value.');
     }
 
     // Check that the translate operation link is shown.
@@ -170,8 +174,8 @@ class BlockContentTranslationUITest extends ContentTranslationUITestBase {
     $disabled_block_content = $this->createBlockContent(FALSE, $bundle->id());
 
     // Make sure that only a single row was inserted into the block table.
-    $rows = db_query('SELECT * FROM {block_content_field_data} WHERE id = :id', [':id' => $enabled_block_content->id()])->fetchAll();
-    $this->assertEqual(1, count($rows));
+    $rows = Database::getConnection()->query('SELECT * FROM {block_content_field_data} WHERE id = :id', [':id' => $enabled_block_content->id()])->fetchAll();
+    $this->assertCount(1, $rows);
   }
 
   /**

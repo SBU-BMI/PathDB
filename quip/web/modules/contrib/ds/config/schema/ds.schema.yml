@@ -16,6 +16,9 @@ ds.settings:
     ft-show-colon:
       type: boolean
       label: 'Kill the label colon'
+    ft-layout-builder:
+      type: boolean
+      label: 'Enable field templates on Layout Builder field blocks'
     classes:
       type: mapping
       label: 'Display Suite classes'

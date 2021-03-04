@@ -234,7 +234,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
         $this->entity = $reloaded_entity;
 
         // Set a default value on the fields.
-        $this->entity->set('field_rest_test', ['value' => 'All the faith he had had had had no effect on the outcome of his life.']);
+        $this->entity->set('field_rest_test', ['value' => 'All the faith they had had had had no effect on the outcome of their life.']);
         $this->entity->set('field_rest_test_multivalue', [['value' => 'One'], ['value' => 'Two']]);
         $this->entity->set('rest_test_validation', ['value' => 'allowed value']);
         $this->entity->save();
@@ -548,9 +548,10 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     // contain a flattened response. Otherwise performance suffers.
     // @see \Drupal\rest\EventSubscriber\ResourceResponseSubscriber::flattenResponse()
     $cache_items = $this->container->get('database')
-      ->query("SELECT cid, data FROM {cache_dynamic_page_cache} WHERE cid LIKE :pattern", [
-        ':pattern' => '%[route]=rest.%',
-      ])
+      ->select('cache_dynamic_page_cache', 'c')
+      ->fields('c', ['cid', 'data'])
+      ->condition('c.cid', '%[route]=rest.%', 'LIKE')
+      ->execute()
       ->fetchAllAssoc('cid');
     if (!$is_cacheable_by_dynamic_page_cache) {
       $this->assertCount(0, $cache_items);
@@ -862,7 +863,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     $response = $this->request('POST', $url, $request_options);
     $this->assertSame(415, $response->getStatusCode());
     $this->assertSame(['text/html; charset=UTF-8'], $response->getHeader('Content-Type'));
-    $this->assertContains('A client error happened', (string) $response->getBody());
+    $this->assertStringContainsString('A client error happened', (string) $response->getBody());
 
     $url->setOption('query', ['_format' => static::$format]);
 
@@ -901,9 +902,10 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
 
     // DX: 422 when invalid entity: multiple values sent for single-value field.
     $response = $this->request('POST', $url, $request_options);
-    $label_field = $this->entity->getEntityType()->hasKey('label') ? $this->entity->getEntityType()->getKey('label') : static::$labelFieldName;
-    $label_field_capitalized = $this->entity->getFieldDefinition($label_field)->getLabel();
-    $this->assertResourceErrorResponse(422, "Unprocessable Entity: validation failed.\n$label_field: $label_field_capitalized: this field cannot hold more than 1 values.\n", $response);
+    if ($label_field = $this->entity->getEntityType()->hasKey('label') ? $this->entity->getEntityType()->getKey('label') : static::$labelFieldName) {
+      $label_field_capitalized = $this->entity->getFieldDefinition($label_field)->getLabel();
+      $this->assertResourceErrorResponse(422, "Unprocessable Entity: validation failed.\n$label_field: $label_field_capitalized: this field cannot hold more than 1 values.\n", $response);
+    }
 
     $request_options[RequestOptions::BODY] = $parseable_invalid_request_body_2;
 
@@ -988,18 +990,22 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
       // 500 when creating an entity with a duplicate UUID.
       $normalized_entity = $this->getModifiedEntityForPostTesting();
       $normalized_entity[$created_entity->getEntityType()->getKey('uuid')] = [['value' => $created_entity->uuid()]];
-      $normalized_entity[$label_field] = [['value' => $this->randomMachineName()]];
+      if ($label_field) {
+        $normalized_entity[$label_field] = [['value' => $this->randomMachineName()]];
+      }
       $request_options[RequestOptions::BODY] = $this->serializer->encode($normalized_entity, static::$format);
 
       $response = $this->request('POST', $url, $request_options);
       $this->assertSame(500, $response->getStatusCode());
-      $this->assertContains('Internal Server Error', (string) $response->getBody());
+      $this->assertStringContainsString('Internal Server Error', (string) $response->getBody());
 
       // 201 when successfully creating an entity with a new UUID.
       $normalized_entity = $this->getModifiedEntityForPostTesting();
       $new_uuid = \Drupal::service('uuid')->generate();
       $normalized_entity[$created_entity->getEntityType()->getKey('uuid')] = [['value' => $new_uuid]];
-      $normalized_entity[$label_field] = [['value' => $this->randomMachineName()]];
+      if ($label_field) {
+        $normalized_entity[$label_field] = [['value' => $this->randomMachineName()]];
+      }
       $request_options[RequestOptions::BODY] = $this->serializer->encode($normalized_entity, static::$format);
 
       $response = $this->request('POST', $url, $request_options);
@@ -1065,7 +1071,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
       $this->assertSame(405, $response->getStatusCode());
       $this->assertSame(['GET, POST, HEAD'], $response->getHeader('Allow'));
       $this->assertSame(['text/html; charset=UTF-8'], $response->getHeader('Content-Type'));
-      $this->assertContains('A client error happened', (string) $response->getBody());
+      $this->assertStringContainsString('A client error happened', (string) $response->getBody());
     }
     else {
       $this->assertSame(404, $response->getStatusCode());
@@ -1091,7 +1097,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertSame(415, $response->getStatusCode());
     $this->assertSame(['text/html; charset=UTF-8'], $response->getHeader('Content-Type'));
-    $this->assertContains('A client error happened', (string) $response->getBody());
+    $this->assertStringContainsString('A client error happened', (string) $response->getBody());
 
     $url->setOption('query', ['_format' => static::$format]);
 
@@ -1130,9 +1136,10 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
 
     // DX: 422 when invalid entity: multiple values sent for single-value field.
     $response = $this->request('PATCH', $url, $request_options);
-    $label_field = $this->entity->getEntityType()->hasKey('label') ? $this->entity->getEntityType()->getKey('label') : static::$labelFieldName;
-    $label_field_capitalized = $this->entity->getFieldDefinition($label_field)->getLabel();
-    $this->assertResourceErrorResponse(422, "Unprocessable Entity: validation failed.\n$label_field: $label_field_capitalized: this field cannot hold more than 1 values.\n", $response);
+    if ($label_field = $this->entity->getEntityType()->hasKey('label') ? $this->entity->getEntityType()->getKey('label') : static::$labelFieldName) {
+      $label_field_capitalized = $this->entity->getFieldDefinition($label_field)->getLabel();
+      $this->assertResourceErrorResponse(422, "Unprocessable Entity: validation failed.\n$label_field: $label_field_capitalized: this field cannot hold more than 1 values.\n", $response);
+    }
 
     $request_options[RequestOptions::BODY] = $parseable_invalid_request_body_2;
 
@@ -1241,7 +1248,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     // Ensure that fields do not get deleted if they're not present in the PATCH
     // request. Test this using the configurable field that we added, but which
     // is not sent in the PATCH request.
-    $this->assertSame('All the faith he had had had had no effect on the outcome of his life.', $updated_entity->get('field_rest_test')->value);
+    $this->assertSame('All the faith they had had had had no effect on the outcome of their life.', $updated_entity->get('field_rest_test')->value);
 
     // Multi-value field: remove item 0. Then item 1 becomes item 0.
     $normalization_multi_value_tests = $this->getNormalizedPatchEntity();
@@ -1306,7 +1313,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
       $this->assertSame(405, $response->getStatusCode());
       $this->assertSame(['GET, POST, HEAD'], $response->getHeader('Allow'));
       $this->assertSame(['text/html; charset=UTF-8'], $response->getHeader('Content-Type'));
-      $this->assertContains('A client error happened', (string) $response->getBody());
+      $this->assertStringContainsString('A client error happened', (string) $response->getBody());
     }
     else {
       $this->assertSame(404, $response->getStatusCode());
@@ -1406,7 +1413,7 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     };
     $keys_are_field_names = Inspector::assertAllStrings(array_keys(static::$patchProtectedFieldNames));
     $values_are_expected_access_denied_reasons = Inspector::assertAll($is_null_or_string, static::$patchProtectedFieldNames);
-    $this->assertTrue($keys_are_field_names && $values_are_expected_access_denied_reasons, 'In Drupal 8.6, the structure of $patchProtectectedFieldNames changed. It used to be an array with field names as values. Now those values are the keys, and their values should be either NULL or a string: a string containing the reason for why the field cannot be PATCHed, or NULL otherwise.');
+    $this->assertTrue($keys_are_field_names && $values_are_expected_access_denied_reasons, 'In Drupal 8.6, the structure of $patchProtectedFieldNames changed. It used to be an array with field names as values. Now those values are the keys, and their values should be either NULL or a string: a string containing the reason for why the field cannot be PATCHed, or NULL otherwise.');
   }
 
   /**
@@ -1460,17 +1467,20 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
           // is valid, we only care that it's different.
           $field->setValue(['target_id' => 99999]);
           break;
+
         case BooleanItem::class:
           // BooleanItem::generateSampleValue() picks either 0 or 1. So a 50%
           // chance of not picking a different value.
           $field->value = ((int) $field->value) === 1 ? '0' : '1';
           break;
+
         case PathItem::class:
           // PathItem::generateSampleValue() doesn't set a PID, which causes
           // PathItem::postSave() to fail. Keep the PID (and other properties),
           // just modify the alias.
           $field->alias = str_replace(' ', '-', strtolower((new Random())->sentences(3)));
           break;
+
         default:
           $original_field = clone $field;
           while ($field->equals($original_field)) {
@@ -1499,12 +1509,15 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     switch ($entity_key) {
       case 'label':
         // Add a second label to this entity to make it invalid.
-        $label_field = $entity_type->hasKey('label') ? $entity_type->getKey('label') : static::$labelFieldName;
-        $normalization[$label_field][1]['value'] = 'Second Title';
+        if ($label_field = $entity_type->hasKey('label') ? $entity_type->getKey('label') : static::$labelFieldName) {
+          $normalization[$label_field][1]['value'] = 'Second Title';
+        }
         break;
+
       case 'id':
         $normalization[$entity_type->getKey('id')][0]['value'] = $this->anotherEntity->id();
         break;
+
       case 'uuid':
         $normalization[$entity_type->getKey('uuid')][0]['value'] = $this->anotherEntity->uuid();
         break;
@@ -1538,8 +1551,13 @@ abstract class EntityResourceTestBase extends ResourceTestBase {
     else {
       // This is the desired response.
       $this->assertSame(406, $response->getStatusCode());
-      $this->stringContains('?_format=' . static::$format . '>; rel="alternate"; type="' . static::$mimeType . '"', $response->getHeader('Link'));
-      $this->stringContains('?_format=foobar>; rel="alternate"', $response->getHeader('Link'));
+      $actual_link_header = $response->getHeader('Link');
+      if ($actual_link_header) {
+        $this->assertIsArray($actual_link_header);
+        $expected_type = explode(';', static::$mimeType)[0];
+        $this->assertStringContainsString('?_format=' . static::$format . '>; rel="alternate"; type="' . $expected_type . '"', $actual_link_header[0]);
+        $this->assertStringContainsString('?_format=foobar>; rel="alternate"', $actual_link_header[0]);
+      }
     }
   }
 

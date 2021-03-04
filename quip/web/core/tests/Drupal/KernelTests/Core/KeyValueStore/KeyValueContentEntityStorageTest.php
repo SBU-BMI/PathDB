@@ -44,14 +44,14 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
     $empty = EntityTestLabel::create();
     $this->assertIdentical($empty->id->value, NULL);
     $this->assertIdentical($empty->name->value, NULL);
-    $this->assertTrue($empty->uuid->value);
+    $this->assertNotEmpty($empty->uuid->value);
     $this->assertIdentical($empty->langcode->value, $default_langcode);
 
     // Verify ConfigEntity properties/methods on the newly created empty entity.
     $this->assertIdentical($empty->isNew(), TRUE);
     $this->assertIdentical($empty->bundle(), 'entity_test_label');
     $this->assertIdentical($empty->id(), NULL);
-    $this->assertTrue($empty->uuid());
+    $this->assertNotEmpty($empty->uuid());
     $this->assertIdentical($empty->label(), NULL);
 
     // Verify Entity properties/methods on the newly created empty entity.
@@ -62,7 +62,7 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
       $this->fail('EntityMalformedException was thrown.');
     }
     catch (EntityMalformedException $e) {
-      $this->pass('EntityMalformedException was thrown.');
+      // Expected exception; just continue testing.
     }
 
     // Verify that an empty entity cannot be saved.
@@ -71,7 +71,7 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
       $this->fail('EntityMalformedException was thrown.');
     }
     catch (EntityMalformedException $e) {
-      $this->pass('EntityMalformedException was thrown.');
+      // Expected exception; just continue testing.
     }
 
     // Verify that an entity with an empty ID string is considered empty, too.
@@ -84,7 +84,7 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
       $this->fail('EntityMalformedException was thrown.');
     }
     catch (EntityMalformedException $e) {
-      $this->pass('EntityMalformedException was thrown.');
+      // Expected exception; just continue testing.
     }
 
     // Verify properties on a newly created entity.
@@ -93,7 +93,7 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
       'name' => $this->randomString(),
     ]);
     $this->assertIdentical($entity_test->id->value, $expected['id']);
-    $this->assertTrue($entity_test->uuid->value);
+    $this->assertNotEmpty($entity_test->uuid->value);
     $this->assertNotEqual($entity_test->uuid->value, $empty->uuid->value);
     $this->assertIdentical($entity_test->name->value, $expected['name']);
     $this->assertIdentical($entity_test->langcode->value, $default_langcode);
@@ -101,14 +101,13 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
     // Verify methods on the newly created entity.
     $this->assertIdentical($entity_test->isNew(), TRUE);
     $this->assertIdentical($entity_test->id(), $expected['id']);
-    $this->assertTrue($entity_test->uuid());
+    $this->assertNotEmpty($entity_test->uuid());
     $expected['uuid'] = $entity_test->uuid();
     $this->assertIdentical($entity_test->label(), $expected['name']);
 
     // Verify that the entity can be saved.
     try {
       $status = $entity_test->save();
-      $this->pass('EntityMalformedException was not thrown.');
     }
     catch (EntityMalformedException $e) {
       $this->fail('EntityMalformedException was not thrown.');
@@ -143,7 +142,7 @@ class KeyValueContentEntityStorageTest extends KernelTestBase {
       $this->fail('Not possible to overwrite an entity entity.');
     }
     catch (EntityStorageException $e) {
-      $this->pass('Not possible to overwrite an entity entity.');
+      // Expected exception; just continue testing.
     }
 
     // Verify that renaming the ID returns correct status and properties.

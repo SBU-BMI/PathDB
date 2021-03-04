@@ -5,10 +5,13 @@
   "homepage": "https://drupal.org/project/redirect_after_login",
   "authors": [
     {
-      "name": "Rahul Kumar",
-      "homepage": "https://www.drupal.org/u/rahul-kr-sh",
+      "name": "Shamsher Alam",
+      "homepage": "https://www.drupal.org/u/shamsher_alam",
       "role": "Author"
     }
   ],
+  "require": {
+    "drupal/core": "^8 || ^9"
+  },
   "license": "GPL-2.0+"
 }

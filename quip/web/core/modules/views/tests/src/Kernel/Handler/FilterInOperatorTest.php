@@ -70,7 +70,7 @@ class FilterInOperatorTest extends ViewsKernelTestBase {
       ],
     ];
 
-    $this->assertEqual(2, count($view->result));
+    $this->assertCount(2, $view->result);
     $this->assertIdenticalResultset($view, $expected_result, $this->columnMap);
 
     $view->destroy();
@@ -104,7 +104,7 @@ class FilterInOperatorTest extends ViewsKernelTestBase {
       ],
     ];
 
-    $this->assertEqual(3, count($view->result));
+    $this->assertCount(3, $view->result);
     $this->assertIdenticalResultset($view, $expected_result, $this->columnMap);
   }
 
@@ -130,7 +130,7 @@ class FilterInOperatorTest extends ViewsKernelTestBase {
       ],
     ];
 
-    $this->assertEqual(2, count($view->result));
+    $this->assertCount(2, $view->result);
     $this->assertIdenticalResultset($view, $expected_result, $this->columnMap);
   }
 
@@ -160,7 +160,40 @@ class FilterInOperatorTest extends ViewsKernelTestBase {
       ],
     ];
 
-    $this->assertEqual(3, count($view->result));
+    $this->assertCount(3, $view->result);
+    $this->assertIdenticalResultset($view, $expected_result, $this->columnMap);
+  }
+
+  /**
+   * Tests that we can safely change the identifier on a grouped filter.
+   */
+  public function testFilterGroupedChangedIdentifier() {
+    $filters = $this->getGroupedExposedFilters();
+    $view = Views::getView('test_view');
+
+    $filters['age']['group_info']['default_group'] = 2;
+    $filters['age']['group_info']['identifier'] = 'not-age';
+    $view->setDisplay();
+    $view->displayHandlers->get('default')->overrideOption('filters', $filters);
+
+    $this->executeView($view);
+
+    $expected_result = [
+      [
+        'name' => 'John',
+        'age' => 25,
+      ],
+      [
+        'name' => 'George',
+        'age' => 27,
+      ],
+      [
+        'name' => 'Ringo',
+        'age' => 28,
+      ],
+    ];
+
+    $this->assertCount(3, $view->result);
     $this->assertIdenticalResultset($view, $expected_result, $this->columnMap);
   }
 

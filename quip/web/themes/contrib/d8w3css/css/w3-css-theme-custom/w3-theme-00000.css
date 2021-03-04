@@ -1,0 +1,42 @@
+html,
+body,
+button,
+input,
+select,
+optgroup,
+textarea {
+  color: #637381;
+}
+.w3-border {
+  border: 1px solid #d3d8dd !important;
+}
+
+.w3-button:hover {
+  color: #637381 !important;
+  background-color: #e6e9ec !important;
+}
+.fa,
+.svg-inline--fa {
+  color: inherit;
+}
+
+#header,
+#copyright,
+.close-nav,
+.mobile-nav,
+#page-title,
+#highlighted,
+.page-wrapper,
+#footer-menu,
+#top-container,
+#main-container,
+#bottom-container,
+#footer-container,
+.search-slide-wrapper,
+.main-navigation-wrapper,
+#top-container .top-box > div,
+#footer-container .footer-box>div,
+#bottom-container-inner .bottom-box>div {
+  background-color: white;
+  color: #637381;
+}
