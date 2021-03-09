@@ -3,6 +3,12 @@ if [ ! -d /data/tmp ]; then
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
+# clear default ssl.conf
+FILE=/etc/httpd/conf.d/ssl.conf
+if [ -f "$FILE" ]; then
+    echo "$FILE exists"
+    rm -f $FILE
+fi
 # clear any stale httpd.pid files
 FILE=/var/run/httpd/httpd.pid
 if [ -f "$FILE" ]; then
