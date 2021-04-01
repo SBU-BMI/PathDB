@@ -79,8 +79,6 @@ class ViewsBulkOperationsActionManager extends ActionManager {
 
     $entity_type_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($definitions as $plugin_id => &$definition) {
-      $this->processDefinition($definition, $plugin_id);
-
       // We only allow actions of existing entity type and empty
       // type meaning it's applicable to all entity types.
       if (
@@ -96,11 +94,21 @@ class ViewsBulkOperationsActionManager extends ActionManager {
       // Filter definitions that are incompatible due to applied core
       // configuration form workaround (using confirm_form_route for config
       // forms and using action execute() method for purposes other than
-      // actual action execution). Luckily, core also has useful actions
-      // without the workaround, like node_assign_owner_action.
-      if (!in_array('Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionInterface', class_implements($definition['class'])) && (!empty($definition['confirm_form_route_name']))) {
-        unset($definitions[$plugin_id]);
+      // actual action execution). Also filter out actions that don't implement
+      // ViewsBulkOperationsActionInterface and have empty type as this
+      // shouldn't be the case in core. Luckily, core also has useful actions
+      // without the workaround, like node_assign_owner_action or
+      // comment_unpublish_by_keyword_action.
+      if (!in_array('Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionInterface', class_implements($definition['class']))) {
+        if (
+          !empty($definition['confirm_form_route_name']) ||
+          empty($definition['type'])
+        ) {
+          unset($definitions[$plugin_id]);
+        }
       }
+
+      $this->processDefinition($definition, $plugin_id);
     }
     $this->alterDefinitions($definitions);
     foreach ($definitions as $plugin_id => $plugin_definition) {

@@ -70,7 +70,7 @@
 <div class="page-wrapper w3-col w3-clear w3-animate-opacity w3-text-theme {{ color_page_wrapper }} ">
   <!-- Start: Header -->
   <header id="header" class="w3-col w3-clear w3-theme-l4 {{ color_header }}" role="banner" aria-label="{{ 'Site header'|t }}">
-    <div id="header-inner" class="d8-fade w3-container header-inner {{ website_width }}">
+    <div id="header-inner" class="w3-container header-inner {{ website_width }}">
       {% if page.primary_menu_vertical %}
         <div id="open-nav-inner" class="open-nav-inner w3-opacity w3-hover-opacity-off w3-left w3-button w3-left-align w3-large w3-theme {{ color_primary_menu }}">
           <i class="fa fa-bars"></i>
@@ -85,7 +85,7 @@
   {% if page.primary_menu %}
   <!-- Start: Main Navigation - Horizontal -->
   <div id="main-navigation-h" class="w3-col w3-clear main-navigation-wrapper w3-card w3-theme {{ color_primary_menu }}" role="navigation" aria-label="{{ 'Main Navigation'|t }}" >
-    <div id="main-navigation-inner-h" class="d8-fade w3-row main-navigation-inner-h {{ website_width }}">
+    <div id="main-navigation-inner-h" class="w3-row main-navigation-inner-h {{ website_width }}">
       <div class="mobile-nav w3-hide-large w3-button w3-block w3-right-align w3-large w3-theme {{ color_primary_menu }}">
         <i class="fa fa-bars"></i>
       </div>
@@ -97,7 +97,7 @@
   {% if is_front and page.welcome_text %}
     <!-- Start: Welcome Text -->
     <div id="welcome-text" class="w3-col w3-clear w3-theme-l5 {{ color_welcome_text }}">
-      <div id="welcome-text-inner" class="d8-fade w3-row welcome-text-inner {{ website_width }}">
+      <div id="welcome-text-inner" class="w3-row welcome-text-inner {{ website_width }}">
         {{ page.welcome_text }}
       </div>
     </div>

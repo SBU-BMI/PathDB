@@ -2,13 +2,14 @@
 
 namespace Drupal\bulk_update_fields\Form;
 
+use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeWidgetBase;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\SessionManagerInterface;
-use Drupal\user\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\default_paragraphs\Plugin\Field\FieldWidget\DefaultParagraphsWidget;
@@ -63,7 +64,7 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
   /**
    * Constructs a \Drupal\bulk_update_fields\Form\BulkUpdateFieldsForm.
    *
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   Temp storage.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   Session.
@@ -84,7 +85,7 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.private_tempstore'),
+      $container->get('tempstore.private'),
       $container->get('session_manager'),
       $container->get('current_user'),
       $container->get('router.builder')
@@ -145,7 +146,9 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
             }
           }
         }
-        $this->userInput['fields'] = array_merge($this->userInput['fields'], $form_state_values['default_value_input']);
+        if (isset($this->userInput['fields']) && isset($form_state_values['default_value_input'])) {
+          $this->userInput['fields'] = array_merge($this->userInput['fields'], $form_state_values['default_value_input']);
+        }
         $form_state->setRebuild();
         break;
 
@@ -153,7 +156,7 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
         if (method_exists($this, 'updateFields')) {
           $return_verify = $this->updateFields();
         }
-        drupal_set_message($return_verify);
+        $this->messenger()->addStatus($return_verify);
         $this->routeBuilder->rebuild();
         break;
     }
@@ -200,7 +203,7 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
           'mail',
           'init'
         ];
-
+        $excluded_fields = $this->config('bulk_update_fields.settings')->get('exclude');
         // Make it possible to bulk update 'Generate automatic URL alias'.
         // @todo: add code to remove 'URL alias'.
         if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
@@ -214,7 +217,9 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
           $fields = $entity->getFieldDefinitions();
           foreach ($fields as $field) {
             if (!in_array($field->getName(), $excluded_base_fields) && !isset($options[$field->getName()])) {
-              $options[$field->getName()]['field_name'] = ($field->getLabel()) ? $field->getLabel() : $field->getName();
+              if (!in_array($field->getName(), array_filter($excluded_fields))) {
+                $options[$field->getName()]['field_name'] = ($field->getLabel()) ? $field->getLabel() : $field->getName();
+              }
             }
           }
         }
@@ -242,7 +247,7 @@ class BulkUpdateFieldsForm extends FormBase implements FormInterface {
               if ($field->getType() == 'datetime') {
                 $type = \Drupal::service('plugin.manager.field.widget');
                 $plugin_definition = $type->getDefinition('datetime_default');
-                $widget = new \Drupal\datetime\Plugin\Field\FieldWidget\DateTimeWidgetBase('datetime', $plugin_definition, $entity->get($field_name)->getFieldDefinition(), [], []);
+                $widget = new DateTimeWidgetBase('datetime', $plugin_definition, $entity->get($field_name)->getFieldDefinition(), [], []);
                 $form['#parents'] = [];
                 $form['default_value_input'][$field_name] = $widget->form($entity->get($field_name), $form, $form_state);
               }

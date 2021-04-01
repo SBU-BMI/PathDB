@@ -417,11 +417,6 @@ function template_preprocess_ds_entity_view(&$variables) {
 
   $configuration = $build['#ds_configuration'];
 
-  // Process the render array so we can reuse it.
-  // Don't add/override the cache key if there aren't any.
-  if (!empty($build['#cache']['keys'])) {
-    $build['#cache']['keys'][0] = 'ds_entity_view';
-  }
   unset($build['#theme']);
   unset($build['#pre_render']);
   unset($build['#sorted']);
@@ -537,7 +532,7 @@ function ds_preprocess_ds_layout(&$variables) {
             ['clear' => TRUE]
           );
         }
-        [$key, $attribute_value] = explode('|', $replaced_attribute);
+        list($key, $attribute_value) = explode('|', $replaced_attribute);
         // Handle the class attribute as an array and others as strings.
         $key == 'class' ? $variables['attributes'][$key][] = $attribute_value : $variables['attributes'][$key] = $attribute_value;
       }

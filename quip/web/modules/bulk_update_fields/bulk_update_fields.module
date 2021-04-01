@@ -49,5 +49,5 @@ function _bulk_update_fields_create_action($entity_type_machine_name, $entity_ty
     'plugin' => 'bulk_update_fields_action_base',
   ]);
   $action->save();
-  drupal_set_message(t('Action @label created from bulk_update_fields module.', ['@label' => $label]));
+  \Drupal::messenger()->addStatus(t('Action @label created from bulk_update_fields module.', ['@label' => $label]));
 }

@@ -47,20 +47,29 @@ class PublishLatestRevisionAction extends ActionBase/*extends ViewsBulkOperation
     // Do some processing..
     // ...
     //\Drupal::Messenger()->addStatus(utf8_encode('Publish bulk operation by moderated_content_bulk_publish module'));
-    \Drupal::logger('moderated_content_bulk_publish')->notice("EXECUTING PUBLISH LATEST REVISION OF ".$entity->label());
+    $user = \Drupal::currentUser();
 
-    $adminModeration = new AdminModeration($entity, \Drupal\node\NodeInterface::PUBLISHED);
-    $entity = $adminModeration->publish();
+    if ($user->hasPermission('moderated content bulk publish')) {
+      \Drupal::logger('moderated_content_bulk_publish')->notice("Executing publish latest revision of ".$entity->label());
 
-    // Check if published
-    if (!$entity->isPublished()){
+      $adminModeration = new AdminModeration($entity, \Drupal\node\NodeInterface::PUBLISHED);
+      $entity = $adminModeration->publish();
+
+      // Check if published
+      if (!$entity->isPublished()){
         $msg = "Something went wrong, the entity must be published by this point.  Review your content moderation configuration make sure you have archive state which sets current revision and a published state and try again.";
         \Drupal::Messenger()->addError(utf8_encode($msg));
         \Drupal::logger('moderated_content_bulk_publish')->warning($msg);
         return $msg;
-    }
+      }
+      return sprintf('Example action (configuration: %s)', print_r($this->configuration, TRUE));
     
-    return sprintf('Example action (configuration: %s)', print_r($this->configuration, TRUE));
+    }
+    else {
+      \Drupal::messenger()->addWarning(t("You don't have access to execute this operation!"));
+      return;
+    }
+
   }
 
   /**

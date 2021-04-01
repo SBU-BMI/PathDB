@@ -854,10 +854,9 @@ function _ds_field_ui_table_layouts($entity_type, $bundle, $view_mode, array &$f
     $entity_displays = \Drupal::configFactory()->listAll('core.entity_view_display.' . $entity_type . '.' . $bundle);
     if (!empty($entity_displays)) {
       $entity_type_info = \Drupal::entityTypeManager()->getDefinition($entity_type);
-      $bundle_info = \Drupal::entityTypeManager()->getStorage($entity_type_info->getBundleEntityType())->load($bundle);
       foreach ($entity_displays as $name) {
         $row = \Drupal::config($name)->get();
-        if ($row['mode'] == $view_mode) {
+        if ($row['mode'] === $view_mode) {
           continue;
         }
 
@@ -868,8 +867,14 @@ function _ds_field_ui_table_layouts($entity_type, $bundle, $view_mode, array &$f
           $view_mode_label = 'Default';
         }
 
-        if ($row['targetEntityType'] == $entity_type && $row['bundle'] == $bundle) {
-          $options[$row['id']] = $entity_type_info->getLabel() . ' > ' . $bundle_info->label() . ' > ' . $view_mode_label;
+        if ($row['targetEntityType'] === $entity_type && $row['bundle'] === $bundle) {
+          if ($entity_type_info->getBundleEntityType()) {
+            $bundle_info = \Drupal::entityTypeManager()->getStorage($entity_type_info->getBundleEntityType())->load($bundle);
+            $options[$row['id']] = $entity_type_info->getLabel() . ' > ' . $bundle_info->label() . ' > ' . $view_mode_label;
+          }
+          else {
+            $options[$row['id']] = $entity_type_info->getLabel() . ' > ' . $view_mode_label;
+          }
         }
       }
 

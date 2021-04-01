@@ -188,13 +188,12 @@ class RestUIController implements ContainerInjectionInterface {
               return "<del>$method</del>";
             }, $disabled_methods)
           );
+          if (!in_array('POST', $enabled_methods)) {
+            $create_uri_path = FALSE;
+          }
         }
         else {
           $configured_methods = $available_methods;
-        }
-
-        if (!in_array('POST', $enabled_methods)) {
-          $create_uri_path = FALSE;
         }
 
         // All necessary information is collected, now generate some HTML.
