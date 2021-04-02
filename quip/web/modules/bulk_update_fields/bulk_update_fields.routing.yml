@@ -7,3 +7,13 @@ bulk_update_fields.form:
    _admin_route: TRUE
   requirements:
     _permission: 'administer bulk_update_fields'
+
+bulk_update_fields.bulk_update_exclude_form:
+  path: '/admin/bulk_update_fields/exclude'
+  defaults:
+    _form: '\Drupal\bulk_update_fields\Form\BulkUpdateExcludeForm'
+    _title: 'Bulk update exclude fields'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'exclude bulk_update_fields'

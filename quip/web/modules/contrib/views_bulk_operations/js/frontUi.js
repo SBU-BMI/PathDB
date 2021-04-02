@@ -86,7 +86,9 @@
         }
 
         var $placeholder = this.$placeholder;
+        var $selectionInfo = this.$selectionInfo;
         var target_uri = drupalSettings.path.baseUrl + drupalSettings.path.pathPrefix + 'views-bulk-operations/ajax/' + this.view_id + '/' + this.display_id;
+
         $.ajax(target_uri, {
           method: 'POST',
           data: {
@@ -94,6 +96,7 @@
             op: op
           },
           success: function (data) {
+            $selectionInfo.html($(data.selection_info).html());
             $placeholder.text(data.count);
           }
         });
@@ -122,6 +125,7 @@
     var $multiSelectElement = $vboForm.find('.vbo-multipage-selector').first();
     if ($multiSelectElement.length) {
 
+      Drupal.viewsBulkOperationsSelection.$selectionInfo = $multiSelectElement.find('.vbo-info-list-wrapper').first();
       Drupal.viewsBulkOperationsSelection.$placeholder = $multiSelectElement.find('.placeholder').first();
       Drupal.viewsBulkOperationsSelection.view_id = $multiSelectElement.attr('data-view-id');
       Drupal.viewsBulkOperationsSelection.display_id = $multiSelectElement.attr('data-display-id');
@@ -162,9 +166,22 @@
     if ($primarySelectAll.length) {
       $primarySelectAll.on('change', function (event) {
         var value = this.checked;
+
         // Select / deselect all checkboxes in the view.
+        // If there are table select all elements, use that.
+        if (tableSelectAll.length) {
+          tableSelectAll.forEach(function (element) {
+            if (element.get(0).checked != value) {
+              element.click();
+            }
+          });
+        }
+
+        // Also handle checkboxes that may still have different values.
         $vboForm.find('.views-field-views-bulk-operations-bulk-form input[type="checkbox"]').each(function () {
-          this.checked = value;
+          if (this.checked != value) {
+            $(this).click();
+          }
         });
 
         // Clear the selection information if exists.

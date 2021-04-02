@@ -11,7 +11,10 @@ libraries:
   - drupal8_w3css_theme/w3-css
   - drupal8_w3css_theme/font-awesome
   - drupal8_w3css_theme/d8w3css-google-font-external
-  - drupal8_w3css_theme/global-components
+  - drupal8_w3css_theme/d8w3css-global-components
+  - drupal8_w3css_theme/d8w3css-match-height
+  - drupal8_w3css_theme/d8w3css-full-opacity
+
 #Regions
 regions:
   header: 'Header'
@@ -37,7 +40,7 @@ regions:
   footer_menu: 'Footer Menu Container'
   auto_hidden_block: 'Auto Hidden Blocks'
 
-# Information added by Drupal.org packaging script on 2021-01-17
-version: '8.x-1.19'
+# Information added by Drupal.org packaging script on 2021-03-31
+version: '8.x-1.21'
 project: 'd8w3css'
-datestamp: 1610924536
+datestamp: 1617193770

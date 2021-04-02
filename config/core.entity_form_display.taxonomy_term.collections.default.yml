@@ -3,7 +3,10 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.taxonomy_term.collections.url
     - taxonomy.vocabulary.collections
+  module:
+    - link
 id: taxonomy_term.collections.default
 targetEntityType: taxonomy_term
 bundle: collections
@@ -17,6 +20,21 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 100
+    region: content
+    third_party_settings: {  }
+  url:
+    weight: 101
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
 hidden:
   description: true
   path: true

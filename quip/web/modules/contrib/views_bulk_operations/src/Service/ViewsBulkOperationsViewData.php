@@ -243,6 +243,10 @@ class ViewsBulkOperationsViewData implements ViewsBulkOperationsViewDataInterfac
       throw new \Exception('Unexpected view result row structure.');
     }
 
+    if (empty($entity)) {
+      return;
+    }
+
     if ($entity instanceof TranslatableInterface && $entity->isTranslatable()) {
 
       // Try to find a field alias for the langcode.

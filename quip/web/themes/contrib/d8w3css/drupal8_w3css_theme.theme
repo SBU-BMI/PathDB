@@ -19,29 +19,49 @@ use Drupal\block_content\BlockContentInterface;
 function drupal8_w3css_theme_preprocess_html(&$variables) {
   // Add node id to the body class.
   $variables['path_info']['args'] = FALSE;
-  $path_raw                       = \Drupal::service('path.current')->getPath();
-  $path_trimmed                   = ltrim($path_raw, '/');
-  $path_args                      = explode('/', $path_trimmed);
-  // Add user id to the body class.
-  if (isset($path_args[0], $path_args[1]) && ($path_args[0] == 'user')) {
-    $variables['attributes']['class'][] = 'path-user-' . $path_args[1];
+
+  $routeMatch = \Drupal::routeMatch();
+  // Test route name.
+  switch ($routeMatch->getRouteName()) {
+
+    // Add node id to the body class.
+    case 'entity.node.canonical':
+      $node_id = $routeMatch->getParameter('node')->id();
+
+      if ($node_id) {
+        $variables['attributes']['class'][] = 'path-node-' . $node_id;
+      }
+      break;
+
+    // Add vocabulary name and term id to the body class.
+    case 'entity.taxonomy_term.canonical':
+      $term = $routeMatch->getParameter('taxonomy_term');
+
+      if ($term->id()) {
+        $variables['attributes']['class'][] = 'path-taxonomy-term-' . $term->id();
+      }
+      if ($term->bundle()) {
+        $variables['attributes']['class'][] = 'path-vocabulary-' . Html::cleanCssIdentifier($term->bundle());
+      }
+      break;
+
+    // Add user id to the body class.
+    case 'entity.user.canonical':
+      $user_id = $routeMatch->getParameter('user')->id();
+
+      if ($user_id) {
+        $variables['attributes']['class'][] = 'path-user-' . $user_id;
+      }
+      break;
   }
-  // Add node id to the body class.
-  if (isset($path_args[0], $path_args[1]) && ($path_args[0] == 'node') && (is_numeric($path_args[1]))) {
-    $variables['attributes']['class'][] = 'path-node-' . $path_args[1];
-  }
-  // Add term id to the body class.
-  if (isset($path_args[0], $path_args[1], $path_args[2]) && $path_args[0] == 'taxonomy' && $path_args[1] == 'term') {
-    $variables['attributes']['class'][] = 'path-taxonomy-term-' . $path_args[2];
-    $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($path_args[2]);
-    $vocabulary_id = $term->bundle();
-    $variables['attributes']['class'][] = 'path-vocabulary-' . Html::cleanCssIdentifier($vocabulary_id);
-  }
-  // Add view id to the body class.
-  $view_id = \Drupal::routeMatch()->getParameter('view_id');
+
+  // Add view id name to the body class.
+  $view_id = $routeMatch->getParameter('view_id');
+
   if ($view_id) {
     $variables['attributes']['class'][] = 'path-view-' . Html::cleanCssIdentifier($view_id);
   }
+
 }
 
 /**
@@ -232,17 +252,36 @@ function drupal8_w3css_theme_preprocess_page(&$variables) {
  * Implements hook_page_attachments_alter().
  */
 function drupal8_w3css_theme_page_attachments_alter(array &$attachments) {
-  // Disable font awesome library if fontawesome module installed.
+
+  // Load font awesome locally.
   if (theme_get_setting('d8w3css_font_awesome_4')) {
     $external_font_awesome = array_search('drupal8_w3css_theme/font-awesome', $attachments['#attached']['library'], TRUE);
     unset($attachments['#attached']['library'][$external_font_awesome]);
     $attachments['#attached']['library'][] = 'drupal8_w3css_theme/d8w3css-font-awesome-local';
   }
+
+  // Load google fonts locally.
   if (theme_get_setting('d8w3css_google_font')) {
     $external_google_font = array_search('drupal8_w3css_theme/d8w3css-google-font-external', $attachments['#attached']['library'], TRUE);
     unset($attachments['#attached']['library'][$external_google_font]);
     $attachments['#attached']['library'][] = 'drupal8_w3css_theme/d8w3css-google-font-local';
   }
+
+  // don't load full opacity if disabled.
+  if (!theme_get_setting('full_opacity_onscroll')) {
+    $full_opacity = array_search('drupal8_w3css_theme/d8w3css-full-opacity', $attachments['#attached']['library'], TRUE);
+    unset($attachments['#attached']['library'][$full_opacity]);
+  }
+
+  // don't load match height if all are disabled.
+  if ((!theme_get_setting('top_region')) &&
+      (!theme_get_setting('main_region')) &&
+      (!theme_get_setting('bottom_region')) &&
+      (!theme_get_setting('footer_region'))) {
+    $match_height = array_search('drupal8_w3css_theme/d8w3css-match-height', $attachments['#attached']['library'], TRUE);
+    unset($attachments['#attached']['library'][$match_height]);
+  }
+
 }
 
 /**

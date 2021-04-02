@@ -148,7 +148,7 @@ abstract class RendererBase extends EntityTranslationRendererBase {
 
           // New way of creating the alias.
           if (strpos($group_field, '|') !== FALSE) {
-            [, $ffield] = explode('|', $group_field);
+            list(, $ffield) = explode('|', $group_field);
             if (isset($this->view->sort[$ffield]->realField)) {
               $group_field = $this->view->sort[$ffield]->tableAlias . '_' . $this->view->sort[$ffield]->realField;
             }

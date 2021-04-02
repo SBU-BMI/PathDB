@@ -8,6 +8,7 @@ module:
   block: 0
   block_content: 0
   breakpoint: 0
+  bulk_update_fields: 0
   ckeditor: 0
   color: 0
   comment: 0
@@ -70,6 +71,8 @@ module:
   update: 0
   user: 0
   views_base_url: 0
+  views_bulk_edit: 0
+  views_bulk_operations: 0
   views_data_export: 0
   views_field_view: 0
   views_taxonomy_term_name_depth: 0

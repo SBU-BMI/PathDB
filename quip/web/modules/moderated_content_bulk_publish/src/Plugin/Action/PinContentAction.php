@@ -47,20 +47,28 @@ class PinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase
     // Do some processing..
     // ...
     //\Drupal::Messenger()->addStatus(utf8_encode('Pin bulk operation by moderated_content_bulk_publish module'));
-    \Drupal::logger('moderated_content_bulk_publish')->notice("EXECUTING PIN CONTENT FOR ".$entity->label());
 
-    $adminPin = new AdminPin($entity, $entity->isSticky());
-    $entity = $adminPin->pin();
+    $user = \Drupal::currentUser();
 
-    // Check if pinned
-    if (!$entity->isSticky()){
+    if ($user->hasPermission('moderated content bulk pin content')) {
+      \Drupal::logger('moderated_content_bulk_publish')->notice("EXECUTING PIN CONTENT FOR ".$entity->label());
+
+      $adminPin = new AdminPin($entity, $entity->isSticky());
+      $entity = $adminPin->pin();
+
+      // Check if pinned
+      if (!$entity->isSticky()){
         $msg = "Something went wrong, the entity must be pinned by this point.";
         \Drupal::Messenger()->addError(utf8_encode($msg));
         \Drupal::logger('moderated_content_bulk_publish')->warning($msg);
         return $msg;
+      }
+      return sprintf('Example action (configuration: %s)', print_r($this->configuration, TRUE));
     }
-    
-    return sprintf('Example action (configuration: %s)', print_r($this->configuration, TRUE));
+    else {
+      \Drupal::messenger()->addWarning(t("You don't have access to execute this operation!"));
+      return;
+    }
   }
 
   /**

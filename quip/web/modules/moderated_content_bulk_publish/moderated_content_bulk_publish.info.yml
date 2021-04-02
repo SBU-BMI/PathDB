@@ -3,8 +3,9 @@ description: 'Provides general administration features that Drupal 8 core does n
 package: Administration
 type: module
 core: 8.x
+core_version_requirement: ^8 || ^9
 
-# Information added by Drupal.org packaging script on 2020-01-12
-version: '8.x-1.0-alpha5'
+# Information added by Drupal.org packaging script on 2020-11-27
+version: '2.0.2'
 project: 'moderated_content_bulk_publish'
-datestamp: 1578856387
+datestamp: 1606495276

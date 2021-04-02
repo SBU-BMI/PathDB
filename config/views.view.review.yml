@@ -9,6 +9,7 @@ dependencies:
     - field.storage.node.imageid
     - field.storage.node.studyid
     - node.type.wsi
+    - taxonomy.vocabulary.collections
     - user.role.authenticated
     - workflows.workflow.quip
   module:
@@ -16,7 +17,9 @@ dependencies:
     - node
     - rest
     - serialization
+    - taxonomy
     - user
+    - views_bulk_operations
 id: review
 label: Review
 module: views
@@ -106,6 +109,66 @@ display:
         options:
           view_mode: teaser
       fields:
+        views_bulk_operations_bulk_form:
+          id: views_bulk_operations_bulk_form
+          table: views
+          field: views_bulk_operations_bulk_form
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Views bulk operations'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          batch: true
+          batch_size: 10
+          form_step: true
+          buttons: false
+          clear_on_exposed: true
+          action_title: Action
+          selected_actions:
+            11:
+              action_id: views_bulk_edit
+              preconfiguration:
+                get_bundles_from_results: 1
+          plugin_id: views_bulk_operations_bulk_form
         nid:
           id: nid
           table: node_field_data
@@ -716,9 +779,10 @@ display:
           admin_label: ''
           operator: in
           value:
-            quip-needs_deidentification_review: quip-needs_deidentification_review
-            quip-contains_identifiable_information: quip-contains_identifiable_information
             quip-published: quip-published
+            quip-contains_identifiable_information: quip-contains_identifiable_information
+            quip-needs_deidentification_review: quip-needs_deidentification_review
+            quip-draft: quip-draft
           group: 1
           exposed: true
           expose:
@@ -752,6 +816,53 @@ display:
             group_items: {  }
           entity_type: node
           plugin_id: moderation_state_filter
+        field_collection_target_id:
+          id: field_collection_target_id
+          table: node__field_collection
+          field: field_collection_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_collection_target_id_op
+            label: Collection
+            description: ''
+            use_operator: false
+            operator: field_collection_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: field_collection_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: select
+          limit: true
+          vid: collections
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
       sorts:
         field_collection_target_id:
           id: field_collection_target_id
@@ -858,12 +969,13 @@ display:
       display_extenders: {  }
       use_ajax: true
     cache_metadata:
-      max-age: -1
+      max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user
         - 'user.node_grants:view'
         - user.roles
       tags:
@@ -880,12 +992,13 @@ display:
     display_options:
       display_extenders: {  }
     cache_metadata:
-      max-age: -1
+      max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user
         - 'user.node_grants:view'
         - user.roles
       tags:
@@ -903,12 +1016,13 @@ display:
       display_extenders: {  }
       path: review
     cache_metadata:
-      max-age: -1
+      max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user
         - 'user.node_grants:view'
         - user.roles
       tags:
@@ -939,12 +1053,13 @@ display:
           items_per_page: 10
           offset: 0
     cache_metadata:
-      max-age: -1
+      max-age: 0
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - request_format
         - url
+        - user
         - 'user.node_grants:view'
         - user.roles
       tags:
