@@ -119,6 +119,7 @@ fi
 	cp -f /quip/config-update/field.storage.node.field_map_type.yml /data/tmp2
 	/quip/vendor/bin/drush -y config:import --partial --source /data/tmp2
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
+	/quip/vendor/bin/drush -y pm:enable moderated_content_bulk_publish
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 	/quip/vendor/bin/drush -y user:cancel archon
