@@ -1,0 +1,24 @@
+include_home_segment: false
+home_segment_title: Home
+home_segment_keep: 0
+include_title_segment: false
+language_path_prefix_as_segment: false
+use_menu_title_as_fallback: false
+remove_repeated_segments: true
+absolute_paths: false
+hide_single_home_item: true
+_core:
+  default_config_hash: ALaJtTMWaPkrzRKrWM1z4u7BslSR_0tTzlGXfeZPhDQ
+include_invalid_paths: true
+excluded_paths: "admin\r\noverview\r\ntac_lite\r\nadd\r\npeople\r\nupdates\r\nupdate\r\ncollections"
+replaced_titles: ''
+segments_separator: null
+title_segment_as_link: false
+title_from_page_when_available: false
+add_structured_data_json_ld: false
+capitalizator_forced_words: {  }
+custom_paths: ''
+capitalizator_forced_words_first_letter: false
+capitalizator_forced_words_case_sensitivity: false
+capitalizator_ignored_words: {  }
+follow_redirects: true

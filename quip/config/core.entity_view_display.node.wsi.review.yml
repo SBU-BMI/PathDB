@@ -1,0 +1,297 @@
+uuid: 7ed38d16-570a-44c4-886a-3138086d8d7d
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.review
+    - field.field.node.wsi.acquisitiondatetime
+    - field.field.node.wsi.clinicaltrialsubjectid
+    - field.field.node.wsi.field_bulk_upload
+    - field.field.node.wsi.field_collection
+    - field.field.node.wsi.field_iip_path
+    - field.field.node.wsi.field_utarget
+    - field.field.node.wsi.field_wsiimage
+    - field.field.node.wsi.imagedvolumeheight
+    - field.field.node.wsi.imagedvolumewidth
+    - field.field.node.wsi.imageid
+    - field.field.node.wsi.lossyimagecompression
+    - field.field.node.wsi.lossyimagecompressionmethod
+    - field.field.node.wsi.lossyimagecompressionratio
+    - field.field.node.wsi.manufacturer
+    - field.field.node.wsi.md5
+    - field.field.node.wsi.patientid
+    - field.field.node.wsi.referencepixelphysicalvaluex
+    - field.field.node.wsi.referencepixelphysicalvaluey
+    - field.field.node.wsi.studyid
+    - node.type.wsi
+  module:
+    - datetime
+    - field_group
+    - layout_builder
+    - layout_discovery
+    - user
+third_party_settings:
+  field_group:
+    group_tabbers:
+      children:
+        - group_image
+      parent_name: ''
+      weight: 31
+      format_type: tabs
+      format_settings:
+        id: ''
+        classes: ''
+        direction: horizontal
+      label: Tabbers
+      region: header
+    group_image:
+      children: {  }
+      parent_name: group_tabbers
+      weight: 38
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+      label: Image
+      region: header
+  layout_builder:
+    allow_custom: false
+    enabled: true
+    sections:
+      -
+        layout_id: layout_onecol
+        layout_settings:
+          label: 'Moderation Area'
+        components:
+          9abd3888-b9b9-46f8-8af3-d62db5deaf81:
+            uuid: 9abd3888-b9b9-46f8-8af3-d62db5deaf81
+            region: content
+            configuration:
+              id: 'field_block:node:wsi:moderation_state'
+              label: 'Moderation state'
+              provider: layout_builder
+              label_display: '0'
+              formatter:
+                label: inline
+                type: content_moderation_state
+                settings: {  }
+                third_party_settings: {  }
+              context_mapping:
+                entity: layout_builder.entity
+                view_mode: view_mode
+            additional: {  }
+            weight: 0
+        third_party_settings: {  }
+      -
+        layout_id: layout_threecol_section
+        layout_settings:
+          label: BAM
+          column_widths: 33-34-33
+        components:
+          60c96cc9-e05d-43c1-a289-a0fe25928c9a:
+            uuid: 60c96cc9-e05d-43c1-a289-a0fe25928c9a
+            region: first
+            configuration:
+              id: 'field_block:node:wsi:studyid'
+              label: 'Study ID'
+              provider: layout_builder
+              label_display: visible
+              formatter:
+                label: inline
+                type: string
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+              context_mapping:
+                entity: layout_builder.entity
+                view_mode: view_mode
+            additional: {  }
+            weight: 0
+          f835cf63-799a-410d-be70-965b0f51433a:
+            uuid: f835cf63-799a-410d-be70-965b0f51433a
+            region: second
+            configuration:
+              id: 'field_block:node:wsi:clinicaltrialsubjectid'
+              label: '​Subject ID'
+              provider: layout_builder
+              label_display: visible
+              formatter:
+                label: inline
+                type: string
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+              context_mapping:
+                entity: layout_builder.entity
+                view_mode: view_mode
+            additional: {  }
+            weight: 0
+          18623158-c039-474f-8e62-62f42b152e24:
+            uuid: 18623158-c039-474f-8e62-62f42b152e24
+            region: third
+            configuration:
+              id: 'field_block:node:wsi:imageid'
+              label: 'Image ID'
+              provider: layout_builder
+              label_display: visible
+              formatter:
+                label: inline
+                type: string
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
+              context_mapping:
+                entity: layout_builder.entity
+                view_mode: view_mode
+            additional: {  }
+            weight: 0
+        third_party_settings: {  }
+id: node.wsi.review
+targetEntityType: node
+bundle: wsi
+mode: review
+content:
+  acquisitiondatetime:
+    weight: 5
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: header
+  clinicaltrialsubjectid:
+    weight: 16
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  content_moderation_control:
+    weight: 0
+    region: header
+    settings: {  }
+    third_party_settings: {  }
+  field_bulk_upload:
+    weight: 4
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  field_collection:
+    weight: 2
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: header
+  imagedvolumeheight:
+    weight: 6
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  imagedvolumewidth:
+    weight: 14
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  imageid:
+    weight: 11
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  links:
+    weight: 1
+    region: header
+    settings: {  }
+    third_party_settings: {  }
+  lossyimagecompression:
+    weight: 7
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  lossyimagecompressionmethod:
+    weight: 8
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  md5:
+    weight: 15
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  patientid:
+    weight: 12
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+  referencepixelphysicalvaluex:
+    weight: 9
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  referencepixelphysicalvaluey:
+    weight: 10
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_decimal
+    region: header
+  studyid:
+    weight: 13
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: header
+hidden:
+  field_iip_path: true
+  field_utarget: true
+  field_wsiimage: true
+  lossyimagecompressionratio: true
+  manufacturer: true
+  search_api_excerpt: true

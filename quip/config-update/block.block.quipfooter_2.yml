@@ -1,0 +1,25 @@
+uuid: 650ac5c9-c471-4bcb-9753-756ab0c04ee6
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:707d9aef-6374-43a2-98d0-b65b7f6855a2'
+  module:
+    - block_content
+  theme:
+    - bootstrap
+id: quipfooter_2
+theme: bootstrap
+region: footer
+weight: 0
+provider: null
+plugin: 'block_content:707d9aef-6374-43a2-98d0-b65b7f6855a2'
+settings:
+  id: 'block_content:707d9aef-6374-43a2-98d0-b65b7f6855a2'
+  label: QuIPFooter
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

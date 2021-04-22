@@ -1,0 +1,27 @@
+uuid: aeb4b905-fab7-4102-a880-3e9bbf52e5a4
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mappings
+    - node.type.bulk_csv_upload
+  module:
+    - file
+id: node.bulk_csv_upload.field_mappings
+field_name: field_mappings
+entity_type: node
+bundle: bulk_csv_upload
+label: Mappings
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: mappings
+  file_extensions: csv
+  max_filesize: ''
+  description_field: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

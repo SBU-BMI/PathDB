@@ -1,0 +1,22 @@
+uuid: e00cacaf-82f9-4fc4-814a-f3bc69af7aa4
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.wsi
+id: node.wsi.promote
+field_name: promote
+entity_type: node
+bundle: wsi
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

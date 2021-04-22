@@ -1,0 +1,23 @@
+uuid: c4e9e9b9-a246-4eb7-99bd-f2ea7363a4ff
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.referencepixelphysicalvaluex
+    - node.type.wsi
+id: node.wsi.referencepixelphysicalvaluex
+field_name: referencepixelphysicalvaluex
+entity_type: node
+bundle: wsi
+label: 'Reference Pixel Physical Value X'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

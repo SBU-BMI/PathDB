@@ -1,0 +1,21 @@
+uuid: ac20432f-b3a8-41f1-aa74-7466ad872430
+langcode: en
+status: false
+dependencies:
+  theme:
+    - seven
+id: seven_quipfooter
+theme: seven
+region: header
+weight: 0
+provider: null
+plugin: 'block_content:17eec47a-e4aa-4020-aae7-ba86347d94dd'
+settings:
+  id: 'block_content:17eec47a-e4aa-4020-aae7-ba86347d94dd'
+  label: 'QuIP Footer'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

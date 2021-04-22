@@ -43,6 +43,7 @@ module:
   layout_discovery: 0
   link: 0
   menu_ui: 0
+  moderated_content_bulk_publish: 0
   node: 0
   options: 0
   page_cache: 0
