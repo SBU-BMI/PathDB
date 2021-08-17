@@ -5,13 +5,17 @@
  * Install, update and uninstall functions for the LDAP authentication module.
  */
 
+declare(strict_types = 1);
+
+use Drupal\Core\Database\Database;
+
 /**
  * Implements hook_requirements().
  */
 function ldap_authentication_requirements($phase) {
 
   $requirements = [];
-  if ($phase != "install" && db_table_exists('ldapauth')) {
+  if ($phase != "install" && Database::getConnection()->schema()->tableExists('ldapauth')) {
     $requirements['ldap_authentication_ldap_integration'] = [
       'title' => t('LDAP Integration LDAP Auth Upgrade Concern'),
       'severity' => REQUIREMENT_WARNING,
@@ -55,5 +59,85 @@ function ldap_authentication_update_8304() {
     $config->clear('ldap_authentication_conf');
     $config->setData($data);
     $config->save(TRUE);
+  }
+}
+
+/**
+ * Update configuration to new syntax.
+ */
+function ldap_authentication_update_8305() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('ldap_authentication.settings');
+
+  switch ($config->get('passwordOption')) {
+    case 2:
+      $config->set('passwordOption', 'disable');
+      break;
+
+    case 3:
+      $config->set('passwordOption', 'hide');
+      break;
+
+    case 4:
+      $config->set('passwordOption', 'allow');
+      break;
+  }
+
+  switch ($config->get('emailOption')) {
+    case 2:
+      $config->set('emailOption', 'remove');
+      break;
+
+    case 3:
+      $config->set('emailOption', 'disable');
+      break;
+
+    case 4:
+      $config->set('emailOption', 'allow');
+      break;
+  }
+
+  switch ($config->get('emailUpdate')) {
+    case 1:
+      $config->set('emailUpdate', 'update_notify');
+      break;
+
+    case 2:
+      $config->set('emailUpdate', 'update');
+      break;
+
+    case 3:
+      $config->set('emailUpdate', 'no_update');
+      break;
+  }
+
+  switch ($config->get('authenticationMode')) {
+    case 1:
+      $config->set('authenticationMode', 'mixed');
+      break;
+
+    case 2:
+      $config->set('authenticationMode', 'exclusive');
+      break;
+  }
+
+  $config->save();
+}
+
+/**
+ * Add system administrator role for exclusion.
+ */
+function ldap_authentication_update_8306() {
+  $config = \Drupal::configFactory()
+    ->getEditable('ldap_authentication.settings');
+  if ($config->get('authenticationMode') == 'mixed') {
+    $config->set('skipAdministrators', TRUE);
+    $config->save();
+    return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be excluded from LDAP since mixed mode is active.');
+  }
+  else {
+    $config->set('skipAdministrators', FALSE);
+    $config->save();
+    return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be included in LDAP since exclusive mode is active.');
   }
 }

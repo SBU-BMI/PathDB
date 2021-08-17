@@ -43,6 +43,7 @@ module:
   layout_discovery: 0
   link: 0
   menu_ui: 0
+  moderated_content_bulk_publish: 0
   node: 0
   options: 0
   page_cache: 0
@@ -70,6 +71,7 @@ module:
   typed_data: 0
   update: 0
   user: 0
+  user_current_paths: 0
   views_base_url: 0
   views_bulk_edit: 0
   views_bulk_operations: 0

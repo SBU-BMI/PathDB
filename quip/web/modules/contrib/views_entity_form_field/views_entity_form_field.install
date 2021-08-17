@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the module.
+ */
+
+use Drupal\Component\Utility\NestedArray;
+
+/**
+ * Update all entity_form_field views fields to their proper views table.
+ */
+function views_entity_form_field_update_8001() {
+  // Used to cache views tables that have already been found.
+  $tables = [];
+
+  $views_storage = \Drupal::entityTypeManager()->getStorage('view');
+  foreach ($views_storage->loadMultiple() as $view_id => $view) {
+    /** @var \Drupal\views\Entity\View $view */
+    $updated = FALSE;
+    foreach (array_keys($view->get('display')) as $display_id) {
+      $display = &$view->getDisplay($display_id);
+
+      if (NestedArray::keyExists($display, ['display_options', 'fields']) && !empty($display['display_options']['fields'])) {
+        foreach ($display['display_options']['fields'] as &$field) {
+          // Find all entity_form_field plugins.
+          if ($field['plugin_id'] === 'entity_form_field') {
+            $entity_type_id = $field['entity_type'];
+
+            // Get entity type's views table ID if it's not already found.
+            if (!array_key_exists($entity_type_id, $tables)) {
+              $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+              $tables[$entity_type_id] = $entity_type->getBaseTable();
+              if ($entity_type->isTranslatable()) {
+                $tables[$entity_type_id] = $entity_type->getDataTable() ?: $entity_type_id . '_field_data';
+              }
+            }
+
+            // Update field 'table' ID and note that we updated the View.
+            $field['table'] = $tables[$entity_type_id];
+            $updated = TRUE;
+          }
+        }
+      }
+    }
+
+    // Save View if it's been updated.
+    if ($updated) {
+      $view->save();
+    }
+  }
+}

@@ -5,10 +5,11 @@
  * This module injects itself into Drupal's Authentication stack.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
-use Drupal\ldap_authentication\Helper\LdapAuthenticationConfiguration;
-use Drupal\ldap_user\Helper\ExternalAuthenticationHelper;
 
 /**
  * Implements hook_help().
@@ -16,43 +17,20 @@ use Drupal\ldap_user\Helper\ExternalAuthenticationHelper;
 function ldap_authentication_help($path, $arg) {
 
   $authentication_help = t('LDAP authentication allows authentication against an LDAP server. It may be used alongside other authentication means such as built in Drupal authentication, OpenID, etc.  More detailed help is available on drupal.org at !helplink.', [
-    '%helplink' => \Drupal::l('http://drupal.org/node/997082', Url::fromUri('http://drupal.org/node/997082')),
+    '%helplink' => Link::fromTextAndUrl('http://drupal.org/node/997082', Url::fromUri('http://drupal.org/node/997082')),
   ]
   );
   switch ($path) {
     case 'admin/config/people/ldap/authentication':
     case 'admin/help#ldap_authentication':
-      $output = '<p>' . $authentication_help . '</p>';
-      return $output;
+      return '<p>' . $authentication_help . '</p>';
   }
-}
-
-/**
- * Are we LDAP authenticated.
- *
- * @param int|User $user
- *   The user account.
- *
- * @return bool
- *   True if user is recorded as LDAP authenticated and identified.
- *
- * @deprecated
- */
-function ldap_authentication_ldap_authenticated($user) {
-  if (is_numeric($user)) {
-    $user = @\Drupal::entityManager()->getStorage('user')->load((int) $user);
-  }
-  if (!is_object($user) || $user->id() == 0) {
-    return FALSE;
-  }
-  $authname = ExternalAuthenticationHelper::getUserIdentifierFromMap($user->id());
-  return !empty($authname);
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function ldap_authentication_form_user_pass_alter(&$form, $form_state) {
+function ldap_authentication_form_user_pass_alter(&$form, FormStateInterface $form_state) {
   // Add the LDAP user password validation before the user module's validation.
   array_unshift($form['#validate'], 'ldap_authentication_user_pass_validate');
 }
@@ -68,7 +46,7 @@ function ldap_authentication_form_user_pass_alter(&$form, $form_state) {
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state.
  */
-function ldap_authentication_core_override_user_login_authenticate_validate(array $form, FormStateInterface &$form_state) {
+function ldap_authentication_core_override_user_login_authenticate_validate(array $form, FormStateInterface $form_state) {
   // No additional validation of user credentials is needed when the uid is set.
   if (!empty($form_state->get('uid'))) {
     return;
@@ -81,38 +59,55 @@ function ldap_authentication_core_override_user_login_authenticate_validate(arra
 /**
  * Change how password is validated.
  *
- * Primarily a check on the password field with configurable responses as
- * seen on the 'Authentication' tab.
+ * Prevents changing of password for LDAP-associated accounts, these
+ * fields are already blocked in the form but for password reset this is
+ * a necessary check. Non-LDAP accounts should not be affected.
  *
  * @param array $form
  *   The form.
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state.
  *
- *   TODO: Verify that this callback is actually needed. The form adjustments
- *   should already create a form that does not allow this.
  */
 function ldap_authentication_user_pass_validate(array &$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('ldap_authentication.settings');
+
+  if ($config->get('passwordOption') === 'allow') {
+    // Password field has not been disabled, reset is generally allowed.
+    return;
+  }
+
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
   $name_or_mail = trim($form_state->getValue('name'));
-  $account = user_load_by_mail($name_or_mail);
+  $users = $user_storage->loadByProperties(['mail' => $name_or_mail]);
+  $account = $users ? reset($users) : FALSE;
 
   if (!$account) {
-    $account = user_load_by_name($name_or_mail);
+    $users = $user_storage->loadByProperties(['name' => $name_or_mail]);
+    $account = $users ? reset($users) : FALSE;
   }
-  $config = \Drupal::config('ldap_authentication.settings');
-  if ($account && ldap_authentication_ldap_authenticated($account)) {
-    if ($config->get('passwordOption') != LdapAuthenticationConfiguration::$passwordFieldAllow) {
-      if ($config->get('ldapUserHelpLinkUrl')) {
-        $helpLink = \Drupal::l($config->get('ldapUserHelpLinkText'),
-          Url::fromUri($config->get('ldapUserHelpLinkUrl')));
-        $form_state->setErrorByName('name', t(
-          'You may not reset your password here. You must reset your password via the directions at @link.',
-          ['@link' => $helpLink])
-        );
-      }
-      else {
-        $form_state->setErrorByName('name', t("You may not reset your password here. You must reset your password via one of your organization's password management sites."));
-      }
+
+  if (!$account) {
+    // Fall through to regular user-not-found message and associated checks.
+    return;
+  }
+
+  /** @var \Drupal\externalauth\Authmap $authmap */
+  $authmap = \Drupal::service('externalauth.authmap');
+  $authname = $authmap->get($account->id(), 'ldap_user');
+  if ($authname) {
+    // It's an LDAP account and hide/disable is on, throw a validation error.
+    if ($config->get('ldapUserHelpLinkUrl')) {
+      $form_state->setErrorByName('name', t(
+          'You may not reset your password here. You must reset your password via the directions at <a href=":url">@text</a>.',
+          [
+            ':url' => $config->get('ldapUserHelpLinkUrl'),
+            '@text' => $config->get('ldapUserHelpLinkText'),
+          ])
+      );
+    }
+    else {
+      $form_state->setErrorByName('name', t("You may not reset your password here. You must reset your password via one of your organization's password management sites."));
     }
   }
 }
@@ -130,27 +125,30 @@ function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $fo
 
   $user = $form_state->getBuildInfo()['callback_object']->getEntity();
   $config = \Drupal::config('ldap_authentication.settings');
-  if (ldap_authentication_ldap_authenticated($user)) {
-    if ($config->get('emailOption') == LdapAuthenticationConfiguration::$emailFieldRemove) {
+  /** @var \Drupal\externalauth\Authmap $authmap */
+  $authmap = \Drupal::service('externalauth.authmap');
+  $authname = $authmap->get($user->id(), 'ldap_user');
+  if ($authname) {
+    if ($config->get('emailOption') === 'remove') {
       $form['account']['mail']['#access'] = FALSE;
     }
-    elseif ($config->get('emailOption') == LdapAuthenticationConfiguration::$emailFieldDisable) {
+    elseif ($config->get('emailOption') === 'disable') {
       $form['account']['mail']['#disabled'] = TRUE;
       $form['account']['mail']['#description'] = t('This email address is automatically set and may not be changed.');
     }
 
-    if (!LdapAuthenticationConfiguration::showPasswordField($user)) {
-      if ($config->get('passwordOption') == LdapAuthenticationConfiguration::$passwordFieldHide) {
+    if (!ldap_authentication_show_password_field($user)) {
+      if ($config->get('passwordOption') === 'hide') {
         // TODO: Allow for the case where email changes are allowed to show
         // current pass.
         $form['account']['current_pass']['#access'] = FALSE;
         $form['account']['pass']['#access'] = FALSE;
       }
-      elseif ($config->get('emailOption') == LdapAuthenticationConfiguration::$emailFieldDisable) {
+      elseif ($config->get('emailOption') === 'disable') {
         $form['account']['current_pass']['#disabled'] = TRUE;
         $form['account']['pass']['#disabled'] = TRUE;
         if ($config->get('ldapUserHelpLinkUrl')) {
-          $form['account']['current_pass']['#description'] = \Drupal::l($config->get('ldapUserHelpLinkText'), Url::fromUri($config->get('ldapUserHelpLinkUrl')));
+          $form['account']['current_pass']['#description'] = Link::fromTextAndUrl($config->get('ldapUserHelpLinkText'), Url::fromUri($config->get('ldapUserHelpLinkUrl')));
         }
         else {
           $form['account']['current_pass']['#description'] = t('The password cannot be changed using this website.');
@@ -158,6 +156,39 @@ function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $fo
       }
     }
   }
+}
+
+/**
+ * Should the password field be shown?
+ *
+ * @param \Drupal\user\UserInterface|\Drupal\Core\Session\AccountProxyInterface $user
+ *   User account.
+ *
+ * @return bool
+ *   Password status.
+ */
+function ldap_authentication_show_password_field($user = NULL) {
+
+  if (!$user) {
+    $user = \Drupal::currentUser();
+  }
+
+  if ($user->hasPermission('administer users')) {
+    return TRUE;
+  }
+
+  // Hide only if LDAP authenticated and updating password is not allowed.
+  /** @var \Drupal\externalauth\Authmap $authmap */
+  $authmap = \Drupal::service('externalauth.authmap');
+  $authname = $authmap->get($user->id(), 'ldap_user');
+  if ($authname) {
+    $password_option = \Drupal::config('ldap_authentication.settings')
+      ->get('passwordOption');
+    return $password_option === 'allow';
+  }
+
+  // Default to showing.
+  return TRUE;
 }
 
 /**
@@ -175,7 +206,7 @@ function ldap_authentication_form_user_login_form_alter(&$form, FormStateInterfa
  *
  * For user_login_block.
  */
-function ldap_authentication_form_user_login_block_alter(&$form, &$form_state) {
+function ldap_authentication_form_user_login_block_alter(&$form, FormStateInterface $form_state) {
   _ldap_authentication_login_form_alter($form, $form_state, 'user_login_block');
 
 }
@@ -188,7 +219,7 @@ function ldap_authentication_form_user_login_block_alter(&$form, &$form_state) {
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state.
  */
-function ldap_authentication_user_login_authenticate_validate(array $form, FormStateInterface &$form_state) {
+function ldap_authentication_user_login_authenticate_validate(array $form, FormStateInterface $form_state) {
   if ($form_state->getValue('pass') && $form_state->getValue('name')) {
     $validator = \Drupal::service('ldap_authentication.login_validator');
     $form_state = $validator->validateLogin($form_state);
@@ -208,8 +239,10 @@ function ldap_authentication_user_login_authenticate_validate(array $form, FormS
  * @param string $form_id
  *   The form ID.
  */
-function _ldap_authentication_login_form_alter(array &$form, FormStateInterface &$form_state, $form_id) {
-  if (!LdapAuthenticationConfiguration::hasEnabledAuthenticationServers()) {
+function _ldap_authentication_login_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\ldap_authentication\AuthenticationServers $authentication_servers */
+  $authentication_servers = \Drupal::service('ldap_authentication.servers');
+  if (!$authentication_servers->authenticationServersAvailable()) {
     return;
   }
 
@@ -228,12 +261,14 @@ function _ldap_authentication_login_form_alter(array &$form, FormStateInterface 
   // 'user_login_authenticate_validate',
   // 'user_login_final_validate'
   // ].
-  if (@in_array('::validateAuthentication', $form['#validate']) &&
-    $config->get('authenticationMode')) {
-    $key = array_search('::validateAuthentication', $form['#validate']);
-    $form['#validate'][$key] = 'ldap_authentication_core_override_user_login_authenticate_validate';
-    array_splice($form['#validate'], $key + 1, 0, 'ldap_authentication_user_login_authenticate_validate');
-  }
+  if (is_array($form['#validate']) && $config->get('authenticationMode')) {
+    $key = array_search('::validateAuthentication', $form['#validate'], TRUE);
+    if ($key !== FALSE) {
+      $form['#validate'][$key] = 'ldap_authentication_core_override_user_login_authenticate_validate';
+      array_splice($form['#validate'], $key + 1, 0, 'ldap_authentication_user_login_authenticate_validate');
+
+    }
+   }
 
   // Add help information for entering in username/password.
   if ($config->get('loginUIUsernameTxt')) {

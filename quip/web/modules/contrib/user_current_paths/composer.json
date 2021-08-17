@@ -1,0 +1,8 @@
+{
+  "name": "drupal/current_user_paths",
+  "type": "drupal-module",
+  "description": "Current user paths",
+  "homepage": "https://www.drupal.org/project/current_user_paths",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev"
+}

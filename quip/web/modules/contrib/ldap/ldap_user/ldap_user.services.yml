@@ -2,14 +2,70 @@ services:
   logger.channel.ldap_user:
     parent: logger.channel_base
     arguments: ['ldap_user']
-  init_subscriber:
-    class: Drupal\ldap_user\EventSubscriber\InitSubscriber
-    tags:
-      -
-        name: event_subscriber
-  ldap_user.orphan_processor:
+  ldap.drupal_user_processor:
+    class: Drupal\ldap_user\Processor\DrupalUserProcessor
+    arguments:
+      - '@logger.channel.ldap_user'
+      - '@config.factory'
+      - '@ldap.detail_log'
+      - '@ldap.token_processor'
+      - '@externalauth.authmap'
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@token'
+      - '@module_handler'
+      - '@current_user'
+      - '@ldap.user_manager'
+      - '@event_dispatcher'
+      - '@ldap_user.field_provider'
+      - '@messenger'
+  ldap_user.field_provider:
+    class: Drupal\ldap_user\FieldProvider
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'
+      - '@module_handler'
+      - '@entity_field.manager'
+  ldap.orphan_processor:
     class: Drupal\ldap_user\Processor\OrphanProcessor
-    arguments: ['@logger.channel.ldap_user', '@config.factory', '@ldap.servers', '@plugin.manager.mail', '@language_manager', '@state', '@entity_type.manager']
-  ldap_user.group_user_update_processor:
+    arguments:
+      - '@logger.channel.ldap_user'
+      - '@config.factory'
+      - '@plugin.manager.mail'
+      - '@language_manager'
+      - '@state'
+      - '@entity_type.manager'
+      - '@ldap.user_manager'
+  ldap.group_user_update_processor:
     class: Drupal\ldap_user\Processor\GroupUserUpdateProcessor
-    arguments: ['@logger.channel.ldap_user', '@ldap.detail_log', '@config.factory', '@ldap.servers', '@state', '@module_handler', '@entity_type.manager']
+    arguments:
+      - '@logger.channel.ldap_user'
+      - '@ldap.detail_log'
+      - '@config.factory'
+      - '@state'
+      - '@module_handler'
+      - '@entity_type.manager'
+      - '@externalauth.authmap'
+      - '@ldap.query'
+      - '@ldap.drupal_user_processor'
+  ldap_user.ldap_provision:
+    class: Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber
+    arguments:
+      - '@config.factory'
+      - '@logger.channel.ldap_user'
+      - '@ldap.detail_log'
+      - '@entity_type.manager'
+      - '@module_handler'
+      - '@ldap.user_manager'
+      - '@ldap_user.field_provider'
+      - '@file_system'
+    tags:
+      - { name: event_subscriber }
+  ldap_user.ldap_delete:
+    class: Drupal\ldap_user\EventSubscriber\LdapEntryDeletionSubscriber
+    arguments:
+      - '@config.factory'
+      - '@logger.channel.ldap_user'
+      - '@ldap.user_manager'
+    tags:
+      - { name: event_subscriber }

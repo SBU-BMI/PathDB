@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\Provider;
 
 use Drupal\authorization\Plugin\ConfigurableAuthorizationPluginBase;
@@ -47,14 +45,14 @@ abstract class ProviderPluginBase extends ConfigurableAuthorizationPluginBase im
   /**
    * {@inheritdoc}
    */
-  public function isSyncOnLogonSupported(): bool {
+  public function isSyncOnLogonSupported() {
     return $this->syncOnLogonSupported;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function revocationSupported(): bool {
+  public function revocationSupported() {
     return $this->revocationSupported;
   }
 
@@ -66,28 +64,28 @@ abstract class ProviderPluginBase extends ConfigurableAuthorizationPluginBase im
    * @return array
    *   Handlers.
    */
-  public function getHandlers(): array {
+  public function getHandlers() {
     return $this->handlers;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getProposals(UserInterface $user): array {
+  public function getProposals(UserInterface $user) {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function filterProposals(array $proposals, array $providerMapping): array {
+  public function filterProposals(array $proposals, array $providerMapping) {
     return $proposals;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function sanitizeProposals(array $proposals): array {
+  public function sanitizeProposals(array $proposals) {
     return $proposals;
   }
 

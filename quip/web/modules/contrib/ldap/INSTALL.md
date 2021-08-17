@@ -16,11 +16,11 @@ sAMAccountName is the unique name attribute for your Active Directory.
 ### Requirements
 
 The following requirements need to be met for you to work with any of the LDAP
-modules. 
+modules.
 
-* PHP version 5.6.
+* PHP version 7.1
 * PHP LDAP extension.
-* Drupal Core >=8.2.0.
+* Drupal Core >=8.8.0.
 
 For SSO please see ldap_sso/README.md.
 
@@ -52,11 +52,11 @@ general instructions under Debugging for recommended steps.
 We recommend you follow these steps to solve your issue:
 
 1. Review the recent log messages for errors.
-1. Enable ldap_help (and activated detailed logging under settings) to receive
-additional debugging information.
+1. Enable detailed watchdog logging under LDAP settings to receive additional
+ debugging information.
 1. Isolate a test-case that ideally is proven to work with at least one other
 LDAP consumer other than your Drupal site.
-1. If all else fails consider 
+1. If all else fails consider
 [filing a support request](https://www.drupal.org/node/add/project-issue/ldap).
 Please note that you will need to provide detailed information on your
 environment and usage scenario. The more complex this is the less likely it is

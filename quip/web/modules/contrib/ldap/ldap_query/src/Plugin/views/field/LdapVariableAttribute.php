@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Plugin\views\field;
 
 use Drupal\ldap_query\Plugin\views\VariableAttributeCustomization;

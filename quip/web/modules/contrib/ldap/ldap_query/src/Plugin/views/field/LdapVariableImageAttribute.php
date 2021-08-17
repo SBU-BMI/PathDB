@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Plugin\views\field;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -24,7 +26,8 @@ class LdapVariableImageAttribute extends LdapVariableAttribute {
    * @return array|null
    *   Markup with image if available.
    */
-  public function render(ResultRow $values) {
+  public function render(ResultRow $values): array {
+    $formatter = '';
     if ($this->getValue($values)) {
       $data = $this->getValue($values)[0];
       $formatter = new FormattableMarkup(
@@ -32,14 +35,14 @@ class LdapVariableImageAttribute extends LdapVariableAttribute {
           ':src' => base64_encode($data),
         ]
       );
-      return ['#markup' => $formatter];
     }
+    return ['#markup' => $formatter];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);
     // To avoid code complexity, multi-value is removed for images, since
     // that is in unusual scenario.

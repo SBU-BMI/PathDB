@@ -127,6 +127,28 @@ class FileLoaderTest extends TestCase
         $this->assertCount(2, $loadedFiles);
         $this->assertNotContains('ExcludeFile.txt', $loadedFiles);
     }
+
+    /**
+     * @dataProvider excludeTrailingSlashConsistencyProvider
+     */
+    public function testExcludeTrailingSlashConsistency(string $exclude)
+    {
+        $loader = new TestFileLoader(new FileLocator(__DIR__.'/../Fixtures'));
+        $loadedFiles = $loader->import('ExcludeTrailingSlash/*', null, false, null, $exclude);
+        $this->assertCount(2, $loadedFiles);
+        $this->assertNotContains('baz.txt', $loadedFiles);
+    }
+
+    public function excludeTrailingSlashConsistencyProvider(): iterable
+    {
+        yield [__DIR__.'/../Fixtures/Exclude/ExcludeToo/'];
+        yield [__DIR__.'/../Fixtures/Exclude/ExcludeToo'];
+        yield [__DIR__.'/../Fixtures/Exclude/ExcludeToo/*'];
+        yield [__DIR__.'/../Fixtures/*/ExcludeToo'];
+        yield [__DIR__.'/../Fixtures/*/ExcludeToo/'];
+        yield [__DIR__.'/../Fixtures/Exclude/ExcludeToo/*'];
+        yield [__DIR__.'/../Fixtures/Exclude/ExcludeToo/AnotheExcludedFile.txt'];
+    }
 }
 
 class TestFileLoader extends FileLoader
@@ -143,22 +165,12 @@ class TestFileLoader extends FileLoader
         return $this->supports;
     }
 
-    public function addLoading($resource)
+    public function addLoading(string $resource): void
     {
         self::$loading[$resource] = true;
     }
 
-    public function removeLoading($resource)
-    {
-        unset(self::$loading[$resource]);
-    }
-
-    public function clearLoading()
-    {
-        self::$loading = [];
-    }
-
-    public function setSupports($supports)
+    public function setSupports(bool $supports): void
     {
         $this->supports = $supports;
     }

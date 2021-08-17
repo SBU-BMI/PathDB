@@ -3,10 +3,12 @@
 namespace Drupal\views_base_url\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\path_alias\AliasManagerInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A handler to output site's base url.
@@ -16,6 +18,33 @@ use Drupal\Core\Link;
  * @ViewsField("base_url")
  */
 class BaseUrl extends FieldPluginBase {
+
+  /**
+   * Definition of path alias manager.
+   *
+   * @var \Drupal\path_alias\AliasManager
+   */
+  protected $pathAliasManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AliasManagerInterface $pathAliasManager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->pathAliasManager = $pathAliasManager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('path_alias.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -149,7 +178,7 @@ class BaseUrl extends FieldPluginBase {
       // Link path.
       if (!empty($this->options['show_link_options']['link_path'])) {
         $aliased_path = $this->viewsTokenReplace($this->options['show_link_options']['link_path'], $tokens);
-        $aliased_path = \Drupal::service('path.alias_manager')->getAliasByPath($aliased_path);
+        $aliased_path = $this->pathAliasManager->getAliasByPath($aliased_path);
         $link_path = "$base_url$aliased_path";
       }
       else {

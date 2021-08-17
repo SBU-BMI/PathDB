@@ -1,10 +1,11 @@
 name: 'LDAP Users'
 description: 'Module for LDAP identified users.  User may be associated via LDAP authentication, LDAP authorization, or from account provisioning.  Configures syncing of LDAP entries to Drupal user properties, fields and the opposite direction.'
 type: module
-# core: 8.x
+core_version_requirement: ^8.7.7 || ^9
 package: 'Lightweight Directory Access Protocol'
 dependencies:
   - ldap:ldap_servers
+  - ldap:ldap_query
   - externalauth:externalauth
 stylesheets:
   all:
@@ -12,8 +13,7 @@ stylesheets:
 
 configure: ldap_user.admin_form
 
-# Information added by Drupal.org packaging script on 2019-05-31
-version: '8.x-3.0-beta7'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2021-05-16
+version: '8.x-4.0-beta3'
 project: 'ldap'
-datestamp: 1559320103
+datestamp: 1621188711

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_authentication\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -18,7 +20,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class LdapAuthenticationProfileUpdateForm extends FormBase {
 
+  /**
+   * Current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $currentUser;
+
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
   /**
@@ -30,6 +43,11 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
 
   /**
    * Constructor.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   Current user.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
    */
   public function __construct(AccountInterface $current_user, EntityTypeManagerInterface $entity_type_manager) {
     $this->currentUser = $current_user;
@@ -76,7 +94,9 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
     if (!filter_var($form_state->getValue(['mail']), FILTER_VALIDATE_EMAIL)) {
       $form_state->setErrorByName('mail', $this->t('You must specify a valid email address.'));
     }
-    $existing = user_load_by_mail($form_state->getValue(['mail']));
+    $users = $this->entityTypeManager->getStorage('user')
+      ->loadByProperties(['mail' => $form_state->getValue(['mail'])]);
+    $existing = $users ? reset($users) : FALSE;
     if ($existing) {
       $form_state->setErrorByName('mail', $this->t('This email address is already in use.'));
     }
@@ -95,7 +115,7 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
     $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser->id());
     $user->set('mail', $form_state->getValue('mail'));
     $user->save();
-    drupal_set_message($this->t('Your profile has been updated.'));
+    $this->messenger()->addMessage($this->t('Your profile has been updated.'));
     $form_state->setRedirect('<front>');
   }
 

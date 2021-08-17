@@ -1,0 +1,5 @@
+user_current_paths.edit_redirect:
+  title: 'Edit my account'
+  weight: -9
+  route_name: user_current_paths.edit_redirect
+  menu_name: account

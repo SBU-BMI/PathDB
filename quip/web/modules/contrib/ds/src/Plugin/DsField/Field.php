@@ -77,6 +77,12 @@ TWIG;
       $attributes->addClass($config['class']);
     }
 
+    // Build the link attributes.
+    $link_attributes = new Attribute();
+    if (!empty($config['link']) && !empty($config['link class'])) {
+      $link_attributes->addClass($config['link class']);
+    }
+
     return [
       '#type' => 'inline_template',
       '#template' => $template,
@@ -84,7 +90,7 @@ TWIG;
         'is_link' => $is_link,
         'wrapper' => !empty($config['wrapper']) ? $config['wrapper'] : '',
         'attributes' => $attributes,
-        'link_attributes' => new Attribute(),
+        'link_attributes' => $link_attributes,
         'entity_url' => $entity_url,
         'output' => $output,
       ],

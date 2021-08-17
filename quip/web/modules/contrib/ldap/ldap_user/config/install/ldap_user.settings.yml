@@ -11,6 +11,7 @@ ldapEntryProvisionTriggers:
 userUpdateCronQuery: none
 userUpdateCronInterval: daily
 orphanedDrupalAcctBehavior: ldap_user_orphan_email
+orphanedDrupalAcctReportingInbox: ''
 orphanedCheckQty: 100
 orphanedAccountCheckInterval: weekly
 userConflictResolve: resolve

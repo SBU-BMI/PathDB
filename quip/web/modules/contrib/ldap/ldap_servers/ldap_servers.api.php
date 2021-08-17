@@ -5,6 +5,8 @@
  * Hooks provided by ldap_servers module.
  */
 
+declare(strict_types = 1);
+
 use Drupal\ldap_servers\Entity\Server;
 
 /**
@@ -91,57 +93,4 @@ function hook_ldap_entry_pre_provision_alter(array &$ldap_entries, Server $ldap_
  */
 function hook_ldap_entry_post_provision(array &$ldap_entries, Server $ldap_server, array $context) {
 
-}
-
-/**
- * Perform alterations of LDAP attributes before query is made.
- *
- * To avoid excessive attributes in an LDAP query, modules should
- * alter attributes needed based on $op parameter.
- *
- * @param array $attributes
- *   Array of attributes to be returned from LDAP queries where:
- *     - each key is LDAP attribute name (e.g. mail, cn)
- *     - each value is associative array of form:
- *       - 'conversion' => NULL,
- *       - 'values' => array(0 => 'john', 1 => 'johnny'))
- * @param array $params
- *   Context array with some or all of the following key/values
- *   'sid' => Drupal account object,
- *   'ldap_context' => ,
- *   'direction' =>.
- */
-function hook_ldap_attributes_needed_alter(array &$attributes, array $params) {
-
-}
-
-/**
- * Perform alterations of $ldap_user variable.
- *
- * @param array $ldap_entry
- *   LDAP entry result.
- * @param array $params
- *   Context array with some or all of the following key/values
- *   'account' => Drupal account object,
- *   'ldap_context' => ,
- *   'module' =>  module calling alter, e.g. 'ldap_user',
- *   'function' => function calling alter, e.g. 'provisionLdapEntry'.
- */
-function hook_ldap_user_alter(array &$ldap_entry, array $params) {
-
-}
-
-/**
- * Allow the results from the LDAP search answer to be modified.
- *
- * The query parameters are provided as context information (read-only).
- *
- * @param array $entries
- *   LDAP entry result.
- * @param array $ldap_query_params
- *   Parameters for the query.
- */
-function hook_ldap_server_search_results_alter(array &$entries, array $ldap_query_params) {
-  // Look for a specific part of the $results array
-  // and maybe change it.
 }

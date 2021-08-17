@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\Tests\authorization_drupal_roles\Unit;
 
 use Drupal\authorization_drupal_roles\Plugin\authorization\Consumer\DrupalRolesConsumer;
@@ -23,7 +21,7 @@ class DrupalRolesConsumerTests extends UnitTestCase {
   /**
    * Setup.
    */
-  public function setUp(): void {
+  public function setUp() {
     $this->consumerPlugin = $this->getMockBuilder(DrupalRolesConsumer::class)
       ->disableOriginalConstructor()
       ->setMethods(NULL)
@@ -33,7 +31,7 @@ class DrupalRolesConsumerTests extends UnitTestCase {
   /**
    * Test filterProposals().
    */
-  public function testFilterProposals(): void {
+  public function testFilterProposals() {
 
     $proposals = [
       'student' => 'student',
@@ -45,21 +43,21 @@ class DrupalRolesConsumerTests extends UnitTestCase {
       'role' => 'source',
     ];
     $result = $this->consumerPlugin->filterProposals($proposals, $consumerMapping);
-    $this->assertEquals($proposals, $result);
+    $this->assertArrayEquals($proposals, $result);
 
     // Match for single proposal.
     $consumerMapping = [
       'role' => 'staff',
     ];
     $result = $this->consumerPlugin->filterProposals($proposals, $consumerMapping);
-    $this->assertEquals(['staff' => 'staff'], $result);
+    $this->assertArrayEquals(['staff' => 'staff'], $result);
 
     // Invalid role.
     $consumerMapping = [
       'role' => 'none',
     ];
     $result = $this->consumerPlugin->filterProposals($proposals, $consumerMapping);
-    $this->assertEquals([], $result);
+    $this->assertArrayEquals([], $result);
 
     // No proposals.
     $proposals = [];
@@ -67,7 +65,7 @@ class DrupalRolesConsumerTests extends UnitTestCase {
       'role' => 'student',
     ];
     $result = $this->consumerPlugin->filterProposals($proposals, $consumerMapping);
-    $this->assertEquals([], $result);
+    $this->assertArrayEquals([], $result);
   }
 
 }

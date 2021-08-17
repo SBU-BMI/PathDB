@@ -1,12 +1,9 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
 /**
@@ -17,28 +14,28 @@ class AuthorizationProfileDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getQuestion(): TranslatableMarkup {
+  public function getQuestion() {
     return $this->t('Are you sure you want to delete %name?', ['%name' => $this->entity->label()]);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCancelUrl(): Url {
+  public function getCancelUrl() {
     return new Url('entity.authorization_profile.collection');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getConfirmText(): TranslatableMarkup {
+  public function getConfirmText() {
     return $this->t('Delete');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->entity->delete();
 
     $this->messenger()->addStatus($this->t('content @type: deleted @label.',

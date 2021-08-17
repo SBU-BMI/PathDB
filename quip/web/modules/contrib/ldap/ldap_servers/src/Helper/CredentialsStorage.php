@@ -1,37 +1,56 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_servers\Helper;
 
 /**
  * Temporarily stores credentials from user input.
  *
  * This temporary storage is required so that LDAP can work with them in the
- * clear indepedent of the login form process and to avoid passend them
+ * clear independent of the login form process and to avoid passing them
  * around dozens of functions.
  */
 class CredentialsStorage {
 
-  private static $userDn = NULL;
-  private static $userPassword = NULL;
+  /**
+   * User DN.
+   *
+   * @var string
+   */
+  private static $userDn;
+
+  /**
+   * User Password.
+   *
+   * @var string
+   */
+  private static $userPassword;
+
+  /**
+   * Validate.
+   *
+   * @var bool
+   */
   private static $validate = FALSE;
 
   /**
    * Stores the user DN as provided by other LDAP modules.
    *
-   * @param string $userDn
+   * @param string|null $userDn
    *   DN to store.
    */
-  public static function storeUserDn($userDn) {
+  public static function storeUserDn(?string $userDn): void {
     self::$userDn = $userDn;
   }
 
   /**
    * Stores the password from user input.
    *
-   * @param string $password
+   * @param string|null $password
    *   Password to store.
    */
-  public static function storeUserPassword($password) {
+  public static function storeUserPassword(?string $password): void {
     self::$userPassword = $password;
   }
 
@@ -41,7 +60,7 @@ class CredentialsStorage {
    * @param bool $validate
    *   Defaults to false.
    */
-  public static function testCredentials($validate) {
+  public static function testCredentials($validate): void {
     self::$validate = $validate;
   }
 
@@ -51,7 +70,7 @@ class CredentialsStorage {
    * @return null|string
    *   Login name.
    */
-  public static function getUserDn() {
+  public static function getUserDn(): ?string {
     return self::$userDn;
   }
 
@@ -61,7 +80,7 @@ class CredentialsStorage {
    * @return null|string
    *   Login password.
    */
-  public static function getPassword() {
+  public static function getPassword(): ?string {
     return self::$userPassword;
   }
 
@@ -71,7 +90,7 @@ class CredentialsStorage {
    * @return bool
    *   Defaults to false.
    */
-  public static function validateCredentials() {
+  public static function validateCredentials(): bool {
     return self::$validate;
   }
 

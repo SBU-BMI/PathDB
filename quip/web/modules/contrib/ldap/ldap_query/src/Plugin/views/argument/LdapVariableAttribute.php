@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Plugin\views\argument;
 
 use Drupal\ldap_query\Plugin\views\VariableAttributeCustomization;
@@ -18,8 +20,8 @@ class LdapVariableAttribute extends LdapAttribute {
   /**
    * {@inheritdoc}
    */
-  public function query($group_by = FALSE) {
-    parent::query($group_by);
+  public function query($group_by = FALSE): void {
+    $this->ensureMyTable();
     $this->realField = $this->options['attribute_name'];
     $this->query->addWhere(0, $this->realField, $this->argument, '=');
   }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization;
 
 /**
@@ -40,7 +38,7 @@ class AuthorizationResponse {
    * @param array $authorizations_applied
    *   Authorizations applied.
    */
-  public function __construct(string $message, bool $skipped, array $authorizations_applied) {
+  public function __construct($message, $skipped, array $authorizations_applied) {
     $this->message = $message;
     $this->skipped = $skipped;
     $this->authorizationsApplied = $authorizations_applied;
@@ -52,7 +50,7 @@ class AuthorizationResponse {
    * @return string
    *   The message.
    */
-  public function getMessage(): string {
+  public function getMessage() {
     return $this->message;
   }
 
@@ -62,7 +60,7 @@ class AuthorizationResponse {
    * @return bool
    *   If skipped.
    */
-  public function getSkipped(): bool {
+  public function getSkipped() {
     return $this->skipped;
   }
 
@@ -72,7 +70,7 @@ class AuthorizationResponse {
    * @return array
    *   Authorizations.
    */
-  public function getAuthorizationsApplied(): array {
+  public function getAuthorizationsApplied() {
     return $this->authorizationsApplied;
   }
 
