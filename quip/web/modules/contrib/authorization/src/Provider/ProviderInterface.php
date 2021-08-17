@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\Provider;
 
 use Drupal\authorization\Plugin\ConfigurableAuthorizationPluginInterface;
@@ -23,7 +21,7 @@ interface ProviderInterface extends ConfigurableAuthorizationPluginInterface {
    * @return array
    *   Filtered proposals.
    */
-  public function filterProposals(array $proposals, array $providerMapping): array;
+  public function filterProposals(array $proposals, array $providerMapping);
 
   /**
    * Get the proposals for this users.
@@ -34,7 +32,7 @@ interface ProviderInterface extends ConfigurableAuthorizationPluginInterface {
    * @return array
    *   Relevant proposals.
    */
-  public function getProposals(UserInterface $user): array;
+  public function getProposals(UserInterface $user);
 
   /**
    * Sanitize proposals.
@@ -45,7 +43,7 @@ interface ProviderInterface extends ConfigurableAuthorizationPluginInterface {
    * @return array
    *   Processed proposals.
    */
-  public function sanitizeProposals(array $proposals): array;
+  public function sanitizeProposals(array $proposals);
 
   /**
    * Provides sync on logon.
@@ -53,7 +51,7 @@ interface ProviderInterface extends ConfigurableAuthorizationPluginInterface {
    * @return bool
    *   Sync on logon supported.
    */
-  public function isSyncOnLogonSupported(): bool;
+  public function isSyncOnLogonSupported();
 
   /**
    * Provides revocation.
@@ -61,6 +59,6 @@ interface ProviderInterface extends ConfigurableAuthorizationPluginInterface {
    * @return bool
    *   Revocation supported.
    */
-  public function revocationSupported(): bool;
+  public function revocationSupported();
 
 }

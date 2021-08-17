@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\Plugin;
 
 use Drupal\Core\Entity\DependencyTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -27,11 +24,7 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function __construct(
-    array $configuration,
-    string $plugin_id,
-    array $plugin_definition
-  ) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     $configuration += $this->defaultConfiguration();
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -39,12 +32,7 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public static function create(
-    ContainerInterface $container,
-    array $configuration,
-    $plugin_id,
-    $plugin_definition
-  ) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $plugin = new static($configuration, $plugin_id, $plugin_definition);
 
     /** @var \Drupal\Core\StringTranslation\TranslationInterface $translation */
@@ -57,7 +45,7 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function label(): TranslatableMarkup {
+  public function label() {
     $plugin_definition = $this->getPluginDefinition();
     return $plugin_definition['label'];
   }
@@ -65,22 +53,22 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function getDescription(): string {
+  public function getDescription() {
     $plugin_definition = $this->getPluginDefinition();
-    return $plugin_definition['description'] ?? '';
+    return isset($plugin_definition['description']) ? $plugin_definition['description'] : '';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getType(): string {
+  public function getType() {
     return $this->type;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getTokens(): array {
+  public function getTokens() {
     $tokens = [];
     $tokens['@' . $this->getType() . '_name'] = $this->label();
     $tokens['@' . $this->getType() . '_mappingDirections'] = '';
@@ -91,7 +79,7 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration(): array {
+  public function defaultConfiguration() {
     return [];
   }
 
@@ -111,24 +99,24 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {}
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {}
 
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {}
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {}
 
   /**
    * {@inheritdoc}
    */
-  public function buildRowForm(array $form, FormStateInterface $form_state, $index): array {
+  public function buildRowForm(array $form, FormStateInterface $form_state, $index) {
     // Should be removed.
     return [];
   }
@@ -136,12 +124,12 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function validateRowForm(array &$form, FormStateInterface $form_state): void {}
+  public function validateRowForm(array &$form, FormStateInterface $form_state) {}
 
   /**
    * {@inheritdoc}
    */
-  public function buildRowDescription(array $form, FormStateInterface $form_state): string {
+  public function buildRowDescription(array $form, FormStateInterface $form_state) {
     // Should be removed.
     return "";
   }
@@ -149,12 +137,12 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * {@inheritdoc}
    */
-  public function submitRowForm(array &$form, FormStateInterface $form_state): void {}
+  public function submitRowForm(array &$form, FormStateInterface $form_state) {}
 
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies(): array {
+  public function calculateDependencies() {
     $this->addDependency('module', $this->getPluginDefinition()['provider']);
     return $this->dependencies;
   }

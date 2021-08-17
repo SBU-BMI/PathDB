@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\Tests\authorization_drupal_roles\Kernel;
 
 use Drupal\authorization_drupal_roles\Plugin\authorization\Consumer\DrupalRolesConsumer;
@@ -18,7 +16,7 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = [
+  public static $modules = [
     'user',
     'system',
     'field',
@@ -39,7 +37,7 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
   /**
    * Setup of kernel tests.
    */
-  public function setUp(): void {
+  public function setUp() {
     parent::setUp();
 
     $this->installEntitySchema('user');
@@ -54,7 +52,7 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
   /**
    * Tests granting new roles.
    */
-  public function testGrant(): void {
+  public function testGrant() {
     $account = User::create(['name' => 'hpotter']);
     $account->set('authorization_drupal_roles_roles', ['student', 'gryffindor']);
     $this->consumerPlugin->grantSingleAuthorization($account, 'student');
@@ -62,8 +60,8 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
 
     // No duplicate information in authorization record, only one role because
     // nothing else assigned, yet.
-    self::assertEquals($savedData, $account->get('authorization_drupal_roles_roles')->getValue());
-    self::assertEquals(['anonymous', 'student'], $account->getRoles());
+    $this->assertEquals($account->get('authorization_drupal_roles_roles')->getValue(), $savedData);
+    $this->assertEquals($account->getRoles(), ['anonymous', 'student']);
 
     $this->consumerPlugin->grantSingleAuthorization($account, 'wizard');
     $savedData = [
@@ -71,13 +69,13 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
       1 => ['value' => 'gryffindor'],
       2 => ['value' => 'wizard'],
     ];
-    self::assertEquals($account->get('authorization_drupal_roles_roles')->getValue(), $savedData);
+    $this->assertEquals($account->get('authorization_drupal_roles_roles')->getValue(), $savedData);
   }
 
   /**
    * Previously granted roles are removed, when no longer applicable.
    */
-  public function testRevocation(): void {
+  public function testRevocation() {
     $account = User::create(['name' => 'hpotter']);
     $roles_granted = ['student', 'gryffindor', 'staff'];
     $account->set('authorization_drupal_roles_roles', $roles_granted);
@@ -89,8 +87,8 @@ class DrupalRolesIntegrationTest extends EntityKernelTestBase {
     // the provider and removal is presumed enabled.
     $active_roles = ['staff'];
     $this->consumerPlugin->revokeGrants($account, $active_roles);
-    self::assertEquals([0 => ['value' => 'staff']], $account->get('authorization_drupal_roles_roles')->getValue());
-    self::assertEquals(['anonymous', 'staff'], $account->getRoles());
+    $this->assertEquals($account->get('authorization_drupal_roles_roles')->getValue(), [0 => ['value' => 'staff']]);
+    $this->assertEquals($account->getRoles(), ['anonymous', 'staff']);
   }
 
 }

@@ -28,6 +28,36 @@ Working with LDAP and the various elements of OpenLDAP, such as slapd, are
 not easy to work with. See also some examples on the
 [track hacks](http://trac-hacks.org/wiki/LdapPluginTests) page.
 
+## Testing LDAP behavior
+
+Since problems often occur with the interpretation of a directory server's
+output it's important that we test against expected results and not just
+test our functions in isolation. 
+
+Whenever you are trying to debug a complex dance between the Drupal integration
+modules and a directory, consider mocking the LDAP connector with the Fake
+classes provided by ldap_servers. For example: 
+\Drupal\Tests\ldap_authentication\LoginTest
+
+## Case-handling
+
+LDAP is a case-aware but not case-sensitive protocol, which means that what
+we get back in Symfony\Component\Ldap\Entry objects, or LDAP data in general,
+may contain differences in case. For example the property "memberOf".
+
+We need to keep the following in mind when making changes to these modules:
+* Comparisons against LDAP data must ignore case. Examples: 
+  * A query for ldap authorization specified as "memberof=..." in
+the configuration must also catch data returned as "memberOf=...".
+  * Token processing on records returned by LDAP must do the same.
+* Data sent to LDAP can ignore case-formatting (we do not need to normalize it).
+
+Note that attributes returned from LDAP via the LdapBaseManager are lowercased
+through `::sanitizeUserDataResponse` so we need to
+`get('businesscategory')` not `get('businessCategory')`.
+
+## Misc
+
 ### User binding
 
 If you want to bind with user credentials, you only need to modify the 
@@ -43,35 +73,3 @@ grants.ldif to allow for it. Here is an example which simply allows anyone:
 >   by dn="cn=admin,dc=hogwarts,dc=edu" write
 >   by * read
 ```
-
-## Various LDAP Project Notes
-
-### Case Sensitivity and Character Escaping in LDAP Modules
-
-The class MassageAttributes should be used for dealing with case sensitivity
-and character escaping consistently. See the functions for further information.
-
-A filter might be built as follows:
-
-```php
-$massage = new MassageAttributes;
-$username = $massage->queryLdapAttributeValue($username);
-$objectclass = mb_strtolower($item);
-$filter = "(&(cn=$username)(objectClass=$objectclass))";
-```
-
-See ConversionHelper for working with fields directly.
-
-### Common variables used in ldap_* and their structures
-
-The structure of $ldap_user and $ldap_entry are different!
-
-#### $ldap_user
-@see LdapServer::matchUsernameToExistingLdapEntry() return
-
-#### $ldap_entry and $ldap_*_entry.
-@see LdapServer::ldap_search() return array
-
-####  $user_attr_key
-key of form <attr_type>.<attr_name>[:<instance>] such as field.lname, 
-property.mail, field.aliases:2

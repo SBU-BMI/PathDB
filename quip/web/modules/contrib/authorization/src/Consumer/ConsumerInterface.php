@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\Consumer;
 
 use Drupal\authorization\Plugin\ConfigurableAuthorizationPluginInterface;
@@ -20,7 +18,7 @@ interface ConsumerInterface extends ConfigurableAuthorizationPluginInterface {
    * @param array $context
    *   Grants applied during this procedure.
    */
-  public function revokeGrants(UserInterface $user, array $context): void;
+  public function revokeGrants(UserInterface $user, array $context);
 
   /**
    * Grant one individual proposal.
@@ -30,7 +28,7 @@ interface ConsumerInterface extends ConfigurableAuthorizationPluginInterface {
    * @param mixed $consumerMapping
    *   What to grant.
    */
-  public function grantSingleAuthorization(UserInterface $user, $consumerMapping): void;
+  public function grantSingleAuthorization(UserInterface $user, $consumerMapping);
 
   /**
    * Are we allowed to create things.
@@ -41,15 +39,15 @@ interface ConsumerInterface extends ConfigurableAuthorizationPluginInterface {
    * @return bool
    *   Whether the consumer provides creating targets.
    */
-  public function consumerTargetCreationAllowed(): bool;
+  public function consumerTargetCreationAllowed();
 
   /**
    * Create authorization consumer targets.
    *
-   * @param string $consumer
+   * @param mixed $consumer
    *   What grant to create.
    */
-  public function createConsumerTarget(string $consumer): void;
+  public function createConsumerTarget($consumer);
 
   /**
    * Consumer-side filtering.
@@ -62,6 +60,6 @@ interface ConsumerInterface extends ConfigurableAuthorizationPluginInterface {
    * @return array
    *   Remaining, valid proposals.
    */
-  public function filterProposals(array $proposals, array $consumerMapping): array;
+  public function filterProposals(array $proposals, array $consumerMapping);
 
 }

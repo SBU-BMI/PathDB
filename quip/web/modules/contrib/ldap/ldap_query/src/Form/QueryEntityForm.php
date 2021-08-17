@@ -1,17 +1,25 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\ldap_servers\Entity\Server;
 
 /**
- * Class QueryEntityForm.
+ * Query entity form.
  *
  * @package Drupal\ldap_query\Form
  */
 class QueryEntityForm extends EntityForm {
+
+  /**
+   * Query Entity.
+   *
+   * @var \Drupal\ldap_query\Entity\QueryEntity
+   */
+  protected $entity;
 
   /**
    * {@inheritdoc}
@@ -25,7 +33,7 @@ class QueryEntityForm extends EntityForm {
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
       '#default_value' => $ldap_query_entity->label(),
-      '#description' => $this->t("Label for the LDAP Queries."),
+      '#description' => $this->t('Label for the LDAP Queries.'),
       '#required' => TRUE,
     ];
 
@@ -38,11 +46,13 @@ class QueryEntityForm extends EntityForm {
       '#disabled' => !$ldap_query_entity->isNew(),
     ];
 
-    $factory = \Drupal::service('ldap.servers');
-    $servers = $factory->getAllServers();
+    $storage = $this->entityTypeManager
+      ->getStorage('ldap_server');
+    $servers = $storage->getQuery()->execute();
+
     $options = [];
     /** @var \Drupal\ldap_servers\Entity\Server $server */
-    foreach ($servers as $server) {
+    foreach ($storage->loadMultiple($servers) as $server) {
       $options[$server->id()] = $server->label();
     }
 
@@ -111,7 +121,7 @@ class QueryEntityForm extends EntityForm {
 
     $dereference = $ldap_query_entity->get('dereference');
     if (!$dereference) {
-      $dereference = LDAP_DEREF_NEVER;
+      $dereference = \defined('LDAP_DEREF_NEVER') ? LDAP_DEREF_NEVER : 0;
     }
 
     $form['dereference'] = [
@@ -120,26 +130,23 @@ class QueryEntityForm extends EntityForm {
       '#default_value' => $dereference,
       '#required' => TRUE,
       '#options' => [
-        LDAP_DEREF_NEVER => $this->t('Aliases are never dereferenced (default).'),
-        LDAP_DEREF_SEARCHING => $this->t('Aliases should be dereferenced during the search but not when locating the base object of the search.'),
-        LDAP_DEREF_FINDING => $this->t('Aliases should be dereferenced when locating the base object but not during the search.'),
-        LDAP_DEREF_ALWAYS => $this->t('Aliases should always be dereferenced.'),
+        // Integers provided as fallback for CI without ldap extension.
+        \defined('LDAP_DEREF_NEVER') ? LDAP_DEREF_NEVER : 0 => $this->t('Aliases are never dereferenced (default).'),
+        \defined('LDAP_DEREF_SEARCHING') ? LDAP_DEREF_SEARCHING : 1 => $this->t('Aliases should be dereferenced during the search but not when locating the base object of the search.'),
+        \defined('LDAP_DEREF_FINDING') ? LDAP_DEREF_FINDING : 2 => $this->t('Aliases should be dereferenced when locating the base object but not during the search.'),
+        \defined('LDAP_DEREF_ALWAYS') ? LDAP_DEREF_ALWAYS : 3 => $this->t('Aliases should always be dereferenced.'),
       ],
     ];
 
-    $scope = $ldap_query_entity->get('scope');
-    if (!$scope) {
-      $scope = Server::SCOPE_SUBTREE;
-    }
     $form['scope'] = [
       '#type' => 'radios',
       '#title' => $this->t('Scope of search'),
-      '#default_value' => $scope,
+      '#default_value' => $ldap_query_entity->get('scope') ?: 'sub',
       '#required' => TRUE,
       '#options' => [
-        Server::SCOPE_SUBTREE => $this->t('Subtree (default)'),
-        Server::SCOPE_BASE => $this->t('Base'),
-        Server::SCOPE_ONE_LEVEL => $this->t('One Level'),
+        'sub' => $this->t('Subtree (default)'),
+        'base' => $this->t('Base'),
+        'one' => $this->t('One Level'),
       ],
       '#description' => $this->t('
       <em>Subtree</em>: This value is used to indicate searching of all entries at all levels under and including the specified base DN.<br>
@@ -155,17 +162,22 @@ class QueryEntityForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $ldap_query_entity = $this->entity;
+
+    // Ideally this would not be a text-input but an list of text fields.
+    $attributes_without_spaces = str_replace(' ', '', $ldap_query_entity->get('attributes'));
+    $ldap_query_entity->set('attributes', $attributes_without_spaces);
+
     $status = $ldap_query_entity->save();
 
-    switch ($status) {
-      case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label LDAP Queries.', [
+    if ($status === SAVED_NEW) {
+      $this->messenger()
+        ->addMessage($this->t('Created the %label LDAP query.', [
           '%label' => $ldap_query_entity->label(),
         ]));
-        break;
-
-      default:
-        drupal_set_message($this->t('Saved the %label LDAP Queries.', [
+    }
+    else {
+      $this->messenger()
+        ->addMessage($this->t('Saved the %label LDAP query.', [
           '%label' => $ldap_query_entity->label(),
         ]));
     }

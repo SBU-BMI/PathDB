@@ -1,0 +1,41 @@
+ldap_user.mapping.*:
+  type: config_entity
+  label: 'Mapping config'
+  mapping:
+    id:
+      type: string
+      label: 'Machine name for this server configuration'
+    label:
+      type: label
+      label: 'Name'
+    uuid:
+      type: string
+    ldap_attribute:
+      type: string
+      label: 'Ldap attribute'
+    user_attribute:
+      type: string
+      label: 'User attribute'
+    convert:
+      type: boolean
+      label: 'Convert from binary'
+    direction:
+      type: string
+      label: 'Provisioning direction'
+    user_tokens:
+      type: string
+      label: 'User entered tokens'
+    configuration_module:
+      type: string
+      label: 'Module configuring mapping'
+    provisioning_module:
+      type: string
+      label: 'Module provisioning mapping'
+    enabled:
+      type: boolean
+      label: 'Enabled'
+    provisioning_events:
+      type: sequence
+      label: 'Configured provisioning events'
+      sequence:
+        type: string

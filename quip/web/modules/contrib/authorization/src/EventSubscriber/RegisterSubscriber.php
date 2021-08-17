@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -15,7 +13,7 @@ class RegisterSubscriber implements EventSubscriberInterface {
   /**
    * Action on register.
    */
-  public function onRegister(): void {
+  public function onRegister() {
 
   }
 

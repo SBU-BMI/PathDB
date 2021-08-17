@@ -6,7 +6,7 @@ ldap_authentication.settings:
      sequence:
        type: string
     authenticationMode:
-      type: integer
+      type: string
       label: 'Authentication mode'
     loginUIUsernameTxt:
       type: text
@@ -15,15 +15,15 @@ ldap_authentication.settings:
       type: text
       label: 'Password Description Text'
     ldapUserHelpLinkUrl:
-      type: text
+      type: string
       label: 'LDAP Account User Help URL'
     ldapUserHelpLinkText:
       type: text
       label: 'LDAP Account User Help Link Text'
     emailOption:
-      type: integer
+      type: string
     emailUpdate:
-      type: integer
+      type: string
     emailTemplateHandling:
       type: string
     emailTemplate:
@@ -39,7 +39,7 @@ ldap_authentication.settings:
     emailTemplateUsagePromptRegex:
       type: string
     passwordOption:
-      type: integer
+      type: string
     allowOnlyIfTextInDn:
       type: sequence
       sequence:
@@ -49,4 +49,6 @@ ldap_authentication.settings:
       sequence:
         type: string
     excludeIfNoAuthorizations:
-      type: integer
+      type: boolean
+    skipAdministrators:
+      type: boolean

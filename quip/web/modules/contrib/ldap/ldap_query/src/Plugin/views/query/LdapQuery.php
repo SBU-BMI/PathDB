@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Plugin\views\query;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\ldap_query\Controller\QueryController;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
@@ -59,6 +60,13 @@ class LdapQuery extends QueryPluginBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getCacheMaxAge() {
+    return 0;
+  }
+
+  /**
    * Execute the query.
    *
    * @param \Drupal\views\ViewExecutable $view
@@ -74,7 +82,10 @@ class LdapQuery extends QueryPluginBase {
     }
     $start = microtime(TRUE);
 
-    $controller = new QueryController($this->options['query_id']);
+    // @todo Dependency Injection.
+    /** @var \Drupal\ldap_query\Controller\QueryController $controller */
+    $controller = \Drupal::service('ldap.query');
+    $controller->load($this->options['query_id']);
     $filter = $this->buildLdapFilter($controller->getFilter());
 
     $controller->execute($filter);
@@ -82,17 +93,15 @@ class LdapQuery extends QueryPluginBase {
     $fields = $controller->availableFields();
 
     $index = 0;
-    unset($results['count']);
     $rows = [];
     foreach ($results as $result) {
       $row = [];
-      // TODO: Try to only fetch requested fields instead of all available.
       foreach ($fields as $field_key => $void) {
-        if (isset($result[$field_key])) {
-          unset($result[$field_key]['count']);
-          $row[$field_key] = $result[$field_key];
+        if ($result->hasAttribute($field_key, FALSE)) {
+          $row[$field_key] = $result->getAttribute($field_key, FALSE);
         }
       }
+      $row['dn'] = [0 => $result->getDn()];
       $row['index'] = $index++;
       $rows[] = $row;
     }
@@ -107,10 +116,12 @@ class LdapQuery extends QueryPluginBase {
 
     // Pager.
     $totalItems = count($view->result);
-    $offset = ($view->pager->getCurrentPage()) * $view->pager->getItemsPerPage() + $view->pager->getOffset();
+    $offset = $view->pager->getCurrentPage() * $view->pager->getItemsPerPage() + $view->pager->getOffset();
     $length = NULL;
     if ($view->pager->getItemsPerPage() > 0) {
-      $length = $view->pager->getItemsPerPage();
+      // A Views ExposedInput for items_for_page will return a string value
+      // via a querystring parameter.
+      $length = (int) $view->pager->getItemsPerPage();
     }
 
     if ($offset > 0 || $length > 0) {
@@ -127,46 +138,37 @@ class LdapQuery extends QueryPluginBase {
   /**
    * Sort the results.
    *
-   * @param array $results
+   * @param array $rows
    *   Results to operate on.
    *
    * @return array
    *   Result data.
+   *
+   * @todo Should be private, public for easier testing.
    */
-  private function sortResults(array $results) {
-    $parameters = [];
-    $orders = $this->orderby;
-    $set = [];
-    foreach ($orders as $orderCriterion) {
-      foreach ($results as $key => $row) {
-        // TODO: Could be improved by making the element index configurable.
-        $orderCriterion['data'][$key] = $row[$orderCriterion['field']][0];
-        $set[$key][$orderCriterion['field']] = $row[$orderCriterion['field']][0];
-        $set[$key]['index'] = $key;
-      }
-      $parameters[] = $orderCriterion['data'];
-      if ($orderCriterion['direction'] == 'ASC') {
-        $parameters[] = SORT_ASC;
-      }
-      else {
-        $parameters[] = SORT_DESC;
+  public function sortResults(array $rows): array {
+    $sorts = $this->orderby;
+    foreach ($sorts as $sort) {
+      foreach ($rows as $key => $row) {
+        $rows[$key]['sort_' . $sort['field']] = $row[$sort['field']][0] ?? '';
       }
     }
-    $parameters[] = &$set;
-    call_user_func_array('array_multisort', $parameters);
 
-    $processedResults = [];
-    foreach ($set as $row) {
-      $processedResults[] = $results[$row['index']];
+    $multisortParameters = [];
+    foreach ($sorts as $sort) {
+      $multisortParameters[] = array_column($rows, 'sort_' . $sort['field']);
+      $multisortParameters[] = mb_strtoupper($sort['direction']) === 'ASC' ? SORT_ASC : SORT_DESC;
     }
+    $multisortParameters[] = &$rows;
+    array_multisort(...$multisortParameters);
 
-    return $processedResults;
+    return $rows;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function ensureTable($table, $relationship = NULL) {
+  public function ensureTable($table, $relationship = NULL): string {
     return '';
   }
 
@@ -180,7 +182,7 @@ class LdapQuery extends QueryPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function addOrderBy($table, $field, $order, $alias = '', $params = []) {
+  public function addOrderBy($table, $field, $order, $alias = '', $params = []): void {
     $this->orderby[] = [
       'field' => $field,
       'direction' => $order,
@@ -190,7 +192,7 @@ class LdapQuery extends QueryPluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function defineOptions() {
+  protected function defineOptions(): array {
     $options = parent::defineOptions();
     $options['query_id'] = [
       'default' => NULL,
@@ -201,16 +203,16 @@ class LdapQuery extends QueryPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);
 
-    $qids = \Drupal::EntityQuery('ldap_query_entity')
+    $queries = \Drupal::EntityQuery('ldap_query_entity')
       ->condition('status', 1)
       ->execute();
 
     $form['query_id'] = [
       '#type' => 'select',
-      '#options' => $qids,
+      '#options' => $queries,
       '#title' => $this->t('Ldap Query'),
       '#default_value' => $this->options['query_id'],
       '#description' => $this->t('The LDAP query you want Views to use.'),
@@ -219,9 +221,24 @@ class LdapQuery extends QueryPluginBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Add a simple WHERE clause to the query.
+   *
+   * @param mixed $group
+   *   The WHERE group to add these to; groups are used to create AND/OR
+   *   sections. Groups cannot be nested. Use 0 as the default group.
+   *   If the group does not yet exist it will be created as an AND group.
+   * @param mixed $field
+   *   The name of the field to check.
+   * @param mixed $value
+   *   The value to test the field against. In most cases, this is a scalar. For
+   *   more complex options, it is an array. The meaning of each element in the
+   *   array is dependent on the $operator.
+   * @param mixed $operator
+   *   The comparison operator, such as =, <, or >=. It also accepts more
+   *   complex options such as IN, LIKE, LIKE BINARY, or BETWEEN. Defaults to =.
+   *   If $field is a string you have to use 'formula' here.
    */
-  public function addWhere($group, $field, $value = NULL, $operator = NULL) {
+  public function addWhere($group, $field, $value = NULL, $operator = NULL): void {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -231,7 +248,7 @@ class LdapQuery extends QueryPluginBase {
     if (!isset($this->where[$group])) {
       $this->setWhereGroup('AND', $group);
     }
-    if (!empty($operator) && $operator != 'LIKE') {
+    if (!empty($operator) && $operator !== 'LIKE') {
       $this->where[$group]['conditions'][] = [
         'field' => $field,
         'value' => $value,
@@ -243,10 +260,10 @@ class LdapQuery extends QueryPluginBase {
   /**
    * Compiles all conditions into a set of LDAP requirements.
    *
-   * @return string
+   * @return string|null
    *   Condition string.
    */
-  public function buildConditions() {
+  public function buildConditions(): ?string {
 
     $groups = [];
     foreach ($this->where as $group) {
@@ -265,7 +282,7 @@ class LdapQuery extends QueryPluginBase {
     }
 
     if (count($groups) > 1) {
-      $output = '(' . self::LDAP_FILTER_OPERATORS[$this->groupOperator] . implode($groups) . ')';
+      $output = '(' . self::LDAP_FILTER_OPERATORS[$this->groupOperator] . implode('', $groups) . ')';
     }
     else {
       $output = array_pop($groups);
@@ -283,7 +300,7 @@ class LdapQuery extends QueryPluginBase {
    * @return string
    *   Combined string.
    */
-  private function buildLdapFilter($standardFilter) {
+  private function buildLdapFilter(string $standardFilter): string {
     $searchFilter = $this->buildConditions();
     if (!empty($searchFilter)) {
       $finalFilter = '(&' . $standardFilter . $searchFilter . ')';
@@ -307,15 +324,24 @@ class LdapQuery extends QueryPluginBase {
    * @return string
    *   LDAP filter such as (cn=Example).
    */
-  private function translateCondition($field, $value, $operator) {
-    $item = '(' . $field . '=' . SafeMarkup::checkPlain($value) . ')';
-    if (mb_substr($operator, 0, 1) == '!') {
-      $condition = "(!$item)";
+  private function translateCondition(string $field, string $value, string $operator): string {
+    if (mb_strpos($operator, '!') === 0) {
+      $condition = sprintf('(!(%s=%s))', $field, Html::escape($value));
     }
     else {
-      $condition = $item;
+      $condition = sprintf('(%s=%s)', $field, Html::escape($value));
     }
     return $condition;
+  }
+
+  /**
+   * Let modules modify the query just prior to finalizing it.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   *   View.
+   */
+  public function alter(ViewExecutable $view): void {
+    \Drupal::moduleHandler()->invokeAll('views_query_alter', [$view, $this]);
   }
 
 }

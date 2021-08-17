@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\EventSubscriber;
 
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -15,14 +13,14 @@ class LoginSubscriber implements EventSubscriberInterface {
   /**
    * Action on request.
    */
-  public function onRequest(): void {
+  public function onRequest() {
 
   }
 
   /**
    * Action on login.
    */
-  public function onLogin(): void {
+  public function onLogin() {
 
   }
 

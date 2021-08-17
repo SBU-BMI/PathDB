@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * @file
  * Contains authorization_drupal_roles.module..
@@ -11,7 +9,7 @@ declare(strict_types = 1);
  * Implements hook_module_preinstall().
  */
 function authorization_drupal_roles_module_preinstall($module) {
-  if ($module === 'authorization_drupal_roles') {
+  if ($module == 'authorization_drupal_roles') {
     $type = \Drupal::entityTypeManager()->getDefinition('user');
     $fields = authorization_drupal_roles_entity_base_field_info($type);
     foreach ($fields as $name => $data) {

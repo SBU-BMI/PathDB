@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\filter\StringFilter;
@@ -17,7 +19,7 @@ class LdapAttribute extends StringFilter {
    * {@inheritdoc}
    */
   public function operator() {
-    return $this->operator == '=' ? '=' : '!=';
+    return $this->operator === '=' ? '=' : '!=';
   }
 
   /**
@@ -73,7 +75,7 @@ class LdapAttribute extends StringFilter {
    * {@inheritdoc}
    */
   protected function opEmpty($field) {
-    if ($this->operator == 'empty') {
+    if ($this->operator === 'empty') {
       $this->query->addWhere($this->options['group'], $this->realField, '*', '!=');
     }
     else {
@@ -81,5 +83,5 @@ class LdapAttribute extends StringFilter {
     }
   }
 
-  // TODO: Port numerical comparisons. Requires change of base type.
+  // @todo Port numerical comparisons. Requires change of base type.
 }

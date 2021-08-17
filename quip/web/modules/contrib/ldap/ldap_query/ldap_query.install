@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the LDAP API module.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\ldap_query\Entity\QueryEntity;
+
+/**
+ * Updates bind method to new value.
+ */
+function ldap_query_update_8301() {
+  $query = \Drupal::entityQuery('ldap_query_entity');
+  $ids = $query->execute();
+  $entities = QueryEntity::loadMultiple($ids);
+  /** @var \Drupal\ldap_query\Entity\QueryEntity $entity */
+  foreach ($entities as $entity) {
+    switch ($entity->get('scope')) {
+      case 1:
+        $entity->set('scope', 'base');
+        break;
+
+      case 2:
+        $entity->set('scope', 'one');
+        break;
+
+      case 3:
+        $entity->set('scope', 'sub');
+        break;
+    }
+    $entity->save();
+  }
+}

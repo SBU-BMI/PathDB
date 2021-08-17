@@ -1,0 +1,21 @@
+ldap_user.user_settings:
+  title: 'User settings'
+  route_name: ldap_user.admin_form
+  description: 'Configure general LDAP user behavior.'
+  parent: ldap.settings
+  weight: 10
+
+ldap_user.drupal_mappings:
+  title: 'Drupal mappings'
+  route_name: ldap_user.drupal_admin_form
+  description: 'Define field mappings when importing data into Drupal.'
+  parent: ldap.settings
+  weight: 11
+
+
+ldap_user.ldap_mappings:
+  title: 'LDAP mappings'
+  route_name: ldap_user.ldap_admin_form
+  description: 'Define field mappings when exporting data from Drupal.'
+  parent: ldap.settings
+  weight: 12

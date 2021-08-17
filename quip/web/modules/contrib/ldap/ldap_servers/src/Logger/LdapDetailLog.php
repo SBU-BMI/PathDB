@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_servers\Logger;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -8,10 +10,24 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 /**
  * The detailed logger for the LDAP modules.
  *
- * This logger is only active the ldap_help setting watchdog_detail is active.
- * When it is, it passes messages to the regular logger with priority debug.
+ * This logger is only active when the ldap_servers setting watchdog_detail is
+ * active. It passes messages to the regular logger with priority debug.
  */
 class LdapDetailLog {
+
+  /**
+   * Logger.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $loggerFactory;
+
+  /**
+   * Config.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
 
   /**
    * LdapDetailLog constructor.
@@ -23,7 +39,7 @@ class LdapDetailLog {
    */
   public function __construct(LoggerChannelFactoryInterface $factory, ConfigFactoryInterface $config) {
     $this->loggerFactory = $factory;
-    $this->config = $config->get('ldap_help.settings');
+    $this->config = $config->get('ldap_servers.settings');
   }
 
   /**

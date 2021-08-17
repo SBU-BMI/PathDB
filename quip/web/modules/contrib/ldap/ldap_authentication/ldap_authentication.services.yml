@@ -1,6 +1,7 @@
 services:
   ldap_authentication.route_subscriber:
     class: Drupal\ldap_authentication\Routing\RouteSubscriber
+    arguments: ['@config.factory']
     tags:
       - { name: event_subscriber }
   ldap_authentication.email_template:
@@ -10,12 +11,45 @@ services:
     arguments: ['@config.factory']
   ldap_authentication.user_help_tab_access:
     class: Drupal\ldap_authentication\Access\UserHelpTabAccess
-    arguments: ['@config.factory', '@current_user']
+    arguments:
+    - '@config.factory'
+    - '@current_user'
+    - '@externalauth.authmap'
     tags:
       - { name: access_check, applies_to: _user_help_tab_access_check }
   logger.channel.ldap_authentication:
       parent: logger.channel_base
       arguments: ['ldap_authentication']
   ldap_authentication.login_validator:
-    class: \Drupal\ldap_authentication\Controller\LoginValidator
-    arguments: ['@config.factory', '@ldap.detail_log', '@logger.channel.ldap_authentication', '@entity_type.manager', '@module_handler']
+    class: \Drupal\ldap_authentication\Controller\LoginValidatorLoginForm
+    arguments:
+    - '@config.factory'
+    - '@ldap.detail_log'
+    - '@logger.channel.ldap_authentication'
+    - '@entity_type.manager'
+    - '@module_handler'
+    - '@ldap.bridge'
+    - '@externalauth.authmap'
+    - '@ldap_authentication.servers'
+    - '@ldap.user_manager'
+    - '@messenger'
+    - '@ldap.drupal_user_processor'
+  ldap_authentication.login_validator_sso:
+    class: \Drupal\ldap_authentication\Controller\LoginValidatorSso
+    arguments:
+    - '@config.factory'
+    - '@ldap.detail_log'
+    - '@logger.channel.ldap_authentication'
+    - '@entity_type.manager'
+    - '@module_handler'
+    - '@ldap.bridge'
+    - '@externalauth.authmap'
+    - '@ldap_authentication.servers'
+    - '@ldap.user_manager'
+    - '@messenger'
+    - '@ldap.drupal_user_processor'
+  ldap_authentication.servers:
+    class: Drupal\ldap_authentication\AuthenticationServers
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'

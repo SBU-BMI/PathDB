@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization\Consumer;
 
 use Drupal\authorization\Plugin\ConfigurableAuthorizationPluginBase;
@@ -28,20 +26,21 @@ abstract class ConsumerPluginBase extends ConfigurableAuthorizationPluginBase im
   /**
    * {@inheritdoc}
    */
-  public function consumerTargetCreationAllowed(): bool {
+  public function consumerTargetCreationAllowed() {
     return $this->allowConsumerTargetCreation;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function filterProposals(array $proposals, array $consumer_mapping): array {
+  public function filterProposals(array $proposals, array $consumer_mapping) {
     if (!empty($proposals)) {
       $property = array_pop($consumer_mapping);
       return [$property => $property];
     }
-
-    return [];
+    else {
+      return [];
+    }
   }
 
 }

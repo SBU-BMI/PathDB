@@ -1,5 +1,18 @@
-entity.ldap_server.collection:
-  title: 'LDAP Servers'
-  route_name: entity.ldap_server.collection
-  description: 'List LDAP Servers'
+ldap.settings:
+  title: 'LDAP'
+  route_name: ldap.settings
+  description: 'All functionality available through LDAP and its submodules.'
   parent: user.admin_index
+
+entity.ldap_server.collection:
+  title: 'Servers'
+  route_name: entity.ldap_server.collection
+  description: 'List configured LDAP servers.'
+  parent: ldap.settings
+
+ldap_servers.debugging:
+  title: 'Debugging'
+  route_name: ldap_servers.debugging_review
+  description: 'Configure additional debug logging.'
+  parent: ldap.settings
+  weight: 90

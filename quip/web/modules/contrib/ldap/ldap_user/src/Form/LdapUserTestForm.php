@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_user\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Url;
-use Drupal\ldap_servers\ServerFactory;
-use Drupal\ldap_user\Helper\ExternalAuthenticationHelper;
-use Drupal\ldap_user\Helper\LdapConfiguration;
+use Drupal\externalauth\Authmap;
+use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
-use Drupal\ldap_user\Processor\LdapUserProcessor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -20,11 +20,47 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
 
+  /**
+   * Sync Trigger Options.
+   *
+   * @var array
+   */
   private static $syncTriggerOptions;
 
+  /**
+   * Request.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request|null
+   */
   protected $request;
-  protected $serverFactory;
+
+  /**
+   * LDAP User Manager.
+   *
+   * @var \Drupal\ldap_servers\LdapUserManager
+   */
+  protected $ldapUserManager;
+
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
+
+  /**
+   * Externalauth.
+   *
+   * @var \Drupal\externalauth\Authmap
+   */
+  protected $externalAuth;
+
+  /**
+   * Drupal User Processor.
+   *
+   * @var \Drupal\ldap_user\Processor\DrupalUserProcessor
+   */
+  protected $drupalUserProcessor;
 
   /**
    * {@inheritdoc}
@@ -34,12 +70,31 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * LdapUserTestForm constructor.
+   *
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   Request stack.
+   * @param \Drupal\ldap_servers\LdapUserManager $ldap_user_manager
+   *   LDAP user manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
+   * @param \Drupal\externalauth\Authmap $external_auth
+   *   External auth.
+   * @param \Drupal\ldap_user\Processor\DrupalUserProcessor $drupal_user_processor
+   *   Drupal user processor.
    */
-  public function __construct(RequestStack $request_stack, ServerFactory $server_factory, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(
+    RequestStack $request_stack,
+    LdapUserManager $ldap_user_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    Authmap $external_auth,
+    DrupalUserProcessor $drupal_user_processor
+  ) {
     $this->request = $request_stack->getCurrentRequest();
-    $this->serverFactory = $server_factory;
+    $this->ldapUserManager = $ldap_user_manager;
     $this->entityTypeManager = $entity_type_manager;
+    $this->externalAuth = $external_auth;
+    $this->drupalUserProcessor = $drupal_user_processor;
 
     self::$syncTriggerOptions = [
       self::PROVISION_DRUPAL_USER_ON_USER_UPDATE_CREATE => $this->t('On sync to Drupal user create or update. Requires a server with binding method of "Service Account Bind" or "Anonymous Bind".'),
@@ -57,15 +112,17 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('request_stack'),
-      $container->get('ldap.servers'),
-      $container->get('entity_type.manager')
+      $container->get('ldap.user_manager'),
+      $container->get('entity_type.manager'),
+      $container->get('externalauth.authmap'),
+      $container->get('ldap.drupal_user_processor')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $op = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $op = NULL): array {
 
     $form['#prefix'] = $this->t('<h1>Debug LDAP synchronization events</h1>');
 
@@ -80,7 +137,7 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
       '#type' => 'textfield',
       '#title' => $this->t('Testing Drupal Username'),
       '#default_value' => $this->request->query->get('username'),
-      '#required' => 1,
+      '#required' => TRUE,
       '#size' => 30,
       '#maxlength' => 255,
       '#description' => $this->t("The user need not exist in Drupal and testing will not affect the user's LDAP or Drupal Account."),
@@ -89,7 +146,6 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
     $form['action'] = [
       '#type' => 'radios',
       '#title' => $this->t('Actions/Event Handler to Test'),
-      '#required' => 0,
       '#default_value' => $this->request->query->get('action'),
       '#options' => self::$syncTriggerOptions,
       '#required' => TRUE,
@@ -107,22 +163,23 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
 
     $username = $form_state->getValue(['testing_drupal_username']);
     $selected_action = $form_state->getValue(['action']);
 
     $config = $this->configFactory()->get('ldap_user.settings')->get();
-    $processor = new DrupalUserProcessor();
-    $ldapProcessor = new LdapUserProcessor();
+
     $user_ldap_entry = FALSE;
 
     if ($config['drupalAcctProvisionServer']) {
-      $user_ldap_entry = $this->serverFactory->getUserDataFromServerByIdentifier($username, $config['drupalAcctProvisionServer']);
+      $this->ldapUserManager->setServer($config['drupalAcctProvisionServer']);
+      $user_ldap_entry = $this->ldapUserManager->getUserDataByIdentifier($username);
     }
     if ($config['ldapEntryProvisionServer']) {
       if (!$user_ldap_entry) {
-        $user_ldap_entry = $this->serverFactory->getUserDataFromServerByIdentifier($username, $config['ldapEntryProvisionServer']);
+        $this->ldapUserManager->setServer($config['ldapEntryProvisionServer']);
+        $user_ldap_entry = $this->ldapUserManager->getUserDataByIdentifier($username);
       }
     }
     $results = [];
@@ -130,11 +187,12 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
     $results['related LDAP entry (before provisioning or syncing)'] = $user_ldap_entry;
 
     /** @var \Drupal\user\Entity\User $account */
-    $existingAccount = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => $username]);
+    $existingAccount = $this->entityTypeManager->getStorage('user')
+      ->loadByProperties(['name' => $username]);
     $existingAccount = $existingAccount ? reset($existingAccount) : FALSE;
     if ($existingAccount) {
       $results['user entity (before provisioning or syncing)'] = $existingAccount->toArray();
-      $results['User Authmap'] = ExternalAuthenticationHelper::getUserIdentifierFromMap($existingAccount->id());
+      $results['User Authmap'] = $this->externalAuth->get($existingAccount->id(), 'ldap_user');
     }
     else {
       $results['User Authmap'] = 'No authmaps available.  Authmaps only shown if user account exists beforehand';
@@ -144,18 +202,26 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
     $sync_trigger_description = self::$syncTriggerOptions[$selected_action];
     foreach ([self::PROVISION_TO_DRUPAL, self::PROVISION_TO_LDAP] as $direction) {
       if ($this->provisionEnabled($direction, $selected_action)) {
-        if ($direction == self::PROVISION_TO_DRUPAL) {
-          $processor->provisionDrupalAccount($account);
-          $results['provisionDrupalAccount method results']["context = $sync_trigger_description"]['proposed'] = $account;
+        if ($direction === self::PROVISION_TO_DRUPAL) {
+          $this->drupalUserProcessor->createDrupalUserFromLdapEntry($account);
+          $results['createDrupalUserFromLdapEntry method results']["context = $sync_trigger_description"]['proposed'] = $account;
         }
         else {
-          $provision_result = $ldapProcessor->provisionLdapEntry($username, NULL);
-          $results['provisionLdapEntry method results']["context = $sync_trigger_description"] = $provision_result;
+          // @FIXME
+          // This is not testing all supported event,
+          // only the new user created event.
+          // The form needs to be restructured in general for those!
+          // $event = new LdapNewUserCreatedEvent($account);
+          // /** @var EventDispatcher $dispatcher */
+          // $dispatcher = \Drupal::service('event_dispatcher');
+          // $dispatcher->dispatch($event, LdapNewUserCreatedEvent::EVENT_NAME);
+          // @FIXME.
+          $results['provisionLdapEntry method results']["context = $sync_trigger_description"] = 'Test not ported';
         }
       }
       else {
-        if ($direction == self::PROVISION_TO_DRUPAL) {
-          $results['provisionDrupalAccount method results']["context = $sync_trigger_description"] = 'Not enabled.';
+        if ($direction === self::PROVISION_TO_DRUPAL) {
+          $results['createDrupalUserFromLdapEntry method results']["context = $sync_trigger_description"] = 'Not enabled.';
         }
         else {
           $results['provisionLdapEntry method results']["context = $sync_trigger_description"] = 'Not enabled.';
@@ -163,11 +229,13 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
       }
     }
 
-    if (function_exists('dpm')) {
-      dpm($results);
+    if (\function_exists('kint')) {
+      // @phpcs:ignore
+      kint($results);
     }
     else {
-      drupal_set_message($this->t('This form will not display results unless the devel module is enabled.'), 'warning');
+      $this->messenger()
+        ->addWarning($this->t('This form will not display results unless the devel and kint module is enabled.'));
     }
 
     $params = [
@@ -188,21 +256,18 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
    *   Provision trigger, see events above, such as 'sync', 'provision',
    *   'delete_ldap_entry', 'delete_drupal_entry', 'cancel_drupal_entry'.
    *
-   * @deprecated
-   *
    * @return bool
    *   Provisioning enabled.
-   *   TODO: Move to ldapusertestform and/or kill.
    */
-  private function provisionEnabled($direction, $provision_trigger) {
+  private function provisionEnabled(int $direction, int $provision_trigger): bool {
     $result = FALSE;
 
-    if ($direction == self::PROVISION_TO_LDAP) {
-      $result = LdapConfiguration::provisionAvailableToLdap($provision_trigger);
-
+    $config = $this->configFactory()->get('ldap_user.settings');
+    if ($direction === self::PROVISION_TO_LDAP) {
+      $result = \in_array($provision_trigger, $config->get('ldapEntryProvisionTriggers'), TRUE);
     }
-    elseif ($direction == self::PROVISION_TO_DRUPAL) {
-      $result = LdapConfiguration::provisionAvailableToDrupal($provision_trigger);
+    elseif ($direction === self::PROVISION_TO_DRUPAL) {
+      $result = \in_array($provision_trigger, $config->get('drupalAcctProvisionTriggers'), TRUE);
     }
 
     return $result;

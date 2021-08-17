@@ -1,0 +1,7 @@
+ldap_servers.settings:
+  type: config_object
+  label: Settings
+  mapping:
+    watchdog_detail:
+      label: 'Enable detailed logging'
+      type: boolean

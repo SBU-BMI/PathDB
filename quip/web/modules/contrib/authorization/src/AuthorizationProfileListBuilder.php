@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 namespace Drupal\authorization;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
@@ -15,7 +13,7 @@ class AuthorizationProfileListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildHeader(): array {
+  public function buildHeader() {
     $header['label'] = $this->t('Profile');
     $header['provider'] = $this->t('Provider');
     $header['consumer'] = $this->t('Consumer');
@@ -26,9 +24,9 @@ class AuthorizationProfileListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildRow(EntityInterface $entity): array {
-    $row['label'] = $entity->label();
-    // @todo Abstract get[Provider|Consumer]Options() from the form into Entity
+  public function buildRow(EntityInterface $entity) {
+    $row['label'] = $entity->label($entity);
+    // TODO: Abstract get[Provider|Consumer]Options() from the form into Entity
     // or as a trait so we can display the label of them here instead of the
     // machine name.
     $row['provider'] = $entity->get('provider');

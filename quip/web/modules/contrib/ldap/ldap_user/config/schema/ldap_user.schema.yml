@@ -8,17 +8,22 @@ ldap_user.settings:
       label: 'LDAP server to provision LDAP entries on'
       type: string
     drupalAcctProvisionTriggers:
-      label: 'drupalAcctProvisionTriggers'
+      label: 'Provision triggers to Drupal'
       type: sequence
       sequence:
-        type: string
+        -  type: string
+           label: 'Enabled trigger'
     ldapEntryProvisionTriggers:
-      label: 'ldapEntryProvisionTriggers'
       type: sequence
+      label: 'Provision triggers to LDAP'
       sequence:
-        type: string
+        -  type: string
+           label: 'Enabled trigger'
     orphanedDrupalAcctBehavior:
       label: 'orphanedDrupalAcctBehavior'
+      type: string
+    orphanedDrupalAcctReportingInbox:
+      label: 'orphanedDrupalAcctReportingInbox'
       type: string
     orphanedCheckQty:
       label: 'orphanedCheckQty'

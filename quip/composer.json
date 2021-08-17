@@ -36,7 +36,7 @@
         "drupal/hide_revision_field": "^2.1",
         "drupal/http_response_headers": "^2.0",
         "drupal/jwt": "^1.0@alpha",
-        "drupal/ldap": "^3.0@beta",
+        "drupal/ldap": "^4.0@beta",
         "drupal/prepopulate": "^2.2",
         "drupal/redirect_after_login": "^2.5",
         "drupal/restrict_by_ip": "4.x-dev",
