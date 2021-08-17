@@ -1,12 +1,12 @@
-name: 'Views base url'
+name: 'Views Base URL'
 description: 'Global views field that provides site''s base url'
-# core: 8.x
+core: 8.x
+core_version_requirement: ^8 || ^9
 dependencies:
   - drupal:views
 type: module
 
-# Information added by Drupal.org packaging script on 2017-09-21
-version: '8.x-1.0'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2021-06-08
+version: '2.0.0-beta2'
 project: 'views_base_url'
-datestamp: 1505975351
+datestamp: 1623153169

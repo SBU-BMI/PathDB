@@ -320,7 +320,7 @@ function ds_entity_view_alter(&$build, EntityInterface $entity, EntityDisplayInt
           $filtered_elements = Element::children($build[$field]);
           foreach ($filtered_elements as $filtered_element) {
             if ($filtered_element != $delta) {
-              $build[$field][$filtered_element]['#access'] = FALSE;
+              unset($build[$field][$filtered_element]);
             }
           }
         }
@@ -332,7 +332,7 @@ function ds_entity_view_alter(&$build, EntityInterface $entity, EntityDisplayInt
           $filtered_elements = Element::children($build[$field]);
           $filtered_elements = array_slice($filtered_elements, $limit);
           foreach ($filtered_elements as $filtered_element) {
-            $build[$field][$filtered_element]['#access'] = FALSE;
+            unset($build[$field][$filtered_element]);
           }
         }
       }

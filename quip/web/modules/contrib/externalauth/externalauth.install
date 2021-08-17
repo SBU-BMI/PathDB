@@ -70,13 +70,15 @@ function externalauth_schema() {
  */
 function externalauth_update_8101() {
   $schema = Database::getConnection()->schema();
-  $schema->changeField('authmap', 'authname', 'authname', [
+  if ($schema->tableExists('authmap')) {
+    $schema->changeField('authmap', 'authname', 'authname', [
     'description' => 'Unique authentication name provided by authentication provider',
     'type' => 'varchar',
     'length' => 128,
     'not null' => TRUE,
     'default' => '',
-  ]);
+    ]);
+  }
 }
 
 /**
