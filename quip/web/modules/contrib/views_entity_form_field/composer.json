@@ -1,0 +1,22 @@
+{
+  "name": "drupal/views_entity_form_field",
+  "type": "drupal-module",
+  "description": "Add entity form field widgets to a view.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/views_entity_form_field",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/views_entity_form_field",
+    "source": "http://cgit.drupalcode.org/views_entity_form_field"
+  },
+  "authors": [
+    {
+      "name": "Garrett Rathbone",
+      "email": "garrett.rathbone@gmail.com",
+      "homepage": "https://www.drupal.org/u/grathbone",
+      "role": "Maintainer"
+    }
+  ],
+  "require": { }
+}
