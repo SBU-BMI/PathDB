@@ -1,0 +1,39 @@
+uuid: e28c505a-1ed9-4161-bcc1-fcba4889a096
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.collectionmetadata.field_collection
+    - field.field.node.collectionmetadata.randomfiles
+    - node.type.collectionmetadata
+  module:
+    - file
+    - user
+id: node.collectionmetadata.default
+targetEntityType: node
+bundle: collectionmetadata
+mode: default
+content:
+  field_collection:
+    weight: 101
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  randomfiles:
+    weight: 102
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    type: file_default
+    region: content
+hidden:
+  search_api_excerpt: true

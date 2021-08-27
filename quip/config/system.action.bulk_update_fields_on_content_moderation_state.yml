@@ -1,0 +1,11 @@
+uuid: 9cade905-931a-40f1-98f4-0bb6ec09a61b
+langcode: en
+status: true
+dependencies:
+  module:
+    - bulk_update_fields
+id: bulk_update_fields_on_content_moderation_state
+label: 'Bulk Update Content moderation state Fields'
+type: content_moderation_state
+plugin: bulk_update_fields_action_base
+configuration: {  }

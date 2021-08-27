@@ -1,0 +1,25 @@
+uuid: 0ed7f94f-36c7-4169-a274-54e998e4ce52
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: dJ0L2DNSj5q6XVZAGsuVDpJTh5UeYkIPwKrUOOpr8YI
+id: authenticated
+label: 'Authenticated user'
+weight: -9
+is_admin: false
+permissions:
+  - 'access comments'
+  - 'access content'
+  - 'access shortcuts'
+  - 'create map content'
+  - 'create wsi content'
+  - 'delete own map content'
+  - 'delete own wsi content'
+  - 'edit own map content'
+  - 'edit own wsi content'
+  - 'post comments'
+  - 'search content'
+  - 'skip comment approval'
+  - 'use text format basic_html'
+  - 'view own unpublished content'

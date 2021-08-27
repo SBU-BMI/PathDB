@@ -1,0 +1,29 @@
+uuid: 6b360c6a-5b4c-42f7-a398-b97e9e464529
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.collection
+  module:
+    - facets
+    - system
+  theme:
+    - bootstrap
+id: collection_2
+theme: bootstrap
+region: sidebar_first
+weight: 0
+provider: null
+plugin: 'facet_block:collection'
+settings:
+  id: 'facet_block:collection'
+  label: Collection
+  provider: facets
+  label_display: visible
+  block_id: collection_2
+visibility:
+  request_path:
+    id: request_path
+    pages: "/imagesearch\r\n/imagesearch/*"
+    negate: false
+    context_mapping: {  }

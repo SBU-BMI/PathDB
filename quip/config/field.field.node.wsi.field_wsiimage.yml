@@ -1,0 +1,27 @@
+uuid: 9a30b529-2b23-4d3a-9e1e-d00371c99f91
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_wsiimage
+    - node.type.wsi
+  module:
+    - file
+id: node.wsi.field_wsiimage
+field_name: field_wsiimage
+entity_type: node
+bundle: wsi
+label: wsiimage
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: 'wsi/[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'svs tif'
+  max_filesize: ''
+  description_field: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

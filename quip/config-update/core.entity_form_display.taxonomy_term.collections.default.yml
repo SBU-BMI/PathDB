@@ -1,0 +1,40 @@
+uuid: d86a455e-8037-42e7-b09a-75f72614f47e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.collections.url
+    - taxonomy.vocabulary.collections
+  module:
+    - link
+id: taxonomy_term.collections.default
+targetEntityType: taxonomy_term
+bundle: collections
+mode: default
+content:
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 100
+    region: content
+    third_party_settings: {  }
+  url:
+    weight: 101
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+hidden:
+  description: true
+  path: true

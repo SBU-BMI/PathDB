@@ -1,5 +1,6 @@
 module:
   action: 0
+  authorization: 0
   auto_entitylabel: 0
   automated_cron: 0
   ban: 0
@@ -41,6 +42,11 @@ module:
   key: 0
   layout_builder: 0
   layout_discovery: 0
+  ldap_authentication: 0
+  ldap_authorization: 0
+  ldap_query: 0
+  ldap_servers: 0
+  ldap_user: 0
   link: 0
   menu_ui: 0
   moderated_content_bulk_publish: 0
@@ -81,6 +87,7 @@ module:
   views_ui: 0
   workflows: 0
   menu_link_content: 1
+  externalauth: 10
   views: 10
   tac_lite: 100
   standard: 1000
