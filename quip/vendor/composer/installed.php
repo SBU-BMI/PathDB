@@ -2002,12 +2002,12 @@
             'dev_requirement' => true,
         ),
         'seld/phar-utils' => array(
-            'pretty_version' => '1.1.1',
-            'version' => '1.1.1.0',
+            'pretty_version' => '1.1.2',
+            'version' => '1.1.2.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../seld/phar-utils',
             'aliases' => array(),
-            'reference' => '8674b1d84ffb47cc59a101f5d5a3b61e87d23796',
+            'reference' => '749042a2315705d2dfbbc59234dd9ceb22bf3ff0',
             'dev_requirement' => true,
         ),
         'shama/baton' => array(
