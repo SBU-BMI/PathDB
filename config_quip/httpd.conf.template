@@ -39,7 +39,8 @@ ServerRoot "/etc/httpd"
 # prevent Apache from glomming onto all bound IP addresses.
 #
 #Listen 12.34.56.78:80
-Listen 80
+Listen 8080
+Listen 8443
 
 #
 # Dynamic Shared Object (DSO) Support
@@ -93,11 +94,17 @@ ServerAdmin root@localhost
 #
 # If your host doesn't have a registered DNS name, enter its IP address here.
 #
-#ServerName www.example.com:80
-    ProxyPass /caMicroscope/img/ http://ca-security:4010/img/
-    ProxyPassReverse /caMicroscope/img/ http://ca-security:4010/img/
-    ProxyPass /caMicroscope/data/ http://ca-security:4010/data/
-    ProxyPassReverse /caMicroscope/data/ http://ca-security:4010/data/
+#ServerName quip.bmi.stonybrook.edu
+
+#    SSLEngine on
+#    SSLCertificateFile /config/quip.bmi.stonybrook.edu.cer
+#    SSLCertificateKeyFile /config/quip.bmi.stonybrook.edu.key
+#    SSLCertificateChainFile /config/inter.cer
+
+#    ProxyPass /caMicroscope/img/ http://ca-security:4010/img/
+#    ProxyPassReverse /caMicroscope/img/ http://ca-security:4010/img/
+#    ProxyPass /caMicroscope/data/ http://ca-security:4010/data/
+#    ProxyPassReverse /caMicroscope/data/ http://ca-security:4010/data/
 
 #
 # Deny access to the entirety of your server's filesystem. You must
@@ -121,9 +128,9 @@ ServerAdmin root@localhost
 # documents. By default, all requests are taken from this directory, but
 # symbolic links and aliases may be used to point to other locations.
 #
-DocumentRoot "/data/pathdb/quip/web"
+DocumentRoot "/quip/web"
 #
-<Directory "/data/pathdb/quip/web">
+<Directory "/quip/web">
     AllowOverride all
     Require all granted
     Options Indexes FollowSymLinks IncludesNOEXEC
@@ -330,4 +337,40 @@ EnableSendfile on
 #
 # Load config files in the "/etc/httpd/conf.d" directory, if any.
 IncludeOptional conf.d/*.conf
+
+<VirtualHost *:8080>
+    SSLEngine off
+#    SSLCertificateFile /config/quip.bmi.stonybrook.edu.cer
+#    SSLCertificateKeyFile /config/quip.bmi.stonybrook.edu.key
+#    SSLCertificateChainFile /config/inter.cer
+    Options Indexes FollowSymLinks IncludesNOEXEC
+    KeepAlive On
+    DirectoryIndex index.php index.htm index.html
+    ProxyPass /caMicroscope/img/ http://ca-security:4010/img/
+    ProxyPassReverse /caMicroscope/img/ http://ca-security:4010/img/
+    ProxyPass /caMicroscope/data/ http://ca-security:4010/data/
+    ProxyPassReverse /caMicroscope/data/ http://ca-security:4010/data/
+    ProxyRequests Off
+    CustomLog "/data/pathdb/logs/access_log" combined
+    ErrorLog "/data/pathdb/logs/error_log"
+</VirtualHost>
+
+<VirtualHost *:8443>
+#    SSLEngine on
+#    SSLCertificateFile /config/quip.bmi.stonybrook.edu.cer
+#    SSLCertificateKeyFile /config/quip.bmi.stonybrook.edu.key
+#    SSLCertificateChainFile /config/inter.cer
+    Options Indexes FollowSymLinks IncludesNOEXEC
+    RewriteEngine On
+    KeepAlive On
+    DirectoryIndex index.php index.htm index.html
+    ProxyPass /caMicroscope/img/ http://ca-security:4010/img/
+    ProxyPassReverse /caMicroscope/img/ http://ca-security:4010/img/
+    ProxyPass /caMicroscope/data/ http://ca-security:4010/data/
+    ProxyPassReverse /caMicroscope/data/ http://ca-security:4010/data/
+    ProxyRequests Off
+    CustomLog "/data/pathdb/logs/access_log" combined
+    ErrorLog "/data/pathdb/logs/error_log"
+</VirtualHost>
+
 
