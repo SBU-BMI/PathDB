@@ -1,27 +1,58 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_authentication\Access;
 
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\ldap_authentication\Helper\LdapAuthenticationConfiguration;
+use Drupal\externalauth\Authmap;
 
 /**
  * Checks whether the use is allowed to see the help tab.
  */
 class UserHelpTabAccess implements AccessInterface {
 
-  private $config;
-  private $currentUser;
+  /**
+   * Config.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
+
+  /**
+   * Current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * Externalauth.
+   *
+   * @var \Drupal\externalauth\Authmap
+   */
+  protected $externalAuth;
 
   /**
    * Constructor.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Config Factory.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   Current user.
+   * @param \Drupal\externalauth\Authmap $external_auth
+   *   External auth.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountInterface $current_user) {
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    AccountInterface $current_user,
+    Authmap $external_auth) {
     $this->config = $config_factory->get('ldap_authentication.settings');
     $this->currentUser = $current_user;
+    $this->externalAuth = $external_auth;
   }
 
   /**
@@ -32,13 +63,14 @@ class UserHelpTabAccess implements AccessInterface {
    */
   public function accessLdapHelpTab() {
     $mode = $this->config->get('authenticationMode');
-    if ($mode == LdapAuthenticationConfiguration::MODE_MIXED) {
-      if (ldap_authentication_ldap_authenticated($this->currentUser)) {
+    if ($mode === 'mixed') {
+      if ($this->externalAuth->get($this->currentUser->id(), 'ldap_user')) {
         return TRUE;
       }
     }
-    elseif ($mode == LdapAuthenticationConfiguration::MODE_EXCLUSIVE) {
-      if ($this->currentUser->isAnonymous() || ldap_authentication_ldap_authenticated($this->currentUser)) {
+    else {
+      if ($this->currentUser->isAnonymous() ||
+        $this->externalAuth->get($this->currentUser->id(), 'ldap_user')) {
         return TRUE;
       }
     }
@@ -52,9 +84,8 @@ class UserHelpTabAccess implements AccessInterface {
     if ($this->accessLdapHelpTab()) {
       return AccessResultAllowed::allowed();
     }
-    else {
-      return AccessResultAllowed::forbidden();
-    }
+
+    return AccessResultAllowed::forbidden();
   }
 
 }

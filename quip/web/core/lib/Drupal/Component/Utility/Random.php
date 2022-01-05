@@ -164,7 +164,7 @@ class Random {
    * @param int $size
    *   The number of random keys to add to the object.
    *
-   * @return \stdClass
+   * @return object
    *   The generated object, with the specified number of random keys. Each key
    *   has a random string value.
    */
@@ -249,6 +249,7 @@ class Random {
    * Generate paragraphs separated by double new line.
    *
    * @param int $paragraph_count
+   *
    * @return string
    */
   public function paragraphs($paragraph_count = 12) {

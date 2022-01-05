@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Commenting;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 
 class PostStatementCommentSniff implements Sniff
 {
@@ -40,6 +40,7 @@ class PostStatementCommentSniff implements Sniff
         T_WHILE   => true,
         T_FOR     => true,
         T_FOREACH => true,
+        T_MATCH   => true,
     ];
 
 

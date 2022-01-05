@@ -189,7 +189,11 @@ class MigrateExecutable implements MigrateExecutableInterface {
     }
     catch (\Exception $e) {
       $this->message->display(
-        $this->t('Migration failed with source plugin exception: @e', ['@e' => $e->getMessage()]), 'error');
+        $this->t('Migration failed with source plugin exception: @e in @file line @line', [
+          '@e' => $e->getMessage(),
+          '@file' => $e->getFile(),
+          '@line' => $e->getLine(),
+        ]), 'error');
       $this->migration->setStatus(MigrationInterface::STATUS_IDLE);
       return MigrationInterface::RESULT_FAILED;
     }
@@ -269,8 +273,11 @@ class MigrateExecutable implements MigrateExecutableInterface {
       }
       catch (\Exception $e) {
         $this->message->display(
-          $this->t('Migration failed with source plugin exception: @e',
-            ['@e' => $e->getMessage()]), 'error');
+          $this->t('Migration failed with source plugin exception: @e in @file line @line', [
+            '@e' => $e->getMessage(),
+            '@file' => $e->getFile(),
+            '@line' => $e->getLine(),
+          ]), 'error');
         $this->migration->setStatus(MigrationInterface::STATUS_IDLE);
         return MigrationInterface::RESULT_FAILED;
       }
@@ -546,9 +553,9 @@ class MigrateExecutable implements MigrateExecutableInterface {
     drupal_static_reset();
 
     // Entity storage can blow up with caches so clear them out.
-    $manager = \Drupal::entityManager();
-    foreach ($manager->getDefinitions() as $id => $definition) {
-      $manager->getStorage($id)->resetCache();
+    $entity_type_manager = \Drupal::entityTypeManager();
+    foreach ($entity_type_manager->getDefinitions() as $id => $definition) {
+      $entity_type_manager->getStorage($id)->resetCache();
     }
 
     // @TODO: explore resetting the container.

@@ -56,7 +56,7 @@ class YamlDiscoveryDecoratorTest extends UnitTestCase {
       ],
     ];
 
-    $decorated = $this->getMock('Drupal\Component\Plugin\Discovery\DiscoveryInterface');
+    $decorated = $this->createMock('Drupal\Component\Plugin\Discovery\DiscoveryInterface');
     $decorated->expects($this->once())
       ->method('getDefinitions')
       ->will($this->returnValue($definitions));
@@ -70,7 +70,7 @@ class YamlDiscoveryDecoratorTest extends UnitTestCase {
   public function testGetDefinitions() {
     $definitions = $this->discoveryDecorator->getDefinitions();
 
-    $this->assertInternalType('array', $definitions);
+    $this->assertIsArray($definitions);
     $this->assertCount(6, $definitions);
 
     foreach ($this->expectedKeys as $expected_key) {

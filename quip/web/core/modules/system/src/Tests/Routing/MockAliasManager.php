@@ -2,7 +2,7 @@
 
 namespace Drupal\system\Tests\Routing;
 
-use Drupal\Core\Path\AliasManagerInterface;
+use Drupal\path_alias\AliasManagerInterface;
 
 /**
  * An easily configurable mock alias manager.
@@ -73,6 +73,7 @@ class MockAliasManager implements AliasManagerInterface {
    * {@inheritdoc}
    * @param $path
    * @param null $langcode
+   *
    * @return
    */
   public function getAliasByPath($path, $langcode = NULL) {

@@ -23,13 +23,21 @@ class PageNotFoundTest extends BrowserTestBase {
    */
   public static $modules = ['system_test'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected $adminUser;
 
   protected function setUp() {
     parent::setUp();
 
     // Create an administrative user.
-    $this->adminUser = $this->drupalCreateUser(['administer site configuration', 'link to any page']);
+    $this->adminUser = $this->drupalCreateUser([
+      'administer site configuration',
+      'link to any page',
+    ]);
     $this->adminUser->roles[] = 'administrator';
     $this->adminUser->save();
 
@@ -69,7 +77,7 @@ class PageNotFoundTest extends BrowserTestBase {
     $this->drupalGet('/this-path-does-not-exist');
     $this->assertNoText('Admin-only 4xx response');
     $this->assertText('The requested page could not be found.');
-    $this->assertResponse(404);
+    $this->assertSession()->statusCodeEquals(404);
     // Verify the access cacheability metadata for custom 404 is bubbled.
     $this->assertCacheContext('user.roles');
 
@@ -77,7 +85,7 @@ class PageNotFoundTest extends BrowserTestBase {
     $this->drupalGet('/this-path-does-not-exist');
     $this->assertText('Admin-only 4xx response');
     $this->assertNoText('The requested page could not be found.');
-    $this->assertResponse(404);
+    $this->assertSession()->statusCodeEquals(404);
     // Verify the access cacheability metadata for custom 404 is bubbled.
     $this->assertCacheContext('user.roles');
   }

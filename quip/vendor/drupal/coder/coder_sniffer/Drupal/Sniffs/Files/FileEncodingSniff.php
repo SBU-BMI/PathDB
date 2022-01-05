@@ -36,7 +36,7 @@ class FileEncodingSniff implements Sniff
      *
      * Any other detected encodings will throw a warning.
      *
-     * @var array
+     * @var array<string>
      */
     public $allowedEncodings = ['UTF-8'];
 
@@ -44,7 +44,7 @@ class FileEncodingSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -63,7 +63,7 @@ class FileEncodingSniff implements Sniff
      * @param int                         $stackPtr  The position of the current token in
      *                                               the stack passed in $tokens.
      *
-     * @return void
+     * @return int|void
      */
     public function process(File $phpcsFile, $stackPtr)
     {

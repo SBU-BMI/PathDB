@@ -1,0 +1,11 @@
+uuid: d9749188-1959-416c-89e7-02e03d0a78d9
+langcode: en
+status: true
+dependencies:
+  module:
+    - bulk_update_fields
+id: bulk_update_fields_on_ldap_query_entity
+label: 'Bulk Update LDAP Queries Fields'
+type: ldap_query_entity
+plugin: bulk_update_fields_action_base
+configuration: {  }

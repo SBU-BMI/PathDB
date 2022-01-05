@@ -23,15 +23,13 @@ class UnicodeTest extends TestCase {
   }
 
   /**
-   * Tests multibyte encoding and decoding.
+   * Tests multibyte encoding.
    *
    * @dataProvider providerTestMimeHeader
    * @covers ::mimeHeaderEncode
-   * @covers ::mimeHeaderDecode
    */
-  public function testMimeHeader($value, $encoded) {
+  public function testMimeHeaderEncode($value, $encoded) {
     $this->assertEquals($encoded, Unicode::mimeHeaderEncode($value));
-    $this->assertEquals($value, Unicode::mimeHeaderDecode($encoded));
   }
 
   /**
@@ -44,9 +42,49 @@ class UnicodeTest extends TestCase {
    */
   public function providerTestMimeHeader() {
     return [
-      ['tést.txt', '=?UTF-8?B?dMOpc3QudHh0?='],
-      // Simple ASCII characters.
-      ['ASCII', 'ASCII'],
+      "Base64 encoding" => ['tést.txt', '=?UTF-8?B?dMOpc3QudHh0?='],
+      "ASCII characters only" => ['test.txt', 'test.txt'],
+    ];
+  }
+
+  /**
+   * Tests multibyte decoding.
+   *
+   * @dataProvider providerTestMimeHeaderDecode
+   * @covers ::mimeHeaderDecode
+   */
+  public function testMimeHeaderDecode($value, $encoded) {
+    $this->assertEquals($value, Unicode::mimeHeaderDecode($encoded));
+  }
+
+  /**
+   * Data provider for testMimeHeaderDecode().
+   *
+   * @return array
+   *   An array containing a string and its encoded value.
+   */
+  public function providerTestMimeHeaderDecode() {
+    return [
+      'Uppercase base64 encoding' => [
+        'tést.txt',
+        '=?utf-8?B?dMOpc3QudHh0?=',
+      ],
+      'Uppercase quoted-printable encoding' => [
+        'tést.txt',
+        '=?UTF-8?Q?t=C3=A9st.txt?=',
+      ],
+      'Lowercase base64 encoding' => [
+        'tést.txt',
+        '=?utf-8?b?dMOpc3QudHh0?=',
+      ],
+      'Lowercase quoted-printable encoding' => [
+        'tést.txt',
+        '=?UTF-8?q?t=C3=A9st.txt?=',
+      ],
+      'ASCII characters only' => [
+        'test.txt',
+        'test.txt',
+      ],
     ];
   }
 
@@ -55,7 +93,6 @@ class UnicodeTest extends TestCase {
    *
    * @dataProvider providerStrtolower
    * @covers ::strtolower
-   * @covers ::caseFlip
    * @group legacy
    * @expectedDeprecation \Drupal\Component\Utility\Unicode::strtolower() is deprecated in Drupal 8.6.0 and will be removed before Drupal 9.0.0. Use mb_strtolower() instead. See https://www.drupal.org/node/2850048.
    */
@@ -84,7 +121,6 @@ class UnicodeTest extends TestCase {
    *
    * @dataProvider providerStrtoupper
    * @covers ::strtoupper
-   * @covers ::caseFlip
    * @group legacy
    * @expectedDeprecation \Drupal\Component\Utility\Unicode::strtoupper() is deprecated in Drupal 8.6.0 and will be removed before Drupal 9.0.0. Use mb_strtoupper() instead. See https://www.drupal.org/node/2850048.
    */

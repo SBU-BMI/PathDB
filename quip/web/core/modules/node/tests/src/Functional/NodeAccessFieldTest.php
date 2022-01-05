@@ -20,6 +20,11 @@ class NodeAccessFieldTest extends NodeTestBase {
   public static $modules = ['node_access_test', 'field_ui'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to bypass access content.
    *
    * @var \Drupal\user\UserInterface
@@ -46,8 +51,15 @@ class NodeAccessFieldTest extends NodeTestBase {
     node_access_rebuild();
 
     // Create some users.
-    $this->adminUser = $this->drupalCreateUser(['access content', 'bypass node access']);
-    $this->contentAdminUser = $this->drupalCreateUser(['access content', 'administer content types', 'administer node fields']);
+    $this->adminUser = $this->drupalCreateUser([
+      'access content',
+      'bypass node access',
+    ]);
+    $this->contentAdminUser = $this->drupalCreateUser([
+      'access content',
+      'administer content types',
+      'administer node fields',
+    ]);
 
     // Add a custom field to the page content type.
     $this->fieldName = mb_strtolower($this->randomMachineName() . '_field_name');
@@ -61,10 +73,12 @@ class NodeAccessFieldTest extends NodeTestBase {
       'entity_type' => 'node',
       'bundle' => 'page',
     ])->save();
-    entity_get_display('node', 'page', 'default')
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+    $display_repository->getViewDisplay('node', 'page')
       ->setComponent($this->fieldName)
       ->save();
-    entity_get_form_display('node', 'page', 'default')
+    $display_repository->getFormDisplay('node', 'page')
       ->setComponent($this->fieldName)
       ->save();
   }

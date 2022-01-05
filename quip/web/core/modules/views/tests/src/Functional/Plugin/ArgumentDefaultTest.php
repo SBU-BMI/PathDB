@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\views\Functional\Plugin;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -29,6 +30,11 @@ class ArgumentDefaultTest extends ViewTestBase {
     'test_argument_default_node',
     'test_argument_default_query_param',
     ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -62,7 +68,7 @@ class ArgumentDefaultTest extends ViewTestBase {
     $id = $view->addHandler('default', 'argument', 'views_test_data', 'name', $options);
     $view->initHandlers();
     $plugin = $view->argument[$id]->getPlugin('argument_default');
-    $this->assertTrue($plugin instanceof ArgumentDefaultTestPlugin, 'The correct argument default plugin is used.');
+    $this->assertInstanceOf(ArgumentDefaultTestPlugin::class, $plugin);
 
     // Check that the value of the default argument is as expected.
     $this->assertEqual($view->argument[$id]->getDefaultArgument(), 'John', 'The correct argument default value is returned.');
@@ -85,7 +91,10 @@ class ArgumentDefaultTest extends ViewTestBase {
    * Tests the use of a default argument plugin that provides no options.
    */
   public function testArgumentDefaultNoOptions() {
-    $admin_user = $this->drupalCreateUser(['administer views', 'administer site configuration']);
+    $admin_user = $this->drupalCreateUser([
+      'administer views',
+      'administer site configuration',
+    ]);
     $this->drupalLogin($admin_user);
 
     // The current_user plugin has no options form, and should pass validation.
@@ -102,7 +111,7 @@ class ArgumentDefaultTest extends ViewTestBase {
       '%function' => 'views_handler_argument->validateOptionsForm()',
     ];
     $message = t('%type: @message in %function', $error);
-    $this->assertNoRaw($message, format_string('Did not find error message: @message.', ['@message' => $message]));
+    $this->assertNoRaw($message, new FormattableMarkup('Did not find error message: @message.', ['@message' => $message]));
   }
 
   /**
@@ -160,9 +169,9 @@ class ArgumentDefaultTest extends ViewTestBase {
     $this->drupalPlaceBlock("views_block:test_argument_default_node-block_1", ['id' => $id]);
     $xpath = '//*[@id="block-' . $id . '"]';
     $this->drupalGet('node/' . $node1->id());
-    $this->assertTrue(strpos($this->xpath($xpath)[0]->getText(), $node1->getTitle()));
+    $this->assertStringContainsString($node1->getTitle(), $this->xpath($xpath)[0]->getText());
     $this->drupalGet('node/' . $node2->id());
-    $this->assertTrue(strpos($this->xpath($xpath)[0]->getText(), $node2->getTitle()));
+    $this->assertStringContainsString($node2->getTitle(), $this->xpath($xpath)[0]->getText());
   }
 
   /**

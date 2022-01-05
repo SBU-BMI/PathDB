@@ -21,15 +21,12 @@
 
         this.listenTo(this.model, 'change', this.render);
 
-        // Use aria-role form so that the number of items in the list is spoken.
-        this.$el.attr('role', 'form');
-
         // Initial render.
         this.render();
       },
 
       /**
-       * @inheritdoc
+       * {@inheritdoc}
        */
       render() {
         const isOpen = this.model.get('isOpen');

@@ -3,6 +3,7 @@
 namespace Drupal\Tests\Core\Utility;
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\GeneratedButton;
 use Drupal\Core\GeneratedNoLink;
 use Drupal\Core\GeneratedUrl;
 use Drupal\Core\Language\Language;
@@ -29,28 +30,28 @@ class LinkGeneratorTest extends UnitTestCase {
   /**
    * The mocked url generator.
    *
-   * @var \PHPUnit_Framework_MockObject_MockObject
+   * @var \PHPUnit\Framework\MockObject\MockObject
    */
   protected $urlGenerator;
 
   /**
    * The mocked module handler.
    *
-   * @var \PHPUnit_Framework_MockObject_MockObject
+   * @var \PHPUnit\Framework\MockObject\MockObject
    */
   protected $moduleHandler;
 
   /**
    * The mocked renderer service.
    *
-   * @var \PHPUnit_Framework_MockObject_MockObject|\Drupal\Core\Render\RendererInterface
+   * @var \PHPUnit\Framework\MockObject\MockObject|\Drupal\Core\Render\RendererInterface
    */
   protected $renderer;
 
   /**
    * The mocked URL Assembler service.
    *
-   * @var \PHPUnit_Framework_MockObject_MockObject|\Drupal\Core\Utility\UnroutedUrlAssemblerInterface
+   * @var \PHPUnit\Framework\MockObject\MockObject|\Drupal\Core\Utility\UnroutedUrlAssemblerInterface
    */
   protected $urlAssembler;
 
@@ -73,10 +74,10 @@ class LinkGeneratorTest extends UnitTestCase {
     $this->urlGenerator = $this->getMockBuilder('\Drupal\Core\Routing\UrlGenerator')
       ->disableOriginalConstructor()
       ->getMock();
-    $this->moduleHandler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
-    $this->renderer = $this->getMock('\Drupal\Core\Render\RendererInterface');
+    $this->moduleHandler = $this->createMock('Drupal\Core\Extension\ModuleHandlerInterface');
+    $this->renderer = $this->createMock('\Drupal\Core\Render\RendererInterface');
     $this->linkGenerator = new LinkGenerator($this->urlGenerator, $this->moduleHandler, $this->renderer);
-    $this->urlAssembler = $this->getMock('\Drupal\Core\Utility\UnroutedUrlAssemblerInterface');
+    $this->urlAssembler = $this->createMock('\Drupal\Core\Utility\UnroutedUrlAssemblerInterface');
   }
 
   /**
@@ -169,7 +170,7 @@ class LinkGeneratorTest extends UnitTestCase {
     $url->setOption('set_active_class', TRUE);
 
     $result = $this->linkGenerator->generate('Test', $url);
-    $this->assertTrue($result instanceof GeneratedNoLink);
+    $this->assertInstanceOf(GeneratedNoLink::class, $result);
     $this->assertSame('<span>Test</span>', (string) $result);
   }
 
@@ -197,6 +198,26 @@ class LinkGeneratorTest extends UnitTestCase {
 
     $result = $this->linkGenerator->generate('Test', $url);
     $this->assertSame('<a href="">Test</a>', (string) $result);
+  }
+
+  /**
+   * Tests the generate() method with the <button> route.
+   *
+   * @covers ::generate
+   */
+  public function testGenerateButton() {
+    $this->urlGenerator->expects($this->never())
+      ->method('generateFromRoute');
+    $this->moduleHandler->expects($this->once())
+      ->method('alter')
+      ->with('link', $this->isType('array'));
+
+    $url = Url::fromRoute('<button>');
+    $url->setUrlGenerator($this->urlGenerator);
+
+    $result = $this->linkGenerator->generate('Test', $url);
+    $this->assertInstanceOf(GeneratedButton::class, $result);
+    $this->assertSame('<button type="button">Test</button>', (string) $result);
   }
 
   /**
@@ -247,7 +268,7 @@ class LinkGeneratorTest extends UnitTestCase {
       ->with('base:example', ['query' => ['foo' => '"bar"', 'zoo' => 'baz']] + $this->defaultOptions)
       ->willReturn((new GeneratedUrl())->setGeneratedUrl('/example?foo=%22bar%22&zoo=baz'));
 
-    $path_validator = $this->getMock('Drupal\Core\Path\PathValidatorInterface');
+    $path_validator = $this->createMock('Drupal\Core\Path\PathValidatorInterface');
     $container_builder = new ContainerBuilder();
     $container_builder->set('path.validator', $path_validator);
     \Drupal::setContainer($container_builder);
@@ -416,7 +437,7 @@ class LinkGeneratorTest extends UnitTestCase {
         'tag' => 'em',
       ],
     ], $result);
-    $this->assertTrue(strpos($result, '<em>HTML output</em>') !== FALSE);
+    $this->assertStringContainsString('<em>HTML output</em>', $result);
   }
 
   /**
@@ -431,8 +452,10 @@ class LinkGeneratorTest extends UnitTestCase {
         switch ($name) {
           case 'test_route_1':
             return (new GeneratedUrl())->setGeneratedUrl('/test-route-1');
+
           case 'test_route_3':
             return (new GeneratedUrl())->setGeneratedUrl('/test-route-3');
+
           case 'test_route_4':
             if ($parameters['object'] == '1') {
               return (new GeneratedUrl())->setGeneratedUrl('/test-route-4/1');

@@ -31,6 +31,11 @@ targetEntityType: node
 bundle: wsi
 mode: teaser
 content:
+  content_moderation_control:
+    weight: -20
+    settings: {  }
+    third_party_settings: {  }
+    region: content
   links:
     weight: 100
     region: content

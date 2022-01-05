@@ -1,0 +1,6 @@
+ldap_authentication_admin_form:
+  title: 'Authentication'
+  route_name: ldap_authentication.admin_form
+  description: 'Configure LDAP authentication behavior.'
+  parent: ldap.settings
+  weight: 20

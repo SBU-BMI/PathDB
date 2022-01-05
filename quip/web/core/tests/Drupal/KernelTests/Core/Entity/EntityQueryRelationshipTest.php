@@ -132,7 +132,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $this->queryResults = $storage->getQuery()
       ->notExists("user_id.entity.name")
       ->execute();
-    $this->assertEqual(count($this->queryResults), 0);
+    $this->assertCount(0, $this->queryResults);
     // This returns the 0th entity as that's only one pointing to the 0th
     // term (test without specifying the field column).
     $this->queryResults = $storage->getQuery()
@@ -171,7 +171,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $this->queryResults = $storage->getQuery()
       ->notExists("user_id.entity:user.name")
       ->execute();
-    $this->assertEqual(count($this->queryResults), 0);
+    $this->assertCount(0, $this->queryResults);
     // This returns the 0th entity as that's only one pointing to the 0th
     // term (test without specifying the field column).
     $this->queryResults = $storage->getQuery()
@@ -195,7 +195,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
    * Tests the invalid specifier in the query relationship.
    */
   public function testInvalidSpecifier() {
-    $this->setExpectedException(PluginNotFoundException::class);
+    $this->expectException(PluginNotFoundException::class);
     $this->container
       ->get('entity_type.manager')
       ->getStorage('taxonomy_term')

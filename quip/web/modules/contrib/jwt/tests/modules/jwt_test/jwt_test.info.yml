@@ -1,0 +1,12 @@
+name: 'JWT test'
+type: module
+description: 'Support module for jwt testing.'
+package: Testing
+core_version_requirement: ^8.7.12 || ^9.0
+dependencies:
+  - jwt:jwt
+
+# Information added by Drupal.org packaging script on 2021-06-17
+version: '8.x-1.0-rc1'
+project: 'jwt'
+datestamp: 1623958871

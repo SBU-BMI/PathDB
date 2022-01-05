@@ -32,7 +32,7 @@ class ClassCommentSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -120,6 +120,31 @@ class ClassCommentSniff implements Sniff
 
                 $phpcsFile->fixer->addContent($commentEnd, "\n");
                 $phpcsFile->fixer->endChangeset();
+            }
+        }
+
+        $comment = [];
+        for ($i = $start; $i < $commentEnd; $i++) {
+            if ($tokens[$i]['code'] === T_DOC_COMMENT_TAG) {
+                break;
+            }
+
+            if ($tokens[$i]['code'] === T_DOC_COMMENT_STRING) {
+                $comment[] = $tokens[$i]['content'];
+            }
+        }
+
+        $words = explode(' ', implode(' ', $comment));
+        if (count($words) <= 2) {
+            $className = $phpcsFile->getDeclarationName($stackPtr);
+
+            foreach ($words as $word) {
+                // Check if the comment contains the class name.
+                if (strpos($word, $className) !== false) {
+                    $error = 'The class short comment should describe what the class does and not simply repeat the class name';
+                    $phpcsFile->addWarning($error, $commentEnd, 'Short');
+                    break;
+                }
             }
         }
 

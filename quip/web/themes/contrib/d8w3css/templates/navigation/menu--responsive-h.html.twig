@@ -19,7 +19,7 @@
  */
 #}
 <div class="ul-responsive-h">
-  <i class="mobile-nav-responsive fa fa-bars w3-hide-large w3-button w3-block w3-right-align w3-xxlarge"></i>
+  <div class="mobile-nav-responsive w3-hide-large w3-button w3-block w3-right-align w3-large"><i class="fa fa-bars"> </i></div>
 {% import _self as menus %}
 {#
   We call a macro which calls itself to render the full tree.
@@ -54,23 +54,24 @@
         ]
       %}
      {% if menu_level == 0 and item.is_expanded %}
-        <li{{ item.attributes.addClass(item_classes) }}>
-        <a href="#" class="w3-button tMenu toggle-parent">{{ item.title }} <span class="fa fa-chevron-down dropdown-arrow"></span></a>
+        <li{{ item.attributes.addClass(item_classes) }} role="none">
+        <a href="#" class="w3-button tMenu toggle-parent" role="menuitem" aria-haspopup="true">{{ item.title }} <span class="fa fa-chevron-down dropdown-arrow"></span></a>
       {% elseif menu_level != 0 and item.is_expanded %}
-        <li{{ item.attributes.addClass(item_classes) }}>
-        <a href="#" class="w3-button tMenu toggle-child">{{ item.title }} <span class=" fa fa-chevron-down dropdown-arrow"></span></a>
+        <li{{ item.attributes.addClass(item_classes) }} role="none">
+        <a href="#" class="w3-button tMenu toggle-child" role="menuitem" aria-haspopup="true">{{ item.title }} <span class=" fa fa-chevron-down dropdown-arrow"></span></a>
       {% else %}
       {%
         set link_classes = [
           'w3-button li-link li-link-' ~ menu_name|clean_class,
         ]
       %}
-      <li{{ item.attributes.addClass(item_classes) }}>
+      <li{{ item.attributes.addClass(item_classes) }} role="none">
         {{
           link(
             item.title,
             item.url,
-            item.attributes.removeClass(item_classes).addClass(link_classes)
+            item.attributes.removeClass(item_classes).addClass(link_classes),
+            item.attributes.setAttribute("role", "menuitem")
           )
         }}
       {% endif %}

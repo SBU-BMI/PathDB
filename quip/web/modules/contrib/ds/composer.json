@@ -2,10 +2,17 @@
   "name": "drupal/ds",
   "description": "Extend the display options for every entity type.",
   "type": "drupal-module",
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "keywords": ["php", "layout", "drupal"],
   "homepage": "https://www.drupal.org/project/ds",
   "minimum-stability": "dev",
+  "require": {
+    "drupal/core": "^8.8 || ^9"
+  },
+  "require-dev": {
+    "drupal/field_group": "3.x-dev",
+    "drupal/devel": "3.x-dev"
+  },
   "authors": [
     {
       "name": "Bram Goffings",

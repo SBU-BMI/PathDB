@@ -10,8 +10,12 @@ use SomethingElse;
 declare(ticks=1);
 
 declare(ticks=1) {
-    // Code.
+    echo $i;
 }
+
+declare(ticks=1) :
+    echo $i;
+enddeclare;
 
 define("MAXSIZE", 100);
 if (defined('MINSIZE') === false) {
@@ -59,6 +63,7 @@ if (!interface_exists('MyInterface')) {
     interface MyInterface {}
 }
 
+#[\Attribute]
 namespace {
     class A {}
 }

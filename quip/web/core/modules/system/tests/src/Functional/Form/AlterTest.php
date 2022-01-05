@@ -20,6 +20,11 @@ class AlterTest extends BrowserTestBase {
   public static $modules = ['block', 'form_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests execution order of hook_form_alter() and hook_form_FORM_ID_alter().
    */
   public function testExecutionOrder() {
@@ -33,7 +38,7 @@ class AlterTest extends BrowserTestBase {
       'system_form_form_test_alter_form_alter() executed.',
     ];
     $content = preg_replace('/\s+/', ' ', Xss::filter($this->getSession()->getPage()->getContent(), []));
-    $this->assert(strpos($content, implode(' ', $expected)) !== FALSE, 'Form alter hooks executed in the expected order.');
+    $this->assertStringContainsString(implode(' ', $expected), $content, 'Form alter hooks executed in the expected order.');
   }
 
 }

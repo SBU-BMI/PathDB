@@ -11,6 +11,8 @@ use Drupal\tac_lite\Form\SchemeForm;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Database\Query\Condition;
 
 /**
  * Implements hook_help().
@@ -20,7 +22,7 @@ function tac_lite_help($route_name, RouteMatchInterface $route_match) {
     // Main module help for the block module.
     case 'help.page.tac_lite':
       $admin_taclite = Url::fromRoute('tac_lite.administration');
-      $admin_tac_lite_url = \Drupal::l(t('administer -> people -> access control by taxonomy'), $admin_taclite);
+      $admin_tac_lite_url = Link::fromTextAndUrl(t('administer -> people -> access control by taxonomy'), $admin_taclite);
       $output = '<p>' . t('Taxonomy Access Control Lite allows you to restrict access to site content. It uses a simple scheme based on Taxonomy, Users and Roles.') . '</p>';
       $output .= '<p>' . t("This module leverages Drupal's node_access table allows this module to grant permission to view, update, and delete nodes.  To control which users can <em>create</em> new nodes, use Drupal's role based permissions.") . '</p>';
       $output .= '<p>' . t("It is important to understand that this module <em>grants</em> privileges, as opposed to <em>revoking</em> privileges.  So, use Drupal's built-in permissions to hide content from certain roles, then use this module to show the content.  This module cannot hide content that the user is allowed to see based on their existing privileges.") . '</p>';
@@ -32,7 +34,7 @@ function tac_lite_help($route_name, RouteMatchInterface $route_match) {
       ]) . '</li>';
       $output .= '<li>' . t('Configure one or more <em>schemes</em>.   simple site may need only one scheme which grants view permission.  A more complex site might require additional schemes for update and delete.  Each scheme associates roles and terms.  Users will be granted priviliges based on their role and the terms with which nodes are tagged.') . '</li>';
       $output .= '<li>' . t('When settings are correct, <a href=:url>rebuild node_access permissions</a>.', [
-        ':url' => \Drupal::url('node.configure_rebuild_confirm'),
+        ':url' => Url::fromRoute('node.configure_rebuild_confirm')->toString(),
       ]) . '</li>';
       $output .= '<li>' . t('Optionally, grant access to individual users. (See the <em>access by taxonomy</em> tab, under user -> edit.)') . '</li>';
       $output .= '</ol>';
@@ -106,8 +108,8 @@ function _tac_lite_get_terms($node) {
     }
   }
   elseif (\Drupal::currentUser()->hasPermission('administer tac_lite')) {
-    drupal_set_message(t('tac_lite.module enabled, but not <a href=:admin_url>configured</a>. No tac_lite terms associated with :title.', [
-      ':admin_url' => \Drupal::url('tac_lite.administration'),
+    \Drupal::messenger()->addStatus(t('tac_lite.module enabled, but not <a href=:admin_url>configured</a>. No tac_lite terms associated with :title.', [
+      ':admin_url' => Url::fromRoute('tac_lite.administration')->toString(),
       ':title' => $node->getTitle(),
     ]
     ));
@@ -122,7 +124,7 @@ function tac_lite_node_get_terms($node) {
   $nid = $node->id();
   if (!isset($terms[$nid])) {
     // Get fields of all node.
-    $fields = \Drupal::entityManager()->getFieldDefinitions('node', $node->getType());
+    $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', $node->getType());
     // Get tids from all taxonomy_term_reference fields.
     foreach ($fields as $field_name => $field) {
       $field_type = method_exists($field, 'getType') ? $field->getType() : NULL;
@@ -243,7 +245,8 @@ function tac_lite_query_term_access_alter(AlterableInterface $query) {
     $primary_table = '';
     $t = $query->getTables();
     foreach ($t as $info) {
-      if (!$info['join type']) {
+      $table = $info['table'];
+      if ($table == 'taxonomy_term_data' || $table == 'taxonomy_term_field_data') {
         $primary_table = $info['alias'];
       }
     }
@@ -251,7 +254,7 @@ function tac_lite_query_term_access_alter(AlterableInterface $query) {
     // Prevent query from finding terms the current user does
     // not have permission to see.
     $query->leftJoin('taxonomy_term_field_data', 'tac_td', $primary_table . '.tid = tac_td.tid');
-    $or = db_or();
+    $or = new Condition('OR');
     $or->condition($primary_table . '.tid', $tids, 'IN');
     $or->condition('tac_td.vid', $vids, 'NOT IN');
     $query->condition($or);

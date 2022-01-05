@@ -12,7 +12,6 @@ use Drupal\jwt\JsonWebToken\JsonWebToken;
 use Drupal\Core\Authentication\AuthenticationProviderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * JWT Authentication Provider.
@@ -53,29 +52,28 @@ class JwtAuth implements AuthenticationProviderInterface {
    * {@inheritdoc}
    */
   public function applies(Request $request) {
-    $auth = $request->headers->get('Authorization');
-    return preg_match('/^Bearer .+/', $auth);
+    return (bool) self::getJwtFromRequest($request);
   }
 
   /**
    * {@inheritdoc}
    */
   public function authenticate(Request $request) {
-    $raw_jwt = $this->getJwtFromRequest($request);
+    $raw_jwt = self::getJwtFromRequest($request);
 
     // Decode JWT and validate signature.
     try {
       $jwt = $this->transcoder->decode($raw_jwt);
     }
     catch (JwtDecodeException $e) {
-      throw new AccessDeniedHttpException($e->getMessage(), $e);
+      return NULL;
     }
 
     $validate = new JwtAuthValidateEvent($jwt);
     // Signature is validated, but allow modules to do additional validation.
     $this->eventDispatcher->dispatch(JwtAuthEvents::VALIDATE, $validate);
     if (!$validate->isValid()) {
-      throw new AccessDeniedHttpException($validate->invalidReason());
+      return NULL;
     }
 
     $valid = new JwtAuthValidEvent($jwt);
@@ -83,7 +81,7 @@ class JwtAuth implements AuthenticationProviderInterface {
     $user = $valid->getUser();
 
     if (!$user) {
-      throw new AccessDeniedHttpException('Unable to load user from provided JWT.');
+      return NULL;
     }
 
     return $user;
@@ -105,20 +103,29 @@ class JwtAuth implements AuthenticationProviderInterface {
   /**
    * Gets a raw JsonWebToken from the current request.
    *
-   * @param Request $request
+   * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
    *
    * @return string|bool
    *   Raw JWT String if on request, false if not.
    */
-  protected function getJwtFromRequest(Request $request) {
-    $auth_header = $request->headers->get('Authorization');
-    $matches = array();
-    if (!$hasJWT = preg_match('/^Bearer (.*)/', $auth_header, $matches)) {
-      return FALSE;
+  public static function getJwtFromRequest(Request $request) {
+    $auth_headers = [];
+    $auth = $request->headers->get('Authorization');
+    if ($auth) {
+      $auth_headers[] = $auth;
     }
-
-    return $matches[1];
+    // Check a second header used in combination with basic auth.
+    $fallback = $request->headers->get('JWT-Authorization');
+    if ($fallback) {
+      $auth_headers[] = $fallback;
+    }
+    foreach ($auth_headers as $value) {
+      if (preg_match('/^Bearer (.+)/', $value, $matches)) {
+        return $matches[1];
+      }
+    }
+    return FALSE;
   }
 
 }

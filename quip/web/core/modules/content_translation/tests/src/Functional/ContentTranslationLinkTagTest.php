@@ -17,7 +17,17 @@ class ContentTranslationLinkTagTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test', 'content_translation', 'content_translation_test', 'language'];
+  public static $modules = [
+    'entity_test',
+    'content_translation',
+    'content_translation_test',
+    'language',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * The added languages.
@@ -131,7 +141,7 @@ class ContentTranslationLinkTagTest extends BrowserTestBase {
 
     $this->assertSession()->statusCodeEquals(200);
     $result = $this->xpath('//link[@rel="alternate" and @hreflang]');
-    $this->assertFalse($result, 'No alternate link tag found.');
+    $this->assertEmpty($result, 'No alternate link tag found.');
   }
 
 }

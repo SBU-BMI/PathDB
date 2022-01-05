@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\WhiteSpace;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class FunctionSpacingSniff implements Sniff
@@ -112,14 +112,32 @@ class FunctionSpacingSniff implements Sniff
         $isFirst = false;
         $isLast  = false;
 
-        $ignore = (Tokens::$emptyTokens + Tokens::$methodPrefixes);
+        $ignore = ([T_WHITESPACE => T_WHITESPACE] + Tokens::$methodPrefixes);
 
         $prev = $phpcsFile->findPrevious($ignore, ($stackPtr - 1), null, true);
+
+        while ($tokens[$prev]['code'] === T_ATTRIBUTE_END) {
+            // Skip past function attributes.
+            $prev = $phpcsFile->findPrevious($ignore, ($tokens[$prev]['attribute_opener'] - 1), null, true);
+        }
+
+        if ($tokens[$prev]['code'] === T_DOC_COMMENT_CLOSE_TAG) {
+            // Skip past function docblocks.
+            $prev = $phpcsFile->findPrevious($ignore, ($tokens[$prev]['comment_opener'] - 1), null, true);
+        }
+
         if ($tokens[$prev]['code'] === T_OPEN_CURLY_BRACKET) {
             $isFirst = true;
         }
 
         $next = $phpcsFile->findNext($ignore, ($closer + 1), null, true);
+        if (isset(Tokens::$emptyTokens[$tokens[$next]['code']]) === true
+            && $tokens[$next]['line'] === $tokens[$closer]['line']
+        ) {
+            // Skip past "end" comments.
+            $next = $phpcsFile->findNext($ignore, ($next + 1), null, true);
+        }
+
         if ($tokens[$next]['code'] === T_CLOSE_CURLY_BRACKET) {
             $isLast = true;
         }
@@ -227,6 +245,14 @@ class FunctionSpacingSniff implements Sniff
                 // Ignore comments as they can have different spacing rules, and this
                 // isn't a proper function comment anyway.
                 return;
+            }
+
+            while ($tokens[$prevContent]['code'] === T_ATTRIBUTE_END
+                && $tokens[$prevContent]['line'] === ($currentLine - 1)
+            ) {
+                // Account for function attributes.
+                $currentLine = $tokens[$tokens[$prevContent]['attribute_opener']]['line'];
+                $prevContent = $phpcsFile->findPrevious(T_WHITESPACE, ($tokens[$prevContent]['attribute_opener'] - 1), null, true);
             }
 
             if ($tokens[$prevContent]['code'] === T_DOC_COMMENT_CLOSE_TAG

@@ -62,7 +62,7 @@
         this.textEditor = Drupal.editors[this.textFormat.editor];
 
         // Store the actual value of this field. We'll need this to restore the
-        // original value when the user discards his modifications.
+        // original value when the user discards their modifications.
         const $fieldItems = this.$el.find('.quickedit-field');
         if ($fieldItems.length) {
           this.$textElement = $fieldItems.eq(0);
@@ -73,7 +73,7 @@
       },
 
       /**
-       * @inheritdoc
+       * {@inheritdoc}
        *
        * @return {jQuery}
        *   The text element edited.
@@ -83,7 +83,7 @@
       },
 
       /**
-       * @inheritdoc
+       * {@inheritdoc}
        *
        * @param {object} fieldModel
        *   The field model.
@@ -179,7 +179,7 @@
       },
 
       /**
-       * @inheritdoc
+       * {@inheritdoc}
        *
        * @return {object}
        *   The settings for the quick edit UI.
@@ -194,7 +194,7 @@
       },
 
       /**
-       * @inheritdoc
+       * {@inheritdoc}
        */
       revert() {
         this.$textElement.html(this.model.get('originalValue'));

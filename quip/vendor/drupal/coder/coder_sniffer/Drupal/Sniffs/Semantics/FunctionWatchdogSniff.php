@@ -9,7 +9,6 @@
 
 namespace Drupal\Sniffs\Semantics;
 
-use Drupal\Sniffs\Semantics\FunctionCall;
 use PHP_CodeSniffer\Files\File;
 
 /**
@@ -26,7 +25,7 @@ class FunctionWatchdogSniff extends FunctionCall
     /**
      * Returns an array of function names this test wants to listen for.
      *
-     * @return array
+     * @return array<string>
      */
     public function registerFunctionNames()
     {

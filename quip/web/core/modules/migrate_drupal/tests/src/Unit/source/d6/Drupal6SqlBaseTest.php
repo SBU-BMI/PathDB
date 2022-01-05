@@ -69,10 +69,10 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
   protected function setUp() {
     $plugin = 'placeholder_id';
     /** @var \Drupal\Core\State\StateInterface $state */
-    $state = $this->getMock('Drupal\Core\State\StateInterface');
-    /** @var \Drupal\Core\Entity\EntityManagerInterface $entity_manager */
-    $entity_manager = $this->getMock('Drupal\Core\Entity\EntityManagerInterface');
-    $this->base = new TestDrupal6SqlBase($this->migrationConfiguration, $plugin, [], $this->getMigration(), $state, $entity_manager);
+    $state = $this->createMock('Drupal\Core\State\StateInterface');
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
+    $entity_type_manager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->base = new TestDrupal6SqlBase($this->migrationConfiguration, $plugin, [], $this->getMigration(), $state, $entity_type_manager);
     $this->base->setDatabase($this->getDatabase($this->databaseContents));
   }
 
@@ -82,8 +82,8 @@ class Drupal6SqlBaseTest extends MigrateTestCase {
   public function testGetSystemData() {
     $system_data = $this->base->getSystemData();
     // Should be 1 theme and 2 modules.
-    $this->assertEquals(1, count($system_data['theme']));
-    $this->assertEquals(2, count($system_data['module']));
+    $this->assertCount(1, $system_data['theme']);
+    $this->assertCount(2, $system_data['module']);
 
     // Calling again should be identical.
     $this->assertSame($system_data, $this->base->getSystemData());

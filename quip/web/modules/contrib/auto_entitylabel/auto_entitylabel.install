@@ -22,17 +22,17 @@ function auto_entitylabel_update_8001() {
  * Split a single configuration into separate configs.
  */
 function auto_entitylabel_update_8201() {
-  /** @var \Drupal\Core\Entity\EntityTypeManager $entity_manager */
-  $entity_manager = \Drupal::entityTypeManager();
+  /** @var \Drupal\Core\Entity\EntityTypeManager $entity_type_manager */
+  $entity_type_manager = \Drupal::entityTypeManager();
 
-  /** @var \Drupal\Core\Config\Config $config */
+  /** @var \Drupal\Core\Config\Config $old_config */
   $old_config = \Drupal::configFactory()
     ->getEditable('auto_entitylabel.settings');
   $raw = $old_config->getRawData();
 
   $entity_types = [];
   /** @var \Drupal\Core\Config\Entity\ConfigEntityType $entity_type */
-  foreach ($entity_manager->getDefinitions() as $entity_type_id => $entity_type) {
+  foreach ($entity_type_manager->getDefinitions() as $entity_type_id => $entity_type) {
     if ($entity_type->getLinkTemplate('auto-label')) {
       $entity_types[] = $entity_type_id;
     }
@@ -63,11 +63,10 @@ function auto_entitylabel_update_8201() {
   $config_interface = \Drupal::service('config.factory');
 
   foreach ($new_configs as $type => $type_configs) {
-    $prefix = $entity_manager->getStorage($type)
-      ->getEntityType()
-      ->getConfigPrefix();
-
-    $type = $entity_manager->getStorage($type)->getEntityType()->getProvider();
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entityType */
+    $entityType = $entity_type_manager->getStorage($type)->getEntityType();
+    $prefix = $entityType->getConfigPrefix();
+    $type = $entity_type_manager->getStorage($type)->getEntityType()->getProvider();
 
     foreach ($type_configs as $bundle => $settings) {
       $config_name = "auto_entitylabel.settings.$type.$bundle";

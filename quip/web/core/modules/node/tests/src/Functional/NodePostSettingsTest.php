@@ -10,10 +10,19 @@ namespace Drupal\Tests\node\Functional;
  */
 class NodePostSettingsTest extends NodeTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
   protected function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(['create page content', 'administer content types', 'access user profiles']);
+    $web_user = $this->drupalCreateUser([
+      'create page content',
+      'administer content types',
+      'access user profiles',
+    ]);
     $this->drupalLogin($web_user);
   }
 
@@ -36,7 +45,7 @@ class NodePostSettingsTest extends NodeTestBase {
     // Check that the post information is displayed.
     $node = $this->drupalGetNodeByTitle($edit['title[0][value]']);
     $elements = $this->xpath('//div[contains(@class, :class)]', [':class' => 'node__submitted']);
-    $this->assertEqual(count($elements), 1, 'Post information is displayed.');
+    $this->assertCount(1, $elements, 'Post information is displayed.');
     $node->delete();
 
     // Set "Basic page" content type to display post information.
@@ -52,7 +61,7 @@ class NodePostSettingsTest extends NodeTestBase {
 
     // Check that the post information is displayed.
     $elements = $this->xpath('//div[contains(@class, :class)]', [':class' => 'node__submitted']);
-    $this->assertEqual(count($elements), 0, 'Post information is not displayed.');
+    $this->assertCount(0, $elements, 'Post information is not displayed.');
   }
 
 }

@@ -5,7 +5,7 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 ### update OS
 RUN yum update -y && yum clean all
-RUN yum -y install wget which zip unzip java-1.8.0-openjdk bind-utils epel-release
+RUN yum -y install wget which zip unzip bind-utils epel-release
 RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73
 RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt \
@@ -52,7 +52,11 @@ RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nod
 # copy over Docker initialization scripts
 EXPOSE 80 8080
 COPY run.sh /root/run.sh
+#<<<<<<< dev-merge
+#COPY savepathdb /root/savepathdb
+#=======
 COPY run_sleep.sh /root/run_sleep.sh
+#>>>>>>> k8s-develop
 COPY mysql.tgz /build
 RUN mkdir /quip/config
 RUN mkdir /quip/config-update
@@ -64,8 +68,13 @@ COPY content/* /quip/content/
 
 # download caMicroscope
 WORKDIR /quip/web
+#<<<<<<< dev-merge
+#ARG viewer
+#RUN if [ -z ${viewer} ]; then git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.9.1; else git clone https://github.com/camicroscope/caMicroscope.git --branch=$viewer; fi
+#=======
 ARG viewer="v3.7.7"
 RUN if [ -z ${viewer} ]; then git clone https://github.com/camicroscope/caMicroscope.git --branch=v3.5.10; else git clone https://github.com/camicroscope/caMicroscope.git --branch=$viewer; fi
+#>>>>>>> k8s-develop
 ARG featureMap
 RUN if [ -z ${featureMap} ]; then git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3; else git clone https://github.com/SBU-BMI/FeatureMap --branch=$featureMap; fi
 RUN rm /etc/httpd/conf.d/ssl.conf

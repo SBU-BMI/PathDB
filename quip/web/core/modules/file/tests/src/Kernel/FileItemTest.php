@@ -93,8 +93,8 @@ class FileItemTest extends FieldKernelTestBase {
     $entity->save();
 
     $entity = EntityTest::load($entity->id());
-    $this->assertTrue($entity->file_test instanceof FieldItemListInterface, 'Field implements interface.');
-    $this->assertTrue($entity->file_test[0] instanceof FieldItemInterface, 'Field item implements interface.');
+    $this->assertInstanceOf(FieldItemListInterface::class, $entity->file_test);
+    $this->assertInstanceOf(FieldItemInterface::class, $entity->file_test[0]);
     $this->assertEqual($entity->file_test->target_id, $this->file->id());
     $this->assertEqual($entity->file_test->display, 1);
     $this->assertEqual($entity->file_test->description, $description);
@@ -124,7 +124,11 @@ class FileItemTest extends FieldKernelTestBase {
     $this->entityValidateAndSave($entity);
     // Verify that the sample file was stored in the correct directory.
     $uri = $entity->file_test->entity->getFileUri();
-    $this->assertEqual($this->directory, dirname(file_uri_target($uri)));
+
+    /** @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $stream_wrapper_manager */
+    $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager');
+
+    $this->assertEqual($this->directory, dirname($stream_wrapper_manager::getTarget($uri)));
 
     // Make sure the computed files reflects updates to the file.
     file_put_contents('public://example-3.txt', $this->randomMachineName());
@@ -132,7 +136,8 @@ class FileItemTest extends FieldKernelTestBase {
     $file3 = File::create([
       'uri' => 'public://example-3.txt',
     ]);
-    $display = entity_get_display('entity_test', 'entity_test', 'default');
+    $display = \Drupal::service('entity_display.repository')
+      ->getViewDisplay('entity_test', 'entity_test');
     $display->setComponent('file_test', [
       'label' => 'above',
       'type' => 'file_default',
@@ -141,7 +146,9 @@ class FileItemTest extends FieldKernelTestBase {
     $entity = EntityTest::create();
     $entity->file_test = ['entity' => $file3];
     $uri = $file3->getFileUri();
-    $output = entity_view($entity, 'default');
+    $output = \Drupal::entityTypeManager()
+      ->getViewBuilder('entity_test')
+      ->view($entity, 'default');
     \Drupal::service('renderer')->renderRoot($output);
     $this->assertTrue(!empty($entity->file_test->entity));
     $this->assertEqual($entity->file_test->entity->getFileUri(), $uri);

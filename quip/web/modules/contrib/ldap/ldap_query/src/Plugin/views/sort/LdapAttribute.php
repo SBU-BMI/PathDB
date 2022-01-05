@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query\Plugin\views\sort;
 
 use Drupal\views\Plugin\views\sort\Standard;

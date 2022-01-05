@@ -5,6 +5,7 @@ namespace Drupal\Tests\search\Functional;
 use Drupal\Core\Database\Database;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\search\SearchIndexInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -31,7 +32,18 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['language', 'locale', 'comment', 'node', 'search'];
+  protected static $modules = [
+    'language',
+    'locale',
+    'comment',
+    'node',
+    'search',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   protected function setUp() {
     parent::setUp();
@@ -40,7 +52,14 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
 
     // Create a user who can administer search, do searches, see the status
     // report, and administer cron. Log in.
-    $user = $this->drupalCreateUser(['administer search', 'search content', 'use advanced search', 'access content', 'access site reports', 'administer site configuration']);
+    $user = $this->drupalCreateUser([
+      'administer search',
+      'search content',
+      'use advanced search',
+      'access content',
+      'access site reports',
+      'administer site configuration',
+    ]);
     $this->drupalLogin($user);
 
     // Set up the search plugin.
@@ -128,7 +147,8 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
     // Run the shutdown function. Testing is a unique case where indexing
     // and searching has to happen in the same request, so running the shutdown
     // function manually is needed to finish the indexing process.
-    search_update_totals();
+    $search_index = \Drupal::service('search.index');
+    assert($search_index instanceof SearchIndexInterface);
     $this->assertIndexCounts(6, 8, 'after updating partially');
     $this->assertDatabaseCounts(2, 0, 'after updating partially');
 
@@ -140,7 +160,6 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
     $this->plugin = $this->container->get('plugin.manager.search')->createInstance('node_search');
 
     $this->plugin->updateIndex();
-    search_update_totals();
     $this->assertIndexCounts(0, 8, 'after updating fully');
     $this->assertDatabaseCounts(8, 0, 'after updating fully');
 
@@ -150,38 +169,37 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
     $this->assertIndexCounts(8, 8, 'after reindex');
     $this->assertDatabaseCounts(8, 0, 'after reindex');
     $this->plugin->updateIndex();
-    search_update_totals();
 
     // Test search results.
 
     // This should find two results for the second and third node.
     $this->plugin->setSearch('English OR Hungarian', [], []);
     $search_result = $this->plugin->execute();
-    $this->assertEqual(count($search_result), 2, 'Found two results.');
+    $this->assertCount(2, $search_result, 'Found two results.');
     // Nodes are saved directly after each other and have the same created time
     // so testing for the order is not possible.
     $results = [$search_result[0]['title'], $search_result[1]['title']];
-    $this->assertTrue(in_array('Third node this is the Hungarian title', $results), 'The search finds the correct Hungarian title.');
-    $this->assertTrue(in_array('Second node this is the English title', $results), 'The search finds the correct English title.');
+    $this->assertContains('Third node this is the Hungarian title', $results, 'The search finds the correct Hungarian title.');
+    $this->assertContains('Second node this is the English title', $results, 'The search finds the correct English title.');
 
     // Now filter for Hungarian results only.
     $this->plugin->setSearch('English OR Hungarian', ['f' => ['language:hu']], []);
     $search_result = $this->plugin->execute();
 
-    $this->assertEqual(count($search_result), 1, 'The search found only one result');
+    $this->assertCount(1, $search_result, 'The search found only one result');
     $this->assertEqual($search_result[0]['title'], 'Third node this is the Hungarian title', 'The search finds the correct Hungarian title.');
 
     // Test for search with common key word across multiple languages.
     $this->plugin->setSearch('node', [], []);
     $search_result = $this->plugin->execute();
 
-    $this->assertEqual(count($search_result), 6, 'The search found total six results');
+    $this->assertCount(6, $search_result, 'The search found total six results');
 
     // Test with language filters and common key word.
     $this->plugin->setSearch('node', ['f' => ['language:hu']], []);
     $search_result = $this->plugin->execute();
 
-    $this->assertEqual(count($search_result), 2, 'The search found 2 results');
+    $this->assertCount(2, $search_result, 'The search found 2 results');
 
     // Test to check for the language of result items.
     foreach ($search_result as $result) {
@@ -190,13 +208,12 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
 
     // Mark one of the nodes for reindexing, using the API function, and
     // verify indexing status.
-    search_mark_for_reindex('node_search', $this->searchableNodes[0]->id());
+    $search_index->markForReindex('node_search', $this->searchableNodes[0]->id());
     $this->assertIndexCounts(1, 8, 'after marking one node to reindex via API function');
 
     // Update the index and verify the totals again.
     $this->plugin = $this->container->get('plugin.manager.search')->createInstance('node_search');
     $this->plugin->updateIndex();
-    search_update_totals();
     $this->assertIndexCounts(0, 8, 'after indexing again');
 
     // Mark one node for reindexing by saving it, and verify indexing status.
@@ -227,32 +244,32 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
     // Add a bogus entry to the search index table using a different search
     // type. This will not appear in the index status, because it is not
     // managed by a plugin.
-    search_index('foo', $this->searchableNodes[0]->id(), 'en', 'some text');
+    $search_index->index('foo', $this->searchableNodes[0]->id(), 'en', 'some text');
     $this->assertIndexCounts(1, 8, 'after adding a different index item');
 
     // Mark just this "foo" index for reindexing.
-    search_mark_for_reindex('foo');
+    $search_index->markForReindex('foo');
     $this->assertIndexCounts(1, 8, 'after reindexing the other search type');
 
     // Mark everything for reindexing.
-    search_mark_for_reindex();
+    $search_index->markForReindex();
     $this->assertIndexCounts(8, 8, 'after reindexing everything');
 
     // Clear one item from the index, but with wrong language.
     $this->assertDatabaseCounts(8, 1, 'before clear');
-    search_index_clear('node_search', $this->searchableNodes[0]->id(), 'hu');
+    $search_index->clear('node_search', $this->searchableNodes[0]->id(), 'hu');
     $this->assertDatabaseCounts(8, 1, 'after clear with wrong language');
     // Clear using correct language.
-    search_index_clear('node_search', $this->searchableNodes[0]->id(), 'en');
+    $search_index->clear('node_search', $this->searchableNodes[0]->id(), 'en');
     $this->assertDatabaseCounts(7, 1, 'after clear with right language');
     // Don't specify language.
-    search_index_clear('node_search', $this->searchableNodes[1]->id());
+    $search_index->clear('node_search', $this->searchableNodes[1]->id());
     $this->assertDatabaseCounts(6, 1, 'unspecified language clear');
     // Clear everything in 'foo'.
-    search_index_clear('foo');
+    $search_index->clear('foo');
     $this->assertDatabaseCounts(6, 0, 'other index clear');
     // Clear everything.
-    search_index_clear();
+    $search_index->clear();
     $this->assertDatabaseCounts(0, 0, 'complete clear');
   }
 
@@ -311,7 +328,7 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
       ->groupBy('sid')
       ->execute()
       ->fetchCol();
-    $this->assertEqual($count_node, count($results), 'Node count was ' . $count_node . ' for ' . $message);
+    $this->assertCount($count_node, $results, 'Node count was ' . $count_node . ' for ' . $message);
 
     // Count number of "foo" records.
     $results = $connection->select('search_dataset', 'i')
@@ -319,7 +336,7 @@ class SearchMultilingualEntityTest extends BrowserTestBase {
       ->condition('type', 'foo')
       ->execute()
       ->fetchCol();
-    $this->assertEqual($count_foo, count($results), 'Foo count was ' . $count_foo . ' for ' . $message);
+    $this->assertCount($count_foo, $results, 'Foo count was ' . $count_foo . ' for ' . $message);
 
   }
 

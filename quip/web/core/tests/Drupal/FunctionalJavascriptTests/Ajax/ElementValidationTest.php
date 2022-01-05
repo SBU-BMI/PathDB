@@ -17,6 +17,11 @@ class ElementValidationTest extends WebDriverTestBase {
   public static $modules = ['ajax_test', 'ajax_forms_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Tries to post an Ajax change to a form that has a validated element.
    *
    * Drupal AJAX commands update the DOM echoing back the validated values in
@@ -39,7 +44,7 @@ class ElementValidationTest extends WebDriverTestBase {
     $this->assertNotNull($placeholder_text, 'A callback successfully echoed back a string.');
 
     $this->drupalGet('ajax_validation_test');
-    // Partialy complete the form with a number.
+    // Partially complete the form with a number.
     $page->fillField('drivernumber', '12345');
     $page->findField('spare_required_field')->focus();
 

@@ -3,7 +3,7 @@
 namespace Drupal\Tests\taxonomy_unique\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
+use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Tests for taxonomy unique module.

@@ -1,0 +1,279 @@
+/* Global */
+html,
+body,
+button,
+input,
+select,
+optgroup,
+textarea {
+  color: #637381;
+}
+
+a,
+.w3-button {
+  transition: 0.4s !important;
+}
+
+.ul-parent-account {
+  color: inherit;
+}
+
+#header .fa,
+#header .svg-inline--fa {
+  color: inherit;
+}
+
+#top-container .top-box>div,
+#bottom-container .bottom-box>div,
+#footer-container .footer-box>div {
+  border-width: 1px;
+  border-style: solid;
+  transition: 0.4s !important;
+}
+
+/* Border Color  */
+.cke_top,
+.w3-border,
+ul.primary,
+.cke_bottom,
+.cke_chrome,
+ul.secondary,
+ul.primary > li,
+#top-container .top-box>div,
+#bottom-container .bottom-box>div,
+#footer-container .footer-box>div {
+  border-color: #d3d8dd !important;
+}
+
+/* Hover Color  */
+.w3-button:hover,
+#open-search:hover,
+#open-nav-inner:hover {
+  color: #637381 !important;
+  background-color: #e6e9ec !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+#top-container .top-box>div:hover,
+#bottom-container .bottom-box>div:hover,
+#footer-container .footer-box>div:hover {
+  box-shadow: rgba(0, 0, 0, 0.22) 0 25px 57px 0;
+  border-color: #a3aeb8;
+}
+
+/* button animation  */
+.w3-button {
+  position: relative;
+}
+
+.w3-button:before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.w3-button:hover:before {
+  animation: btnBorderAnimation 0.1s linear forwards;
+}
+
+@keyframes btnBorderAnimation {
+  0% {
+    width: 0;
+    height: 0;
+    border-bottom-color: #a3aeb8;
+  }
+
+  99.9999% {
+    width: 100%;
+    height: 100%;
+    border-bottom-color: #a3aeb8;
+  }
+
+  100% {
+    width: 0;
+    height: 0;
+    border-bottom-color: transparent;
+  }
+
+}
+
+/* Border animation  */
+#top-container .top-box>.animate-border,
+#bottom-container .bottom-box>.animate-border,
+#footer-container .footer-box>.animate-border {
+  position: relative;
+}
+
+#top-container .top-box>.animate-border:before,
+#bottom-container .bottom-box>.animate-border:before,
+#footer-container .footer-box>.animate-border:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  background-color: transparent;
+  border: 2px solid transparent;
+}
+
+#top-container .top-box>.animate-border:hover:before,
+#bottom-container .bottom-box>.animate-border:hover:before,
+#footer-container .footer-box>.animate-border:hover:before {
+  animation: borderLeftColors 1s linear forwards;
+}
+
+#footer-menu-inner form.w3-content {
+  border: 1px solid #fff;
+}
+
+@keyframes borderLeftColors {
+  0% {
+    width: 0;
+    height: 0;
+    border-top-color: #a3aeb8;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+
+  50% {
+    width: 100%;
+    height: 0;
+    border-top-color: #a3aeb8;
+    border-right-color: #a3aeb8;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+
+  99.9999% {
+    width: 100%;
+    height: 100%;
+    border-top-color: #a3aeb8;
+    border-right-color: #a3aeb8;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+
+  100% {
+    width: 0;
+    height: 0;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+
+}
+
+#top-container .top-box>.animate-border:after,
+#bottom-container .bottom-box>.animate-border:after,
+#footer-container .footer-box>.animate-border:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  background-color: transparent;
+  border: 2px solid transparent;
+}
+
+#top-container .top-box>.animate-border:hover:after,
+#bottom-container .bottom-box>.animate-border:hover:after,
+#footer-container .footer-box>.animate-border:hover:after {
+  animation: borderRightColors 1s linear forwards;
+}
+
+@keyframes borderRightColors {
+  0% {
+    width: 0;
+    height: 0;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: #a3aeb8;
+    border-left-color: transparent;
+  }
+
+  50% {
+    width: 100%;
+    height: 0;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: #a3aeb8;
+    border-left-color: #a3aeb8;
+  }
+
+  99.9999% {
+    width: 100%;
+    height: 100%;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: #a3aeb8;
+    border-left-color: #a3aeb8;
+  }
+
+  100% {
+    width: 0;
+    height: 0;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+
+}
+/* You must have a sub-theme available and an image name page-wrapper.jpg
+  inside images folder */
+
+/* Use the image on drupal.org for direction on how to change the colors for each region. */
+
+/* https://www.drupal.org/files/project-images/drupal8-w3css-theme-color-guidance.jpg */
+
+/* Disable colors on all parents */
+.page-wrapper,
+#footer-menu,
+#highlighted,
+#welcome-text,
+#top-container,
+#main-container,
+#bottom-container,
+#footer-container {
+  background-color: transparent;
+  color: #637381;
+}
+
+#header,
+.close-nav,
+#copyright,
+.mobile-nav,
+#page-title,
+.search-slide-wrapper,
+.main-navigation-wrapper {
+  background-color: white;
+  color: #637381;
+}
+
+#top-container .top-box>div,
+#footer-container .footer-box>div,
+#main-container-inner .main-box>div,
+#bottom-container-inner .bottom-box>div {
+  background-color: white;
+  color: #637381;
+}
+
+/* We apply the main image to the whole page wrapper */
+.page-wrapper {
+  background-color: transparent;
+  background-size: cover;
+  background-image: url(../images/page-wrapper.jpg);
+  background-position: top center;
+  background-repeat: repeat;
+}

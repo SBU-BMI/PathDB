@@ -26,7 +26,7 @@ class ValidGlobalSniff implements Sniff
     /**
      * List of allowed Drupal core global variable names.
      *
-     * @var array
+     * @var array<string>
      */
     public $coreGlobals = [
         '$argc',
@@ -83,7 +83,7 @@ class ValidGlobalSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -112,7 +112,7 @@ class ValidGlobalSniff implements Sniff
         while (($varToken = $phpcsFile->findNext($ignore, ($varToken + 1), null, true, null, true)) !== false) {
             if ($tokens[$varToken]['code'] === T_VARIABLE
                 && in_array($tokens[$varToken]['content'], $this->coreGlobals) === false
-                && $tokens[$varToken]['content']{1} !== '_'
+                && $tokens[$varToken]['content'][1] !== '_'
             ) {
                 $error = 'global variables should start with a single underscore followed by the module and another underscore';
                 $phpcsFile->addError($error, $varToken, 'GlobalUnderScore');

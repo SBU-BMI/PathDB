@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\ControlStructures;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class ControlSignatureSniff implements Sniff
@@ -53,6 +53,7 @@ class ControlSignatureSniff implements Sniff
             T_ELSE,
             T_ELSEIF,
             T_SWITCH,
+            T_MATCH,
         ];
 
     }//end register()

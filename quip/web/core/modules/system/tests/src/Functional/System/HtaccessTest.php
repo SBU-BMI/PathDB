@@ -19,6 +19,11 @@ class HtaccessTest extends BrowserTestBase {
   public static $modules = ['node', 'path'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Get an array of file paths for access testing.
    *
    * @return int[]
@@ -86,6 +91,10 @@ class HtaccessTest extends BrowserTestBase {
     $file_paths["$path/composer.json"] = 403;
     $file_paths["$path/composer.lock"] = 403;
 
+    // Ensure web server configuration files cannot be accessed.
+    $file_paths["$path/.htaccess"] = 403;
+    $file_paths["$path/web.config"] = 403;
+
     return $file_paths;
   }
 
@@ -99,7 +108,7 @@ class HtaccessTest extends BrowserTestBase {
 
     // Test that adding "/1" to a .php URL does not make it accessible.
     $this->drupalGet('core/lib/Drupal.php/1');
-    $this->assertResponse(403, "Access to core/lib/Drupal.php/1 is denied.");
+    $this->assertSession()->statusCodeEquals(403);
 
     // Test that it is possible to have path aliases containing .php.
     $type = $this->drupalCreateContentType();
@@ -112,14 +121,14 @@ class HtaccessTest extends BrowserTestBase {
     ]);
     $node->save();
     $this->drupalGet('test.php');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertText('This is a node');
 
     // Update node's alias to test.php/test.
     $node->path = '/test.php/test';
     $node->save();
     $this->drupalGet('test.php/test');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertText('This is a node');
   }
 
@@ -132,9 +141,9 @@ class HtaccessTest extends BrowserTestBase {
    *   The expected response code. For example: 200, 403 or 404.
    */
   protected function assertFileAccess($path, $response_code) {
-    $this->assertTrue(file_exists(\Drupal::root() . '/' . $path), "The file $path exists.");
+    $this->assertFileExists(\Drupal::root() . '/' . $path);
     $this->drupalGet($path);
-    $this->assertResponse($response_code, "Response code to $path is $response_code.");
+    $this->assertEquals($response_code, $this->getSession()->getStatusCode(), "Response code to $path should be $response_code");
   }
 
   /**
@@ -142,7 +151,7 @@ class HtaccessTest extends BrowserTestBase {
    */
   public function testSvgzContentEncoding() {
     $this->drupalGet('core/modules/system/tests/logo.svgz');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Use x-encoded-content-encoding because of Content-Encoding responses
     // (gzip, deflate, etc.) are automatically decoded by Guzzle.

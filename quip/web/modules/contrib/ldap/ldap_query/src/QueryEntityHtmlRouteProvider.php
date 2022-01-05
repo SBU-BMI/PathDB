@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query;
 
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -39,7 +41,7 @@ class QueryEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
    * @return \Symfony\Component\Routing\Route|null
    *   The generated route, if available.
    */
-  protected function getCollectionRoute(EntityTypeInterface $entity_type) {
+  protected function getCollectionRoute(EntityTypeInterface $entity_type): ?Route {
     if ($entity_type->hasLinkTemplate('collection') && $entity_type->hasListBuilderClass()) {
       $entity_type_id = $entity_type->id();
       $route = new Route($entity_type->getLinkTemplate('collection'));
@@ -55,6 +57,7 @@ class QueryEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
 
       return $route;
     }
+    return NULL;
   }
 
   /**
@@ -66,7 +69,7 @@ class QueryEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
    * @return \Symfony\Component\Routing\Route|null
    *   The generated route, if available.
    */
-  protected function getAddFormRoute(EntityTypeInterface $entity_type) {
+  protected function getAddFormRoute(EntityTypeInterface $entity_type): ?Route {
     if ($entity_type->hasLinkTemplate('add-form')) {
       $entity_type_id = $entity_type->id();
       $route = new Route($entity_type->getLinkTemplate('add-form'));
@@ -88,6 +91,7 @@ class QueryEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
 
       return $route;
     }
+    return NULL;
   }
 
 }

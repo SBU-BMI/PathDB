@@ -19,7 +19,13 @@ class ArgumentUidRevisionTest extends ViewsKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'field', 'text', 'user', 'node_test_views'];
+  public static $modules = [
+    'node',
+    'field',
+    'text',
+    'user',
+    'node_test_views',
+  ];
 
   /**
    * {@inheritdoc}
@@ -64,13 +70,13 @@ class ArgumentUidRevisionTest extends ViewsKernelTestBase {
       'type' => 'default',
       'title' => $this->randomMachineName(),
     ]);
-    $node2->setRevisionAuthorId($no_author->id());
+    $node2->setRevisionUserId($no_author->id());
     $node2->save();
     $expected_result[] = ['nid' => $node2->id()];
 
     // Force to add a new revision.
     $node2->setNewRevision(TRUE);
-    $node2->setRevisionAuthorId($author->id());
+    $node2->setRevisionUserId($author->id());
     $node2->save();
 
     // Create one  node on which the author has neither authorship of revisions

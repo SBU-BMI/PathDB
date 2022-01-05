@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the LDAP API module.
  */
 
+declare(strict_types = 1);
+
 /**
  * Implements hook_requirements().
  */
@@ -43,10 +45,11 @@ function ldap_servers_requirements($phase) {
  * Updates bind method to new value.
  */
 function ldap_servers_update_8301() {
-  $factory = \Drupal::service('ldap.servers');
-  /** @var \Drupal\ldap_servers\ServerFactory $factory */
-  $servers = $factory->getAllServers();
-  foreach ($servers as $server) {
+  /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
+  $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
+  $servers = $storage->getQuery()->execute();
+  /** @var \Drupal\ldap_servers\Entity\Server $server */
+  foreach ($storage->loadMultiple($servers) as $server) {
     $currentMethod = $server->get('bind_method');
     if ($currentMethod == 1) {
       $server->set('bind_method', 'service_account');
@@ -79,10 +82,11 @@ function ldap_servers_update_8302() {
  * Adds default timeout to all servers.
  */
 function ldap_servers_update_8303() {
-  $factory = \Drupal::service('ldap.servers');
-  /** @var \Drupal\ldap_servers\ServerFactory $factory */
-  $servers = $factory->getAllServers();
-  foreach ($servers as $server) {
+  /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
+  $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
+  $servers = $storage->getQuery()->execute();
+  /** @var \Drupal\ldap_servers\Entity\Server $server */
+  foreach ($storage->loadMultiple($servers) as $server) {
     $server->set('timeout', 10);
     $server->save();
   }
@@ -93,37 +97,65 @@ function ldap_servers_update_8303() {
  * Force server attributes to be lowercase.
  */
 function ldap_servers_update_8304() {
-  $factory = \Drupal::service('ldap.servers');
-  /** @var \Drupal\ldap_servers\ServerFactory $factory */
-  $servers = $factory->getAllServers();
-  foreach ($servers as $server) {
-    $fields = [
-      'user_attr',
-      'account_name_attr',
-      'mail_attr',
-      'mail_template',
-      'picture_attr',
-      'unique_persistent_attr',
-      'user_dn_expression',
-      'grp_memb_attr',
-      'grp_object_cat',
-      'grp_memb_attr_match_user_attr',
-      'grp_user_memb_attr',
-      'grp_derive_from_dn_attr',
-    ];
-
-    foreach ($fields as $field) {
-      $server->set($field, mb_strtolower($server->get($field)));
-    }
-    $server->save();
-  }
-  return t('All server configuration attributes are forced to lowercase. Note that exporting this state can contain configuration overrides. Please review.');
+ // Update removed due to upstream support in symfony/ldap.
 }
-
 
 /**
  * Removal of double-escaping.
  */
 function ldap_servers_update_8305() {
   return t('Escaping of field data now relies solely on Twig auto-escaping. If you have created custom code make sure it takes this into account. See https://www.drupal.org/project/ldap/issues/2969097 for details.');
+}
+
+/**
+ * Paged search removal.
+ */
+function ldap_servers_update_8401() {
+  return t('Paged search has been removed in favor of more robust data retrieval. Please retest your configuration if you have used paged search.');
+}
+
+/**
+ * Corrects a configuration field type.
+ */
+function ldap_servers_update_8402() {
+  $config_factory = \Drupal::configFactory();
+  $config_old = $config_factory->getEditable('ldap_servers.settings');
+  if ($config_old) {
+    $config_new = $config_factory->getEditable('ldap_help.settings');
+    $config_new->set('watchdog_detail', $config_old->get('watchdog_detail'));
+    $config_new->save();
+    $config_old->delete();
+  }
+}
+
+/**
+ * Convert basedn to array.
+ */
+function ldap_servers_update_8403() {
+  $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
+  $servers = $storage->getQuery()->execute();
+  /** @var \Drupal\ldap_servers\Entity\Server $server */
+  foreach ($storage->loadMultiple($servers) as $server) {
+    $split = preg_split('/\r\n|\r|\n/', $server->get('basedn'));
+    $server->set('basedn', $split);
+    $server->save();
+  }
+}
+
+/**
+ * Fix encryption settings.
+ */
+function ldap_servers_update_8404() {
+  $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
+  /** @var \Drupal\ldap_servers\Entity\Server $server */
+  foreach ($storage->loadMultiple() as $server) {
+    $server->set('encryption', 'none');
+    if ($server->get('tls')) {
+      $server->set('encryption', 'tls');
+    }
+    if ($server->get('port') == 636) {
+      $server->set('encryption', 'ssl');
+    }
+    $server->save();
+  }
 }

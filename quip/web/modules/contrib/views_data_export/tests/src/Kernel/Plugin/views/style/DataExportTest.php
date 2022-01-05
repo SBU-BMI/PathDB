@@ -30,6 +30,7 @@ class DataExportTest extends ViewsKernelTestBase {
     'serialization',
     'rest',
     'views_data_export_test',
+    'xls_serialization',
   ];
 
   /**
@@ -74,7 +75,16 @@ class DataExportTest extends ViewsKernelTestBase {
     $view->save();
 
     $view->calculateDependencies();
-    $this->assertEquals(['module' => ['csv_serialization', 'entity_test', 'rest', 'serialization', 'user', 'views_data_export']], $view->getDependencies());
+    $this->assertEquals([
+      'module' => [
+        'csv_serialization',
+        'entity_test',
+        'rest',
+        'serialization',
+        'user',
+        'views_data_export',
+      ],
+    ], $view->getDependencies());
   }
 
 }

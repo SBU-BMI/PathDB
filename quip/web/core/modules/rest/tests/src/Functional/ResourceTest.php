@@ -26,6 +26,11 @@ class ResourceTest extends BrowserTestBase {
   public static $modules = ['hal', 'rest', 'entity_test', 'rest_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The entity.
    *
    * @var \Drupal\Core\Entity\EntityInterface
@@ -78,7 +83,7 @@ class ResourceTest extends BrowserTestBase {
     // means there's always a match and hence when there is no matching REST
     // route, the non-REST route is used, but can't render into
     // application/hal+json, so it returns a 406.
-    $this->assertResponse('406', 'HTTP response code is 406 when the resource does not define formats, because it falls back to the canonical, non-REST route.');
+    $this->assertSession()->statusCodeEquals(406);
   }
 
   /**
@@ -104,7 +109,7 @@ class ResourceTest extends BrowserTestBase {
     // means there's always a match and hence when there is no matching REST
     // route, the non-REST route is used, but can't render into
     // application/hal+json, so it returns a 406.
-    $this->assertResponse('406', 'HTTP response code is 406 when the resource does not define formats, because it falls back to the canonical, non-REST route.');
+    $this->assertSession()->statusCodeEquals(406);
   }
 
   /**
@@ -152,7 +157,7 @@ class ResourceTest extends BrowserTestBase {
 
     foreach ($manager->getDefinitions() as $resource => $definition) {
       foreach ($definition['uri_paths'] as $key => $uri_path) {
-        $this->assertFalse(strpos($uri_path, '//'), 'The resource URI path does not have duplicate slashes.');
+        $this->assertStringNotContainsString('//', $uri_path, 'The resource URI path does not have duplicate slashes.');
       }
     }
   }

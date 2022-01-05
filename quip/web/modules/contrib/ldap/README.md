@@ -18,7 +18,6 @@ For more information review the following resources:
 | ldap_authentication | This module provides a overall authentication functionality closely tied to ldap_user and ties in with several other modules, such as ldap_sso. |
 | ldap_authorization | The module to grant roles to users based on directory criteria, relies on the externalauth module. |
 | ldap_feeds (Unported) | Feeds integration to automatically sync users. |
-| ldap_help | A debugging module to help you discover additional information through detailed logging.  |
 | ldap_query | A module to allow you to execute custom queries, which can be display in Views or used in custom solutions. |
 | ldap_servers | The base module for communicating with a directory. |
 | ldap_sso | Provides Kerberos/NTLM single-sign-on. Note that this module is now a [separate project on drupal.org](https://www.drupal.org/project/ldap_sso). |
@@ -31,7 +30,7 @@ ldap_servers, ldap_user.
 ## Additional information
 
 If you are not yet familiar with how LDAP operates or how directory services
-work in general, the following links can be helpful resources. 
+work in general, the following links can be helpful resources.
 
 However, we recommend in any case that you contact your organization's directory
 maintainer, since their help can often save you a significant amount of time in

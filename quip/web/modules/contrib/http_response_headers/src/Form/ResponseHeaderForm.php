@@ -99,12 +99,12 @@ class ResponseHeaderForm extends EntityForm {
     $status = $response_header->save();
 
     if ($status) {
-      drupal_set_message($this->t('Saved the %label Response Header.', array(
+      $this->messenger()->addMessage($this->t('Saved the %label Response Header.', array(
         '%label' => $response_header->label(),
       )));
     }
     else {
-      drupal_set_message($this->t('The %label Response Header was not saved.', array(
+      $this->messenger()->addMessage($this->t('The %label Response Header was not saved.', array(
         '%label' => $response_header->label(),
       )));
     }

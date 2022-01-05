@@ -3,6 +3,8 @@
 namespace Drupal\views_taxonomy_term_name_depth\Plugin\views\argument;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\Database;
+use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -190,9 +192,11 @@ class IndexNameDepth extends ArgumentPluginBase {
         }
       }
     }
-    $subquery = db_select('taxonomy_index', 'tn');
+
+    // Now build the subqueries.
+    $subquery = $this->database->select('taxonomy_index', 'tn');
     $subquery->addField('tn', 'nid');
-    $where = db_or()->condition('tn.tid', $tids, $operator);
+    $where = (new Condition('OR'))->condition('tn.tid', $tids, $operator);
     $last = "tn";
 
     if ($this->options['depth'] > 0) {
@@ -206,7 +210,8 @@ class IndexNameDepth extends ArgumentPluginBase {
     }
     elseif ($this->options['depth'] < 0) {
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery->leftJoin('taxonomy_term__parent', "tp$count", "$last.tid = tp$count.parent_target_id");
+        $field = $count == 1 ? 'tid' : 'entity_id';
+        $subquery->leftJoin('taxonomy_term__parent', "tp$count", "$last.$field = tp$count.parent_target_id");
         $where->condition("tp$count.entity_id", $tids, $operator);
         $last = "tp$count";
       }

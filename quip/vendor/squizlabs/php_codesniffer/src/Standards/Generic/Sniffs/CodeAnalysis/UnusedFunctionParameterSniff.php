@@ -16,12 +16,19 @@
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\CodeAnalysis;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class UnusedFunctionParameterSniff implements Sniff
 {
+
+    /**
+     * The list of class type hints which will be ignored.
+     *
+     * @var array
+     */
+    public $ignoreTypeHints = [];
 
 
     /**
@@ -34,6 +41,7 @@ class UnusedFunctionParameterSniff implements Sniff
         return [
             T_FUNCTION,
             T_CLOSURE,
+            T_FN,
         ];
 
     }//end register()
@@ -82,11 +90,23 @@ class UnusedFunctionParameterSniff implements Sniff
         }
 
         foreach ($methodParams as $param) {
+            if (isset($param['property_visibility']) === true) {
+                // Ignore constructor property promotion.
+                continue;
+            }
+
             $params[$param['name']] = $stackPtr;
         }
 
         $next = ++$token['scope_opener'];
         $end  = --$token['scope_closer'];
+
+        // Check the end token for arrow functions as
+        // they can end at a content token due to not having
+        // a clearly defined closing token.
+        if ($token['code'] === T_FN) {
+            ++$end;
+        }
 
         $foundContent = false;
         $validTokens  = [
@@ -190,6 +210,10 @@ class UnusedFunctionParameterSniff implements Sniff
             // If there is only one parameter and it is unused, no need for additional errorcode toggling logic.
             if ($methodParamsCount === 1) {
                 foreach ($params as $paramName => $position) {
+                    if (in_array($methodParams[0]['type_hint'], $this->ignoreTypeHints, true) === true) {
+                        continue;
+                    }
+
                     $data = [$paramName];
                     $phpcsFile->addWarning($error, $position, $errorCode, $data);
                 }
@@ -206,6 +230,7 @@ class UnusedFunctionParameterSniff implements Sniff
                         $errorInfo[$methodParams[$i]['name']] = [
                             'position'  => $params[$methodParams[$i]['name']],
                             'errorcode' => $errorCode.'BeforeLastUsed',
+                            'typehint'  => $methodParams[$i]['type_hint'],
                         ];
                     }
                 } else {
@@ -215,14 +240,19 @@ class UnusedFunctionParameterSniff implements Sniff
                         $errorInfo[$methodParams[$i]['name']] = [
                             'position'  => $params[$methodParams[$i]['name']],
                             'errorcode' => $errorCode.'AfterLastUsed',
+                            'typehint'  => $methodParams[$i]['type_hint'],
                         ];
                     }
                 }
-            }
+            }//end for
 
             if (count($errorInfo) > 0) {
                 $errorInfo = array_reverse($errorInfo);
                 foreach ($errorInfo as $paramName => $info) {
+                    if (in_array($info['typehint'], $this->ignoreTypeHints, true) === true) {
+                        continue;
+                    }
+
                     $data = [$paramName];
                     $phpcsFile->addWarning($error, $info['position'], $info['errorcode'], $data);
                 }

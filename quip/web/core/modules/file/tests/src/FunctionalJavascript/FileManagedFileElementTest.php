@@ -17,6 +17,11 @@ class FileManagedFileElementTest extends WebDriverTestBase {
   protected static $modules = ['node', 'file', 'file_module_test', 'field_ui'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with administration permissions.
    *
    * @var \Drupal\user\UserInterface
@@ -28,7 +33,18 @@ class FileManagedFileElementTest extends WebDriverTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    $this->adminUser = $this->drupalCreateUser(['access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer node fields', 'administer node display', 'administer nodes', 'bypass node access']);
+    $this->adminUser = $this->drupalCreateUser([
+      'access content',
+      'access administration pages',
+      'administer site configuration',
+      'administer users',
+      'administer permissions',
+      'administer content types',
+      'administer node fields',
+      'administer node display',
+      'administer nodes',
+      'bypass node access',
+    ]);
     $this->drupalLogin($this->adminUser);
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
   }

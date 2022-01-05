@@ -29,7 +29,7 @@ class NamespacedDependencySniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -45,7 +45,7 @@ class NamespacedDependencySniff implements Sniff
      * @param int                         $stackPtr  The position of the current token
      *                                               in the stack passed in $tokens.
      *
-     * @return int
+     * @return int|void
      */
     public function process(File $phpcsFile, $stackPtr)
     {

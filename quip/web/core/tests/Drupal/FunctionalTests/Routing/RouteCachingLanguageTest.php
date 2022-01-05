@@ -20,7 +20,18 @@ class RouteCachingLanguageTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['path', 'node', 'content_translation', 'link', 'block'];
+  public static $modules = [
+    'path',
+    'node',
+    'content_translation',
+    'link',
+    'block',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * An user with permissions to administer content types.
@@ -83,12 +94,12 @@ class RouteCachingLanguageTest extends BrowserTestBase {
     ]);
     $field->save();
 
-    entity_get_form_display('node', 'page', 'default')
+    \Drupal::service('entity_display.repository')->getFormDisplay('node', 'page', 'default')
       ->setComponent('field_link', [
         'type' => 'link_default',
       ])
       ->save();
-    entity_get_display('node', 'page', 'full')
+    \Drupal::service('entity_display.repository')->getViewDisplay('node', 'page', 'full')
       ->setComponent('field_link', [
         'type' => 'link',
       ])

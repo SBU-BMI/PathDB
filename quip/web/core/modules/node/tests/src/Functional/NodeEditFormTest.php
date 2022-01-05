@@ -13,6 +13,11 @@ use Drupal\user\Entity\User;
 class NodeEditFormTest extends NodeTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A normal logged in user.
    *
    * @var \Drupal\user\UserInterface
@@ -43,11 +48,17 @@ class NodeEditFormTest extends NodeTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->webUser = $this->drupalCreateUser(['edit own page content', 'create page content']);
-    $this->adminUser = $this->drupalCreateUser(['bypass node access', 'administer nodes']);
+    $this->webUser = $this->drupalCreateUser([
+      'edit own page content',
+      'create page content',
+    ]);
+    $this->adminUser = $this->drupalCreateUser([
+      'bypass node access',
+      'administer nodes',
+    ]);
     $this->drupalPlaceBlock('local_tasks_block');
 
-    $this->nodeStorage = $this->container->get('entity.manager')->getStorage('node');
+    $this->nodeStorage = $this->container->get('entity_type.manager')->getStorage('node');
   }
 
   /**
@@ -66,7 +77,7 @@ class NodeEditFormTest extends NodeTestBase {
 
     // Check that the node exists in the database.
     $node = $this->drupalGetNodeByTitle($edit[$title_key]);
-    $this->assertTrue($node, 'Node found in database.');
+    $this->assertNotEmpty($node, 'Node found in database.');
 
     // Check that "edit" link points to correct page.
     $this->clickLink(t('Edit'));
@@ -90,7 +101,10 @@ class NodeEditFormTest extends NodeTestBase {
     $this->assertText($edit[$body_key], 'Body displayed.');
 
     // Log in as a second administrator user.
-    $second_web_user = $this->drupalCreateUser(['administer nodes', 'edit any page content']);
+    $second_web_user = $this->drupalCreateUser([
+      'administer nodes',
+      'edit any page content',
+    ]);
     $this->drupalLogin($second_web_user);
     // Edit the same node, creating a new revision.
     $this->drupalGet("node/" . $node->id() . "/edit");
@@ -167,7 +181,7 @@ class NodeEditFormTest extends NodeTestBase {
 
     // Now test with the Autocomplete (Tags) field widget.
     /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
-    $form_display = \Drupal::entityManager()->getStorage('entity_form_display')->load('node.page.default');
+    $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load('node.page.default');
     $widget = $form_display->getComponent('uid');
     $widget['type'] = 'entity_reference_autocomplete_tags';
     $widget['settings'] = [

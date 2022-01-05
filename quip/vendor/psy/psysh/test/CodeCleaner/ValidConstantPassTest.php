@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,27 +15,32 @@ use Psy\CodeCleaner\ValidConstantPass;
 
 class ValidConstantPassTest extends CodeCleanerTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->setPass(new ValidConstantPass());
     }
 
     /**
      * @dataProvider getInvalidReferences
-     * @expectedException \Psy\Exception\FatalErrorException
      */
     public function testProcessInvalidConstantReferences($code)
     {
+        $this->expectException(\Psy\Exception\FatalErrorException::class);
         $this->parseAndTraverse($code);
+
+        $this->fail();
     }
 
     public function getInvalidReferences()
     {
         return [
-            ['Foo\BAR'],
+            ['Foo\\BAR'],
 
             // class constant fetch
-            ['Psy\Test\CodeCleaner\ValidConstantPassTest::FOO'],
+            ['Psy\\Test\\CodeCleaner\\ValidConstantPassTest::FOO'],
             ['DateTime::BACON'],
         ];
     }

@@ -2,11 +2,14 @@
 
 namespace Doctrine\Common\Reflection;
 
+use Doctrine\Common\Reflection\Compatibility\ReflectionMethod as CompatibilityReflectionMethod;
 use ReflectionException;
 use ReflectionMethod;
 
 class StaticReflectionMethod extends ReflectionMethod
 {
+    use CompatibilityReflectionMethod;
+
     /**
      * The PSR-0 parser object.
      *
@@ -89,7 +92,7 @@ class StaticReflectionMethod extends ReflectionMethod
     /**
      * {@inheritDoc}
      */
-    public function getClosure($object)
+    public function getClosure($object = null)
     {
         throw new ReflectionException('Method not implemented');
     }
@@ -106,14 +109,6 @@ class StaticReflectionMethod extends ReflectionMethod
      * {@inheritDoc}
      */
     public function getPrototype()
-    {
-        throw new ReflectionException('Method not implemented');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function invoke($object, $parameter = null)
     {
         throw new ReflectionException('Method not implemented');
     }

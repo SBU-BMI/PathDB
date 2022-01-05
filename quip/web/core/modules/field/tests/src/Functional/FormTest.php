@@ -25,7 +25,18 @@ class FormTest extends FieldTestBase {
    *
    * @var array
    */
-  public static $modules = ['node', 'field_test', 'options', 'entity_test', 'locale'];
+  public static $modules = [
+    'node',
+    'field_test',
+    'options',
+    'entity_test',
+    'locale',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * An array of values defining a field single.
@@ -58,7 +69,10 @@ class FormTest extends FieldTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(['view test entity', 'administer entity_test content']);
+    $web_user = $this->drupalCreateUser([
+      'view test entity',
+      'administer entity_test content',
+    ]);
     $this->drupalLogin($web_user);
 
     $this->fieldStorageSingle = [
@@ -97,7 +111,8 @@ class FormTest extends FieldTestBase {
     $this->field['field_name'] = $field_name;
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($this->field)->save();
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field['entity_type'], $this->field['bundle'])
       ->setComponent($field_name)
       ->save();
 
@@ -149,7 +164,7 @@ class FormTest extends FieldTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText(t('entity_test @id has been updated.', ['@id' => $id]), 'Entity was updated');
-    $this->container->get('entity.manager')->getStorage('entity_test')->resetCache([$id]);
+    $this->container->get('entity_type.manager')->getStorage('entity_test')->resetCache([$id]);
     $entity = EntityTest::load($id);
     $this->assertEqual($entity->{$field_name}->value, $value, 'Field value was updated');
 
@@ -160,7 +175,7 @@ class FormTest extends FieldTestBase {
     ];
     $this->drupalPostForm('entity_test/manage/' . $id . '/edit', $edit, t('Save'));
     $this->assertText(t('entity_test @id has been updated.', ['@id' => $id]), 'Entity was updated');
-    $this->container->get('entity.manager')->getStorage('entity_test')->resetCache([$id]);
+    $this->container->get('entity_type.manager')->getStorage('entity_test')->resetCache([$id]);
     $entity = EntityTest::load($id);
     $this->assertTrue($entity->{$field_name}->isEmpty(), 'Field was emptied');
   }
@@ -176,7 +191,8 @@ class FormTest extends FieldTestBase {
     $this->field['default_value'] = [['value' => $default]];
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($this->field)->save();
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field['entity_type'], $this->field['bundle'])
       ->setComponent($field_name)
       ->save();
 
@@ -204,7 +220,8 @@ class FormTest extends FieldTestBase {
     $this->field['required'] = TRUE;
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($this->field)->save();
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field['entity_type'], $this->field['bundle'])
       ->setComponent($field_name)
       ->save();
 
@@ -240,7 +257,8 @@ class FormTest extends FieldTestBase {
     $this->field['field_name'] = $field_name;
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($this->field)->save();
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field['entity_type'], $this->field['bundle'])
       ->setComponent($field_name)
       ->save();
 
@@ -293,7 +311,8 @@ class FormTest extends FieldTestBase {
     }
     ksort($pattern);
     $pattern = implode('.*', array_values($pattern));
-    $this->assertPattern("|$pattern|s", 'Widgets are displayed in the correct order');
+    // Verify that the widgets are displayed in the correct order.
+    $this->assertPattern("|$pattern|s");
     $this->assertFieldByName("{$field_name}[$delta][value]", '', "New widget is displayed");
     $this->assertFieldByName("{$field_name}[$delta][_weight]", $delta, "New widget has the right weight");
     $this->assertNoField("{$field_name}[" . ($delta + 1) . '][value]', 'No extraneous widget is displayed');
@@ -326,7 +345,8 @@ class FormTest extends FieldTestBase {
     $this->field['required'] = TRUE;
     FieldStorageConfig::create($this->fieldStorageUnlimited)->save();
     FieldConfig::create($this->field)->save();
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($this->field['entity_type'], $this->field['bundle'])
       ->setComponent($field_name)
       ->save();
 
@@ -345,13 +365,16 @@ class FormTest extends FieldTestBase {
    * Tests widget handling of multiple required radios.
    */
   public function testFieldFormMultivalueWithRequiredRadio() {
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+
     // Create a multivalue test field.
     $field_storage = $this->fieldStorageUnlimited;
     $field_name = $field_storage['field_name'];
     $this->field['field_name'] = $field_name;
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($this->field)->save();
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    $display_repository->getFormDisplay($this->field['entity_type'], $this->field['bundle'])
       ->setComponent($field_name)
       ->save();
 
@@ -371,7 +394,7 @@ class FormTest extends FieldTestBase {
       'required' => TRUE,
     ];
     FieldConfig::create($field)->save();
-    entity_get_form_display($field['entity_type'], $field['bundle'], 'default')
+    $display_repository->getFormDisplay($field['entity_type'], $field['bundle'])
       ->setComponent($field['field_name'], [
         'type' => 'options_buttons',
       ])
@@ -403,7 +426,7 @@ class FormTest extends FieldTestBase {
     $this->field['field_name'] = $field_name;
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($this->field)->save();
-    $form = entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    $form = \Drupal::service('entity_display.repository')->getFormDisplay($this->field['entity_type'], $this->field['bundle'], 'default')
       ->setComponent($field_name, [
         'type' => 'test_field_widget_multiple',
       ]);
@@ -452,6 +475,9 @@ class FormTest extends FieldTestBase {
    * Tests fields with no 'edit' access.
    */
   public function testFieldFormAccess() {
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+
     $entity_type = 'entity_test_rev';
     // Create a "regular" field.
     $field_storage = $this->fieldStorageSingle;
@@ -463,7 +489,7 @@ class FormTest extends FieldTestBase {
     $field['bundle'] = $entity_type;
     FieldStorageConfig::create($field_storage)->save();
     FieldConfig::create($field)->save();
-    entity_get_form_display($entity_type, $entity_type, 'default')
+    $display_repository->getFormDisplay($entity_type, $entity_type)
       ->setComponent($field_name)
       ->save();
 
@@ -483,7 +509,7 @@ class FormTest extends FieldTestBase {
     ];
     FieldStorageConfig::create($field_storage_no_access)->save();
     FieldConfig::create($field_no_access)->save();
-    entity_get_form_display($field_no_access['entity_type'], $field_no_access['bundle'], 'default')
+    $display_repository->getFormDisplay($field_no_access['entity_type'], $field_no_access['bundle'])
       ->setComponent($field_name_no_access)
       ->save();
 
@@ -493,7 +519,7 @@ class FormTest extends FieldTestBase {
       ->getStorage($entity_type)
       ->create(['id' => 0, 'revision_id' => 0]);
 
-    $display = entity_get_form_display($entity_type, $entity_type, 'default');
+    $display = $display_repository->getFormDisplay($entity_type, $entity_type);
     $form = [];
     $form_state = new FormState();
     $display->buildForm($entity, $form, $form_state);
@@ -578,7 +604,8 @@ class FormTest extends FieldTestBase {
     // widget.
     $this->field->setDefaultValue([]);
     $this->field->save();
-    entity_get_form_display($entity_type, $this->field->getTargetBundle(), 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($entity_type, $this->field->getTargetBundle())
       ->setComponent($this->field->getName(), [
         'type' => 'test_field_widget',
       ])
@@ -598,7 +625,8 @@ class FormTest extends FieldTestBase {
     $this->assertEqual($entity->{$field_name}->value, $value, 'Field value was updated');
 
     // Set the field back to hidden.
-    entity_get_form_display($entity_type, $this->field->getTargetBundle(), 'default')
+    \Drupal::service('entity_display.repository')
+      ->getFormDisplay($entity_type, $this->field->getTargetBundle())
       ->removeComponent($this->field->getName())
       ->save();
 
@@ -642,7 +670,7 @@ class FormTest extends FieldTestBase {
     $entity->save();
 
     $this->drupalGet('entity_test_base_field_display/manage/' . $entity->id());
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertText('A field with multiple values');
     // Test if labels were XSS filtered.
     $this->assertEscaped("<script>alert('a configurable field');</script>");
@@ -694,11 +722,15 @@ class FormTest extends FieldTestBase {
       'field_name' => $field_name,
       'widget' => $widget,
     ]);
-    entity_get_form_display($this->field['entity_type'], $this->field['bundle'], 'default')
+    \Drupal::service('entity_display.repository')->getFormDisplay($this->field['entity_type'], $this->field['bundle'], 'default')
       ->setComponent($field_name, [
         'type' => $widget,
       ])
       ->save();
+
+    // We need to rebuild hook information after setting the component through
+    // the API.
+    $this->rebuildAll();
 
     $this->drupalGet('entity_test/add');
     $this->assertUniqueText("From $hook(): prefix on $field_name parent element.");

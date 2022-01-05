@@ -333,7 +333,7 @@ class IndexFieldsForm extends EntityForm {
       $build['fields'][$key]['boost'] = [
         '#type' => 'select',
         '#options' => $boosts,
-        '#default_value' => sprintf('%.1f', $field->getBoost()),
+        '#default_value' => sprintf('%.1F', $field->getBoost()),
         '#states' => [
           'visible' => [
             ':input[name="fields[' . $key . '][type]"]' => $fulltext_types,
@@ -414,7 +414,7 @@ class IndexFieldsForm extends EntityForm {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $field_values = $form_state->getValues()['fields'];
+    $field_values = $form_state->getValue('fields', []);
     $new_ids = [];
 
     foreach ($field_values as $field_id => $field) {
@@ -464,13 +464,24 @@ class IndexFieldsForm extends EntityForm {
     $new_fields = [];
     foreach ($field_values as $field_id => $new_settings) {
       if (!isset($fields[$field_id])) {
-        $args['%field_id'] = $field_id;
+        $args = [
+          '%field_id' => $field_id,
+        ];
         $this->messenger->addWarning($this->t('The field with ID %field_id does not exist anymore.', $args));
         continue;
       }
       $field = $fields[$field_id];
       $field->setLabel($new_settings['title']);
-      $field->setType($new_settings['type']);
+      try {
+        $field->setType($new_settings['type']);
+      }
+      catch (SearchApiException $e) {
+        $args = [
+          '%field_id' => $field_id,
+          '%field' => $field->getLabel(),
+        ];
+        $this->messenger->addWarning($this->t('The type of field %field (%field_id) cannot be changed.', $args));
+      }
       $field->setBoost($new_settings['boost']);
       $field->setFieldIdentifier($new_settings['id']);
 

@@ -4,9 +4,13 @@
  * To re-create this build:
  * 1. Clone the development repo of CKEditor to your machine
  * 2. Check out the version you'd like to build
- * 3. Run ./dev/builder/build.sh -s /path/to/build-config.js
+ * 3. Copy PATH/TO/DRUPAL/core/assets/vendor/ckeditor/build-config.js ./dev/builder/
+ * 4. Run ./dev/builder/build.sh -s
  *
  * Then, replace this directory (core/assets/vendor/ckeditor) with your build.
+ *
+ * Also: Remember to update core/core.libraries.yml if you are doing an update of the version of CKEditor for Drupal
+ * Core.
  *
  * If you are developing or debugging CKEditor plugins, you may want to work
  * against an unoptimized (unminified) CKEditor build. To do so,
@@ -35,6 +39,7 @@ var CKBUILDER_CONFIG = {
 		'.editorconfig',
 		'.gitignore',
 		'.gitattributes',
+		'.github',
 		'gruntfile.js',
 		'.idea',
 		'.jscsrc',
@@ -43,6 +48,7 @@ var CKBUILDER_CONFIG = {
 		'less',
 		'.mailmap',
 		'node_modules',
+		'.nvmrc',
 		'package.json',
 		'README.md',
 		'tests',
@@ -78,6 +84,8 @@ var CKBUILDER_CONFIG = {
 		list: 1,
 		magicline: 1,
 		maximize: 1,
+    pastefromgdocs: 1,
+    pastefromlibreoffice: 1,
 		pastefromword: 1,
 		pastetext: 1,
 		removeformat: 1,

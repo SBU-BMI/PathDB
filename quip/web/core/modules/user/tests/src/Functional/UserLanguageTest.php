@@ -20,11 +20,19 @@ class UserLanguageTest extends BrowserTestBase {
   public static $modules = ['user', 'language'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test if user can change their default language.
    */
   public function testUserLanguageConfiguration() {
     // User to add and remove language.
-    $admin_user = $this->drupalCreateUser(['administer languages', 'access administration pages']);
+    $admin_user = $this->drupalCreateUser([
+      'administer languages',
+      'access administration pages',
+    ]);
     // User to change their default language.
     $web_user = $this->drupalCreateUser();
 

@@ -32,10 +32,18 @@ use WebDriver\Exception as WebDriverException;
  */
 abstract class Container extends AbstractWebDriver
 {
+    const LEGACY_ELEMENT_ID = 'ELEMENT';
+    const WEBDRIVER_ELEMENT_ID = 'element-6066-11e4-a52e-4f735466cecf';
+
+    /**
+     * @var array
+     */
+    private $strategies;
+
     /**
      * {@inheritdoc}
      */
-    public function __construct($url = 'http://localhost:4444/wd/hub')
+    public function __construct($url)
     {
         parent::__construct($url);
 
@@ -203,12 +211,19 @@ abstract class Container extends AbstractWebDriver
      */
     protected function webDriverElement($value)
     {
-        return array_key_exists('ELEMENT', (array) $value)
-            ? new Element(
-                $this->getElementPath($value['ELEMENT']), // url
-                $value['ELEMENT'] // id
-            )
-            : null;
+        if (array_key_exists(self::LEGACY_ELEMENT_ID, (array) $value)) {
+            return new Element(
+                $this->getElementPath($value[self::LEGACY_ELEMENT_ID]), // url
+                $value[self::LEGACY_ELEMENT_ID] // id
+            );
+        }
+
+        if (array_key_exists(self::WEBDRIVER_ELEMENT_ID, (array) $value)) {
+            return new Element(
+                $this->getElementPath($value[self::WEBDRIVER_ELEMENT_ID]), // url
+                $value[self::WEBDRIVER_ELEMENT_ID] // id
+            );
+        }
     }
 
     /**

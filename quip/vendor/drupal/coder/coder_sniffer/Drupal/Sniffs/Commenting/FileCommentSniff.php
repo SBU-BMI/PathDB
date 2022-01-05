@@ -31,20 +31,9 @@ class FileCommentSniff implements Sniff
 
 
     /**
-     * A list of tokenizers this sniff supports.
-     *
-     * @var array
-     */
-    public $supportedTokenizers = [
-        'PHP',
-        'JS',
-    ];
-
-
-    /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -64,8 +53,6 @@ class FileCommentSniff implements Sniff
      */
     public function process(File $phpcsFile, $stackPtr)
     {
-        $this->currentFile = $phpcsFile;
-
         $tokens       = $phpcsFile->getTokens();
         $commentStart = $phpcsFile->findNext(T_WHITESPACE, ($stackPtr + 1), null, true);
 

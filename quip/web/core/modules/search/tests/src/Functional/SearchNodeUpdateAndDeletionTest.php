@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\search\Functional;
 
+use Drupal\Core\Database\Database;
+use Drupal\search\SearchIndexInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -17,6 +19,11 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
   protected static $modules = ['node', 'search'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to access and search content.
    *
    * @var \Drupal\user\UserInterface
@@ -29,7 +36,10 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Basic page']);
 
     // Create a test user and log in.
-    $this->testUser = $this->drupalCreateUser(['access content', 'search content']);
+    $this->testUser = $this->drupalCreateUser([
+      'access content',
+      'search content',
+    ]);
     $this->drupalLogin($this->testUser);
   }
 
@@ -47,7 +57,8 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
     $node_search_plugin = $this->container->get('plugin.manager.search')->createInstance('node_search');
     // Update the search index.
     $node_search_plugin->updateIndex();
-    search_update_totals();
+    $search_index = \Drupal::service('search.index');
+    assert($search_index instanceof SearchIndexInterface);
 
     // Search the node to verify it appears in search results
     $edit = ['keys' => 'knights'];
@@ -60,7 +71,6 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
 
     // Run indexer again
     $node_search_plugin->updateIndex();
-    search_update_totals();
 
     // Search again to verify the new text appears in test results.
     $edit = ['keys' => 'shrubbery'];
@@ -82,7 +92,6 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
     $node_search_plugin = $this->container->get('plugin.manager.search')->createInstance('node_search');
     // Update the search index.
     $node_search_plugin->updateIndex();
-    search_update_totals();
 
     // Search the node to verify it appears in search results
     $edit = ['keys' => 'dragons'];
@@ -90,7 +99,12 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
     $this->assertText($node->label());
 
     // Get the node info from the search index tables.
-    $search_index_dataset = db_query("SELECT sid FROM {search_index} WHERE type = 'node_search' AND  word = :word", [':word' => 'dragons'])
+    $connection = Database::getConnection();
+    $search_index_dataset = $connection->select('search_index', 'si')
+      ->fields('si', ['sid'])
+      ->condition('type', 'node_search')
+      ->condition('word', 'dragons')
+      ->execute()
       ->fetchField();
     $this->assertNotEqual($search_index_dataset, FALSE, t('Node info found on the search_index'));
 
@@ -98,7 +112,11 @@ class SearchNodeUpdateAndDeletionTest extends BrowserTestBase {
     $node->delete();
 
     // Check if the node info is gone from the search table.
-    $search_index_dataset = db_query("SELECT sid FROM {search_index} WHERE type = 'node_search' AND  word = :word", [':word' => 'dragons'])
+    $search_index_dataset = $connection->select('search_index', 'si')
+      ->fields('si', ['sid'])
+      ->condition('type', 'node_search')
+      ->condition('word', 'dragons')
+      ->execute()
       ->fetchField();
     $this->assertFalse($search_index_dataset, t('Node info successfully removed from search_index'));
 

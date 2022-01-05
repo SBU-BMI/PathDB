@@ -329,7 +329,7 @@ function hook_menu_local_tasks_alter(&$data, $route_name, \Drupal\Core\Cache\Ref
       ],
   ];
   // The tab we're adding is dependent on a user's access to add content.
-  $cacheability->addCacheTags(['user.permissions']);
+  $cacheability->addCacheContexts(['user.permissions']);
 }
 
 /**
@@ -400,7 +400,7 @@ function hook_contextual_links_alter(array &$links, $group, array $route_paramet
   if ($group == 'menu') {
     // Dynamically use the menu name for the title of the menu_edit contextual
     // link.
-    $menu = \Drupal::entityManager()->getStorage('menu')->load($route_parameters['menu']);
+    $menu = \Drupal::entityTypeManager()->getStorage('menu')->load($route_parameters['menu']);
     $links['menu_edit']['title'] = t('Edit menu: @label', ['@label' => $menu->label()]);
   }
 }

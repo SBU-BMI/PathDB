@@ -142,12 +142,8 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
     // have a datetime_type setting.
     $field = FieldStorageConfig::load('node.field_date_with_end_time');
     $this->assertNull($field->getSetting('datetime_type'));
-  }
 
-  /**
-   * Tests the migration of text fields with different text processing.
-   */
-  public function testTextFields() {
+    // Test the migration of text fields with different text processing.
     // All text and text_long field bases that have only plain text instances
     // should be migrated to string and string_long fields.
     // All text_with_summary field bases that have only plain text instances
@@ -173,10 +169,9 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
     // For each text field bases that were skipped, there should be a log
     // message with the required steps to fix this.
     $migration = $this->getMigration('d7_field');
-    $messages = $migration->getIdMap()->getMessageIterator()->fetchAll();
     $errors = array_map(function ($message) {
       return $message->message;
-    }, $messages);
+    }, iterator_to_array($migration->getIdMap()->getMessages()));
     sort($errors);
     $this->assertCount(4, $errors);
     $this->assertEquals($errors[0], 'Can\'t migrate source field field_text_long_plain_filtered configured with both plain text and filtered text processing. See https://www.drupal.org/docs/8/upgrade/known-issues-when-upgrading-from-drupal-6-or-7-to-drupal-8#plain-text');

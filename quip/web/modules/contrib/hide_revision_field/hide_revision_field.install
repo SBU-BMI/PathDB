@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for Hide Revision Field.
  */
 
+use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
+use Drupal\Core\Entity\Schema\EntityStorageSchemaInterface;
 use Drupal\user\RoleInterface;
 
 /**
@@ -15,7 +17,90 @@ function hide_revision_field_install() {
 }
 
 /**
- * Set revision field weight
+ * Apply updates.
+ * @see https://www.drupal.org/project/hide_revision_field/issues/3165347
+ *
+ * @return mixed
+ * @throws \ReflectionException
+ */
+function hide_revision_field_apply_updates() {
+  $entity_definition_update_manager = \Drupal::service('entity.definition_update_manager');
+  $entity_type_manager = \Drupal::service('entity_type.manager');
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $entity_type_listener = \Drupal::service('entity_type.listener');
+  $entity_last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $field_storage_definition_listener = \Drupal::service('field_storage_definition.listener');
+  // Ensure this works also on Drupal 8.6 and earlier.
+  $reflector = new \ReflectionMethod($entity_definition_update_manager, 'getChangeList');
+  $reflector->setAccessible(TRUE);
+  $complete_change_list = $reflector->invoke($entity_definition_update_manager);
+
+  if ($complete_change_list) {
+    // EntityDefinitionUpdateManagerInterface::getChangeList() only disables
+    // the cache and does not invalidate. In case there are changes,
+    // explicitly invalidate caches.
+    $entity_type_manager->clearCachedDefinitions();
+    $entity_field_manager->clearCachedFieldDefinitions();
+  }
+  foreach ($complete_change_list as $entity_type_id => $change_list) {
+    // Process entity type definition changes before storage definitions ones
+    // this is necessary when you change an entity type from non-revisionable
+    // to revisionable and at the same time add revisionable fields to the
+    // entity type.
+    if (!empty($change_list['entity_type'])) {
+      $op = $change_list['entity_type'];
+      $entity_type = $entity_type_manager->getDefinition($entity_type_id);
+      switch ($op) {
+        case EntityDefinitionUpdateManagerInterface::DEFINITION_CREATED:
+          $entity_type_listener->onEntityTypeCreate($entity_type);
+          break;
+
+        case EntityDefinitionUpdateManagerInterface::DEFINITION_UPDATED:
+          $original = $entity_last_installed_schema_repository->getLastInstalledDefinition($entity_type_id);
+          $storage = $entity_type_manager->getStorage($entity_type->id());
+          if ($storage instanceof EntityStorageSchemaInterface && $storage->requiresEntityDataMigration($entity_type, $original)) {
+            throw new \InvalidArgumentException('The entity schema update for the ' . $entity_type->id() . ' entity type requires a data migration.');
+          }
+          $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+          $original_field_Storage_definitions = $entity_last_installed_schema_repository->getLastInstalledFieldStorageDefinitions($entity_type_id);
+          $entity_type_listener->onFieldableEntityTypeUpdate($entity_type, $original, $field_storage_definitions, $original_field_Storage_definitions);
+          break;
+      }
+    }
+    // Process field storage definition changes.
+    if (!empty($change_list['field_storage_definitions'])) {
+      $storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+      $original_storage_definitions = $entity_last_installed_schema_repository->getLastInstalledFieldStorageDefinitions($entity_type_id);
+
+      foreach ($change_list['field_storage_definitions'] as $field_name => $change) {
+        $storage_definition = isset($storage_definitions[$field_name]) ? $storage_definitions[$field_name] : NULL;
+        $original_storage_definition = isset($original_storage_definitions[$field_name]) ? $original_storage_definitions[$field_name] : NULL;
+        $op = $change;
+        switch ($op) {
+          case EntityDefinitionUpdateManagerInterface::DEFINITION_CREATED:
+            $field_storage_definition_listener->onFieldStorageDefinitionCreate($storage_definition);
+            break;
+
+          case EntityDefinitionUpdateManagerInterface::DEFINITION_UPDATED:
+            if ($storage_definition && $original_storage_definition) {
+              $field_storage_definition_listener->onFieldStorageDefinitionUpdate($storage_definition, $original_storage_definition);
+            }
+            break;
+
+          case EntityDefinitionUpdateManagerInterface::DEFINITION_DELETED:
+            if ($original_storage_definition) {
+              $field_storage_definition_listener->onFieldStorageDefinitionDelete($original_storage_definition);
+            }
+            break;
+        }
+      }
+    }
+  }
+  return $entity_type_manager;
+}
+
+/**
+ * Set revision field weight.
  */
 function hide_revision_field_update_8203() {
   module_set_weight('hide_revision_field', 1);
@@ -26,18 +111,20 @@ function hide_revision_field_update_8203() {
  */
 function hide_revision_field_update_8201() {
   drupal_flush_all_caches();
-  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+  hide_revision_field_apply_updates();
   $entity_type_manager = \Drupal::entityTypeManager();
-  foreach (['node_type', 'media_bundle'] as $type) {
+  $types = [
+    'node_type' => 'node',
+    'media_bundle' => 'media',
+  ];
+  foreach ($types as $type => $type_id) {
     if (!$entity_type_manager->hasDefinition($type)) {
       continue;
     }
     /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $bundle */
-    foreach ($entity_type_manager->getStorage($type)->loadMultiple() as $bundle) {
-      $type = $bundle->getEntityType();
-      $bundle_id = $bundle->id();
+    foreach ($entity_type_manager->getStorage($type)->loadMultiple() as $k => $bundle) {
       $entity_type_manager->getStorage('entity_form_display')
-        ->load('node.article.default')
+        ->load("{$type_id}.{$k}.default")
         ->setComponent('revision_log', [
           'type' => 'hide_revision_field_log_widget',
           'settings' => [
@@ -55,5 +142,5 @@ function hide_revision_field_update_8201() {
  * Perform entity updates.
  */
 function hide_revision_field_update_8202() {
-  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+  hide_revision_field_apply_updates();
 }

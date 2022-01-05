@@ -9,7 +9,7 @@ use Drupal\simpletest\WebTestBase;
 /**
  * Provides helper methods for cache tests.
  *
- * @deprecated Scheduled for removal in Drupal 9.0.0.
+ * @deprecated in drupal:8.?.? and is removed from drupal:9.0.0.
  *   Use \Drupal\Tests\system\Functional\Cache\CacheTestBase instead.
  *
  * @see https://www.drupal.org/node/2999939
@@ -29,6 +29,7 @@ abstract class CacheTestBase extends WebTestBase {
    *   The variable the cache should contain.
    * @param $bin
    *   The bin the cache item was stored in.
+   *
    * @return
    *   TRUE on pass, FALSE on fail.
    */

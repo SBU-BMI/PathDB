@@ -5,7 +5,7 @@ namespace Drupal\system\Controller;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Tags;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityAutocompleteMatcher;
+use Drupal\Core\Entity\EntityAutocompleteMatcherInterface;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\Core\Site\Settings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,7 +21,7 @@ class EntityAutocompleteController extends ControllerBase {
   /**
    * The autocomplete matcher for entity references.
    *
-   * @var \Drupal\Core\Entity\EntityAutocompleteMatcher
+   * @var \Drupal\Core\Entity\EntityAutocompleteMatcherInterface
    */
   protected $matcher;
 
@@ -35,12 +35,12 @@ class EntityAutocompleteController extends ControllerBase {
   /**
    * Constructs a EntityAutocompleteController object.
    *
-   * @param \Drupal\Core\Entity\EntityAutocompleteMatcher $matcher
+   * @param \Drupal\Core\Entity\EntityAutocompleteMatcherInterface $matcher
    *   The autocomplete matcher for entity references.
    * @param \Drupal\Core\KeyValueStore\KeyValueStoreInterface $key_value
    *   The key value factory.
    */
-  public function __construct(EntityAutocompleteMatcher $matcher, KeyValueStoreInterface $key_value) {
+  public function __construct(EntityAutocompleteMatcherInterface $matcher, KeyValueStoreInterface $key_value) {
     $this->matcher = $matcher;
     $this->keyValue = $key_value;
   }
@@ -87,7 +87,7 @@ class EntityAutocompleteController extends ControllerBase {
       $selection_settings = $this->keyValue->get($selection_settings_key, FALSE);
       if ($selection_settings !== FALSE) {
         $selection_settings_hash = Crypt::hmacBase64(serialize($selection_settings) . $target_type . $selection_handler, Settings::getHashSalt());
-        if (!Crypt::hashEquals($selection_settings_hash, $selection_settings_key)) {
+        if (!hash_equals($selection_settings_hash, $selection_settings_key)) {
           // Disallow access when the selection settings hash does not match the
           // passed-in key.
           throw new AccessDeniedHttpException('Invalid selection settings key.');

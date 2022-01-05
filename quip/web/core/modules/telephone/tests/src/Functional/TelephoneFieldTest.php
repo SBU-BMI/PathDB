@@ -25,6 +25,11 @@ class TelephoneFieldTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to create articles.
    *
    * @var \Drupal\user\UserInterface
@@ -38,7 +43,10 @@ class TelephoneFieldTest extends BrowserTestBase {
     parent::setUp();
 
     $this->drupalCreateContentType(['type' => 'article']);
-    $this->webUser = $this->drupalCreateUser(['create article content', 'edit own article content']);
+    $this->webUser = $this->drupalCreateUser([
+      'create article content',
+      'edit own article content',
+    ]);
     $this->drupalLogin($this->webUser);
 
     // Add the telephone field to the article content type.
@@ -54,7 +62,9 @@ class TelephoneFieldTest extends BrowserTestBase {
       'bundle' => 'article',
     ])->save();
 
-    entity_get_form_display('node', 'article', 'default')
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+    $display_repository->getFormDisplay('node', 'article')
       ->setComponent('field_telephone', [
         'type' => 'telephone_default',
         'settings' => [
@@ -63,7 +73,7 @@ class TelephoneFieldTest extends BrowserTestBase {
       ])
       ->save();
 
-    entity_get_display('node', 'article', 'default')
+    $display_repository->getViewDisplay('node', 'article')
       ->setComponent('field_telephone', [
         'type' => 'telephone_link',
         'weight' => 1,

@@ -15,7 +15,6 @@ use Drupal\Core\TypedData\DataReferenceDefinitionInterface;
 use Drupal\jsonapi\Query\EntityCondition;
 use Drupal\jsonapi\Query\EntityConditionGroup;
 use Drupal\jsonapi\Query\Filter;
-use Drupal\workspaces\WorkspaceInterface;
 
 /**
  * Adds sufficient access control to collection queries.
@@ -33,7 +32,7 @@ use Drupal\workspaces\WorkspaceInterface;
  * @see https://www.drupal.org/project/drupal/issues/2809177
  * @see https://www.drupal.org/project/drupal/issues/777578
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3032787
+ * @see https://www.drupal.org/project/drupal/issues/3032787
  * @see jsonapi.api.php
  */
 class TemporaryQueryGuard {
@@ -305,20 +304,6 @@ class TemporaryQueryGuard {
         // Disallow querying values of the anonymous user.
         // @see \Drupal\user\UserAccessControlHandler::checkAccess()
         $specific_condition = new EntityCondition('uid', '0', '!=');
-        break;
-
-      case 'workspace':
-        // The default workspace is always viewable, no matter what, so if
-        // the generic condition prevents that, add an OR.
-        // @see \Drupal\workspaces\WorkspaceAccessControlHandler::checkAccess()
-        if ($generic_condition) {
-          $specific_condition = new EntityConditionGroup('OR', [
-            $generic_condition,
-            new EntityCondition('id', WorkspaceInterface::DEFAULT_WORKSPACE),
-          ]);
-          // The generic condition is now part of the specific condition.
-          $generic_condition = NULL;
-        }
         break;
     }
 

@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,10 @@ use Psy\Test\ParserTestCase;
 
 class SudoVisitorTest extends ParserTestCase
 {
-    public function setUp()
+    /**
+     * @before
+     */
+    public function getReady()
     {
         $this->traverser = new NodeTraverser();
         $this->traverser->addVisitor(new SudoVisitor());

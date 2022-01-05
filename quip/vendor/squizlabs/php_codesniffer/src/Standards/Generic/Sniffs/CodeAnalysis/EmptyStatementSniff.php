@@ -23,8 +23,8 @@
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\CodeAnalysis;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class EmptyStatementSniff implements Sniff
@@ -50,6 +50,7 @@ class EmptyStatementSniff implements Sniff
             T_IF,
             T_SWITCH,
             T_WHILE,
+            T_MATCH,
         ];
 
     }//end register()

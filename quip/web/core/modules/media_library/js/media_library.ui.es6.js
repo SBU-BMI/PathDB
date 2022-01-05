@@ -1,5 +1,5 @@
 /**
- * @file media_library.widget.js
+ * @file media_library.ui.es6.js
  */
 (($, Drupal, window) => {
   /**
@@ -33,30 +33,6 @@
     Object.values(response.mediaIds).forEach(value => {
       Drupal.MediaLibrary.currentSelection.push(value);
     });
-  };
-
-  /**
-   * Warn users when clicking outgoing links from the library or widget.
-   *
-   * @type {Drupal~behavior}
-   *
-   * @prop {Drupal~behaviorAttach} attach
-   *   Attaches behavior to links in the media library.
-   */
-  Drupal.behaviors.MediaLibraryWidgetWarn = {
-    attach(context) {
-      $('.js-media-library-item a[href]', context)
-        .once('media-library-warn-link')
-        .on('click', e => {
-          const message = Drupal.t(
-            'Unsaved changes to the form will be lost. Are you sure you want to leave?',
-          );
-          const confirmation = window.confirm(message);
-          if (!confirmation) {
-            e.preventDefault();
-          }
-        });
-    },
   };
 
   /**
@@ -125,8 +101,9 @@
               }
             });
 
-            // Set focus to the media library content.
-            document.getElementById('media-library-content').focus();
+            // Set focus to the first tabbable element in the media library
+            // content.
+            $('#media-library-content :tabbable:first').focus();
 
             // Remove any response-specific settings so they don't get used on
             // the next call by mistake.

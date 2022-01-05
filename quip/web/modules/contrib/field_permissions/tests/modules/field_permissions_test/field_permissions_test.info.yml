@@ -2,12 +2,10 @@ name: 'Field permissions test module'
 type: module
 description: 'Provides a test field permission plugin type.'
 package: Testing
-# core: '8.x'
 dependencies:
   - field_permissions:field_permissions
 
-# Information added by Drupal.org packaging script on 2018-12-20
-version: '8.x-1.0-rc2'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2020-08-28
+version: '8.x-1.1'
 project: 'field_permissions'
-datestamp: 1545332284
+datestamp: 1598646884

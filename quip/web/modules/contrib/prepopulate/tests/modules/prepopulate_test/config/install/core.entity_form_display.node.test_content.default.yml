@@ -11,6 +11,7 @@ dependencies:
     - field.field.node.test_content.field_ief
     - field.field.node.test_content.field_link
     - field.field.node.test_content.field_select_list
+    - field.field.node.test_content.field_select_list_numeric
     - field.field.node.test_content.field_tags
     - field.field.node.test_content.field_telephone
     - field.field.node.test_content.field_text
@@ -104,12 +105,19 @@ content:
     third_party_settings: {  }
     type: options_select
     region: content
+  field_select_list_numeric:
+    weight: 13
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
   field_tags:
     type: entity_reference_autocomplete_tags
     weight: 10
     region: content
     settings:
       match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }
@@ -184,6 +192,7 @@ content:
     region: content
     settings:
       match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
     third_party_settings: {  }

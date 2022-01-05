@@ -21,11 +21,20 @@ class FieldUIIndentationTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
     // Create a test user.
-    $admin_user = $this->drupalCreateUser(['access content', 'administer content types', 'administer node display']);
+    $admin_user = $this->drupalCreateUser([
+      'access content',
+      'administer content types',
+      'administer node display',
+    ]);
     $this->drupalLogin($admin_user);
 
     // Create Basic page node type.

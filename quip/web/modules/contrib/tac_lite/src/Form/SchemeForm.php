@@ -2,6 +2,7 @@
 
 namespace Drupal\tac_lite\Form;
 
+use Drupal\Core\Url;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -121,7 +122,7 @@ class SchemeForm extends ConfigFormBase {
         '#type' => 'markup',
         '#prefix' => '<p>',
         '#suffix' => '</p>',
-        '#markup' => $this->t('First, select one or more vocabularies on the <a href=:url>settings tab</a>. Then, return to this page to complete configuration.', [':url' => \Drupal::url('tac_lite.administration')]),
+        '#markup' => $this->t('First, select one or more vocabularies on the <a href=:url>settings tab</a>. Then, return to this page to complete configuration.', [':url' => Url::fromRoute('tac_lite.administration')->toString()]),
       ];
     }
 
@@ -142,7 +143,7 @@ class SchemeForm extends ConfigFormBase {
       node_access_rebuild(TRUE);
     }
     else {
-      drupal_set_message($this->t('Do not forget to <a href=:url>rebuild node access permissions</a> after you have configured taxonomy-based access.', [':url' => \Drupal::url('node.configure_rebuild_confirm')]), 'warning');
+      $this->messenger()->addWarning($this->t('Do not forget to <a href=:url>rebuild node access permissions</a> after you have configured taxonomy-based access.', [':url' => Url::fromRoute('node.configure_rebuild_confirm')->toString()]));
     }
     parent::submitForm($form, $form_state);
   }
@@ -171,7 +172,7 @@ class SchemeForm extends ConfigFormBase {
    *   form element.
    */
   public static function tacLiteTermSelect($v, $default_values = []) {
-    $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($v->get('vid'));
+    $tree = \Drupal::service('entity_type.manager')->getStorage('taxonomy_term')->loadTree($v->get('vid'));
     $options = [0 => '<none>'];
     if ($tree) {
       foreach ($tree as $term) {

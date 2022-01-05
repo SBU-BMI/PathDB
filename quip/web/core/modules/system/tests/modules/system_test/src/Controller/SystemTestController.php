@@ -6,6 +6,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Controller routines for system_test routes.
  */
-class SystemTestController extends ControllerBase {
+class SystemTestController extends ControllerBase implements TrustedCallbackInterface {
 
   /**
    * The lock service.
@@ -282,7 +283,7 @@ class SystemTestController extends ControllerBase {
   /**
    * A simple page callback that uses a plain Symfony response object.
    */
-  public function respondWithReponse(Request $request) {
+  public function respondWithResponse(Request $request) {
     return new Response('test');
   }
 
@@ -296,7 +297,7 @@ class SystemTestController extends ControllerBase {
   /**
    * A simple page callback that uses a CacheableResponse object.
    */
-  public function respondWithCacheableReponse(Request $request) {
+  public function respondWithCacheableResponse(Request $request) {
     return new CacheableResponse('test');
   }
 
@@ -396,6 +397,21 @@ class SystemTestController extends ControllerBase {
    */
   public function getCacheableResponseWithCustomCacheControl() {
     return new CacheableResponse('Foo', 200, ['Cache-Control' => 'bar']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return ['preRenderCacheTags'];
+  }
+
+  /**
+   * Use a plain Symfony response object to output the current install_profile.
+   */
+  public function getInstallProfile() {
+    $install_profile = \Drupal::installProfile() ?: 'NONE';
+    return new Response('install_profile: ' . $install_profile);
   }
 
 }

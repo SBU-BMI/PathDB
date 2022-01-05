@@ -79,7 +79,7 @@ class DataFetcher implements DataFetcherInterface {
           throw new InvalidArgumentException("The parent property is not a list or a complex structure at '$current_selector_string'.");
         }
 
-        // If an accessed list item is not existing, $typed_data will be NULL.
+        // If an accessed list item does not exist, $typed_data will be NULL.
         if (!isset($typed_data)) {
           $selector_string = implode('.', $sub_paths);
           $current_selector_string = implode('.', $current_selector);

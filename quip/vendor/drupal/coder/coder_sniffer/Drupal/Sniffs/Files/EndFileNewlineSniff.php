@@ -29,7 +29,7 @@ class EndFileNewlineSniff implements Sniff
     /**
      * A list of tokenizers this sniff supports.
      *
-     * @var array
+     * @var array<string>
      */
     public $supportedTokenizers = [
         'PHP',
@@ -41,7 +41,7 @@ class EndFileNewlineSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array
+     * @return array<int|string>
      */
     public function register()
     {
@@ -60,7 +60,7 @@ class EndFileNewlineSniff implements Sniff
      * @param int                         $stackPtr  The position of the current token in
      *                                               the stack passed in $tokens.
      *
-     * @return void
+     * @return int|void
      */
     public function process(File $phpcsFile, $stackPtr)
     {
@@ -101,7 +101,7 @@ class EndFileNewlineSniff implements Sniff
         }
 
         $lastCodeLine = $tokens[$lastCode]['line'];
-        $blankLines   = ($lastLine - $lastCodeLine + 1);
+        $blankLines   = (string) ($lastLine - $lastCodeLine + 1);
         $phpcsFile->recordMetric($stackPtr, 'Number of newlines at EOF', $blankLines);
 
         if ($blankLines > 1) {

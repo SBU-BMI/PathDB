@@ -106,10 +106,6 @@ incorrect, try rebuilding the node access table. This may be done
 under administer >> reports >> status report.  There is a
 button there labelled "rebuild permissions"
 
-Another useful tool is a sub-module of the devel module, called
-devel_node_access which can give you some insight into the contents of
-your node_access table.  Recommended for troubleshooting.
-
 
 AUTHOR
 ------

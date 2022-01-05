@@ -4,7 +4,7 @@ namespace Drupal\authorization\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -49,18 +49,15 @@ class AuthorizationProfileForm extends EntityForm {
   /**
    * Constructs a AuthorizationProfileForm object.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity manager.
    * @param \Drupal\authorization\Provider\ProviderPluginManager $provider_plugin_manager
    *   The Provider plugin manager.
    * @param \Drupal\authorization\Consumer\ConsumerPluginManager $consumer_plugin_manager
    *   The Consumer plugin manager.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct(EntityManagerInterface $entity_manager, ProviderPluginManager $provider_plugin_manager, ConsumerPluginManager $consumer_plugin_manager) {
-    $this->storage = $entity_manager->getStorage('authorization_profile');
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ProviderPluginManager $provider_plugin_manager, ConsumerPluginManager $consumer_plugin_manager) {
+    $this->storage = $entity_type_manager->getStorage('authorization_profile');
     $this->providerPluginManager = $provider_plugin_manager;
     $this->consumerPluginManager = $consumer_plugin_manager;
   }
@@ -70,7 +67,7 @@ class AuthorizationProfileForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('plugin.manager.authorization.provider'),
       $container->get('plugin.manager.authorization.consumer')
     );
@@ -183,7 +180,7 @@ class AuthorizationProfileForm extends EntityForm {
       ];
     }
     else {
-      drupal_set_message($this->t('There are no provider plugins available. You will need to install and enable something like the LDAP Authorization Provider module that ships with LDAP.'), 'error');
+      $this->messenger()->addError($this->t('There are no provider plugins available. You will need to install and enable something like the LDAP Authorization Provider module that ships with LDAP.'));
       $form['#access'] = FALSE;
       $form['#markup'] = $this->t('Authorization profile cannot be created.');
       $form['#cache'] = [
@@ -214,7 +211,7 @@ class AuthorizationProfileForm extends EntityForm {
       ];
     }
     else {
-      drupal_set_message($this->t('There are no consumer plugins available. You can enable the Authorization Drupal Roles submodule to provide integration with core user roles or write your own using that as a template.'), 'error');
+      $this->messenger()->addError($this->t('There are no consumer plugins available. You can enable the Authorization Drupal Roles submodule to provide integration with core user roles or write your own using that as a template.'));
       $form['#access'] = FALSE;
       $form['#markup'] = $this->t('Authorization profile cannot be created.');
       $form['#cache'] = [
@@ -264,7 +261,7 @@ class AuthorizationProfileForm extends EntityForm {
       if (($provider_form = $provider->buildConfigurationForm([], $form_state))) {
         // If the provider plugin changed, notify the user.
         if (!empty($form_state->getValues()['provider']) && count($this->getProviderOptions()) > 1) {
-          drupal_set_message($this->t('You changed the provider, please review its configuration.'), 'warning');
+          $this->messenger()->addWarning($this->t('You changed the provider, please review its configuration.'));
         }
 
         // Modify the provider plugin configuration container element.
@@ -279,7 +276,7 @@ class AuthorizationProfileForm extends EntityForm {
     // Only notify the user of a missing provider plugin if we're editing an
     // existing server.
     elseif (!$authorization_profile->isNew()) {
-      drupal_set_message($this->t('The provider plugin is missing or invalid.'), 'error');
+      $this->messenger()->addError($this->t('The provider plugin is missing or invalid.'));
     }
   }
 
@@ -307,7 +304,7 @@ class AuthorizationProfileForm extends EntityForm {
       if (($consumer_form = $consumer->buildConfigurationForm([], $form_state))) {
         // If the consumer plugin changed, notify the user.
         if (!empty($form_state->getValues()['consumer']) && count($this->getConsumerOptions()) > 1) {
-          drupal_set_message($this->t('You changed the consumer, please review its configuration.'), 'warning');
+          $this->messenger()->addWarning($this->t('You changed the consumer, please review its configuration.'));
         }
 
         // Modify the consumer plugin configuration container element.
@@ -322,7 +319,7 @@ class AuthorizationProfileForm extends EntityForm {
     // Only notify the user of a missing consumer plugin if we're editing an
     // existing server.
     elseif (!$authorization_profile->isNew()) {
-      drupal_set_message($this->t('The consumer plugin is missing or invalid.'), 'error');
+      $this->messenger()->addError($this->t('The consumer plugin is missing or invalid.'));
     }
   }
 
@@ -661,17 +658,17 @@ class AuthorizationProfileForm extends EntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label Authorization profile.', [
+        $this->messenger()->addStatus($this->t('Created the %label Authorization profile.', [
           '%label' => $authorization_profile->label(),
         ]));
         break;
 
       default:
-        drupal_set_message($this->t('Saved the %label Authorization profile.', [
+        $this->messenger()->addStatus($this->t('Saved the %label Authorization profile.', [
           '%label' => $authorization_profile->label(),
         ]));
     }
-    $form_state->setRedirectUrl($authorization_profile->urlInfo('collection'));
+    $form_state->setRedirectUrl($authorization_profile->toUrl('collection'));
   }
 
   /**

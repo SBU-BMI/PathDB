@@ -31,11 +31,11 @@ class ChoiceValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof Choice) {
-            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\Choice');
+            throw new UnexpectedTypeException($constraint, Choice::class);
         }
 
         if (!\is_array($constraint->choices) && !$constraint->callback) {
-            throw new ConstraintDefinitionException('Either "choices" or "callback" must be specified on constraint Choice');
+            throw new ConstraintDefinitionException('Either "choices" or "callback" must be specified on constraint Choice.');
         }
 
         if (null === $value) {
@@ -51,7 +51,7 @@ class ChoiceValidator extends ConstraintValidator
                 && !\is_callable($choices = [$this->context->getClassName(), $constraint->callback])
                 && !\is_callable($choices = $constraint->callback)
             ) {
-                throw new ConstraintDefinitionException('The Choice constraint expects a valid callback');
+                throw new ConstraintDefinitionException('The Choice constraint expects a valid callback.');
             }
             $choices = \call_user_func($choices);
         } else {
@@ -59,7 +59,7 @@ class ChoiceValidator extends ConstraintValidator
         }
 
         if (true !== $constraint->strict) {
-            @trigger_error('Not setting the strict option of the Choice constraint to true is deprecated since Symfony 3.4 and will throw an exception in 4.0.', E_USER_DEPRECATED);
+            @trigger_error('Not setting the strict option of the Choice constraint to true is deprecated since Symfony 3.4 and will throw an exception in 4.0.', \E_USER_DEPRECATED);
         }
 
         if ($constraint->multiple) {

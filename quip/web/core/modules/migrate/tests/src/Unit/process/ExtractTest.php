@@ -24,7 +24,7 @@ class ExtractTest extends MigrateProcessTestCase {
    * Tests successful extraction.
    */
   public function testExtract() {
-    $value = $this->plugin->transform(['foo' => 'bar'], $this->migrateExecutable, $this->row, 'destinationproperty');
+    $value = $this->plugin->transform(['foo' => 'bar'], $this->migrateExecutable, $this->row, 'destination_property');
     $this->assertSame('bar', $value);
   }
 
@@ -32,16 +32,18 @@ class ExtractTest extends MigrateProcessTestCase {
    * Tests invalid input.
    */
   public function testExtractFromString() {
-    $this->setExpectedException(MigrateException::class, 'Input should be an array.');
-    $this->plugin->transform('bar', $this->migrateExecutable, $this->row, 'destinationproperty');
+    $this->expectException(MigrateException::class);
+    $this->expectExceptionMessage('Input should be an array.');
+    $this->plugin->transform('bar', $this->migrateExecutable, $this->row, 'destination_property');
   }
 
   /**
    * Tests unsuccessful extraction.
    */
   public function testExtractFail() {
-    $this->setExpectedException(MigrateException::class, 'Array index missing, extraction failed.');
-    $this->plugin->transform(['bar' => 'foo'], $this->migrateExecutable, $this->row, 'destinationproperty');
+    $this->expectException(MigrateException::class);
+    $this->expectExceptionMessage('Array index missing, extraction failed.');
+    $this->plugin->transform(['bar' => 'foo'], $this->migrateExecutable, $this->row, 'destination_property');
   }
 
   /**
@@ -49,7 +51,7 @@ class ExtractTest extends MigrateProcessTestCase {
    */
   public function testExtractFailDefault() {
     $plugin = new Extract(['index' => ['foo'], 'default' => 'test'], 'map', []);
-    $value = $plugin->transform(['bar' => 'foo'], $this->migrateExecutable, $this->row, 'destinationproperty');
+    $value = $plugin->transform(['bar' => 'foo'], $this->migrateExecutable, $this->row, 'destination_property');
     $this->assertSame('test', $value, '');
   }
 

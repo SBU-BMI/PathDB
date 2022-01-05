@@ -557,9 +557,9 @@ function hook_field_views_data(\Drupal\field\FieldStorageConfigInterface $field_
 function hook_field_views_data_alter(array &$data, \Drupal\field\FieldStorageConfigInterface $field_storage) {
   $entity_type_id = $field_storage->getTargetEntityTypeId();
   $field_name = $field_storage->getName();
-  $entity_type = \Drupal::entityManager()->getDefinition($entity_type_id);
+  $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
   $pseudo_field_name = 'reverse_' . $field_name . '_' . $entity_type_id;
-  $table_mapping = \Drupal::entityManager()->getStorage($entity_type_id)->getTableMapping();
+  $table_mapping = \Drupal::entityTypeManager()->getStorage($entity_type_id)->getTableMapping();
 
   list($label) = views_entity_field_label($entity_type_id, $field_name);
 
@@ -614,10 +614,10 @@ function hook_field_views_data_views_data_alter(array &$data, \Drupal\field\Fiel
   $field_name = $field->getName();
   $data_key = 'field_data_' . $field_name;
   $entity_type_id = $field->entity_type;
-  $entity_type = \Drupal::entityManager()->getDefinition($entity_type_id);
+  $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
   $pseudo_field_name = 'reverse_' . $field_name . '_' . $entity_type_id;
   list($label) = views_entity_field_label($entity_type_id, $field_name);
-  $table_mapping = \Drupal::entityManager()->getStorage($entity_type_id)->getTableMapping();
+  $table_mapping = \Drupal::entityTypeManager()->getStorage($entity_type_id)->getTableMapping();
 
   // Views data for this field is in $data[$data_key].
   $data[$data_key][$pseudo_field_name]['relationship'] = [
@@ -879,7 +879,7 @@ function hook_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
     // Traverse through the 'where' part of the query.
     foreach ($query->where as &$condition_group) {
       foreach ($condition_group['conditions'] as &$condition) {
-        // If this is the part of the query filtering on title, chang the
+        // If this is the part of the query filtering on title, change the
         // condition to filter on node ID.
         if ($condition['field'] == 'node.title') {
           $condition = [
@@ -919,27 +919,6 @@ function hook_views_preview_info_alter(array &$rows, ViewExecutable $view) {
     t('<strong>Table queue</strong>'),
     count($view->query->table_queue) . ': (' . implode(', ', array_keys($view->query->table_queue)) . ')',
   ];
-}
-
-/**
- * Alter the links displayed at the top of the view edit form.
- *
- * @param array $links
- *   A renderable array of links which will be displayed at the top of the
- *   view edit form. Each entry will be in a form suitable for
- *   '#theme' => 'links'.
- * @param \Drupal\views\ViewExecutable $view
- *   The view object being edited.
- * @param string $display_id
- *   The ID of the display being edited, e.g. 'default' or 'page_1'.
- *
- * @see \Drupal\views_ui\ViewUI::renderDisplayTop()
- */
-function hook_views_ui_display_top_links_alter(array &$links, ViewExecutable $view, $display_id) {
-  // Put the export link first in the list.
-  if (isset($links['export'])) {
-    $links = ['export' => $links['export']] + $links;
-  }
 }
 
 // @todo Describe how to alter a view ajax response with event listeners.

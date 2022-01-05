@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Theme\Registry;
 use Drupal\Core\TypedData\TranslatableInterface as TranslatableDataInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ingroup entity_api
  */
-class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterface, EntityViewBuilderInterface {
+class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterface, EntityViewBuilderInterface, TrustedCallbackInterface {
   use DeprecatedServicePropertyTrait;
 
   /**
@@ -107,7 +108,7 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
     $this->languageManager = $language_manager;
     $this->themeRegistry = $theme_registry ?: \Drupal::service('theme.registry');
     if (!$entity_display_repository) {
-      @trigger_error('Calling EntityViewBuilder::__construct() with the $entity_repository argument is supported in drupal:8.7.0 and will be required before drupal:9.0.0. See https://www.drupal.org/node/2549139.', E_USER_DEPRECATED);
+      @trigger_error('Calling EntityViewBuilder::__construct() with the $entity_display_repository argument is supported in drupal:8.7.0 and will be required before drupal:9.0.0. See https://www.drupal.org/node/2549139.', E_USER_DEPRECATED);
       $entity_display_repository = \Drupal::service('entity_display.repository');
     }
     $this->entityDisplayRepository = $entity_display_repository;
@@ -140,6 +141,13 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
     $build['#pre_render'][] = [$this, 'build'];
 
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return ['build', 'buildMultiple'];
   }
 
   /**
@@ -448,7 +456,15 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
    * {@inheritdoc}
    */
   public function viewField(FieldItemListInterface $items, $display_options = []) {
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $entity = $items->getEntity();
+    // If the field is not translatable and the entity is, then the field item
+    // list always points to the default translation of the entity. Attempt to
+    // fetch it in the current content language.
+    if (!$items->getFieldDefinition()->isTranslatable() && $entity->isTranslatable()) {
+      $entity = $this->entityRepository->getTranslationFromContext($entity);
+    }
+
     $field_name = $items->getFieldDefinition()->getName();
     $display = $this->getSingleFieldDisplay($entity, $field_name, $display_options);
 

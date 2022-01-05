@@ -61,6 +61,8 @@ class Condition implements ConditionInterface, \Countable {
 
   /**
    * The identifier of the query placeholder this condition has been compiled against.
+   *
+   * @var string
    */
   protected $queryPlaceholderIdentifier;
 
@@ -397,7 +399,7 @@ class Condition implements ConditionInterface, \Countable {
    * {@inheritdoc}
    */
   public function conditionGroupFactory($conjunction = 'AND') {
-    return new Condition($conjunction);
+    return new static($conjunction);
   }
 
   /**

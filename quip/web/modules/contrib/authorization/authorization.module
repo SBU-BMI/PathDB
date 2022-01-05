@@ -35,7 +35,7 @@ function authorization_user_login($account) {
 
   if (\Drupal::config('authorization.settings')->get('authorization_message')) {
     foreach ($processed_authorizations as $authorization) {
-      drupal_set_message(t('Done with @authorization', ['@authorization' => $authorization->getMessage()]), 'status', TRUE);
+      \Drupal::messenger()->addStatus(t('Done with @authorization', ['@authorization' => $authorization->getMessage()]), TRUE);
     }
   }
 }

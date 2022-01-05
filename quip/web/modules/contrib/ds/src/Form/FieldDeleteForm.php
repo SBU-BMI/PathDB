@@ -109,9 +109,13 @@ class FieldDeleteForm extends ConfirmFormBase implements ContainerInjectionInter
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
-    return [
-      'ds.field.' . $this->field['id'],
-    ];
+    if ($this->field) {
+      return [
+        'ds.field.' . $this->field['id'],
+      ];
+    }
+
+    return [];
   }
 
 }

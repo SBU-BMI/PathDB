@@ -7,6 +7,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\restrict_by_ip\IPToolsInterface;
 use Drupal\restrict_by_ip\Exception\InvalidIPException;
+use Drupal\Core\Url;
 
 /**
  * Class RoleSettingsForm.
@@ -54,7 +55,7 @@ class RoleSettingsForm extends ConfigFormBase {
 
     if (count($user_roles) === 0) {
       $form['no_roles'] = [
-        '#markup' => $this->t('No roles configured. <a href="@add-role">Add a role</a>.', ['@add-role' => $this->url('entity.user_role.collection')]),
+        '#markup' => $this->t('No roles configured. <a href="@add-role">Add a role</a>.', ['@add-role' => Url::fromRoute('entity.user_role.collection')]),
         '#prefix' => '<p>',
         '#suffix' => '</p>',
       ];

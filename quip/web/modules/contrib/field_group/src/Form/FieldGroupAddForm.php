@@ -112,10 +112,10 @@ class FieldGroupAddForm extends FormBase {
     $this->context = $context;
 
     if ($context == 'form') {
-      $this->mode = \Drupal::request()->get('form_mode_name');
+      $this->mode = $this->getRequest()->get('form_mode_name');
     }
     else {
-      $this->mode = \Drupal::request()->get('view_mode_name');
+      $this->mode = $this->getRequest()->get('view_mode_name');
     }
 
     if (empty($this->mode)) {
@@ -153,7 +153,7 @@ class FieldGroupAddForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Add a new group'),
       '#options' => $formatter_options,
-      '#empty_option' => $this->t('- Select a group type -'),
+      '#empty_option' => $this->t('- Select a field group type -'),
       '#required' => TRUE,
     ];
 
@@ -212,7 +212,7 @@ class FieldGroupAddForm extends FormBase {
     $group->bundle = $this->bundle;
     $group->mode = $this->mode;
 
-    $manager = \Drupal::service('plugin.manager.field_group.formatters');
+    $manager = $this->fieldGroupFormatterPluginManager;
     $plugin = $manager->getInstance([
       'format_type' => $form_state->getValue('group_formatter'),
       'configuration' => [
@@ -272,6 +272,7 @@ class FieldGroupAddForm extends FormBase {
         'parent_name' => '',
         'weight' => 20,
         'format_type' => $form_state->get('group_formatter'),
+        'region' => 'hidden',
       ];
 
       $new_group->format_settings = $form_state->getValue('format_settings');
@@ -284,7 +285,7 @@ class FieldGroupAddForm extends FormBase {
       // Store new group information for any additional submit handlers.
       $groups_added = $form_state->get('groups_added');
       $groups_added['_add_new_group'] = $new_group->group_name;
-      $this->messenger->addMessage(t('New group %label successfully created.', ['%label' => $new_group->label]));
+      $this->messenger->addMessage($this->t('New group %label successfully created.', ['%label' => $new_group->label]));
 
       $form_state->setRedirectUrl(FieldgroupUi::getFieldUiRoute($new_group));
       \Drupal::cache()->invalidate('field_groups');

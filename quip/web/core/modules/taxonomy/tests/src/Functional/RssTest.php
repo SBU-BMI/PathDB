@@ -21,6 +21,11 @@ class RssTest extends TaxonomyTestBase {
   public static $modules = ['node', 'field_ui', 'views'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Vocabulary for testing.
    *
    * @var \Drupal\taxonomy\VocabularyInterface
@@ -37,7 +42,12 @@ class RssTest extends TaxonomyTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->drupalLogin($this->drupalCreateUser(['administer taxonomy', 'bypass node access', 'administer content types', 'administer node display']));
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer taxonomy',
+      'bypass node access',
+      'administer content types',
+      'administer node display',
+    ]));
     $this->vocabulary = $this->createVocabulary();
     $this->fieldName = 'taxonomy_' . $this->vocabulary->id();
 
@@ -49,12 +59,15 @@ class RssTest extends TaxonomyTestBase {
     ];
     $this->createEntityReferenceField('node', 'article', $this->fieldName, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
-    entity_get_form_display('node', 'article', 'default')
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+
+    $display_repository->getFormDisplay('node', 'article')
       ->setComponent($this->fieldName, [
         'type' => 'options_select',
       ])
       ->save();
-    entity_get_display('node', 'article', 'default')
+    $display_repository->getViewDisplay('node', 'article')
       ->setComponent($this->fieldName, [
         'type' => 'entity_reference_label',
       ])
@@ -114,7 +127,7 @@ class RssTest extends TaxonomyTestBase {
 
     // Check that the "Exception value" is disabled by default.
     $this->drupalGet('taxonomy/term/all/feed');
-    $this->assertResponse(404);
+    $this->assertSession()->statusCodeEquals(404);
     // Set the exception value to 'all'.
     $view = Views::getView('taxonomy_term');
     $arguments = $view->getDisplay()->getOption('arguments');

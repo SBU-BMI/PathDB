@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * @internal JSON:API maintains no PHP API since its API is the HTTP API. This
  *   class may change at any time and this will break any dependencies on it.
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3032787
+ * @see https://www.drupal.org/project/drupal/issues/3032787
  * @see jsonapi.api.php
  *
  * @see http://jsonapi.org/format/#error-objects
@@ -49,7 +49,9 @@ class HttpExceptionNormalizer extends NormalizerBase {
    * {@inheritdoc}
    */
   public function normalize($object, $format = NULL, array $context = []) {
-    return new HttpExceptionNormalizerValue(new CacheableMetadata(), static::rasterizeValueRecursive($this->buildErrorObjects($object)));
+    $cacheability = new CacheableMetadata();
+    $cacheability->addCacheableDependency($object);
+    return new HttpExceptionNormalizerValue($cacheability, static::rasterizeValueRecursive($this->buildErrorObjects($object)));
   }
 
   /**
@@ -85,7 +87,7 @@ class HttpExceptionNormalizer extends NormalizerBase {
     // Exceptions thrown without an explicitly defined code get assigned zero by
     // default. Since this is no helpful information, omit it.
     if ($exception->getCode() !== 0) {
-      $error['code'] = $exception->getCode();
+      $error['code'] = (string) $exception->getCode();
     }
     if ($this->currentUser->hasPermission('access site reports')) {
       // The following information may contain sensitive information. Only show
@@ -110,7 +112,7 @@ class HttpExceptionNormalizer extends NormalizerBase {
    *   URL pointing to the specific RFC-2616 section. Or NULL if it is an HTTP
    *   status code that is defined in another RFC.
    *
-   * @see https://www.drupal.org/project/jsonapi/issues/2832211#comment-11826234
+   * @see https://www.drupal.org/project/drupal/issues/2832211#comment-11826234
    *
    * @internal
    */

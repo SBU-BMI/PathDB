@@ -86,7 +86,7 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user'];
+  public static $modules = ['system', 'user', 'path_alias'];
 
   /**
    * {@inheritdoc}
@@ -99,7 +99,7 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
     $this->container->get('theme_installer')->install($this->allThemes);
 
     // Enable all core modules.
-    $all_modules = system_rebuild_module_data();
+    $all_modules = $this->container->get('extension.list.module')->getList();
     $all_modules = array_filter($all_modules, function ($module) {
       // Filter contrib, hidden, already enabled modules and modules in the
       // Testing package.
@@ -124,6 +124,7 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
     $this->allModules = array_keys($all_modules);
     $this->allModules[] = 'system';
     $this->allModules[] = 'user';
+    $this->allModules[] = 'path_alias';
     sort($this->allModules);
     $this->container->get('module_installer')->install($this->allModules);
 
@@ -172,7 +173,7 @@ class ResolvedLibraryDefinitionsFilesMatchTest extends KernelTestBase {
             $path = $this->root . '/' . $file;
             // Only check and assert each file path once.
             if (!isset($this->pathsChecked[$path])) {
-              $this->assertTrue(is_file($path), "$file file referenced from the $extension/$library_name library exists.");
+              $this->assertFileExists($path, "$file file referenced from the $extension/$library_name library does not exist.");
               $this->pathsChecked[$path] = TRUE;
             }
           }

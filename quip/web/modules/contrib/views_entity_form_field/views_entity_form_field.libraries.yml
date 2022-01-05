@@ -1,0 +1,5 @@
+views_form:
+  version: VERSION
+  css:
+    theme:
+      css/views-form.css: {}

@@ -10,11 +10,16 @@ namespace Drupal\FunctionalTests\Installer;
 class InstallerTest extends InstallerTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Ensures that the user page is available after installation.
    */
   public function testInstaller() {
     $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     // Confirm that we are logged-in after installation.
     $this->assertText($this->rootUser->getAccountName());
 
@@ -27,6 +32,13 @@ class InstallerTest extends InstallerTestBase {
     // Ensure that the timezone is correct for sites under test after installing
     // interactively.
     $this->assertEqual($this->config('system.date')->get('timezone.default'), 'Australia/Sydney');
+
+    // Ensure the profile has a weight of 1000.
+    $module_extension_list = \Drupal::service('extension.list.module');
+    $extensions = $module_extension_list->getList();
+
+    $this->assertArrayHasKey('testing', $extensions);
+    $this->assertEquals(1000, $extensions['testing']->weight);
   }
 
   /**
@@ -51,7 +63,7 @@ class InstallerTest extends InstallerTestBase {
     // Assert that the expected title is present.
     $this->assertEqual('Select an installation profile', $this->cssSelect('main h2')[0]->getText());
     $result = $this->xpath('//span[contains(@class, :class) and contains(text(), :text)]', [':class' => 'visually-hidden', ':text' => 'Select an installation profile']);
-    $this->assertEqual(count($result), 1, "Title/Label not displayed when '#title_display' => 'invisible' attribute is set");
+    $this->assertCount(1, $result, "Title/Label not displayed when '#title_display' => 'invisible' attribute is set");
 
     parent::setUpProfile();
   }
@@ -62,6 +74,13 @@ class InstallerTest extends InstallerTestBase {
   protected function setUpSettings() {
     // Assert that the expected title is present.
     $this->assertEqual('Database configuration', $this->cssSelect('main h2')[0]->getText());
+
+    // Assert that we use the by core supported database drivers by default and
+    // not the ones from the driver_test module.
+    $elements = $this->xpath('//label[@for="edit-driver-mysql"]');
+    $this->assertEqual(current($elements)->getText(), 'MySQL, MariaDB, Percona Server, or equivalent');
+    $elements = $this->xpath('//label[@for="edit-driver-pgsql"]');
+    $this->assertEqual(current($elements)->getText(), 'PostgreSQL');
 
     parent::setUpSettings();
   }
@@ -76,8 +95,8 @@ class InstallerTest extends InstallerTestBase {
     // Test that SiteConfigureForm::buildForm() has made the site directory and
     // the settings file non-writable.
     $site_directory = $this->container->get('app.root') . '/' . $this->siteDirectory;
-    $this->assertFalse(is_writable($site_directory));
-    $this->assertFalse(is_writable($site_directory . '/settings.php'));
+    $this->assertDirectoryNotIsWritable($site_directory);
+    $this->assertFileNotIsWritable($site_directory . '/settings.php');
 
     parent::setUpSite();
   }

@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,7 @@ namespace Psy\Test\Reflection;
 
 use Psy\Reflection\ReflectionLanguageConstruct;
 
-class ReflectionLanguageConstructTest extends \PHPUnit\Framework\TestCase
+class ReflectionLanguageConstructTest extends \Psy\Test\TestCase
 {
     /**
      * @dataProvider languageConstructs
@@ -62,11 +62,13 @@ class ReflectionLanguageConstructTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider languageConstructs
-     * @expectedException \RuntimeException
      */
     public function testExportThrows($keyword)
     {
+        $this->expectException(\RuntimeException::class);
         ReflectionLanguageConstruct::export($keyword);
+
+        $this->fail();
     }
 
     public function languageConstructs()
@@ -84,11 +86,13 @@ class ReflectionLanguageConstructTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider unknownLanguageConstructs
-     * @expectedException \InvalidArgumentException
      */
     public function testUnknownLanguageConstructsThrowExceptions($keyword)
     {
+        $this->expectException(\InvalidArgumentException::class);
         new ReflectionLanguageConstruct($keyword);
+
+        $this->fail();
     }
 
     public function unknownLanguageConstructs()

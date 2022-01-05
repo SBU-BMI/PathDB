@@ -18,6 +18,11 @@ class PrepopulateFieldTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'datetime',
     'datetime_range',
@@ -167,13 +172,19 @@ class PrepopulateFieldTest extends BrowserTestBase {
         'edit[field_link][widget][0][uri]=https://example.com',
         'edit[field_link][widget][0][title]=Link Title',
       ],
-      'expected' => 'Link Link Titlehttps://example.com',
+      'expected' => 'Link Link Title https://example.com',
     ];
     $data['field_select_list'] = [
       'query' => [
         'edit[field_select_list][widget]=Green',
       ],
       'expected' => 'Select List Green',
+    ];
+    $data['field_select_list_numeric'] = [
+      'query' => [
+        'edit[field_select_list_numeric][widget]=0',
+      ],
+      'expected' => 'Select List Numeric Zero',
     ];
     $data['field_tags'] = [
       'query' => [

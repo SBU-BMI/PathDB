@@ -1,0 +1,21 @@
+# Schema for the configuration files of the CSS Editor module.
+
+css_editor.theme.*:
+  type: config_object
+  label: 'Custom CSS'
+  mapping:
+    path:
+      type: path
+      label: ''
+    enabled:
+      type: boolean
+      label: 'Enable or disable custom CSS:'
+    css:
+      type: text
+      label: ''
+    plaintext_enabled:
+      type: boolean
+      label: 'Use plain text editor'
+    autopreview_enabled:
+      type: boolean
+      label: 'Enable auto preview'

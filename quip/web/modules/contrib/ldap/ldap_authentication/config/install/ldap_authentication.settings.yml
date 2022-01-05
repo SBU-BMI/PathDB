@@ -1,11 +1,11 @@
 sids: {  }
-authenticationMode: 1
+authenticationMode: mixed
 loginUIUsernameTxt: ''
 loginUIPasswordTxt: ''
 ldapUserHelpLinkUrl: ''
 ldapUserHelpLinkText: ''
-emailOption: 3
-emailUpdate: 1
+emailOption: disable
+emailUpdate: update_notify
 emailTemplateHandling: 'none'
 emailTemplate: '@username@example.com'
 emailTemplateUsageResolveConflict: false
@@ -13,8 +13,9 @@ emailTemplateUsageNeverUpdate: false
 emailTemplateUsagePromptUser: false
 emailTemplateUsageRedirectOnLogin: false
 emailTemplateUsagePromptRegex: '.*@example\\.com'
-passwordOption: 3
+passwordOption: hide
 allowOnlyIfTextInDn: {  }
 excludeIfTextInDn: {  }
 excludeIfNoAuthorizations: null
+skipAdministrators: true
 langcode: en

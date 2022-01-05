@@ -30,7 +30,7 @@ class SessionCacheContextTest extends UnitTestCase {
   /**
    * The session object.
    *
-   * @var \Symfony\Component\HttpFoundation\Session\SessionInterface|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Symfony\Component\HttpFoundation\Session\SessionInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $session;
 
@@ -59,7 +59,7 @@ class SessionCacheContextTest extends UnitTestCase {
     $context1 = $cache_context->getContext();
     $context2 = $cache_context->getContext();
     $this->assertSame($context1, $context2);
-    $this->assertSame(FALSE, strpos($context1, $session_id), 'Session ID not contained in cache context');
+    $this->assertStringNotContainsString($session_id, $context1, 'Session ID not contained in cache context');
   }
 
   /**
@@ -83,8 +83,8 @@ class SessionCacheContextTest extends UnitTestCase {
     $context2 = $cache_context->getContext();
     $this->assertNotEquals($context1, $context2);
 
-    $this->assertSame(FALSE, strpos($context1, $session1_id), 'Session ID not contained in cache context');
-    $this->assertSame(FALSE, strpos($context2, $session2_id), 'Session ID not contained in cache context');
+    $this->assertStringNotContainsString($session1_id, $context1, 'Session ID not contained in cache context');
+    $this->assertStringNotContainsString($session2_id, $context2, 'Session ID not contained in cache context');
   }
 
   /**

@@ -23,6 +23,21 @@ use Drupal\user\UserInterface;
  *     }
  *   },
  *   config_prefix = "authorization_profile",
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "description",
+ *     "provider",
+ *     "consumer",
+ *     "provider",
+ *     "provider_config",
+ *     "provider_mappings",
+ *     "consumer",
+ *     "consumer_config",
+ *     "consumer_mappings",
+ *     "synchronization_modes",
+ *     "synchronization_actions",
+ *   },
  *   admin_permission = "administer site configuration",
  *   entity_keys = {
  *     "id" = "id",
@@ -158,7 +173,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return string
    *   Description.
    */
-  public function getDescription() {
+  public function getDescription(): string {
     return $this->description;
   }
 
@@ -168,7 +183,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return string
    *   Provider ID.
    */
-  public function getProviderId() {
+  public function getProviderId(): string {
     return $this->provider;
   }
 
@@ -178,7 +193,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return string
    *   Consumer ID.
    */
-  public function getConsumerId() {
+  public function getConsumerId(): string {
     return $this->consumer;
   }
 
@@ -188,7 +203,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return bool
    *   Provider valid.
    */
-  public function hasValidProvider() {
+  public function hasValidProvider(): ?bool {
     if ($this->provider_plugin_manager->getDefinition($this->getProviderId(), FALSE)) {
       return TRUE;
     }
@@ -203,7 +218,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return bool
    *   Consumer valid.
    */
-  public function hasValidConsumer() {
+  public function hasValidConsumer(): ?bool {
     if ($this->consumer_plugin_manager->getDefinition($this->getconsumerId(), FALSE)) {
       return TRUE;
     }
@@ -218,8 +233,8 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return \Drupal\authorization\provider\ProviderInterface
    *   The active provider.
    */
-  public function getProvider() {
-    if (!$this->provider_plugin || $this->getProviderId() != $this->provider_plugin->getPluginId()) {
+  public function getProvider(): \Drupal\authorization\provider\ProviderInterface {
+    if (!$this->provider_plugin || $this->getProviderId() !== $this->provider_plugin->getPluginId()) {
       $this->loadProviderPlugin();
     }
     return $this->provider_plugin;
@@ -231,8 +246,8 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return \Drupal\authorization\consumer\ConsumerInterface
    *   The active consumer.
    */
-  public function getConsumer() {
-    if (!$this->consumer_plugin || $this->getConsumerId() != $this->consumer_plugin->getPluginId()) {
+  public function getConsumer(): \Drupal\authorization\consumer\ConsumerInterface {
+    if (!$this->consumer_plugin || $this->getConsumerId() !== $this->consumer_plugin->getPluginId()) {
       $this->loadConsumerPlugin();
     }
     return $this->consumer_plugin;
@@ -241,7 +256,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * Load the provider plugin.
    */
-  private function loadProviderPlugin() {
+  private function loadProviderPlugin(): void {
     $config = $this->getProviderConfig();
     $config['profile'] = $this;
     try {
@@ -259,7 +274,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * Load the consumer plugin.
    */
-  private function loadConsumerPlugin() {
+  private function loadConsumerPlugin(): void {
     $config = $this->getConsumerConfig();
     $config['profile'] = $this;
     try {
@@ -280,7 +295,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return array
    *   General configuration of the provider in the profile.
    */
-  public function getProviderConfig() {
+  public function getProviderConfig(): array {
     return $this->provider_config;
   }
 
@@ -290,7 +305,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return array
    *   General configuration of the consumer in the profile.
    */
-  public function getConsumerConfig() {
+  public function getConsumerConfig(): array {
     return $this->consumer_config;
   }
 
@@ -300,7 +315,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return array
    *   Provider mappings.
    */
-  public function getProviderMappings() {
+  public function getProviderMappings(): array {
     return $this->provider_mappings;
   }
 
@@ -310,7 +325,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return array
    *   Consumer mappings.
    */
-  public function getConsumerMappings() {
+  public function getConsumerMappings(): array {
     return $this->consumer_mappings;
   }
 
@@ -322,7 +337,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @param array $provider_config
    *   Provider config to set.
    */
-  public function setProviderConfig(array $provider_config) {
+  public function setProviderConfig(array $provider_config): void {
     $this->provider_config = $provider_config;
   }
 
@@ -334,7 +349,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @param array $consumer_config
    *   General configuration of the consumer in the profile.
    */
-  public function setConsumerConfig(array $consumer_config) {
+  public function setConsumerConfig(array $consumer_config): void {
     $this->consumer_config = $consumer_config;
   }
 
@@ -344,7 +359,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @param array $provider_mappings
    *   Provider mappings.
    */
-  public function setProviderMappings(array $provider_mappings) {
+  public function setProviderMappings(array $provider_mappings): void {
     $this->provider_mappings = $provider_mappings;
   }
 
@@ -354,7 +369,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @param array $consumer_mappings
    *   Consumer mappings.
    */
-  public function setConsumerMappings(array $consumer_mappings) {
+  public function setConsumerMappings(array $consumer_mappings): void {
     $this->consumer_mappings = $consumer_mappings;
   }
 
@@ -364,7 +379,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return array
    *   Token strings.
    */
-  public function getTokens() {
+  public function getTokens(): array {
     $tokens = [];
     $tokens['@profile_name'] = $this->label;
     return $tokens;
@@ -376,7 +391,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return bool
    *   Profile valid.
    */
-  public function checkConditions() {
+  public function checkConditions(): bool {
 
     if (!$this->get('status')) {
       return FALSE;
@@ -404,14 +419,10 @@ class AuthorizationProfile extends ConfigEntityBase {
    *
    * @return \Drupal\authorization\AuthorizationResponse
    *   Responses.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function grantsAndRevokes(UserInterface $user, $user_save = FALSE) {
+  public function grantsAndRevokes(UserInterface $user, $user_save = FALSE): AuthorizationResponse {
 
-    /* @var \Drupal\authorization\Provider\ProviderPluginBase $provider */
     $provider = $this->getProvider();
-    /* @var \Drupal\authorization\Consumer\ConsumerPluginBase $consumer */
     $consumer = $this->getConsumer();
 
     try {
@@ -423,16 +434,18 @@ class AuthorizationProfile extends ConfigEntityBase {
 
     $proposals = $provider->sanitizeProposals($proposals);
 
-    $provider_mappings = $this->getProviderMappings();
-    $consumer_mappings = $this->getConsumerMappings();
     $applied_grants = [];
-    foreach ($provider_mappings as $providerKey => $provider_mapping) {
+    // TODO: This could be made more elegant with methods on this class checking
+    // for support on this and not checking here the array key directly.
+    $create_consumers = $this->get('synchronization_actions')['create_consumers'] ?? FALSE;
+    $revoke_provision = $this->get('synchronization_actions')['revoke_provider_provisioned'] ?? FALSE;
+    foreach ($this->getProviderMappings() as $provider_key => $provider_mapping) {
       $provider_proposals = $provider->filterProposals($proposals, $provider_mapping);
-      $filtered_proposals = $consumer->filterProposals($provider_proposals, $consumer_mappings[$providerKey]);
+      $filtered_proposals = $consumer->filterProposals($provider_proposals, $this->getConsumerMappings()[$provider_key]);
 
       if (!empty($filtered_proposals)) {
         foreach ($filtered_proposals as $filtered_proposal) {
-          if ($this->get('synchronization_actions')['create_consumers']) {
+          if ($create_consumers) {
             $consumer->createConsumerTarget($filtered_proposal);
           }
           $consumer->grantSingleAuthorization($user, $filtered_proposal);
@@ -441,11 +454,11 @@ class AuthorizationProfile extends ConfigEntityBase {
       }
     }
 
-    if ($this->get('synchronization_actions')['revoke_provider_provisioned']) {
+    if ($revoke_provision) {
       $consumer->revokeGrants($user, $applied_grants);
     }
 
-    if ($user_save == TRUE) {
+    if ($user_save === TRUE) {
       $user->save();
     }
     return new AuthorizationResponse($this->label, FALSE, $applied_grants);

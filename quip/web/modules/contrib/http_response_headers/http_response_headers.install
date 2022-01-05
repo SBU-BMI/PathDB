@@ -56,7 +56,7 @@ function http_response_headers_update_8001() {
         'group' => $header['group'],
         'value' => $header['value'],
       );
-      $entity_manager = \Drupal::entityManager()->getStorage('response_header');
+      $entity_manager = \Drupal::entityTypeManager()->getStorage('response_header');
       if ($existing_entity = current($entity_manager->loadByProperties(array('name' => $entity['name'])))) {
         $saved = $existing_entity->set('value', $entity['value'])->save();
       }

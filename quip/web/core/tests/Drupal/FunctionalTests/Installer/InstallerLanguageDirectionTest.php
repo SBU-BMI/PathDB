@@ -10,6 +10,11 @@ namespace Drupal\FunctionalTests\Installer;
 class InstallerLanguageDirectionTest extends InstallerTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Overrides the language code the installer should use.
    *
    * @var string
@@ -41,7 +46,7 @@ class InstallerLanguageDirectionTest extends InstallerTestBase {
    */
   public function testInstalled() {
     $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 
 }

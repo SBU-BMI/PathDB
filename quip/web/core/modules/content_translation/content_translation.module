@@ -9,6 +9,7 @@ use Drupal\Core\Url;
 use Drupal\content_translation\BundleTranslationSettingsInterface;
 use Drupal\content_translation\ContentTranslationManager;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -297,7 +298,7 @@ function content_translation_entity_base_field_info(EntityTypeInterface $entity_
  *   - translatable: (optional) If the column group should be translatable by
  *     default, defaults to FALSE.
  *   - columns: (optional) A list of columns of this group. Defaults to the
- *     name of he group as the single column.
+ *     name of the group as the single column.
  *   - require_all_groups_for_translation: (optional) Set to TRUE to enforce
  *     that making this column group translatable requires all others to be
  *     translatable too.
@@ -334,7 +335,7 @@ function content_translation_entity_operation(EntityInterface $entity) {
 function content_translation_views_data_alter(array &$data) {
   // Add the content translation entity link definition to Views data for entity
   // types having translation enabled.
-  $entity_types = \Drupal::entityManager()->getDefinitions();
+  $entity_types = \Drupal::entityTypeManager()->getDefinitions();
   /** @var \Drupal\content_translation\ContentTranslationManagerInterface $manager */
   $manager = \Drupal::service('content_translation.manager');
   foreach ($entity_types as $entity_type_id => $entity_type) {
@@ -393,7 +394,7 @@ function content_translation_form_alter(array &$form, FormStateInterface $form_s
   // be the 'add' or 'edit' form. It also tries a 'default' form in case neither
   // of the aforementioned forms are defined.
   if ($entity instanceof ContentEntityInterface && $entity->isTranslatable() && count($entity->getTranslationLanguages()) > 1 && in_array($op, ['edit', 'add', 'default'], TRUE)) {
-    $controller = \Drupal::entityManager()->getHandler($entity->getEntityTypeId(), 'translation');
+    $controller = \Drupal::entityTypeManager()->getHandler($entity->getEntityTypeId(), 'translation');
     $controller->entityFormAlter($form, $form_state, $entity);
 
     // @todo Move the following lines to the code generating the property form
@@ -454,7 +455,7 @@ function content_translation_language_fallback_candidates_entity_view_alter(&$ca
 function content_translation_entity_extra_field_info() {
   $extra = [];
   $bundle_info_service = \Drupal::service('entity_type.bundle.info');
-  foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $info) {
+  foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_type => $info) {
     foreach ($bundle_info_service->getBundleInfo($entity_type) as $bundle => $bundle_info) {
       if (\Drupal::service('content_translation.manager')->isEnabled($entity_type, $bundle)) {
         $extra[$entity_type][$bundle]['form']['translation'] = [
@@ -656,6 +657,7 @@ function content_translation_preprocess_language_content_settings_table(&$variab
  * Implements hook_page_attachments().
  */
 function content_translation_page_attachments(&$page) {
+  $cache = CacheableMetadata::createFromRenderArray($page);
   $route_match = \Drupal::routeMatch();
 
   // If the current route has no parameters, return.
@@ -673,6 +675,13 @@ function content_translation_page_attachments(&$page) {
     if ($entity instanceof ContentEntityInterface && $entity->hasLinkTemplate('canonical')) {
       // Current route represents a content entity. Build hreflang links.
       foreach ($entity->getTranslationLanguages() as $language) {
+        // Skip any translation that cannot be viewed.
+        $translation = $entity->getTranslation($language->getId());
+        $access = $translation->access('view', NULL, TRUE);
+        $cache->addCacheableDependency($access);
+        if (!$access->isAllowed()) {
+          continue;
+        }
         $url = $entity->toUrl('canonical')
           ->setOption('language', $language)
           ->setAbsolute()
@@ -688,6 +697,8 @@ function content_translation_page_attachments(&$page) {
       }
     }
     // Since entity was found, no need to iterate further.
-    return;
+    break;
   }
+  // Apply updated caching information.
+  $cache->applyTo($page);
 }

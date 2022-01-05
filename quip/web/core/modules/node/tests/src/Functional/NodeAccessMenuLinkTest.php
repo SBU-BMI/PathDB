@@ -19,6 +19,11 @@ class NodeAccessMenuLinkTest extends NodeTestBase {
   public static $modules = ['menu_ui', 'block'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to manage menu links and create nodes.
    *
    * @var \Drupal\user\UserInterface
@@ -54,19 +59,19 @@ class NodeAccessMenuLinkTest extends NodeTestBase {
       'menu[title]' => $menu_link_title,
     ];
     $this->drupalPostForm('node/add/page', $edit, t('Save'));
-    $this->assertLink($menu_link_title);
+    $this->assertSession()->linkExists($menu_link_title);
 
     // Ensure anonymous users without "access content" permission do not see
     // this menu link.
     $this->drupalLogout();
     $this->drupalGet('');
-    $this->assertNoLink($menu_link_title);
+    $this->assertSession()->linkNotExists($menu_link_title);
 
     // Ensure anonymous users with "access content" permission see this menu
     // link.
     $this->config('user.role.' . RoleInterface::ANONYMOUS_ID)->set('permissions', ['access content'])->save();
     $this->drupalGet('');
-    $this->assertLink($menu_link_title);
+    $this->assertSession()->linkExists($menu_link_title);
   }
 
 }

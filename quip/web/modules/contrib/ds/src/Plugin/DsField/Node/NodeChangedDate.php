@@ -5,7 +5,7 @@ namespace Drupal\ds\Plugin\DsField\Node;
 use Drupal\ds\Plugin\DsField\Date;
 
 /**
- * Plugin that renders the post date of a node.
+ * Plugin that renders the changed date of a node.
  *
  * @DsField(
  *   id = "node_changed_date",

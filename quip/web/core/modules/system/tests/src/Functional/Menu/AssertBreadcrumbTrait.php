@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\system\Functional\Menu;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 
@@ -40,7 +41,7 @@ trait AssertBreadcrumbTrait {
 
     // Additionally assert page title, if given.
     if (isset($page_title)) {
-      $this->assertTitle(strtr('@title | Drupal', ['@title' => $page_title]));
+      $this->assertTitle("$page_title | Drupal");
     }
 
     // Additionally assert active trail in a menu tree output, if given.
@@ -88,7 +89,7 @@ trait AssertBreadcrumbTrait {
     // No parts must be left, or an expected "Home" will always pass.
     $pass = ($pass && empty($parts));
 
-    $this->assertTrue($pass, format_string('Breadcrumb %parts found on @path.', [
+    $this->assertTrue($pass, new FormattableMarkup('Breadcrumb %parts found on @path.', [
       '%parts' => implode(' » ', $trail),
       '@path' => $this->getUrl(),
     ]));

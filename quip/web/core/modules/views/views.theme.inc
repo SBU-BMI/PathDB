@@ -139,7 +139,9 @@ function template_preprocess_views_view_fields(&$variables) {
       }
 
       if (!empty($variables['options']['separator']) && $previous_inline && $object->inline && $object->content) {
-        $object->separator = Xss::filterAdmin($variables['options']['separator']);
+        $object->separator = [
+          '#markup' => $variables['options']['separator'],
+        ];
       }
 
       $object->class = Html::cleanCssIdentifier($id);
@@ -658,9 +660,26 @@ function template_preprocess_views_view_table(&$variables) {
     $variables['caption_needed'] = FALSE;
   }
 
+  // For backwards compatibility, initialize the 'summary' and 'description'
+  // variables, although core templates now all use 'summary_element' instead.
   $variables['summary'] = $handler->options['summary'];
   $variables['description'] = $handler->options['description'];
-  $variables['caption_needed'] |= !empty($variables['summary']) || !empty($variables['description']);
+  if (!empty($handler->options['summary']) || !empty($handler->options['description'])) {
+    $variables['summary_element'] = [
+      '#type' => 'details',
+      '#title' => $handler->options['summary'],
+      // To ensure that the description is properly escaped during rendering,
+      // use an 'inline_template' to let Twig do its magic, instead of 'markup'.
+      'description' => [
+        '#type' => 'inline_template',
+        '#template' => '{{ description }}',
+        '#context' => [
+          'description' => $handler->options['description'],
+        ],
+      ],
+    ];
+    $variables['caption_needed'] = TRUE;
+  }
 
   $variables['responsive'] = FALSE;
   // If the table has headers and it should react responsively to columns hidden
@@ -866,36 +885,11 @@ function template_preprocess_views_view_rss(&$variables) {
     $title = $view->getTitle();
   }
   $variables['title'] = $title;
-
-  // Figure out which display which has a path we're using for this feed. If
-  // there isn't one, use the global $base_url
-  $link_display_id = $view->display_handler->getLinkDisplay();
-  /** @var \Drupal\views\Plugin\views\display\DisplayPluginBase $display */
-  if ($link_display_id && ($display = $view->displayHandlers->get($link_display_id)) && $display->isEnabled()) {
-    $url = $view->getUrl(NULL, $link_display_id);
-  }
-
-  /** @var \Drupal\Core\Url $url */
-  if (!empty($url)) {
-    $url_options = ['absolute' => TRUE];
-    if (!empty($view->exposed_raw_input)) {
-      $url_options['query'] = $view->exposed_raw_input;
-    }
-
-    // Compare the link to the default home page; if it's the default home page,
-    // just use $base_url.
-    $url_string = $url->setOptions($url_options)->toString();
-    if ($url_string === Url::fromUserInput($config->get('page.front'))->toString()) {
-      $url_string = Url::fromRoute('<front>')->setAbsolute()->toString();
-    }
-
-    $variables['link'] = $url_string;
-  }
-
+  $variables['link'] = Url::fromRoute('<front>')->setAbsolute()->toString();
   $variables['langcode'] = \Drupal::languageManager()->getCurrentLanguage()->getId();
   $variables['namespaces'] = new Attribute($style->namespaces);
   $variables['items'] = $items;
-  $variables['channel_elements'] = \Drupal::service('renderer')->render($style->channel_elements);
+  $variables['channel_elements'] = $style->channel_elements;
 
   // During live preview we don't want to output the header since the contents
   // of the feed are being displayed inside a normal HTML page.
@@ -1025,18 +1019,25 @@ function template_preprocess_views_exposed_form(&$variables) {
  *     exposed input.
  */
 function template_preprocess_views_mini_pager(&$variables) {
-  global $pager_page_array, $pager_total;
+  /* @var $pager_manager \Drupal\Core\Pager\PagerManagerInterface */
+  $pager_manager = \Drupal::service('pager.manager');
 
   $tags = &$variables['tags'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
+  $pager = $pager_manager->getPager($element);
+  if (!$pager) {
+    return;
+  }
+  $current = $pager->getCurrentPage();
+  $total = $pager->getTotalPages();
 
   // Current is the page we are currently paged to.
-  $variables['items']['current'] = $pager_page_array[$element] + 1;
+  $variables['items']['current'] = $current + 1;
 
-  if ($pager_total[$element] > 1 && $pager_page_array[$element] > 0) {
+  if ($total > 1 && $current > 0) {
     $options = [
-      'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] - 1),
+      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $current - 1),
     ];
     $variables['items']['previous']['href'] = Url::fromRoute('<current>', [], $options)->toString();
     if (isset($tags[1])) {
@@ -1045,9 +1046,9 @@ function template_preprocess_views_mini_pager(&$variables) {
     $variables['items']['previous']['attributes'] = new Attribute();
   }
 
-  if ($pager_page_array[$element] < ($pager_total[$element] - 1)) {
+  if ($current < ($total - 1)) {
     $options = [
-      'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] + 1),
+      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $current + 1),
     ];
     $variables['items']['next']['href'] = Url::fromRoute('<current>', [], $options)->toString();
     if (isset($tags[3])) {
@@ -1059,6 +1060,8 @@ function template_preprocess_views_mini_pager(&$variables) {
   // This is based on the entire current query string. We need to ensure
   // cacheability is affected accordingly.
   $variables['#cache']['contexts'][] = 'url.query_args';
+
+  $variables['heading_id'] = Html::getUniqueId('pagination-heading');
 }
 
 /**

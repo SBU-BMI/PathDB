@@ -24,10 +24,21 @@ class ForumUninstallTest extends BrowserTestBase {
   public static $modules = ['forum'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests if forum module uninstallation properly deletes the field.
    */
   public function testForumUninstallWithField() {
-    $this->drupalLogin($this->drupalCreateUser(['administer taxonomy', 'administer nodes', 'administer modules', 'delete any forum content', 'administer content types']));
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer taxonomy',
+      'administer nodes',
+      'administer modules',
+      'delete any forum content',
+      'administer content types',
+    ]));
     // Ensure that the field exists before uninstallation.
     $field_storage = FieldStorageConfig::loadByName('node', 'taxonomy_forums');
     $this->assertNotNull($field_storage, 'The taxonomy_forums field storage exists.');
@@ -80,14 +91,13 @@ class ForumUninstallTest extends BrowserTestBase {
 
     // Delete any forum terms.
     $vid = $this->config('forum.settings')->get('vocabulary');
-    $terms = entity_load_multiple_by_properties('taxonomy_term', ['vid' => $vid]);
-    foreach ($terms as $term) {
-      $term->delete();
-    }
+    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $terms = $storage->loadByProperties(['vid' => $vid]);
+    $storage->delete($terms);
 
     // Ensure that the forum node type can not be deleted.
     $this->drupalGet('admin/structure/types/manage/forum');
-    $this->assertNoLink(t('Delete'));
+    $this->assertSession()->linkNotExists(t('Delete'));
 
     // Now attempt to uninstall forum.
     $this->drupalGet('admin/modules/uninstall');
@@ -114,7 +124,7 @@ class ForumUninstallTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/types/manage/forum');
     $this->clickLink(t('Delete'));
     $this->drupalPostForm(NULL, [], t('Delete'));
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertFalse((bool) NodeType::load('forum'), 'Node type with machine forum deleted.');
 
     // Double check everything by reinstalling the forum module again.
@@ -137,7 +147,7 @@ class ForumUninstallTest extends BrowserTestBase {
 
     // Delete all terms in the Forums vocabulary. Uninstalling the forum module
     // will fail unless this is done.
-    $terms = entity_load_multiple_by_properties('taxonomy_term', ['vid' => 'forums']);
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['vid' => 'forums']);
     foreach ($terms as $term) {
       $term->delete();
     }

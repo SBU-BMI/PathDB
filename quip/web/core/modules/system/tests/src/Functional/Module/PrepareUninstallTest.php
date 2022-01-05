@@ -3,7 +3,7 @@
 namespace Drupal\Tests\system\Functional\Module;
 
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
+use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Tests that modules which provide entity types can be uninstalled.
@@ -13,6 +13,11 @@ use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
 class PrepareUninstallTest extends BrowserTestBase {
 
   use TaxonomyTestTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * An array of node objects.
@@ -146,9 +151,9 @@ class PrepareUninstallTest extends BrowserTestBase {
     $this->assertText('The selected modules have been uninstalled.');
     $this->assertNoText('Allows content to be submitted to the site and displayed on pages.');
 
-    // Ensure the proper response when accessing a non-existent entity type.
+    // Ensure a 404 is returned when accessing a non-existent entity type.
     $this->drupalGet('admin/modules/uninstall/entity/node');
-    $this->assertResponse(404, 'Entity types that do not exist result in a 404.');
+    $this->assertSession()->statusCodeEquals(404);
 
     // Test an entity type which does not have any existing entities.
     $this->drupalGet('admin/modules/uninstall/entity/entity_test_no_label');
@@ -158,7 +163,7 @@ class PrepareUninstallTest extends BrowserTestBase {
 
     // Test an entity type without a label.
     /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
-    $storage = $this->container->get('entity.manager')
+    $storage = $this->container->get('entity_type.manager')
       ->getStorage('entity_test_no_label');
     $storage->create([
       'id' => mb_strtolower($this->randomMachineName()),

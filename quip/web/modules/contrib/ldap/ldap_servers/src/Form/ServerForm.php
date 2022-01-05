@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_servers\Form;
 
 use Drupal\Core\Entity\EntityForm;
@@ -7,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_servers\Entity\Server;
 
 /**
- * Class ServerForm.
+ * Server form.
  *
  * @package Drupal\ldap_servers\Form
  */
@@ -40,7 +42,7 @@ class ServerForm extends EntityForm {
       '#title' => $this->t('Name'),
       '#maxlength' => 255,
       '#default_value' => $server->label(),
-      '#description' => $this->t("Choose a unique <strong><em>name</em></strong> for this server configuration."),
+      '#description' => $this->t('Choose a unique <strong><em>name</em></strong> for this server configuration.'),
       '#required' => TRUE,
     ];
 
@@ -65,14 +67,14 @@ class ServerForm extends EntityForm {
       '#title' => $this->t('LDAP Server type'),
       '#type' => 'select',
       '#options' => [
-        'default' => 'Default LDAP',
-        'ad' => 'Active Directory',
-        'novell_edir' => 'Novell',
-        'openldap' => 'Open LDAP',
-        'opendir' => 'Apple Open Directory',
+        'default' => $this->t('Default LDAP'),
+        'ad' => $this->t('Active Directory'),
+        'novell_edir' => $this->t('Novell'),
+        'openldap' => $this->t('Open LDAP'),
+        'opendir' => $this->t('Apple Open Directory'),
       ],
       '#default_value' => $server->get('type'),
-      '#description' => $this->t("This field is informative. It's purpose is to assist with default values and give validation warnings."),
+      '#description' => $this->t("At the moment this only changes whether unicodePwd should be used for AD."),
     ];
 
     $form['server']['address'] = [
@@ -80,7 +82,7 @@ class ServerForm extends EntityForm {
       '#title' => $this->t('Server address'),
       '#maxlength' => 255,
       '#default_value' => $server->get('address'),
-      '#description' => $this->t('The domain name or IP address of your LDAP Server such as "ad.unm.edu".<br> For SSL use the form ldaps://DOMAIN such as \ldaps://ad.unm.edu"'),
+      '#description' => $this->t('The domain name or IP address of your LDAP Server such as "ad.unm.edu".'),
       '#required' => TRUE,
     ];
 
@@ -89,26 +91,30 @@ class ServerForm extends EntityForm {
       '#title' => $this->t('Server port'),
       '#min' => 1,
       '#max' => 65535,
-      '#default_value' => $server->get('port') ? $server->get('port') : 389,
-      '#description' => $this->t("The TCP/IP port on the above server which accepts LDAP connections. Must be an integer."),
+      '#default_value' => $server->get('port') ?: 389,
+      '#description' => $this->t('Usually 389 for unencrypted and STARTTLS, 636 for SSL.'),
       '#required' => TRUE,
     ];
 
     $form['server']['timeout'] = [
       '#type' => 'number',
-      '#title' => $this->t('Network timeout'),
+      '#title' => $this->t('Timeout'),
       '#min' => -1,
       '#max' => 999,
-      '#default_value' => $server->get('timeout') ? $server->get('timeout') : 10,
-      '#description' => $this->t("How long to wait for a response from the LDAP server in seconds."),
+      '#default_value' => $server->get('timeout') ?: 10,
+      '#description' => $this->t('How long to wait for a response from the LDAP server in seconds (network or query).'),
       '#required' => TRUE,
     ];
 
-    $form['server']['tls'] = [
-      '#title' => $this->t('Use Start-TLS'),
-      '#type' => 'checkbox',
-      '#default_value' => $server->get('tls'),
-      '#description' => $this->t("Secure the connection between the Drupal and the LDAP servers using TLS.<br> <em>Note: To use START-TLS, you must set the LDAP Port to 389.</em>"),
+    $form['server']['encryption'] = [
+      '#title' => $this->t('Encryption'),
+      '#type' => 'select',
+      '#options' => [
+        'none' => $this->t('Unencrypted'),
+        'ssl' => $this->t('SSL (i.e. the ldaps:// protocol)'),
+        'tls' => $this->t('STARTTLS'),
+      ],
+      '#default_value' => $server->get('encryption') ?: 'none',
     ];
 
     $form['bind'] = [
@@ -117,7 +123,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['bind']['bind_method'] = [
-      '#default_value' => $server->get('bind_method') ? $server->get('bind_method') : 'service_account',
+      '#default_value' => $server->get('bind_method') ?: 'service_account',
       '#type' => 'radios',
       '#title' => $this->t('Binding Method for Searches'),
       '#options' => [
@@ -137,10 +143,10 @@ class ServerForm extends EntityForm {
       '#maxlength' => 512,
       '#states' => [
         'visible' => [
-          ':input[name=bind_method]' => ['value' => strval('service_account')],
+          ':input[name=bind_method]' => ['value' => 'service_account'],
         ],
         'required' => [
-          ':input[name=bind_method]' => ['value' => strval('service_account')],
+          ':input[name=bind_method]' => ['value' => 'service_account'],
         ],
       ],
     ];
@@ -151,10 +157,10 @@ class ServerForm extends EntityForm {
       '#size' => 80,
       '#states' => [
         'visible' => [
-          ':input[name=bind_method]' => ['value' => strval('service_account')],
+          ':input[name=bind_method]' => ['value' => 'service_account'],
         ],
         'required' => [
-          ':input[name=bind_method]' => ['value' => strval('service_account')],
+          ':input[name=bind_method]' => ['value' => 'service_account'],
         ],
       ],
     ];
@@ -168,8 +174,9 @@ class ServerForm extends EntityForm {
       '#title' => $this->t('Users'),
     ];
 
+    // @todo Change to "add another" pattern, to avoid linebreak handling.
     $form['users']['basedn'] = [
-      '#default_value' => $server->get('basedn'),
+      '#default_value' => $server->get('basedn') ? implode("\r\n", $server->get('basedn')) : '',
       '#type' => 'textarea',
       '#cols' => 50,
       '#rows' => 6,
@@ -178,19 +185,19 @@ class ServerForm extends EntityForm {
     ];
 
     $form['users']['user_attr'] = [
-      '#default_value' => $server->get('user_attr'),
+      '#default_value' => $server->getAuthenticationNameAttribute(),
       '#type' => 'textfield',
       '#size' => 30,
-      '#title' => $this->t('AuthName attribute'),
+      '#title' => $this->t('Authentication name attribute'),
       '#description' => $this->t("The attribute that holds the user's login name. (eg. <code>cn</code> for eDir or <code>sAMAccountName</code> for Active Directory)."),
     ];
 
     $form['users']['account_name_attr'] = [
-      '#default_value' => $server->get('account_name_attr'),
+      '#default_value' => $server->getAccountNameAttribute(),
       '#type' => 'textfield',
       '#size' => 30,
-      '#title' => $this->t('AccountName attribute'),
-      '#description' => $this->t('The attribute that holds the unique account name. Defaults to the same as the AuthName attribute.'),
+      '#title' => $this->t('Account name attribute'),
+      '#description' => $this->t('The attribute that holds the unique account name. Defaults to the same as the authentication name attribute.'),
     ];
 
     $form['users']['mail_attr'] = [
@@ -202,7 +209,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['users']['mail_template'] = [
-      '#default_value' => $server->get('mail_template'),
+      '#default_value' => $server->getMailTemplate(),
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t('Email template'),
@@ -210,7 +217,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['users']['picture_attr'] = [
-      '#default_value' => $server->get('picture_attr'),
+      '#default_value' => $server->getPictureAttribute(),
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t('Thumbnail attribute'),
@@ -218,7 +225,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['users']['unique_persistent_attr'] = [
-      '#default_value' => $server->get('unique_persistent_attr'),
+      '#default_value' => $server->getUniquePersistentAttribute(),
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t('Persistent and Unique User ID Attribute'),
@@ -233,7 +240,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['users']['user_dn_expression'] = [
-      '#default_value' => $server->get('user_dn_expression'),
+      '#default_value' => $server->getUserDnExpression(),
       '#type' => 'textfield',
       '#size' => 80,
       '#title' => $this->t('Expression for user DN. Required when "Bind with Users Credentials" method selected.'),
@@ -249,7 +256,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['users']['testing_drupal_user_dn'] = [
-      '#default_value' => $server->get('testing_drupal_user_dn'),
+      '#default_value' => $server->getTestingDrupalUserDn(),
       '#type' => 'textfield',
       '#size' => 120,
       '#title' => $this->t('DN of testing username'),
@@ -353,11 +360,11 @@ class ServerForm extends EntityForm {
     ];
 
     $form['groups']['attribute']['grp_user_memb_attr'] = [
-      '#default_value' => $server->get('grp_user_memb_attr'),
+      '#default_value' => $server->getGroupUserMembershipAttribute(),
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t('Attribute in User Entry Containing Groups'),
-      '#description' => $this->t('e.g. memberOf <em>(case sensitive)</em>.'),
+      '#description' => $this->t('Example: memberOf'),
       '#states' => [
         'enabled' => [
           ':input[name=grp_user_memb_attr_exists]' => ['checked' => TRUE],
@@ -379,7 +386,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['groups']['deriveDN']['grp_derive_from_dn'] = [
-      '#default_value' => $server->get('grp_derive_from_dn'),
+      '#default_value' => $server->isGroupDerivedFromDn(),
       '#type' => 'checkbox',
       '#title' => $this->t("Groups are derived from user's LDAP entry DN."),
       '#description' => $this->t('This group definition has very limited functionality and most modules will not take this into account.  LDAP Authorization will.'),
@@ -392,7 +399,7 @@ class ServerForm extends EntityForm {
     ];
 
     $form['groups']['deriveDN']['grp_derive_from_dn_attr'] = [
-      '#default_value' => $server->get('grp_derive_from_dn_attr'),
+      '#default_value' => $server->getDerivedGroupFromDnAttribute(),
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t("Attribute of the user's LDAP entry DN which contains the group"),
@@ -425,35 +432,11 @@ class ServerForm extends EntityForm {
       '#type' => 'textfield',
       '#size' => 120,
       '#title' => $this->t('Testing LDAP Group DN that is writable.'),
-      '#description' => $this->t("<strong>WARNING:</strong> the test script for the server will create, delete, and add members to this group! <br> This is optional and can be useful for debugging and validating forms."),
+      '#description' => $this->t('<strong>WARNING:</strong> the test script for the server will create, delete, and add members to this group! <br> This is optional and can be useful for debugging and validating forms.'),
       '#placeholder' => $this->t('Careful!'),
       '#states' => [
         'visible' => [
           ':input[name=grp_unused]' => ['checked' => FALSE],
-        ],
-      ],
-    ];
-
-    $form['pagination'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Pagination'),
-    ];
-
-    $form['pagination']['search_pagination'] = [
-      '#default_value' => $server->get('search_pagination'),
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use LDAP Pagination.'),
-    ];
-
-    $form['pagination']['search_page_size'] = [
-      '#default_value' => $server->get('search_page_size'),
-      '#type' => 'textfield',
-      '#size' => 10,
-      '#title' => $this->t('Pagination size limit.'),
-      '#description' => $this->t('This should be equal to or smaller than the max number of entries returned at a time by your LDAP server. 1000 is a good guess when unsure. Other modules such as LDAP Query or LDAP Feeds will be allowed to set a smaller page size, but not a larger one.'),
-      '#states' => [
-        'visible' => [
-          ':input[name="search_pagination"]' => ['checked' => TRUE],
         ],
       ],
     ];
@@ -465,12 +448,12 @@ class ServerForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    if ($form_state->getValue('bind_method') != 'service_account') {
+    if ($form_state->getValue('bind_method') !== 'service_account') {
       $this->entity->set('binddn', NULL);
       $this->entity->set('bindpw', NULL);
     }
     else {
-      if ($form_state->getValue('bindpw') != '****') {
+      if ($form_state->getValue('bindpw') !== '****') {
         $this->entity->set('bindpw', $form_state->getValue('bindpw'));
       }
       else {
@@ -481,6 +464,7 @@ class ServerForm extends EntityForm {
         }
       }
     }
+    $this->entity->set('basedn', preg_split('/\r\n|\r|\n/', $form_state->getValue('basedn')));
 
     $fields = [
       'user_attr',
@@ -498,22 +482,25 @@ class ServerForm extends EntityForm {
     ];
 
     foreach ($fields as $field) {
+      // We lowercase all fields to match Entry attributes being lowercased in
+      // \Drupal\ldap_servers\LdapBaseManager::sanitizeUserDataResponse().
       $this->entity->set($field, mb_strtolower(trim($this->entity->get($field))));
     }
 
+    // Remove prefix to avoid user error.
+    $this->entity->set('address', preg_replace('#^ldaps?://#', '', $form_state->getValue('address')));
+
     $status = $this->entity->save();
 
-    switch ($status) {
-      case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label Server.', [
-          '%label' => $this->entity->label(),
-        ]));
-        break;
-
-      default:
-        drupal_set_message($this->t('Saved the %label Server.', [
-          '%label' => $this->entity->label(),
-        ]));
+    if ($status === SAVED_NEW) {
+      $this->messenger()->addMessage($this->t('Created the %label Server.', [
+        '%label' => $this->entity->label(),
+      ]));
+    }
+    else {
+      $this->messenger()->addMessage($this->t('Saved the %label Server.', [
+        '%label' => $this->entity->label(),
+      ]));
     }
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
   }

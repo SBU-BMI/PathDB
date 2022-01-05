@@ -1,81 +1,77 @@
 <?php
 
 namespace Drupal\restrict_by_ip\Tests;
-use Drupal\simpletest\WebTestBase;
+
+use Drupal\user\Entity\Role;
 
 /**
  * Tests roles are restricted to certain IP address range(s).
  *
  * @group restrict_by_ip
- *
- * Assumes that local testing environment has IP address of 127.0.0.1.
  */
-class RoleTest extends WebTestBase {
-  private $regularUser;
-  private $role = [];
+class RoleTest extends RestrictByIPWebTestBase {
 
-  public static $modules = ['restrict_by_ip'];
+  /**
+   * @var \Drupal\user\Entity\Role
+   */
+  private $role;
 
   public function setUp() {
-    // Enable modules needed for these tests.
     parent::setUp();
-
-    // Create a user that we'll use to test logins.
-    $this->regularUser = $this->drupalCreateUser();
 
     // Create a role with administer permissions so we can load the user edit,
     // page and test if the user has this role when logged in.
-    $rid = $this->drupalCreateRole(['administer permissions']);
-    $roles = user_roles();
-    $this->role['id'] = $rid;
-    $this->role['name'] = $roles[$rid];
+    $random_name = $this->randomMachineName();
+    $rid = $this->drupalCreateRole(['administer permissions'], null, $random_name);
+    $this->role = Role::load($rid);
 
     // Add created role to user.
-    $new_roles = $this->regularUser->roles + [$rid => $roles[$rid]];
-    user_save($this->regularUser, ['roles' => $new_roles]);
+    $this->regularUser->addRole($this->role->id());
+    $this->regularUser->save();
   }
 
   public function testRoleAppliedNoRestrictions() {
     $this->drupalLogin($this->regularUser);
-    $this->drupalGet('user/' . $this->regularUser->uid . '/edit');
-    $this->assertText($this->role['name']);
+    $this->drupalGet('user/' . $this->regularUser->id() . '/edit');
+    $this->assertText($this->role->label());
   }
 
   public function testRoleAppliedMatchIP() {
-    variable_set('restrict_by_ip_role_' . _restrict_by_ip_hash_role_name($this->role['name']), '127.0.0.0/8');
+    $this->conf->set('role.' . $this->role->id(), $this->currentIPCIDR)->save();
     $this->drupalLogin($this->regularUser);
-    $this->drupalGet('user/' . $this->regularUser->uid . '/edit');
-    $this->assertText($this->role['name']);
+    $this->drupalGet('user/' . $this->regularUser->id() . '/edit');
+    $this->assertText($this->role->label());
   }
 
   public function testRoleDeniedDifferIP() {
-    variable_set('restrict_by_ip_role_' . _restrict_by_ip_hash_role_name($this->role['name']), '10.0.0.0/8');
+    $this->conf->set('role.' . $this->role->id(), $this->outOfRangeCIDR)->save();
     $this->drupalLogin($this->regularUser);
-    $this->drupalGet('user/' . $this->regularUser->uid . '/edit');
-    $this->assertNoText($this->role['name']);
+    $this->drupalGet('user/' . $this->regularUser->id() . '/edit');
+    $this->assertNoText($this->role->label());
   }
 
-  // Test ip restrictions
+  // // Test ip restrictions
   public function testUIRoleRenamed() {
-    variable_set('restrict_by_ip_role_' . _restrict_by_ip_hash_role_name($this->role['name']), '127.0.0.0/8');
+    $this->conf->set('role.' . $this->role->id(), $this->currentIPCIDR)->save();
     $this->drupalLogin($this->regularUser);
-    $form = [];
-    $form['name'] = 'a new role name';
-    $this->drupalPost('admin/people/permissions/roles/edit/' . $this->role['id'], $form, t('Save role'));
-    $this->assertText('The role has been renamed.');
-    $ip = variable_get('restrict_by_ip_role_' . _restrict_by_ip_hash_role_name('a new role name'), '');
-    $this->assertEqual($ip, '127.0.0.0/8', 'IP restriction updated');
+    $edit = [];
+    $edit['label'] = 'a new role name';
+    $this->drupalPostForm('admin/people/roles/manage/' . $this->role->id(), $edit, t('Save'));
+    $this->assertText('Role a new role name has been updated.');
+    $updatedConf = $this->config('restrict_by_ip.settings');
+    $ip = $updatedConf->get('role.' . $this->role->id());
+    $this->assertEqual($ip, $this->currentIPCIDR, 'IP restriction updated');
   }
 
   public function testUIRoleDeleted() {
-    variable_set('restrict_by_ip_role_' . _restrict_by_ip_hash_role_name($this->role['name']), '127.0.0.0/8');
+    $this->conf->set('role.' . $this->role->id(), $this->currentIPCIDR)->save();
     $this->drupalLogin($this->regularUser);
-    $form = [];
-    $this->drupalPost('admin/people/permissions/roles/edit/' . $this->role['id'], $form, t('Delete role'));
-    $this->drupalPost(NULL, $form, t('Delete'));
-    $this->assertText('The role has been deleted.');
+    $edit = [];
+    $this->drupalPostForm('admin/people/roles/manage/' . $this->role->id() . '/delete', $edit, t('Delete'));
+    $this->assertText('The role ' . $this->role->label() . ' has been deleted.');
     // If we get the default, we know the variable is deleted.
-    $ip = variable_get('restrict_by_ip_role_' . _restrict_by_ip_hash_role_name($this->role['name']), 'ip default');
-    $this->assertEqual($ip, 'ip default', 'IP restriction deleted');
+    $updatedConf = $this->config('restrict_by_ip.settings');
+    $ip = $updatedConf->get('role.' . $this->role->id());
+    $this->assertNull($ip, 'IP restriction deleted');
   }
 }

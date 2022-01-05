@@ -2,7 +2,8 @@
 
 namespace Drupal\authorization\Plugin;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface as DrupalConfigurablePluginInterface;
+use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\DerivativeInspectionInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -12,7 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Describes a configurable Authorization plugin.
  */
-interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInterface, DerivativeInspectionInterface, DrupalConfigurablePluginInterface, PluginFormInterface, ContainerFactoryPluginInterface {
+interface ConfigurableAuthorizationPluginInterface extends PluginInspectionInterface, DerivativeInspectionInterface, ConfigurableInterface, DependentPluginInterface, PluginFormInterface, ContainerFactoryPluginInterface {
 
   /**
    * Returns the label for use on the administration pages.

@@ -45,7 +45,7 @@ class CacheTagsTest extends TestBase {
 
     $this->drupalGet('node/' . $node->id());
     $headers = $this->drupalGetHeader('X-Drupal-Cache-Tags');
-    $this->assertTrue(
+    $this->assertNotEmpty(
       strpos($headers, 'user:' . $node->getRevisionUser()->getOriginalId()),
       'User cache tag found'
     );

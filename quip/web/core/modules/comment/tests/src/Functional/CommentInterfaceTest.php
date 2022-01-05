@@ -19,6 +19,11 @@ use Drupal\filter\Entity\FilterFormat;
 class CommentInterfaceTest extends CommentTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * Set up comments to have subject and preview disabled.
    */
   protected function setUp() {
@@ -50,7 +55,7 @@ class CommentInterfaceTest extends CommentTestBase {
 
     // Test the comment field title is displayed when there's comments.
     $this->drupalGet($this->node->toUrl());
-    $this->assertPattern('@<h2[^>]*>Comments</h2>@', 'Comments title is displayed.');
+    $this->assertPattern('@<h2[^>]*>Comments</h2>@');
 
     // Set comments to have subject and preview to required.
     $this->drupalLogout();
@@ -92,9 +97,7 @@ class CommentInterfaceTest extends CommentTestBase {
     $this->setCommentPreview(DRUPAL_OPTIONAL);
 
     $this->drupalGet('comment/' . $comment->id() . '/edit');
-    $this->assertTitle(t('Edit comment @title | Drupal', [
-      '@title' => $comment->getSubject(),
-    ]));
+    $this->assertTitle('Edit comment ' . $comment->getSubject() . ' | Drupal');
 
     // Test changing the comment author to "Anonymous".
     $comment = $this->postComment(NULL, $comment->comment_body->value, $comment->getSubject(), ['uid' => '']);
@@ -169,25 +172,25 @@ class CommentInterfaceTest extends CommentTestBase {
     $reply_loaded->setUnpublished();
     $reply_loaded->save();
     $this->drupalGet('comment/reply/node/' . $this->node->id() . '/comment/' . $reply_loaded->id());
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
 
     // Attempt to post to node with comments disabled.
     $this->node = $this->drupalCreateNode(['type' => 'article', 'promote' => 1, 'comment' => [['status' => CommentItemInterface::HIDDEN]]]);
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->assertNotNull($this->node, 'Article node created.');
     $this->drupalGet('comment/reply/node/' . $this->node->id() . '/comment');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     $this->assertNoField('edit-comment', 'Comment body field found.');
 
     // Attempt to post to node with read-only comments.
     $this->node = $this->drupalCreateNode(['type' => 'article', 'promote' => 1, 'comment' => [['status' => CommentItemInterface::CLOSED]]]);
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->assertNotNull($this->node, 'Article node created.');
     $this->drupalGet('comment/reply/node/' . $this->node->id() . '/comment');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     $this->assertNoField('edit-comment', 'Comment body field found.');
 
     // Attempt to post to node with comments enabled (check field names etc).
     $this->node = $this->drupalCreateNode(['type' => 'article', 'promote' => 1, 'comment' => [['status' => CommentItemInterface::OPEN]]]);
-    $this->assertTrue($this->node, 'Article node created.');
+    $this->assertNotNull($this->node, 'Article node created.');
     $this->drupalGet('comment/reply/node/' . $this->node->id() . '/comment');
     $this->assertNoText('This discussion is closed', 'Posting to node with comments enabled');
     $this->assertField('edit-comment-body-0-value', 'Comment body field found.');

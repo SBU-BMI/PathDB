@@ -25,6 +25,11 @@ class EntityReferenceFieldDefaultValueTest extends BrowserTestBase {
   public static $modules = ['field_ui', 'node'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to administer content types, node fields, etc.
    *
    * @var \Drupal\user\UserInterface
@@ -39,7 +44,13 @@ class EntityReferenceFieldDefaultValueTest extends BrowserTestBase {
     $this->drupalCreateContentType(['type' => 'referenced_content']);
 
     // Create admin user.
-    $this->adminUser = $this->drupalCreateUser(['access content', 'administer content types', 'administer node fields', 'administer node form display', 'bypass node access']);
+    $this->adminUser = $this->drupalCreateUser([
+      'access content',
+      'administer content types',
+      'administer node fields',
+      'administer node form display',
+      'bypass node access',
+    ]);
     $this->drupalLogin($this->adminUser);
   }
 
@@ -90,7 +101,7 @@ class EntityReferenceFieldDefaultValueTest extends BrowserTestBase {
     $this->assertEqual([$referenced_node->getConfigDependencyName()], $config_entity['dependencies']['content']);
 
     // Clear field definitions cache in order to avoid stale cache values.
-    \Drupal::entityManager()->clearCachedFieldDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Create a new node to check that UUID has been converted to numeric ID.
     $new_node = Node::create(['type' => 'reference_content']);
@@ -143,15 +154,15 @@ class EntityReferenceFieldDefaultValueTest extends BrowserTestBase {
 
     // Check that the field has a dependency on the default value.
     $config_entity = $this->config('field.field.node.reference_content.' . $field_name)->get();
-    $this->assertTrue(in_array($referenced_node_type->getConfigDependencyName(), $config_entity['dependencies']['config'], TRUE), 'The node type referenced_config_to_delete is a dependency of the field.');
-    $this->assertTrue(in_array($referenced_node_type2->getConfigDependencyName(), $config_entity['dependencies']['config'], TRUE), 'The node type referenced_config_to_preserve is a dependency of the field.');
+    $this->assertContains($referenced_node_type->getConfigDependencyName(), $config_entity['dependencies']['config'], 'The node type referenced_config_to_delete is a dependency of the field.');
+    $this->assertContains($referenced_node_type2->getConfigDependencyName(), $config_entity['dependencies']['config'], 'The node type referenced_config_to_preserve is a dependency of the field.');
 
     // Check that the field does not have a dependency on the default value
     // after deleting the node type.
     $referenced_node_type->delete();
     $config_entity = $this->config('field.field.node.reference_content.' . $field_name)->get();
-    $this->assertFalse(in_array($referenced_node_type->getConfigDependencyName(), $config_entity['dependencies']['config'], TRUE), 'The node type referenced_config_to_delete not a dependency of the field.');
-    $this->assertTrue(in_array($referenced_node_type2->getConfigDependencyName(), $config_entity['dependencies']['config'], TRUE), 'The node type referenced_config_to_preserve is a dependency of the field.');
+    $this->assertNotContains($referenced_node_type->getConfigDependencyName(), $config_entity['dependencies']['config'], 'The node type referenced_config_to_delete not a dependency of the field.');
+    $this->assertContains($referenced_node_type2->getConfigDependencyName(), $config_entity['dependencies']['config'], 'The node type referenced_config_to_preserve is a dependency of the field.');
   }
 
 }

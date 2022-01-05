@@ -1,0 +1,19 @@
+user_current_paths.edit_redirect:
+  path: '/user/edit'
+  defaults:
+    _controller: '\Drupal\user_current_paths\Controller\UserCurrentPathsController::editRedirect'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+user_current_paths.current_redirect:
+  path: '/user/current'
+  defaults:
+    _controller: '\Drupal\user_current_paths\Controller\UserCurrentPathsController::wildcardActionRedirect'
+    wildcardaction: 'view'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+user_current_paths.wildcardaction_redirect:
+  path: '/user/current/{wildcardaction}'
+  defaults:
+    _controller: '\Drupal\user_current_paths\Controller\UserCurrentPathsController::wildcardActionRedirect'
+  requirements:
+    _user_is_logged_in: 'TRUE'

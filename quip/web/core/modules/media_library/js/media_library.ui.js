@@ -16,18 +16,6 @@
     });
   };
 
-  Drupal.behaviors.MediaLibraryWidgetWarn = {
-    attach: function attach(context) {
-      $('.js-media-library-item a[href]', context).once('media-library-warn-link').on('click', function (e) {
-        var message = Drupal.t('Unsaved changes to the form will be lost. Are you sure you want to leave?');
-        var confirmation = window.confirm(message);
-        if (!confirmation) {
-          e.preventDefault();
-        }
-      });
-    }
-  };
-
   Drupal.behaviors.MediaLibraryTabs = {
     attach: function attach(context) {
       var $menu = $('.js-media-library-menu');
@@ -68,7 +56,7 @@
             }
           });
 
-          document.getElementById('media-library-content').focus();
+          $('#media-library-content :tabbable:first').focus();
 
           this.settings = null;
         };

@@ -1,8 +1,8 @@
-global-components:
+d8w3css-subtheme-global:
   version: VERSION
   css:
     theme:
-      css/styles.css: {}
+      css/d8w3css-subtheme-style.css: {}
 
   js:
-    js/script.js: {}
+    js/d8w3css-subtheme-script.js: {}

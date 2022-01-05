@@ -15,13 +15,18 @@ class UpcastingTest extends BrowserTestBase {
   public static $modules = ['paramconverter_test', 'node', 'language'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Confirms that all parameters are converted as expected.
    *
    * All of these requests end up being processed by a controller with the
    * signature: f($user, $node, $foo) returning either values or labels
    * like "user: Dries, node: First post, foo: bar"
    *
-   * The tests shuffle the parameters around an checks if the right thing is
+   * The test shuffles the parameters around and checks if the right thing is
    * happening.
    */
   public function testUpcasting() {

@@ -2,12 +2,19 @@
 
 namespace Drupal\Tests\aggregator\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
+
 /**
  * Tests aggregator admin pages.
  *
  * @group aggregator
  */
 class AggregatorAdminTest extends AggregatorTestBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Tests the settings form to ensure the correct default values are used.
@@ -35,7 +42,7 @@ class AggregatorAdminTest extends AggregatorTestBase {
     $this->assertText(t('The configuration options have been saved.'));
 
     foreach ($edit as $name => $value) {
-      $this->assertFieldByName($name, $value, format_string('"@name" has correct default value.', ['@name' => $name]));
+      $this->assertFieldByName($name, $value, new FormattableMarkup('"@name" has correct default value.', ['@name' => $name]));
     }
 
     // Check for our test processor settings form.
@@ -53,7 +60,7 @@ class AggregatorAdminTest extends AggregatorTestBase {
     $this->container->get('module_installer')->uninstall(['aggregator_test']);
     $this->resetAll();
     $this->drupalGet('admin/config/services/aggregator/settings');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -65,11 +72,11 @@ class AggregatorAdminTest extends AggregatorTestBase {
 
     $result = $this->xpath('//table/tbody/tr');
     // Check if the amount of feeds in the overview matches the amount created.
-    $this->assertEqual(1, count($result), 'Created feed is found in the overview');
+    $this->assertCount(1, $result, 'Created feed is found in the overview');
     // Check if the fields in the table match with what's expected.
     $link = $this->xpath('//table/tbody/tr//td[1]/a');
     $this->assertEquals($feed->label(), $link[0]->getText());
-    $count = $this->container->get('entity.manager')->getStorage('aggregator_item')->getItemCount($feed);
+    $count = $this->container->get('entity_type.manager')->getStorage('aggregator_item')->getItemCount($feed);
     $td = $this->xpath('//table/tbody/tr//td[2]');
     $this->assertEquals(\Drupal::translation()->formatPlural($count, '1 item', '@count items'), $td[0]->getText());
 
@@ -80,7 +87,7 @@ class AggregatorAdminTest extends AggregatorTestBase {
     // Check if the fields in the table match with what's expected.
     $link = $this->xpath('//table/tbody/tr//td[1]/a');
     $this->assertEquals($feed->label(), $link[0]->getText());
-    $count = $this->container->get('entity.manager')->getStorage('aggregator_item')->getItemCount($feed);
+    $count = $this->container->get('entity_type.manager')->getStorage('aggregator_item')->getItemCount($feed);
     $td = $this->xpath('//table/tbody/tr//td[2]');
     $this->assertEquals(\Drupal::translation()->formatPlural($count, '1 item', '@count items'), $td[0]->getText());
   }

@@ -9,7 +9,6 @@
 
 namespace Drupal\Sniffs\Semantics;
 
-use Drupal\Sniffs\Semantics\FunctionCall;
 use PHP_CodeSniffer\Files\File;
 
 /**
@@ -26,7 +25,7 @@ class FunctionAliasSniff extends FunctionCall
      * Holds all PHP function name aliases (keys) and originals (values). See
      * http://php.net/manual/en/aliases.php
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $aliases = [
         '_'                          => 'gettext',
@@ -95,42 +94,25 @@ class FunctionAliasSniff extends FunctionCall
         'msql_selectdb'              => 'msql_select_db',
         'msql_tablename'             => 'msql_result',
         'mssql_affected_rows'        => 'sybase_affected_rows',
-        'mssql_affected_rows'        => 'sybase_affected_rows',
-        'mssql_close'                => 'sybase_close',
         'mssql_close'                => 'sybase_close',
         'mssql_connect'              => 'sybase_connect',
-        'mssql_connect'              => 'sybase_connect',
-        'mssql_data_seek'            => 'sybase_data_seek',
         'mssql_data_seek'            => 'sybase_data_seek',
         'mssql_fetch_array'          => 'sybase_fetch_array',
-        'mssql_fetch_array'          => 'sybase_fetch_array',
-        'mssql_fetch_field'          => 'sybase_fetch_field',
         'mssql_fetch_field'          => 'sybase_fetch_field',
         'mssql_fetch_object'         => 'sybase_fetch_object',
-        'mssql_fetch_object'         => 'sybase_fetch_object',
-        'mssql_fetch_row'            => 'sybase_fetch_row',
         'mssql_fetch_row'            => 'sybase_fetch_row',
         'mssql_field_seek'           => 'sybase_field_seek',
-        'mssql_field_seek'           => 'sybase_field_seek',
         'mssql_free_result'          => 'sybase_free_result',
-        'mssql_free_result'          => 'sybase_free_result',
-        'mssql_get_last_message'     => 'sybase_get_last_message',
         'mssql_get_last_message'     => 'sybase_get_last_message',
         'mssql_min_client_severity'  => 'sybase_min_client_severity',
         'mssql_min_error_severity'   => 'sybase_min_error_severity',
         'mssql_min_message_severity' => 'sybase_min_message_severity',
         'mssql_min_server_severity'  => 'sybase_min_server_severity',
         'mssql_num_fields'           => 'sybase_num_fields',
-        'mssql_num_fields'           => 'sybase_num_fields',
-        'mssql_num_rows'             => 'sybase_num_rows',
         'mssql_num_rows'             => 'sybase_num_rows',
         'mssql_pconnect'             => 'sybase_pconnect',
-        'mssql_pconnect'             => 'sybase_pconnect',
-        'mssql_query'                => 'sybase_query',
         'mssql_query'                => 'sybase_query',
         'mssql_result'               => 'sybase_result',
-        'mssql_result'               => 'sybase_result',
-        'mssql_select_db'            => 'sybase_select_db',
         'mssql_select_db'            => 'sybase_select_db',
         'mysql'                      => 'mysql_db_query',
         'mysql_createdb'             => 'mysql_create_db',
@@ -154,7 +136,6 @@ class FunctionAliasSniff extends FunctionCall
         'oci8assign'                 => 'ocicollassign',
         'oci8assignelem'             => 'ocicollassignelem',
         'oci8close'                  => 'ocicloselob',
-        'oci8free'                   => 'ocifreecoll',
         'oci8free'                   => 'ocifreedesc',
         'oci8getelem'                => 'ocicollgetelem',
         'oci8load'                   => 'ociloadlob',
@@ -184,7 +165,7 @@ class FunctionAliasSniff extends FunctionCall
     /**
      * Returns an array of function names this test wants to listen for.
      *
-     * @return array
+     * @return array<string>
      */
     public function registerFunctionNames()
     {

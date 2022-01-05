@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\language\Functional;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -57,12 +58,28 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['locale', 'language_test', 'block', 'user', 'content_translation'];
+  public static $modules = [
+    'locale',
+    'language_test',
+    'block',
+    'user',
+    'content_translation',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
 
   protected function setUp() {
     parent::setUp();
 
-    $this->adminUser = $this->drupalCreateUser(['administer languages', 'translate interface', 'access administration pages', 'administer blocks']);
+    $this->adminUser = $this->drupalCreateUser([
+      'administer languages',
+      'translate interface',
+      'access administration pages',
+      'administer blocks',
+    ]);
     $this->drupalLogin($this->adminUser);
   }
 
@@ -245,7 +262,7 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
       ->set('negotiation.' . LanguageInterface::TYPE_INTERFACE . '.enabled', array_flip(array_keys($language_interface_method_definitions)))
       ->save();
     $this->drupalGet("$langcode_unknown/admin/config", [], $http_header_browser_fallback);
-    $this->assertResponse(404, "Unknown language path prefix should return 404");
+    $this->assertSession()->statusCodeEquals(404);
 
     // Set preferred langcode for user to NULL.
     $account = $this->loggedInUser;
@@ -400,7 +417,7 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
     // match.
     Cache::invalidateTags(['route_match']);
     $this->drupalGet('system/files/test/private-file-test.txt');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -513,19 +530,19 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
     $italian_url = Url::fromRoute('system.admin', [], ['language' => $languages['it']])->toString();
     $url_scheme = \Drupal::request()->isSecure() ? 'https://' : 'http://';
     $correct_link = $url_scheme . $link;
-    $this->assertEqual($italian_url, $correct_link, format_string('The right URL (@url) in accordance with the chosen language', ['@url' => $italian_url]));
+    $this->assertEqual($italian_url, $correct_link, new FormattableMarkup('The right URL (@url) in accordance with the chosen language', ['@url' => $italian_url]));
 
     // Test HTTPS via options.
     $italian_url = Url::fromRoute('system.admin', [], ['https' => TRUE, 'language' => $languages['it']])->toString();
     $correct_link = 'https://' . $link;
-    $this->assertTrue($italian_url == $correct_link, format_string('The right HTTPS URL (via options) (@url) in accordance with the chosen language', ['@url' => $italian_url]));
+    $this->assertTrue($italian_url == $correct_link, new FormattableMarkup('The right HTTPS URL (via options) (@url) in accordance with the chosen language', ['@url' => $italian_url]));
 
     // Test HTTPS via current URL scheme.
     $request = Request::create('', 'GET', [], [], [], ['HTTPS' => 'on']);
     $this->container->get('request_stack')->push($request);
     $italian_url = Url::fromRoute('system.admin', [], ['language' => $languages['it']])->toString();
     $correct_link = 'https://' . $link;
-    $this->assertTrue($italian_url == $correct_link, format_string('The right URL (via current URL scheme) (@url) in accordance with the chosen language', ['@url' => $italian_url]));
+    $this->assertTrue($italian_url == $correct_link, new FormattableMarkup('The right URL (via current URL scheme) (@url) in accordance with the chosen language', ['@url' => $italian_url]));
   }
 
   /**
@@ -542,12 +559,12 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
 
     // Check if configurability persisted.
     $config = $this->config('language.types');
-    $this->assertTrue(in_array('language_interface', $config->get('configurable')), 'Interface language is configurable.');
-    $this->assertTrue(in_array('language_content', $config->get('configurable')), 'Content language is configurable.');
+    $this->assertContains('language_interface', $config->get('configurable'), 'Interface language is configurable.');
+    $this->assertContains('language_content', $config->get('configurable'), 'Content language is configurable.');
 
     // Ensure configuration was saved.
-    $this->assertFalse(array_key_exists('language-url', $config->get('negotiation.language_content.enabled')), 'URL negotiation is not enabled for content.');
-    $this->assertTrue(array_key_exists('language-session', $config->get('negotiation.language_content.enabled')), 'Session negotiation is enabled for content.');
+    $this->assertArrayNotHasKey('language-url', $config->get('negotiation.language_content.enabled'));
+    $this->assertArrayHasKey('language-session', $config->get('negotiation.language_content.enabled'));
   }
 
   /**
@@ -561,18 +578,18 @@ class LanguageUILanguageNegotiationTest extends BrowserTestBase {
 
     // Check if the language switcher block has been created.
     $block = Block::load($block_id);
-    $this->assertTrue($block, 'Language switcher block was created.');
+    $this->assertNotEmpty($block, 'Language switcher block was created.');
 
     // Make sure language_content is not configurable.
     $edit = [
       'language_content[configurable]' => FALSE,
     ];
     $this->drupalPostForm('admin/config/regional/language/detection', $edit, t('Save settings'));
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Check if the language switcher block has been removed.
     $block = Block::load($block_id);
-    $this->assertFalse($block, 'Language switcher block was removed.');
+    $this->assertNull($block, 'Language switcher block was removed.');
   }
 
 }

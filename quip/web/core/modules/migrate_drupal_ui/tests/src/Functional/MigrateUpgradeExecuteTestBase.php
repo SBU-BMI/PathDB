@@ -12,6 +12,13 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
   use CreateTestContentEntitiesTrait;
 
   /**
+   * The destination site major version.
+   *
+   * @var string
+   */
+  protected $destinationSiteVersion;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -19,6 +26,9 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
 
     // Create content.
     $this->createContent();
+
+    // Get the current major version.
+    list($this->destinationSiteVersion) = explode('.', \Drupal::VERSION, 2);
   }
 
   /**
@@ -34,7 +44,7 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
     $connection_options = $this->sourceDatabase->getConnectionOptions();
     $this->drupalGet('/upgrade');
     $session = $this->assertSession();
-    $session->responseContains('Upgrade a site by importing its files and the data from its database into a clean and empty new install of Drupal 8.');
+    $session->responseContains("Upgrade a site by importing its files and the data from its database into a clean and empty new install of Drupal $this->destinationSiteVersion.");
 
     $this->drupalPostForm(NULL, [], t('Continue'));
     $session->pageTextContains('Provide credentials for the database of the Drupal site you want to upgrade.');
@@ -90,23 +100,30 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
     }
     $this->drupalPostForm(NULL, $paths + $edits, t('Review upgrade'));
     if ($version == 6) {
-      $session->responseContains('Failed to read from Files directory.');
+      $session->responseContains('Failed to read from Document root for files.');
     }
     else {
-      $session->responseContains('Failed to read from Public files directory.');
-      $session->responseContains('Failed to read from Private files directory.');
+      $session->responseContains('Failed to read from Document root for public files.');
+      $session->responseContains('Failed to read from Document root for private files.');
     }
 
     // Restart the upgrade process.
     $this->drupalGet('/upgrade');
-    $session->responseContains('Upgrade a site by importing its files and the data from its database into a clean and empty new install of Drupal 8.');
+    $session->responseContains("Upgrade a site by importing its files and the data from its database into a clean and empty new install of Drupal $this->destinationSiteVersion.");
 
     $this->drupalPostForm(NULL, [], t('Continue'));
     $session->pageTextContains('Provide credentials for the database of the Drupal site you want to upgrade.');
     $session->fieldExists('mysql[host]');
 
     $this->drupalPostForm(NULL, $edits, t('Review upgrade'));
-    $this->assertIdConflict($session);
+    $entity_types = [
+      'block_content',
+      'menu_link_content',
+      'file',
+      'taxonomy_term',
+      'user',
+    ];
+    $this->assertIdConflict($session, $entity_types);
 
     $this->drupalPostForm(NULL, [], t('I acknowledge I may lose data. Continue anyway.'));
     $session->statusCodeEquals(200);
@@ -117,7 +134,7 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
     // Ensure there are no errors about any other missing migration providers.
     $session->pageTextNotContains(t('module not found'));
 
-    // Test the upgrade paths.
+    // Test the review page.
     $available_paths = $this->getAvailablePaths();
     $missing_paths = $this->getMissingPaths();
     $this->assertReviewPage($session, $available_paths, $missing_paths);
@@ -133,25 +150,19 @@ abstract class MigrateUpgradeExecuteTestBase extends MigrateUpgradeTestBase {
     $this->createContentPostUpgrade();
 
     $this->drupalGet('/upgrade');
-    $session->pageTextContains('An upgrade has already been performed on this site. To perform a new migration, create a clean and empty new install of Drupal 8. Rollbacks are not yet supported through the user interface.');
+    $session->pageTextContains("An upgrade has already been performed on this site. To perform a new migration, create a clean and empty new install of Drupal $this->destinationSiteVersion. Rollbacks are not yet supported through the user interface.");
     $this->drupalPostForm(NULL, [], t('Import new configuration and content from old site'));
     $this->drupalPostForm(NULL, $edits, t('Review upgrade'));
     $session->pageTextContains('WARNING: Content may be overwritten on your new site.');
     $session->pageTextContains('There is conflicting content of these types:');
     $session->pageTextContains('files');
-    $session->pageTextContains('content item revisions');
     $session->pageTextContains('There is translated content of these types:');
-    $session->pageTextContains('content items');
+    $session->pageTextContainsOnce('content items');
 
     $this->drupalPostForm(NULL, [], t('I acknowledge I may lose data. Continue anyway.'));
     $session->statusCodeEquals(200);
 
-    // Need to update available and missing path lists.
-    $all_available = $this->getAvailablePaths();
-    $all_available[] = 'aggregator';
-    $all_missing = $this->getMissingPaths();
-    $all_missing = array_diff($all_missing, ['aggregator']);
-    $this->assertReviewPage($session, $all_available, $all_missing);
+    // Run the incremental migration and check the results.
     $this->drupalPostForm(NULL, [], t('Perform upgrade'));
     $session->pageTextContains(t('Congratulations, you upgraded Drupal!'));
     $this->assertMigrationResults($this->getEntityCountsIncremental(), $version);

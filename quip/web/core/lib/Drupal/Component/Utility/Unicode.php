@@ -103,6 +103,7 @@ EOD;
     switch (static::check()) {
       case 'mb_strlen':
         return Unicode::STATUS_SINGLEBYTE;
+
       case '':
         return Unicode::STATUS_MULTIBYTE;
     }
@@ -123,7 +124,7 @@ EOD;
    * @param int $status
    *   The new status of multibyte support.
    *
-   * @deprecated in Drupal 8.6.0 and will be removed before Drupal 9.0.0. In
+   * @deprecated in drupal:8.6.0 and is removed from drupal:9.0.0. In
    *   Drupal 9 there will be no way to set the status and in Drupal 8 this
    *   ability has been removed because mb_*() functions are supplied using
    *   Symfony's polyfill.
@@ -161,16 +162,6 @@ EOD;
     }
     if (ini_get('mbstring.encoding_translation') != 0) {
       return 'mbstring.encoding_translation';
-    }
-    // mbstring.http_input and mbstring.http_output are deprecated and empty by
-    // default in PHP 5.6.
-    if (version_compare(PHP_VERSION, '5.6.0') == -1) {
-      if (ini_get('mbstring.http_input') != 'pass') {
-        return 'mbstring.http_input';
-      }
-      if (ini_get('mbstring.http_output') != 'pass') {
-        return 'mbstring.http_output';
-      }
     }
 
     return '';
@@ -270,7 +261,7 @@ EOD;
    * @return int
    *   The length of the string.
    *
-   * @deprecated in Drupal 8.6.0, will be removed before Drupal 9.0.0. Use
+   * @deprecated in drupal:8.6.0 and is removed from drupal:9.0.0. Use
    *   mb_strlen() instead.
    *
    * @see https://www.drupal.org/node/2850048
@@ -289,7 +280,7 @@ EOD;
    * @return string
    *   The string in uppercase.
    *
-   * @deprecated in Drupal 8.6.0, will be removed before Drupal 9.0.0. Use
+   * @deprecated in drupal:8.6.0 and is removed from drupal:9.0.0. Use
    *   mb_strtoupper() instead.
    *
    * @see https://www.drupal.org/node/2850048
@@ -308,7 +299,7 @@ EOD;
    * @return string
    *   The string in lowercase.
    *
-   * @deprecated in Drupal 8.6.0, will be removed before Drupal 9.0.0. Use
+   * @deprecated in drupal:8.6.0 and is removed from drupal:9.0.0. Use
    *   mb_strtolower() instead.
    *
    * @see https://www.drupal.org/node/2850048
@@ -382,7 +373,7 @@ EOD;
    * @return string
    *   The shortened string.
    *
-   * @deprecated in Drupal 8.6.0, will be removed before Drupal 9.0.0. Use
+   * @deprecated in drupal:8.6.0 and is removed from drupal:9.0.0. Use
    *   mb_substr() instead.
    *
    * @see https://www.drupal.org/node/2850048
@@ -546,16 +537,16 @@ EOD;
    */
   public static function mimeHeaderDecode($header) {
     $callback = function ($matches) {
-      $data = ($matches[2] == 'B') ? base64_decode($matches[3]) : str_replace('_', ' ', quoted_printable_decode($matches[3]));
+      $data = (strtolower($matches[2]) == 'b') ? base64_decode($matches[3]) : str_replace('_', ' ', quoted_printable_decode($matches[3]));
       if (strtolower($matches[1]) != 'utf-8') {
         $data = static::convertToUtf8($data, $matches[1]);
       }
       return $data;
     };
     // First step: encoded chunks followed by other encoded chunks (need to collapse whitespace)
-    $header = preg_replace_callback('/=\?([^?]+)\?(Q|B)\?([^?]+|\?(?!=))\?=\s+(?==\?)/', $callback, $header);
+    $header = preg_replace_callback('/=\?([^?]+)\?([Qq]|[Bb])\?([^?]+|\?(?!=))\?=\s+(?==\?)/', $callback, $header);
     // Second step: remaining chunks (do not collapse whitespace)
-    return preg_replace_callback('/=\?([^?]+)\?(Q|B)\?([^?]+|\?(?!=))\?=/', $callback, $header);
+    return preg_replace_callback('/=\?([^?]+)\?([Qq]|[Bb])\?([^?]+|\?(?!=))\?=/', $callback, $header);
   }
 
   /**
@@ -566,8 +557,14 @@ EOD;
    *
    * @return string
    *   The flipped text.
+   *
+   * @deprecated in drupal:8.8.0 and is removed from drupal:9.0.0. There is
+   *   no direct replacement.
+   *
+   * @see https://www.drupal.org/node/3057322
    */
   public static function caseFlip($matches) {
+    @trigger_error('\Drupal\Component\Utility\Unicode::caseFlip() is deprecated in Drupal 8.8.0 and will be removed before Drupal 9.0.0. There is no direct replacement. See https://www.drupal.org/node/3057322', E_USER_DEPRECATED);
     return $matches[0][0] . chr(ord($matches[0][1]) ^ 32);
   }
 
@@ -621,7 +618,7 @@ EOD;
    *   beginning (independent of $offset), or FALSE if not found. Note that
    *   a return value of 0 is not the same as FALSE.
    *
-   * @deprecated in Drupal 8.6.0, will be removed before Drupal 9.0.0. Use
+   * @deprecated in drupal:8.6.0 and is removed from drupal:9.0.0. Use
    *   mb_strpos() instead.
    *
    * @see https://www.drupal.org/node/2850048

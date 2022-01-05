@@ -25,7 +25,7 @@ class AuthorizationProfileListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['label'] = $this->getLabel($entity);
+    $row['label'] = $entity->label($entity);
     // TODO: Abstract get[Provider|Consumer]Options() from the form into Entity
     // or as a trait so we can display the label of them here instead of the
     // machine name.

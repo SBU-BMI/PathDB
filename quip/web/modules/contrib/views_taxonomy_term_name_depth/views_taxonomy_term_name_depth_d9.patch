@@ -1,0 +1,9 @@
+diff --git a/views_taxonomy_term_name_depth.info.yml b/views_taxonomy_term_name_depth.info.yml
+index fe4ce96..497173f 100644
+--- a/views_taxonomy_term_name_depth.info.yml
++++ b/views_taxonomy_term_name_depth.info.yml
+@@ -3,3 +3,4 @@ type: module
+ description: The module provides the Views plugin for Contextual filter with Taxonomy Term Name Depth.
+ core: 8.x
+ package: Views
++core_version_requirement: ^8 || ^9

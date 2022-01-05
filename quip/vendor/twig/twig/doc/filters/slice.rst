@@ -2,6 +2,7 @@
 ===========
 
 .. versionadded:: 1.6
+
     The ``slice`` filter was added in Twig 1.6.
 
 The ``slice`` filter extracts a slice of a sequence, a mapping, or a string:
@@ -67,5 +68,5 @@ Arguments
 
 .. _`Traversable`: https://secure.php.net/manual/en/class.traversable.php
 .. _`array_slice`: https://secure.php.net/array_slice
-.. _`mb_substr` :  https://secure.php.net/mb-substr
+.. _`mb_substr`:   https://secure.php.net/mb-substr
 .. _`substr`:      https://secure.php.net/substr

@@ -21,6 +21,11 @@ class BooleanFormatterSettingsTest extends BrowserTestBase {
   public static $modules = ['field', 'field_ui', 'text', 'node', 'user'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The name of the entity bundle that is created in the test.
    *
    * @var string
@@ -45,7 +50,14 @@ class BooleanFormatterSettingsTest extends BrowserTestBase {
     $type = $this->drupalCreateContentType(['name' => $type_name, 'type' => $type_name]);
     $this->bundle = $type->id();
 
-    $admin_user = $this->drupalCreateUser(['access content', 'administer content types', 'administer node fields', 'administer node display', 'bypass node access', 'administer nodes']);
+    $admin_user = $this->drupalCreateUser([
+      'access content',
+      'administer content types',
+      'administer node fields',
+      'administer node display',
+      'bypass node access',
+      'administer nodes',
+    ]);
     $this->drupalLogin($admin_user);
 
     $this->fieldName = mb_strtolower($this->randomMachineName(8));
@@ -64,12 +76,13 @@ class BooleanFormatterSettingsTest extends BrowserTestBase {
     ]);
     $instance->save();
 
-    $display = entity_get_display('node', $this->bundle, 'default')
+    \Drupal::service('entity_display.repository')
+      ->getViewDisplay('node', $this->bundle)
       ->setComponent($this->fieldName, [
         'type' => 'boolean',
         'settings' => [],
-      ]);
-    $display->save();
+      ])
+      ->save();
   }
 
   /**
@@ -121,7 +134,7 @@ class BooleanFormatterSettingsTest extends BrowserTestBase {
         ':class' => 'field-plugin-summary',
         ':text' => (string) t('Display: @true_label / @false_label', ['@true_label' => $values[0], '@false_label' => $values[1]]),
       ]);
-      $this->assertEqual(count($result), 1, "Boolean formatter settings summary exist.");
+      $this->assertCount(1, $result, "Boolean formatter settings summary exist.");
     }
   }
 

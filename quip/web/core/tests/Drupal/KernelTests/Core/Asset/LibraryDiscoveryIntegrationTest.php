@@ -37,7 +37,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
     // Activate test_theme and verify that the library 'kitten' is added using
     // hook_library_info_alter().
     $this->activateTheme('test_theme');
-    $this->assertTrue($this->libraryDiscovery->getLibraryByName('test_theme', 'kitten'));
+    $this->assertNotEmpty($this->libraryDiscovery->getLibraryByName('test_theme', 'kitten'));
 
     // Now make classy the active theme and assert that library is not added.
     $this->activateTheme('classy');
@@ -57,7 +57,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
     $this->assertAssetInLibrary('core/themes/classy/css/components/dialog.css', 'classy', 'dialog', 'css');
 
     // Confirmatory assert on core library to be removed.
-    $this->assertTrue($this->libraryDiscovery->getLibraryByName('core', 'drupal.progress'), 'Confirmatory test on "core/drupal.progress"');
+    $this->assertNotEmpty($this->libraryDiscovery->getLibraryByName('core', 'drupal.progress'), 'Confirmatory test on "core/drupal.progress"');
 
     // Activate test theme that defines libraries overrides.
     $this->activateTheme('test_theme');
@@ -229,8 +229,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
 
     $this->libraryDiscovery->clearCachedDefinitions();
 
-    // Assert message.
-    $this->pass(sprintf('Activated theme "%s"', $theme_name));
+    $this->assertSame($theme_name, $theme_manager->getActiveTheme()->getName());
   }
 
   /**
@@ -257,7 +256,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
     $library = $this->libraryDiscovery->getLibraryByName($extension, $library_name);
     foreach ($library[$sub_key] as $definition) {
       if ($asset == $definition['data']) {
-        return $this->pass($message);
+        return TRUE;
       }
     }
     return $this->fail($message);
@@ -290,7 +289,7 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
         return $this->fail($message);
       }
     }
-    return $this->pass($message);
+    return TRUE;
   }
 
 }

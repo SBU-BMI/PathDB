@@ -6,8 +6,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate_drupal\Plugin\migrate\source\d7\FieldableEntity;
 use Drupal\Core\Database\Query\SelectInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -31,8 +30,8 @@ class Node extends FieldableEntity {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, StateInterface $state, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $state, $entity_manager);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, StateInterface $state, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $state, $entity_type_manager);
     $this->moduleHandler = $module_handler;
   }
 
@@ -46,7 +45,7 @@ class Node extends FieldableEntity {
       $plugin_definition,
       $migration,
       $container->get('state'),
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('module_handler')
     );
   }
@@ -115,6 +114,13 @@ class Node extends FieldableEntity {
     $entity_translatable = $this->isEntityTranslatable('node') && (int) $this->variableGet('language_content_type_' . $type, 0) === 4;
     $source_language = $this->getEntityTranslationSourceLanguage('node', $nid);
     $language = $entity_translatable && $source_language ? $source_language : $row->getSourceProperty('language');
+
+    // If this is using d7_node_complete source plugin and this is a node
+    // using entity translation then set the language of this revision to the
+    // entity translation language.
+    if ($row->getSourceProperty('etr_created')) {
+      $language = $row->getSourceProperty('language');
+    }
 
     // Get Field API field values.
     foreach ($this->getFields('node', $type) as $field_name => $field) {

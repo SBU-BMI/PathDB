@@ -20,6 +20,11 @@ class MediaDisplayTest extends MediaJavascriptTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'classy';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -97,20 +102,24 @@ class MediaDisplayTest extends MediaJavascriptTestBase {
     $assert_session->elementTextContains('css', 'h1', $image_media_name);
     // Here we expect to see only the image, nothing else.
     // Assert only one element in the content region.
-    $this->assertSame(1, count($page->findAll('css', '.media--type-image > div')));
+    $this->assertCount(1, $page->findAll('css', '.media--type-image > div'));
     // Assert the image is present inside the media element.
     $media_item = $assert_session->elementExists('css', '.media--type-image > div');
     $assert_session->elementExists('css', 'img', $media_item);
-    // Assert that the image src is the original image and not an image style.
+    // Assert that the image src uses the large image style, the label is
+    // visually hidden, and there is no link to the image file.
     $media_image = $assert_session->elementExists('css', '.media--type-image img');
-    $expected_image_src = file_url_transform_relative(file_create_url(\Drupal::token()->replace('public://[date:custom:Y]-[date:custom:m]/example_1.jpeg')));
-    $this->assertSame($expected_image_src, $media_image->getAttribute('src'));
+    $expected_image_src = file_url_transform_relative(file_create_url(\Drupal::token()->replace('public://styles/large/public/[date:custom:Y]-[date:custom:m]/example_1.jpeg')));
+    $this->assertStringContainsString($expected_image_src, $media_image->getAttribute('src'));
+    $field = $assert_session->elementExists('css', '.field--name-field-media-image');
+    $assert_session->elementExists('css', '.field__label.visually-hidden', $field);
+    $assert_session->elementNotExists('css', 'a', $field);
 
     $test_filename = $this->randomMachineName() . '.txt';
     $test_filepath = 'public://' . $test_filename;
     file_put_contents($test_filepath, $this->randomMachineName());
-    $this->drupalGet("media/add/file");
-    $page->attachFileToField("files[field_media_file_0]", \Drupal::service('file_system')->realpath($test_filepath));
+    $this->drupalGet("media/add/document");
+    $page->attachFileToField("files[field_media_document_0]", \Drupal::service('file_system')->realpath($test_filepath));
     $result = $assert_session->waitForButton('Remove');
     $this->assertNotEmpty($result);
     $page->pressButton('Save');
@@ -122,10 +131,10 @@ class MediaDisplayTest extends MediaJavascriptTestBase {
     $assert_session->elementTextContains('css', 'h1', $test_filename);
     // Here we expect to see only the linked filename.
     // Assert only one element in the content region.
-    $this->assertSame(1, count($page->findAll('css', 'article.media--type-file > div')));
+    $this->assertCount(1, $page->findAll('css', 'article.media--type-document > div'));
     // Assert the file link is present, and its text matches the filename.
-    $assert_session->elementExists('css', 'article.media--type-file .field--name-field-media-file a');
-    $link = $page->find('css', 'article.media--type-file .field--name-field-media-file a');
+    $assert_session->elementExists('css', 'article.media--type-document .field--name-field-media-document a');
+    $link = $page->find('css', 'article.media--type-document .field--name-field-media-document a');
     $this->assertSame($test_filename, $link->getText());
 
     // Create a node type "page" to use as host entity.
@@ -161,7 +170,7 @@ class MediaDisplayTest extends MediaJavascriptTestBase {
       ],
     ])->save();
 
-    entity_get_display('node', $node_type->id(), 'default')
+    \Drupal::service('entity_display.repository')->getViewDisplay('node', $node_type->id())
       ->setComponent('field_related_media', [
         'type' => 'entity_reference_entity_view',
         'label' => 'hidden',
@@ -186,7 +195,7 @@ class MediaDisplayTest extends MediaJavascriptTestBase {
     $assert_session->elementNotExists('css', '.field--name-name');
     $assert_session->pageTextNotContains($image_media_name);
     // Only one element is present inside the media container.
-    $this->assertSame(1, count($page->findAll('css', '.field--name-field-related-media article.media--type-image > div')));
+    $this->assertCount(1, $page->findAll('css', '.field--name-field-related-media article.media--type-image > div'));
     // Assert the image is present.
     $assert_session->elementExists('css', '.field--name-field-related-media article.media--type-image img');
   }

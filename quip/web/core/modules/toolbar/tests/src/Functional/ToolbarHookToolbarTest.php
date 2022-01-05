@@ -25,6 +25,11 @@ class ToolbarHookToolbarTest extends BrowserTestBase {
    */
   public static $modules = ['toolbar', 'toolbar_test', 'test_page_test'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected function setUp() {
     parent::setUp();
 
@@ -38,7 +43,7 @@ class ToolbarHookToolbarTest extends BrowserTestBase {
    */
   public function testHookToolbar() {
     $this->drupalGet('test-page');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Assert that the toolbar is present in the HTML.
     $this->assertRaw('id="toolbar-administration"');

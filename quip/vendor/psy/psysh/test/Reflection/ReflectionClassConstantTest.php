@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,17 +13,17 @@ namespace Psy\Test\Reflection;
 
 use Psy\Reflection\ReflectionClassConstant;
 
-class ReflectionClassConstantTest extends \PHPUnit\Framework\TestCase
+class ReflectionClassConstantTest extends \Psy\Test\TestCase
 {
     const CONSTANT_ONE = 'one';
 
     public function testConstruction()
     {
-        $refl  = new ReflectionClassConstant($this, 'CONSTANT_ONE');
+        $refl = new ReflectionClassConstant($this, 'CONSTANT_ONE');
         $class = $refl->getDeclaringClass();
 
-        $this->assertInstanceOf('ReflectionClass', $class);
-        $this->assertSame('Psy\Test\Reflection\ReflectionClassConstantTest', $class->getName());
+        $this->assertInstanceOf(\ReflectionClass::class, $class);
+        $this->assertSame(self::class, $class->getName());
         $this->assertSame('CONSTANT_ONE', $refl->getName());
         $this->assertSame('CONSTANT_ONE', (string) $refl);
         $this->assertSame('one', $refl->getValue());
@@ -31,12 +31,12 @@ class ReflectionClassConstantTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($refl->getDocComment());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testUnknownConstantThrowsException()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new ReflectionClassConstant($this, 'UNKNOWN_CONSTANT');
+
+        $this->fail();
     }
 
     public function testExport()
@@ -62,13 +62,16 @@ class ReflectionClassConstantTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
      * @dataProvider notYetImplemented
      */
     public function testNotYetImplemented($method)
     {
+        $this->expectException(\RuntimeException::class);
+
         $refl = new ReflectionClassConstant($this, 'CONSTANT_ONE');
         $refl->$method();
+
+        $this->fail();
     }
 
     public function notYetImplemented()

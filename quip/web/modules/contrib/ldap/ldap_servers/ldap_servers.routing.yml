@@ -1,3 +1,13 @@
+ldap.settings:
+  path: '/admin/config/people/ldap'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'LDAP'
+  requirements:
+    _permission: 'administer ldap'
+  options:
+    _admin_route: TRUE
+
 # Server routing definition
 entity.ldap_server.collection:
   path: '/admin/config/people/ldap/server'
@@ -58,3 +68,19 @@ entity.ldap_server.enable_disable_form:
     _permission: 'administer ldap'
   options:
     _admin_route: TRUE
+
+ldap_servers.debugging_review:
+  path: /admin/config/people/ldap/help/debugging
+  defaults:
+    _title: 'LDAP Debugging Review'
+    _form: \Drupal\ldap_servers\Form\DebuggingReviewForm
+  requirements:
+    _permission: 'administer ldap'
+
+ldap_servers.debug_settings:
+  path: /admin/config/people/ldap/help
+  defaults:
+    _title: 'Debugging'
+    _form: \Drupal\ldap_servers\Form\LdapDebugSettings
+  requirements:
+    _permission: 'administer ldap'

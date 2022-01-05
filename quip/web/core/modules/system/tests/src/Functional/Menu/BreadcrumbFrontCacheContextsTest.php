@@ -26,6 +26,11 @@ class BreadcrumbFrontCacheContextsTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
+  /**
    * A test node with path alias.
    *
    * @var \Drupal\node\NodeInterface
@@ -84,7 +89,7 @@ class BreadcrumbFrontCacheContextsTest extends BrowserTestBase {
     $this->drupalGet($this->nodeWithAlias->path->alias);
     $breadcrumbs = $this->assertSession()->elementExists('css', '.block-system-breadcrumb-block');
     $crumbs = $breadcrumbs->findAll('css', 'ol li');
-    $this->assertTrue(count($crumbs) === 1);
+    $this->assertCount(1, $crumbs);
     $this->assertTrue($crumbs[0]->getText() === 'Home');
   }
 

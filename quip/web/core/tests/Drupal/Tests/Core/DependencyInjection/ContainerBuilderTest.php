@@ -21,7 +21,7 @@ class ContainerBuilderTest extends UnitTestCase {
     $container->register('bar', 'Drupal\Tests\Core\DependencyInjection\Fixture\BarClass');
 
     $result = $container->get('bar');
-    $this->assertTrue($result instanceof BarClass);
+    $this->assertInstanceOf(BarClass::class, $result);
   }
 
   /**
@@ -40,7 +40,8 @@ class ContainerBuilderTest extends UnitTestCase {
   public function testSetException() {
     $container = new ContainerBuilder();
     $class = new BarClass();
-    $this->setExpectedException(\InvalidArgumentException::class, 'Service ID names must be lowercase: Bar');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Service ID names must be lowercase: Bar');
     $container->set('Bar', $class);
   }
 
@@ -49,7 +50,8 @@ class ContainerBuilderTest extends UnitTestCase {
    */
   public function testSetParameterException() {
     $container = new ContainerBuilder();
-    $this->setExpectedException(\InvalidArgumentException::class, 'Parameter names must be lowercase: Buzz');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Parameter names must be lowercase: Buzz');
     $container->setParameter('Buzz', 'buzz');
   }
 
@@ -58,7 +60,8 @@ class ContainerBuilderTest extends UnitTestCase {
    */
   public function testRegisterException() {
     $container = new ContainerBuilder();
-    $this->setExpectedException(\InvalidArgumentException::class, 'Service ID names must be lowercase: Bar');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Service ID names must be lowercase: Bar');
     $container->register('Bar');
   }
 
@@ -114,7 +117,7 @@ class ContainerBuilderTest extends UnitTestCase {
    */
   public function testSerialize() {
     $container = new ContainerBuilder();
-    $this->setExpectedException(\AssertionError::class);
+    $this->expectException(\AssertionError::class);
     serialize($container);
   }
 
@@ -128,7 +131,7 @@ class ContainerBuilderTest extends UnitTestCase {
    * @preserveGlobalState disabled
    */
   public function testConstructor() {
-    class_alias(testInterface::class, 'Symfony\Component\Config\Resource\ResourceInterface');
+    class_alias(TestInterface::class, 'Symfony\Component\Config\Resource\ResourceInterface');
     $container = new ContainerBuilder();
     $this->assertFalse($container->isTrackingResources());
   }
@@ -140,5 +143,5 @@ class ContainerBuilderTest extends UnitTestCase {
  *
  * @see \Drupal\Tests\Core\DependencyInjection\ContainerBuilderTest::testConstructor()
  */
-interface testInterface {
+interface TestInterface {
 }

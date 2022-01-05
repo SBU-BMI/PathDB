@@ -14,6 +14,11 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
 
   use DependencyTrait;
 
+  /**
+   * Type.
+   *
+   * @var string
+   */
   protected $type;
 
   /**

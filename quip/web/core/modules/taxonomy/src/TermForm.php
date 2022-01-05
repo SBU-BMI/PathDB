@@ -117,7 +117,7 @@ class TermForm extends ContentEntityForm {
     $term->setName(trim($term->getName()));
 
     // Assign parents with proper delta values starting from 0.
-    $term->parent = array_keys($form_state->getValue('parent'));
+    $term->parent = array_values($form_state->getValue('parent'));
 
     return $term;
   }
@@ -162,6 +162,7 @@ class TermForm extends ContentEntityForm {
         $this->messenger()->addStatus($this->t('Created new term %term.', ['%term' => $view_link]));
         $this->logger('taxonomy')->notice('Created new term %term.', ['%term' => $term->getName(), 'link' => $edit_link]);
         break;
+
       case SAVED_UPDATED:
         $this->messenger()->addStatus($this->t('Updated term %term.', ['%term' => $view_link]));
         $this->logger('taxonomy')->notice('Updated term %term.', ['%term' => $term->getName(), 'link' => $edit_link]);

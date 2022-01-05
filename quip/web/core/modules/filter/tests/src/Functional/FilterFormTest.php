@@ -21,6 +21,11 @@ class FilterFormTest extends BrowserTestBase {
   protected static $modules = ['filter', 'filter_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * An administrative user account that can administer text formats.
    *
    * @var \Drupal\user\Entity\User
@@ -71,8 +76,6 @@ class FilterFormTest extends BrowserTestBase {
     // correctly.
     // @see https://www.drupal.org/node/2387983
     \Drupal::service('module_installer')->install(['filter_test_plugin']);
-    // Force rebuild module data.
-    \Drupal::service('extension.list.module')->reset();
   }
 
   /**
@@ -204,10 +207,6 @@ class FilterFormTest extends BrowserTestBase {
     foreach ($found_options as $found_key => $found_option) {
       $expected_key = array_search($found_option->getValue(), $expected_options);
       if ($expected_key !== FALSE) {
-        $this->pass(new FormattableMarkup('Option @option for field @id exists.', [
-          '@option' => $expected_options[$expected_key],
-          '@id' => $id,
-        ]));
         unset($found_options[$found_key]);
         unset($expected_options[$expected_key]);
       }

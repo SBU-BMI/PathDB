@@ -3,6 +3,8 @@
 namespace Doctrine\Common\Collections;
 
 use Closure;
+use ReturnTypeWillChange;
+use Traversable;
 
 /**
  * Lazy collection that is backed by a concrete collection
@@ -17,7 +19,7 @@ abstract class AbstractLazyCollection implements Collection
      * The backed collection to use
      *
      * @psalm-var Collection<TKey,T>
-     * @var Collection
+     * @var Collection<mixed>
      */
     protected $collection;
 
@@ -26,7 +28,10 @@ abstract class AbstractLazyCollection implements Collection
 
     /**
      * {@inheritDoc}
+     *
+     * @return int
      */
+    #[ReturnTypeWillChange]
     public function count()
     {
         $this->initialize();
@@ -274,7 +279,11 @@ abstract class AbstractLazyCollection implements Collection
 
     /**
      * {@inheritDoc}
+     *
+     * @return Traversable<int|string, mixed>
+     * @psalm-return Traversable<TKey,T>
      */
+    #[ReturnTypeWillChange]
     public function getIterator()
     {
         $this->initialize();
@@ -284,7 +293,12 @@ abstract class AbstractLazyCollection implements Collection
 
     /**
      * {@inheritDoc}
+     *
+     * @psalm-param TKey $offset
+     *
+     * @return bool
      */
+    #[ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $this->initialize();
@@ -294,7 +308,13 @@ abstract class AbstractLazyCollection implements Collection
 
     /**
      * {@inheritDoc}
+     *
+     * @param int|string $offset
+     * @psalm-param TKey $offset
+     *
+     * @return mixed
      */
+    #[ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->initialize();
@@ -304,7 +324,13 @@ abstract class AbstractLazyCollection implements Collection
 
     /**
      * {@inheritDoc}
+     *
+     * @param mixed $value
+     * @psalm-param TKey $offset
+     *
+     * @return void
      */
+    #[ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->initialize();
@@ -313,7 +339,12 @@ abstract class AbstractLazyCollection implements Collection
 
     /**
      * {@inheritDoc}
+     *
+     * @psalm-param TKey $offset
+     *
+     * @return void
      */
+    #[ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->initialize();

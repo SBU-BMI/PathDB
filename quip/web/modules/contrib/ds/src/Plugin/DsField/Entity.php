@@ -71,7 +71,7 @@ abstract class Entity extends DsFieldBase {
 
     // When no view modes are found no summary is displayed.
     if (empty($view_modes)) {
-      return '';
+      return [];
     }
 
     // Print the chosen view mode or the default one.

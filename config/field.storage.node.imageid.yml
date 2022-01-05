@@ -13,7 +13,7 @@ field_name: imageid
 entity_type: node
 type: string
 settings:
-  max_length: 16
+  max_length: 64
   is_ascii: false
   case_sensitive: false
 module: core

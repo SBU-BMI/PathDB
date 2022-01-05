@@ -27,6 +27,11 @@ class FilterUITest extends UITestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
     $this->drupalCreateContentType(['type' => 'page']);
@@ -36,7 +41,10 @@ class FilterUITest extends UITestBase {
    * Tests that an option for a filter is saved as expected from the UI.
    */
   public function testFilterInOperatorUi() {
-    $admin_user = $this->drupalCreateUser(['administer views', 'administer site configuration']);
+    $admin_user = $this->drupalCreateUser([
+      'administer views',
+      'administer site configuration',
+    ]);
     $this->drupalLogin($admin_user);
 
     $path = 'admin/structure/views/nojs/handler/test_filter_in_operator_ui/default/filter/type';
@@ -59,12 +67,15 @@ class FilterUITest extends UITestBase {
    * Tests the filters from the UI.
    */
   public function testFiltersUI() {
-    $admin_user = $this->drupalCreateUser(['administer views', 'administer site configuration']);
+    $admin_user = $this->drupalCreateUser([
+      'administer views',
+      'administer site configuration',
+    ]);
     $this->drupalLogin($admin_user);
 
     $this->drupalGet('admin/structure/views/view/test_filter_groups');
 
-    $this->assertLink('Content: ID (= 1)', 0, 'Content: ID (= 1) link appears correctly.');
+    $this->assertSession()->linkExists('Content: ID (= 1)', 0, 'Content: ID (= 1) link appears correctly.');
 
     // Tests that we can create a new filter group from UI.
     $this->drupalGet('admin/structure/views/nojs/rearrange-filter/test_filter_groups/page');
@@ -91,7 +102,10 @@ class FilterUITest extends UITestBase {
    * Tests the identifier settings and restrictions.
    */
   public function testFilterIdentifier() {
-    $admin_user = $this->drupalCreateUser(['administer views', 'administer site configuration']);
+    $admin_user = $this->drupalCreateUser([
+      'administer views',
+      'administer site configuration',
+    ]);
     $this->drupalLogin($admin_user);
     $path = 'admin/structure/views/nojs/handler/test_filter_in_operator_ui/default/filter/type';
 
@@ -109,12 +123,14 @@ class FilterUITest extends UITestBase {
     $this->drupalPostForm($path, $edit, t('Apply'));
     $this->assertText('This identifier is not allowed.');
 
-    // Set the identifier to a value with a restricted character.
-    $edit = [
-      'options[expose][identifier]' => 'value value',
-    ];
-    $this->drupalPostForm($path, $edit, t('Apply'));
-    $this->assertText('This identifier has illegal characters.');
+    // Try a few restricted values for the identifier.
+    foreach (['value value', 'value^value'] as $identifier) {
+      $edit = [
+        'options[expose][identifier]' => $identifier,
+      ];
+      $this->drupalPostForm($path, $edit, t('Apply'));
+      $this->assertText('This identifier has illegal characters.');
+    }
   }
 
 }

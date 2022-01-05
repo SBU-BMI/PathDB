@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,7 +20,7 @@ class ClassWithSecrets
     private static function privateStaticMethod($extra = null)
     {
         if ($extra !== null) {
-            return 'private and static and method with ' . \json_encode($extra);
+            return 'private and static and method with '.\json_encode($extra);
         }
 
         return 'private and static and method';
@@ -29,7 +29,7 @@ class ClassWithSecrets
     private function privateMethod($extra = null)
     {
         if ($extra !== null) {
-            return 'private and method with ' . \json_encode($extra);
+            return 'private and method with '.\json_encode($extra);
         }
 
         return 'private and method';

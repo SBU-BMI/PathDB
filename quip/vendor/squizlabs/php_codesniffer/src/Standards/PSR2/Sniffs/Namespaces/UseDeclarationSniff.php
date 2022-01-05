@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\PSR2\Sniffs\Namespaces;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class UseDeclarationSniff implements Sniff
@@ -75,6 +75,10 @@ class UseDeclarationSniff implements Sniff
                         break;
                     default:
                         $baseUse = 'use';
+                    }
+
+                    if ($tokens[($next + 1)]['code'] !== T_WHITESPACE) {
+                        $baseUse .= ' ';
                     }
 
                     $phpcsFile->fixer->replaceToken($next, ';'.$phpcsFile->eolChar.$baseUse);

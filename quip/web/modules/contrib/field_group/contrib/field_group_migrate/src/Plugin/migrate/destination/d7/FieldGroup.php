@@ -27,17 +27,15 @@ class FieldGroup extends DestinationBase {
     }
 
     $entity = $this->getEntity($values['entity_type'], $values['bundle'], $values['mode'], $values['type']);
-    if (!$entity->isNew()) {
-      $settings = $row->getDestinationProperty('settings');
-      $settings += [
-        'region' => 'content',
-      ];
-      $entity->setThirdPartySetting('field_group', $row->getDestinationProperty('group_name'), $settings);
-      if (isset($settings['format_type']) && ($settings['format_type'] == 'hidden')) {
-        $entity->unsetThirdPartySetting('field_group', $row->getDestinationProperty('group_name'));
-      }
-      $entity->save();
+    $settings = $row->getDestinationProperty('settings');
+    $settings += [
+      'region' => 'content',
+    ];
+    $entity->setThirdPartySetting('field_group', $row->getDestinationProperty('group_name'), $settings);
+    if (isset($settings['format_type']) && ($settings['format_type'] == 'hidden')) {
+      $entity->unsetThirdPartySetting('field_group', $row->getDestinationProperty('group_name'));
     }
+    $entity->save();
 
     return array_values($values);
   }
@@ -88,8 +86,8 @@ class FieldGroup extends DestinationBase {
    *   The entity display object.
    */
   protected function getEntity($entity_type, $bundle, $mode, $type) {
-    $function = $type == 'entity_form_display' ? 'entity_get_form_display' : 'entity_get_display';
-    return $function($entity_type, $bundle, $mode);
+    $function = $type == 'entity_form_display' ? 'getFormDisplay' : 'getViewDisplay';
+    return \Drupal::service('entity_display.repository')->$function($entity_type, $bundle, $mode);
   }
 
 }

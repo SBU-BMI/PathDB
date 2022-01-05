@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_query;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
@@ -25,10 +27,11 @@ class QueryEntityListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
+    /** @var \Drupal\ldap_query\QueryEntityInterface $entity */
     $row['label'] = $entity->label();
     $server = Server::load($entity->get('server_id'));
     $row['server_id'] = $server->label();
-    $row['status'] = $entity->get('status') ? $this->t('Enabled') : $this->t('Disabled');
+    $row['status'] = $entity->isActive() ? $this->t('Enabled') : $this->t('Disabled');
     return $row + parent::buildRow($entity);
   }
 

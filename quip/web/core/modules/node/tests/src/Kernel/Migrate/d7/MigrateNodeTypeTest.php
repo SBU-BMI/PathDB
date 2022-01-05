@@ -47,19 +47,19 @@ class MigrateNodeTypeTest extends MigrateDrupal7TestBase {
   protected function assertEntity($id, $label, $description, $help, $display_submitted, $new_revision, $expected_available_menus, $expected_parent, $body_label = NULL) {
     /** @var \Drupal\node\NodeTypeInterface $entity */
     $entity = NodeType::load($id);
-    $this->assertTrue($entity instanceof NodeTypeInterface);
+    $this->assertInstanceOf(NodeTypeInterface::class, $entity);
     $this->assertIdentical($label, $entity->label());
     $this->assertIdentical($description, $entity->getDescription());
 
     $this->assertIdentical($help, $entity->getHelp());
 
     $this->assertIdentical($display_submitted, $entity->displaySubmitted(), 'Submission info is displayed');
-    $this->assertIdentical($new_revision, $entity->isNewRevision(), 'Is a new revision');
+    $this->assertIdentical($new_revision, $entity->shouldCreateNewRevision(), 'Is a new revision');
 
     if ($body_label) {
       /** @var \Drupal\field\FieldConfigInterface $body */
       $body = FieldConfig::load('node.' . $id . '.body');
-      $this->assertTrue($body instanceof FieldConfigInterface);
+      $this->assertInstanceOf(FieldConfigInterface::class, $body);
       $this->assertIdentical($body_label, $body->label());
     }
 

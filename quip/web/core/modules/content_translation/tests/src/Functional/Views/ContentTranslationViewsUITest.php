@@ -26,11 +26,16 @@ class ContentTranslationViewsUITest extends UITestBase {
   public static $modules = ['content_translation'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests the views UI.
    */
   public function testViewsUI() {
     $this->drupalGet('admin/structure/views/view/test_view/edit');
-    $this->assertTitle(t('@label (@table) | @site-name', ['@label' => 'Test view', '@table' => 'Views test data', '@site-name' => $this->config('system.site')->get('name')]));
+    $this->assertTitle('Test view (Views test data) | Drupal');
   }
 
 }

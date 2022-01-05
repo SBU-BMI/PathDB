@@ -58,7 +58,7 @@ class DenormalizeTest extends NormalizerTestBase {
       $this->fail('Exception should be thrown when type is invalid.');
     }
     catch (UnexpectedValueException $e) {
-      $this->pass('Exception thrown when type is invalid.');
+      // Expected exception; just continue testing.
     }
 
     // No type.
@@ -70,7 +70,7 @@ class DenormalizeTest extends NormalizerTestBase {
       $this->fail('Exception should be thrown when no type is provided.');
     }
     catch (UnexpectedValueException $e) {
-      $this->pass('Exception thrown when no type is provided.');
+      // Expected exception; just continue testing.
     }
   }
 
@@ -86,7 +86,7 @@ class DenormalizeTest extends NormalizerTestBase {
       ],
     ];
 
-    $this->setExpectedException(UnexpectedValueException::class);
+    $this->expectException(UnexpectedValueException::class);
     $this->serializer->denormalize($data_with_invalid_type, $this->entityClass, $this->format);
   }
 
@@ -100,7 +100,7 @@ class DenormalizeTest extends NormalizerTestBase {
       ],
     ];
 
-    $this->setExpectedException(UnexpectedValueException::class);
+    $this->expectException(UnexpectedValueException::class);
     $this->serializer->denormalize($data_with_no_types, $this->entityClass, $this->format);
   }
 
@@ -146,7 +146,8 @@ class DenormalizeTest extends NormalizerTestBase {
   public function testDenormalizeSerializedItem() {
     $entity = EntitySerializedField::create(['serialized' => 'boo']);
     $normalized = $this->serializer->normalize($entity, $this->format);
-    $this->setExpectedException(\LogicException::class, 'The generic FieldItemNormalizer cannot denormalize string values for "value" properties of the "serialized" field (field item class: Drupal\entity_test\Plugin\Field\FieldType\SerializedItem).');
+    $this->expectException(\LogicException::class);
+    $this->expectExceptionMessage('The generic FieldItemNormalizer cannot denormalize string values for "value" properties of the "serialized" field (field item class: Drupal\entity_test\Plugin\Field\FieldType\SerializedItem).');
     $this->serializer->denormalize($normalized, EntitySerializedField::class, $this->format);
   }
 
@@ -159,7 +160,8 @@ class DenormalizeTest extends NormalizerTestBase {
     $this->assertEquals($normalized['serialized_long'][0]['value'], ['Hello world!']);
 
     $normalized['serialized_long'][0]['value'] = 'boo';
-    $this->setExpectedException(\LogicException::class, 'The generic FieldItemNormalizer cannot denormalize string values for "value" properties of the "serialized_long" field (field item class: Drupal\Core\Field\Plugin\Field\FieldType\StringLongItem).');
+    $this->expectException(\LogicException::class);
+    $this->expectExceptionMessage('The generic FieldItemNormalizer cannot denormalize string values for "value" properties of the "serialized_long" field (field item class: Drupal\Core\Field\Plugin\Field\FieldType\StringLongItem).');
     $this->serializer->denormalize($normalized, EntitySerializedField::class);
   }
 

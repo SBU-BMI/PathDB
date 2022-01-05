@@ -20,6 +20,11 @@ class ViewsListTest extends UITestBase {
   public static $modules = ['block', 'views_ui'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to administer views.
    *
    * @var \Drupal\user\Entity\User
@@ -44,8 +49,15 @@ class ViewsListTest extends UITestBase {
   public function testViewsListLimit() {
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
-    $this->assertResponse(200);
-    $this->assertLink(t('Add view'));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->linkExists(t('Add view'));
+
+    // Check that there is a link to the content view without a destination
+    // parameter.
+    $this->drupalGet('admin/structure/views');
+    $links = $this->getSession()->getPage()->findAll('xpath', "//a[contains(@href, 'admin/structure/views/view/content')]");
+    $this->assertStringEndsWith('admin/structure/views/view/content', $links[0]->getAttribute('href'));
+    $this->assertLinkByHref('admin/structure/views/view/content/delete?destination');
 
     // Count default views to be subtracted from the limit.
     $views = count(Views::getEnabledViews());

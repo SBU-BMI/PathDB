@@ -69,11 +69,10 @@ class NodeSubmittedBy extends Date {
       '#account' => $account,
     ];
     return [
-      '#markup' => $this->t('Submitted by <a href=":user_link">@user</a> on @date.',
+      '#markup' => $this->t('Submitted by @user on @date.',
         [
           '@user' => $this->renderer->render($user_name),
           '@date' => $this->dateFormatter->format($this->entity()->created->value, $date_format),
-          ':user_link' => Url::fromUri('entity:user/' . $account->id())->toString(),
         ]
       ),
       '#cache' => [

@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.storage.node.clinicaltrialsubjectid
     - field.storage.node.field_collection
+    - field.storage.node.field_iip_path
     - field.storage.node.imageid
     - field.storage.node.studyid
     - node.type.wsi
@@ -23,7 +24,6 @@ description: ''
 tag: ''
 base_table: node_field_data
 base_field: nid
-core: 8.x
 display:
   default:
     display_plugin: default
@@ -516,6 +516,69 @@ display:
           separator: ', '
           field_api_classes: false
           plugin_id: field
+        field_iip_path:
+          id: field_iip_path
+          table: node__field_iip_path
+          field: field_iip_path
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: iip_path
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
       filters:
         status:
           value: '1'
@@ -527,6 +590,8 @@ display:
           id: status
           expose:
             operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
           group: 1
         type:
           id: type
@@ -553,6 +618,8 @@ display:
             remember_roles:
               authenticated: authenticated
             reduce: false
+            operator_limit_selection: false
+            operator_list: {  }
           is_grouped: false
           group_info:
             label: ''
@@ -639,9 +706,9 @@ display:
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
+        - 'config:field.storage.node.field_iip_path'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions
   data_export_1:
     display_plugin: data_export
     id: data_export_1
@@ -701,6 +768,9 @@ display:
             field_collection_1:
               alias: CollectionID
               raw_output: false
+            field_iip_path:
+              alias: imagepath
+              raw_output: false
       auth:
         - basic_auth
         - jwt_auth
@@ -717,9 +787,9 @@ display:
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
+        - 'config:field.storage.node.field_iip_path'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions
   page_1:
     display_plugin: page
     id: page_1
@@ -740,6 +810,6 @@ display:
       tags:
         - 'config:field.storage.node.clinicaltrialsubjectid'
         - 'config:field.storage.node.field_collection'
+        - 'config:field.storage.node.field_iip_path'
         - 'config:field.storage.node.imageid'
         - 'config:field.storage.node.studyid'
-        - extensions

@@ -1,0 +1,24 @@
+{
+    "name": "drupal/d8w3css",
+    "description": "Speed, Elegance & Ease of Development and Use.",
+    "type": "drupal-theme",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Alaa Haddad (alaahaddad.com)",
+            "homepage": "https://www.drupal.org/u/flashwebcenter",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://drupal.org/project/d8w3css",
+    "support": {
+        "issues": "https://drupal.org/project/issues/d8w3css",
+        "source": "https://git.drupalcode.org/project/d8w3css"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ]
+}

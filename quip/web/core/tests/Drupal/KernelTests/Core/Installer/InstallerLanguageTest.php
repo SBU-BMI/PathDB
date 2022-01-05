@@ -2,6 +2,7 @@
 
 namespace Drupal\KernelTests\Core\Installer;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\StringTranslation\Translator\FileTranslation;
 use Drupal\KernelTests\KernelTestBase;
 
@@ -19,20 +20,21 @@ class InstallerLanguageTest extends KernelTestBase {
     // Different translation files would be found depending on which language
     // we are looking for.
     $expected_translation_files = [
-      NULL => ['drupal-8.0.0-beta2.hu.po', 'drupal-8.0.0.de.po'],
+      NULL => ['drupal-8.0.0-beta2.hu.po', 'drupal-8.0.0.de.po', 'drupal-8.0.x.fr-CA.po'],
       'de' => ['drupal-8.0.0.de.po'],
+      'fr-CA' => ['drupal-8.0.x.fr-CA.po'],
       'hu' => ['drupal-8.0.0-beta2.hu.po'],
       'it' => [],
     ];
 
-    // Hardcode the simpletest module location as we don't yet know where it is.
+    // Hardcode the fixtures location as we don't yet know where it is.
     // @todo Remove as part of https://www.drupal.org/node/2186491
-    $file_translation = new FileTranslation('core/modules/simpletest/files/translations');
+    $file_translation = new FileTranslation('core/tests/fixtures/files/translations', $this->container->get('file_system'));
     foreach ($expected_translation_files as $langcode => $files_expected) {
       $files_found = $file_translation->findTranslationFiles($langcode);
-      $this->assertTrue(count($files_found) == count($files_expected), format_string('@count installer languages found.', ['@count' => count($files_expected)]));
+      $this->assertTrue(count($files_found) == count($files_expected), new FormattableMarkup('@count installer languages found.', ['@count' => count($files_expected)]));
       foreach ($files_found as $file) {
-        $this->assertTrue(in_array($file->filename, $files_expected), format_string('@file found.', ['@file' => $file->filename]));
+        $this->assertContains($file->filename, $files_expected, new FormattableMarkup('@file found.', ['@file' => $file->filename]));
       }
     }
   }

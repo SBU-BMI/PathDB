@@ -66,7 +66,7 @@ class FormatDateFilter extends DataFilterBase implements ContainerFactoryPluginI
       $plugin_id,
       $plugin_definition,
       $container->get('date.formatter'),
-      $container->get('entity.manager')->getStorage('date_format')
+      $container->get('entity_type.manager')->getStorage('date_format')
     );
   }
 

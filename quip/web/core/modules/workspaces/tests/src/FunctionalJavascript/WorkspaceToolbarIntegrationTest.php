@@ -19,6 +19,11 @@ class WorkspaceToolbarIntegrationTest extends OffCanvasTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     $admin_user = $this->drupalCreateUser([
@@ -54,7 +59,7 @@ class WorkspaceToolbarIntegrationTest extends OffCanvasTestBase {
   }
 
   /**
-   * Test workspace switch and landing page behaviour.
+   * Test workspace switch and landing page behavior.
    */
   public function testWorkspaceSwitch() {
     $page = $this->getSession()->getPage();

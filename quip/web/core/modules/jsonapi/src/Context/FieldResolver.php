@@ -19,6 +19,7 @@ use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceTargetDefinition;
 use Drupal\jsonapi\ResourceType\ResourceType;
+use Drupal\jsonapi\ResourceType\ResourceTypeRelationship;
 use Drupal\jsonapi\ResourceType\ResourceTypeRepositoryInterface;
 use Drupal\Core\Http\Exception\CacheableBadRequestHttpException;
 
@@ -66,7 +67,7 @@ use Drupal\Core\Http\Exception\CacheableBadRequestHttpException;
  * @internal JSON:API maintains no PHP API. The API is the HTTP API. This class
  *   may change at any time and could break any dependencies on it.
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3032787
+ * @see https://www.drupal.org/project/drupal/issues/3032787
  * @see jsonapi.api.php
  */
 class FieldResolver {
@@ -241,9 +242,9 @@ class FieldResolver {
    * elide the "entity" keyword from them (this word is used by the entity query
    * system to traverse entity references).
    *
-   * This method takes this external field expression and and attempts to
-   * resolve any aliases and/or abbreviations into a field expression that will
-   * be compatible with the entity query system.
+   * This method takes this external field expression and attempts to resolve
+   * any aliases and/or abbreviations into a field expression that will be
+   * compatible with the entity query system.
    *
    * @link http://jsonapi.org/recommendations/#urls-reference-document
    *
@@ -251,21 +252,34 @@ class FieldResolver {
    *   'uid.field_first_name' -> 'uid.entity.field_first_name'.
    *   'author.firstName' -> 'field_author.entity.field_first_name'
    *
-   * @param string $entity_type_id
-   *   The type of the entity for which to resolve the field name.
-   * @param string $bundle
-   *   The bundle of the entity for which to resolve the field name.
+   * @param \Drupal\jsonapi\ResourceType\ResourceType $resource_type
+   *   The JSON:API resource type from which to resolve the field name.
    * @param string $external_field_name
    *   The public field name to map to a Drupal field name.
+   * @param string $operator
+   *   (optional) The operator of the condition for which the path should be
+   *   resolved.
    *
    * @return string
    *   The mapped field name.
    *
    * @throws \Drupal\Core\Http\Exception\CacheableBadRequestHttpException
    */
-  public function resolveInternalEntityQueryPath($entity_type_id, $bundle, $external_field_name) {
+  public function resolveInternalEntityQueryPath($resource_type, $external_field_name, $operator = NULL) {
+    $function_args = func_get_args();
+    // @todo Remove this conditional block in drupal:9.0.0 and add a type hint
+    // to the first argument of this method.
+    // @see https://www.drupal.org/project/drupal/issues/3078045
+    if (count($function_args) === 3 && is_string($resource_type)) {
+      @trigger_error('Passing the entity type ID and bundle to ' . __METHOD__ . ' is deprecated in drupal:8.8.0 and will throw a fatal error in drupal:9.0.0. Pass a JSON:API resource type instead. See https://www.drupal.org/node/3078036', E_USER_DEPRECATED);
+      list($entity_type_id, $bundle, $external_field_name) = $function_args;
+      $resource_type = $this->resourceTypeRepository->get($entity_type_id, $bundle);
+    }
+    elseif (!$resource_type instanceof ResourceType) {
+      throw new \InvalidArgumentException("The first argument to " . __METHOD__ . " should be an instance of \Drupal\jsonapi\ResourceType\ResourceType, " . gettype($resource_type) . " given.");
+    }
+
     $cacheability = (new CacheableMetadata())->addCacheContexts(['url.query_args:filter', 'url.query_args:sort']);
-    $resource_type = $this->resourceTypeRepository->get($entity_type_id, $bundle);
     if (empty($external_field_name)) {
       throw new CacheableBadRequestHttpException($cacheability, 'No field name was provided for the filter.');
     }
@@ -326,7 +340,7 @@ class FieldResolver {
       }
 
       // Get all of the referenceable resource types.
-      $resource_types = $this->getReferenceableResourceTypes($candidate_definitions);
+      $resource_types = $this->getRelatableResourceTypes($resource_types, $candidate_definitions);
 
       $at_least_one_entity_reference_field = FALSE;
       $candidate_property_names = array_unique(NestedArray::mergeDeepArray(array_map(function (FieldItemDataDefinitionInterface $definition) use (&$at_least_one_entity_reference_field) {
@@ -357,7 +371,10 @@ class FieldResolver {
       // If there are no remaining path parts, the process is finished unless
       // the field has multiple properties, in which case one must be specified.
       if (empty($parts)) {
-        if ($property_specifier_needed) {
+        // If the operator is asserting the presence or absence of a
+        // relationship entirely, it does not make sense to require a property
+        // specifier.
+        if ($property_specifier_needed && (!$at_least_one_entity_reference_field || !in_array($operator, ['IS NULL', 'IS NOT NULL'], TRUE))) {
           $possible_specifiers = array_map(function ($specifier) use ($at_least_one_entity_reference_field) {
             return $at_least_one_entity_reference_field && $specifier !== 'id' ? "meta.$specifier" : $specifier;
           }, $candidate_property_names);
@@ -527,7 +544,7 @@ class FieldResolver {
    */
   protected function isMemberFilterable($external_name, array $resource_types) {
     return array_reduce($resource_types, function ($carry, ResourceType $resource_type) use ($external_name) {
-      // @todo: remove the next line and uncomment the following one in https://www.drupal.org/project/jsonapi/issues/3017047.
+      // @todo: remove the next line and uncomment the following one in https://www.drupal.org/project/drupal/issues/3017047.
       return $carry ?: $external_name === 'id' || $resource_type->isFieldEnabled($resource_type->getInternalName($external_name));
       /*return $carry ?: in_array($external_name, ['id', 'type']) || $resource_type->isFieldEnabled($resource_type->getInternalName($external_name));*/
     }, FALSE);
@@ -536,54 +553,27 @@ class FieldResolver {
   /**
    * Get the referenceable ResourceTypes for a set of field definitions.
    *
-   * @param \Drupal\Core\Field\FieldDefinitionInterface[] $definitions
+   * @param \Drupal\jsonapi\ResourceType\ResourceType[] $resource_types
    *   The resource types on which the reference field might exist.
+   * @param \Drupal\Core\Field\TypedData\FieldItemDataDefinitionInterface[] $definitions
+   *   The field item definitions of targeted fields, keyed by the resource
+   *   type name on which they reside.
    *
    * @return \Drupal\jsonapi\ResourceType\ResourceType[]
    *   The referenceable target resource types.
    */
-  protected function getReferenceableResourceTypes(array $definitions) {
-    return array_reduce($definitions, function ($result, $definition) {
-      $resource_types = array_filter(
-        $this->collectResourceTypesForReference($definition)
-      );
-      $type_names = array_map(function ($resource_type) {
-        /* @var \Drupal\jsonapi\ResourceType\ResourceType $resource_type */
-        return $resource_type->getTypeName();
-      }, $resource_types);
-      return array_merge($result, array_combine($type_names, $resource_types));
-    }, []);
-  }
-
-  /**
-   * Build a list of resource types depending on which bundles are referenced.
-   *
-   * @param \Drupal\Core\Field\TypedData\FieldItemDataDefinitionInterface $item_definition
-   *   The reference definition.
-   *
-   * @return \Drupal\jsonapi\ResourceType\ResourceType[]
-   *   The list of resource types.
-   */
-  protected function collectResourceTypesForReference(FieldItemDataDefinitionInterface $item_definition) {
-    $main_property_definition = $item_definition->getPropertyDefinition(
-      $item_definition->getMainPropertyName()
-    );
-
-    // Check if the field is a flavor of an Entity Reference field.
-    if (!$main_property_definition instanceof DataReferenceTargetDefinition) {
-      return [];
+  protected function getRelatableResourceTypes(array $resource_types, array $definitions) {
+    $relatable_resource_types = [];
+    foreach ($resource_types as $resource_type) {
+      $definition = $definitions[$resource_type->getTypeName()];
+      $resource_type_field = $resource_type->getFieldByInternalName($definition->getFieldDefinition()->getName());
+      if ($resource_type_field instanceof ResourceTypeRelationship) {
+        foreach ($resource_type_field->getRelatableResourceTypes() as $relatable_resource_type) {
+          $relatable_resource_types[$relatable_resource_type->getTypeName()] = $relatable_resource_type;
+        }
+      }
     }
-    $entity_type_id = $item_definition->getSetting('target_type');
-    $handler_settings = $item_definition->getSetting('handler_settings');
-
-    $has_target_bundles = isset($handler_settings['target_bundles']) && !empty($handler_settings['target_bundles']);
-    $target_bundles = $has_target_bundles ?
-      $handler_settings['target_bundles']
-      : $this->getAllBundlesForEntityType($entity_type_id);
-
-    return array_map(function ($bundle) use ($entity_type_id) {
-      return $this->resourceTypeRepository->get($entity_type_id, $bundle);
-    }, $target_bundles);
+    return $relatable_resource_types;
   }
 
   /**
@@ -610,19 +600,6 @@ class FieldResolver {
       }
     }
     return FALSE;
-  }
-
-  /**
-   * Gets all bundle IDs for a given entity type.
-   *
-   * @param string $entity_type_id
-   *   The entity type for which to get bundles.
-   *
-   * @return string[]
-   *   The bundle IDs.
-   */
-  protected function getAllBundlesForEntityType($entity_type_id) {
-    return array_keys($this->entityTypeBundleInfo->getBundleInfo($entity_type_id));
   }
 
   /**
@@ -669,7 +646,7 @@ class FieldResolver {
         $prior_parts = array_slice($unresolved_path_parts, 0, count($unresolved_path_parts) - count($remaining_parts));
         return implode('.', array_merge($prior_parts, [$reference_name], $remaining_parts));
       }, $unique_reference_names);
-      // @todo Add test coverage for this in https://www.drupal.org/project/jsonapi/issues/2971281
+      // @todo Add test coverage for this in https://www.drupal.org/project/drupal/issues/2971281
       $message = sprintf('Ambiguous path. Try one of the following: %s, in place of the given path: %s', implode(', ', $choices), implode('.', $unresolved_path_parts));
       $cacheability = (new CacheableMetadata())->addCacheContexts(['url.query_args:filter', 'url.query_args:sort']);
       throw new CacheableBadRequestHttpException($cacheability, $message);

@@ -67,7 +67,7 @@ class DsExtrasController extends ControllerBase {
 
     drupal_static('ds_view_mode', $view_mode);
 
-    $page = node_view($node, $view_mode);
+    $page = $this->entityTypeManager()->getViewBuilder('node')->view($node, $view_mode);
     unset($page['nodes'][$node->id()]['#cache']);
 
     return $page;

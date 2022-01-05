@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /quip
+/quip/vendor/bin/drush -y config:export --destination /data/config
+cd /
+tar cvfz data/quip.tgz quip
+

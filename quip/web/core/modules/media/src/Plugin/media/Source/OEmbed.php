@@ -220,6 +220,11 @@ class OEmbed extends MediaSourceBase implements OEmbedInterface {
    */
   public function getMetadata(MediaInterface $media, $name) {
     $media_url = $this->getSourceFieldValue($media);
+    // The URL may be NULL if the source field is empty, in which case just
+    // return NULL.
+    if (empty($media_url)) {
+      return NULL;
+    }
 
     try {
       $resource_url = $this->urlResolver->getResourceUrl($media_url);
@@ -342,7 +347,11 @@ class OEmbed extends MediaSourceBase implements OEmbedInterface {
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $thumbnails_directory = $form_state->getValue('thumbnails_directory');
-    if (!file_valid_uri($thumbnails_directory)) {
+
+    /** @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $stream_wrapper_manager */
+    $stream_wrapper_manager = \Drupal::service('stream_wrapper_manager');
+
+    if (!$stream_wrapper_manager->isValidUri($thumbnails_directory)) {
       $form_state->setErrorByName('thumbnails_directory', $this->t('@path is not a valid path.', [
         '@path' => $thumbnails_directory,
       ]));
@@ -385,10 +394,14 @@ class OEmbed extends MediaSourceBase implements OEmbedInterface {
     }
     $remote_thumbnail_url = $remote_thumbnail_url->toString();
 
+    // Remove the query string, since we do not want to include it in the local
+    // thumbnail URI.
+    $local_thumbnail_url = parse_url($remote_thumbnail_url, PHP_URL_PATH);
+
     // Compute the local thumbnail URI, regardless of whether or not it exists.
     $configuration = $this->getConfiguration();
     $directory = $configuration['thumbnails_directory'];
-    $local_thumbnail_uri = "$directory/" . Crypt::hashBase64($remote_thumbnail_url) . '.' . pathinfo($remote_thumbnail_url, PATHINFO_EXTENSION);
+    $local_thumbnail_uri = "$directory/" . Crypt::hashBase64($local_thumbnail_url) . '.' . pathinfo($local_thumbnail_url, PATHINFO_EXTENSION);
 
     // If the local thumbnail already exists, return its URI.
     if (file_exists($local_thumbnail_uri)) {
@@ -438,6 +451,7 @@ class OEmbed extends MediaSourceBase implements OEmbedInterface {
   public function prepareViewDisplay(MediaTypeInterface $type, EntityViewDisplayInterface $display) {
     $display->setComponent($this->getSourceFieldDefinition($type)->getName(), [
       'type' => 'oembed',
+      'label' => 'visually_hidden',
     ]);
   }
 

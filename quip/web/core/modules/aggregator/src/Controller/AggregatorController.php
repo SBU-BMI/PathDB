@@ -125,7 +125,7 @@ class AggregatorController extends ControllerBase {
         $next_update = $this->t('imminently');
       }
       elseif ($last_checked && $refresh_rate) {
-        $next_update = $next = $this->t('%time left', ['%time' => $this->dateFormatter->formatInterval($last_checked + $refresh_rate - REQUEST_TIME)]);
+        $next_update = $this->t('%time left', ['%time' => $this->dateFormatter->formatInterval($last_checked + $refresh_rate - REQUEST_TIME)]);
       }
       else {
         $next_update = $this->t('never');
@@ -160,7 +160,7 @@ class AggregatorController extends ControllerBase {
       '#type' => 'table',
       '#header' => $header,
       '#rows' => $rows,
-      '#empty' => $this->t('No feeds available. <a href=":link">Add feed</a>.', [':link' => $this->url('aggregator.feed_add')]),
+      '#empty' => $this->t('No feeds available. <a href=":link">Add feed</a>.', [':link' => Url::fromRoute('aggregator.feed_add')->toString()]),
     ];
 
     return $build;

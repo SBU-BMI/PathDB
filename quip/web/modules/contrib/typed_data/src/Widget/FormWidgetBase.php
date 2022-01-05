@@ -73,11 +73,4 @@ abstract class FormWidgetBase extends PluginBase implements FormWidgetInterface,
     );
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function calculateDependencies() {
-    return [];
-  }
-
 }

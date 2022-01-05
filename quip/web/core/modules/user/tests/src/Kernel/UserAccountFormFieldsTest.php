@@ -132,12 +132,9 @@ class UserAccountFormFieldsTest extends KernelTestBase {
     if ($operation != 'register') {
       $fields['uid'] = 2;
     }
-    $entity = $this->container->get('entity.manager')
+    $entity = $this->container->get('entity_type.manager')
       ->getStorage($entity_type)
       ->create($fields);
-    $this->container->get('entity.manager')
-      ->getFormObject($entity_type, $operation)
-      ->setEntity($entity);
 
     // @see EntityFormBuilder::getForm()
     return $this->container->get('entity.form_builder')->getForm($entity, $operation);

@@ -16,12 +16,11 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class ExampleConfiguration implements ConfigurationInterface
 {
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('acme_root');
+        $treeBuilder = new TreeBuilder('acme_root');
 
-        $rootNode
+        $treeBuilder->getRootNode()
             ->fixXmlConfig('parameter')
             ->fixXmlConfig('connection')
             ->fixXmlConfig('cms_page')
@@ -94,6 +93,7 @@ class ExampleConfiguration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->append(new CustomNodeDefinition('acme'))
             ->end()
         ;
 

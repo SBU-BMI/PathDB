@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @file
+ * Contains views_entity_form_field.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_help().
+ */
+function views_entity_form_field_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the views_entity_form_field module.
+    case 'help.page.views_entity_form_field':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Add entity form field widgets to a view.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function views_entity_form_field_views_data_alter(array &$data) {
+  /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $bundle_info = \Drupal::service('entity_type.bundle.info')->getAllBundleInfo();
+
+  // Sets up form field options for all entities that have views support.
+  foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_type_id => $entity_type) {
+    if ($entity_type->hasHandlerClass('views_data')) {
+      $fields = [];
+
+      // Get relevant views table to attach the fields to.
+      $views_table = $entity_type->getBaseTable();
+      if ($entity_type->isTranslatable()) {
+        $views_table = $entity_type->getDataTable() ?: $entity_type_id . '_field_data';
+      }
+
+      // Combine all field definitions into one array.
+      if (array_key_exists($entity_type_id, $bundle_info)) {
+        foreach (array_keys($bundle_info[$entity_type_id]) as $bundle) {
+          foreach ($entity_field_manager->getFieldDefinitions($entity_type_id, $bundle) as $field_name => $field_definition) {
+            if ($field_definition->isDisplayConfigurable('form')) {
+              $fields[$field_name]['label'] = $field_definition->getLabel();
+              $fields[$field_name]['description'] = $field_definition->getDescription();
+              $fields[$field_name]['bundles'][] = $bundle;
+            }
+          }
+        }
+      }
+
+      // Add each form field to the field options.
+      foreach ($fields as $field_name => $field) {
+        $data[$views_table]["form_field_{$field_name}"]['field'] = [
+          'title' => t('Form field: @label', [
+            '@label' => $field['label'],
+          ]),
+          'help' => t('Appears in: @bundles.', ['@bundles' => implode(', ', $field['bundles'])]),
+          'id' => 'entity_form_field',
+          'bundles' => $field['bundles'],
+          'entity_type' => $entity_type_id,
+          'field_name' => $field_name,
+        ];
+      }
+    }
+  }
+}

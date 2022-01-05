@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2018 Justin Hileman
+ * (c) 2012-2020 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,12 +11,15 @@
 
 namespace Psy\Test\Util;
 
+use Psy\Reflection\ReflectionClassConstant;
+use Psy\Reflection\ReflectionConstant_;
+use Psy\Reflection\ReflectionNamespace;
 use Psy\Util\Mirror;
 
-class MirrorTest extends \PHPUnit\Framework\TestCase
+class MirrorTest extends \Psy\Test\TestCase
 {
-    const FOO           = 1;
-    private $bar        = 2;
+    const FOO = 1;
+    private $bar = 2;
     private static $baz = 3;
 
     public function aPublicMethod()
@@ -27,52 +30,61 @@ class MirrorTest extends \PHPUnit\Framework\TestCase
     public function testMirror()
     {
         $refl = Mirror::get('sort');
-        $this->assertInstanceOf('ReflectionFunction', $refl);
+        $this->assertInstanceOf(\ReflectionFunction::class, $refl);
 
-        $refl = Mirror::get('Psy\Test\Util\MirrorTest');
-        $this->assertInstanceOf('ReflectionClass', $refl);
+        $refl = Mirror::get(self::class);
+        $this->assertInstanceOf(\ReflectionClass::class, $refl);
 
         $refl = Mirror::get($this);
-        $this->assertInstanceOf('ReflectionObject', $refl);
+        $this->assertInstanceOf(\ReflectionObject::class, $refl);
 
         $refl = Mirror::get($this, 'FOO');
-        if (\version_compare(PHP_VERSION, '7.1.0', '>=')) {
-            $this->assertInstanceOf('ReflectionClassConstant', $refl);
+        if (\version_compare(\PHP_VERSION, '7.1.0', '>=')) {
+            $this->assertInstanceOf(\ReflectionClassConstant::class, $refl);
         } else {
-            $this->assertInstanceOf('Psy\Reflection\ReflectionClassConstant', $refl);
+            $this->assertInstanceOf(ReflectionClassConstant::class, $refl);
         }
 
         $refl = Mirror::get('PHP_VERSION');
-        $this->assertInstanceOf('Psy\Reflection\ReflectionConstant_', $refl);
+        $this->assertInstanceOf(ReflectionConstant_::class, $refl);
 
         $refl = Mirror::get($this, 'bar');
-        $this->assertInstanceOf('ReflectionProperty', $refl);
+        $this->assertInstanceOf(\ReflectionProperty::class, $refl);
 
         $refl = Mirror::get($this, 'baz');
-        $this->assertInstanceOf('ReflectionProperty', $refl);
+        $this->assertInstanceOf(\ReflectionProperty::class, $refl);
 
         $refl = Mirror::get($this, 'aPublicMethod');
-        $this->assertInstanceOf('ReflectionMethod', $refl);
+        $this->assertInstanceOf(\ReflectionMethod::class, $refl);
 
         $refl = Mirror::get($this, 'baz', Mirror::STATIC_PROPERTY);
-        $this->assertInstanceOf('ReflectionProperty', $refl);
+        $this->assertInstanceOf(\ReflectionProperty::class, $refl);
+
+        $refl = Mirror::get('Psy\\Test\\Util');
+        $this->assertInstanceOf(ReflectionNamespace::class, $refl);
+
+        // This is both a namespace and a class, so let's make sure it gets the class:
+        $refl = Mirror::get('Psy\\CodeCleaner');
+        $this->assertInstanceOf(\ReflectionClass::class, $refl);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testMirrorThrowsExceptions()
     {
+        $this->expectException(\RuntimeException::class);
         Mirror::get($this, 'notAMethod');
+
+        $this->fail();
     }
 
     /**
-     * @expectedException \InvalidArgumentException
      * @dataProvider invalidArguments
      */
     public function testMirrorThrowsInvalidArgumentExceptions($value)
     {
+        $this->expectException(\InvalidArgumentException::class);
         Mirror::get($value);
+
+        $this->fail();
     }
 
     public function invalidArguments()

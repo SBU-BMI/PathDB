@@ -14,6 +14,11 @@ class TrustedHostsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -29,7 +34,7 @@ class TrustedHostsTest extends BrowserTestBase {
    */
   public function testStatusPageWithoutConfiguration() {
     $this->drupalGet('admin/reports/status');
-    $this->assertResponse(200, 'The status page is reachable.');
+    $this->assertSession()->statusCodeEquals(200);
 
     $this->assertRaw(t('Trusted Host Settings'));
     $this->assertRaw(t('The trusted_host_patterns setting is not configured in settings.php.'));
@@ -47,7 +52,7 @@ class TrustedHostsTest extends BrowserTestBase {
     $this->writeSettings($settings);
 
     $this->drupalGet('admin/reports/status');
-    $this->assertResponse(200, 'The status page is reachable.');
+    $this->assertSession()->statusCodeEquals(200);
 
     $this->assertRaw(t('Trusted Host Settings'));
     $this->assertRaw(t('The trusted_host_patterns setting is set to allow'));
@@ -82,9 +87,9 @@ class TrustedHostsTest extends BrowserTestBase {
     $this->rebuildContainer();
     $this->container->get('router.builder')->rebuild();
 
-    /** @var \Drupal\Core\Entity\EntityManagerInterface $entity_manager */
-    $entity_manager = $this->container->get('entity.manager');
-    $shortcut_storage = $entity_manager->getStorage('shortcut');
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
+    $entity_type_manager = $this->container->get('entity_type.manager');
+    $shortcut_storage = $entity_type_manager->getStorage('shortcut');
 
     $shortcut = $shortcut_storage->create([
       'title' => $this->randomString(),
@@ -94,7 +99,7 @@ class TrustedHostsTest extends BrowserTestBase {
     $shortcut_storage->save($shortcut);
 
     // Grant the current user access to see the shortcuts.
-    $role_storage = $entity_manager->getStorage('user_role');
+    $role_storage = $entity_type_manager->getStorage('user_role');
     $roles = $this->loggedInUser->getRoles(TRUE);
     /** @var \Drupal\user\RoleInterface $role */
     $role = $role_storage->load(reset($roles));
@@ -103,7 +108,7 @@ class TrustedHostsTest extends BrowserTestBase {
     $this->drupalPlaceBlock('shortcuts');
 
     $this->drupalGet('');
-    $this->assertLink($shortcut->label());
+    $this->assertSession()->linkExists($shortcut->label());
   }
 
 }

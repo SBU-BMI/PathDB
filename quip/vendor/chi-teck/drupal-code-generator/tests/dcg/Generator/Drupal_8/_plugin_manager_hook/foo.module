@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Foo module.
+ */
+
+/**
+ * Implements hook_bar_info().
+ */
+function foo_bar_info() {
+  return [
+    'foo' => [
+      'id' => 'foo',
+      'label' => t('Foo'),
+      'description' => t('Foo description.'),
+    ],
+    'bar' => [
+      'id' => 'bar',
+      'label' => t('Bar'),
+      'description' => t('Bar description.'),
+    ],
+  ];
+}

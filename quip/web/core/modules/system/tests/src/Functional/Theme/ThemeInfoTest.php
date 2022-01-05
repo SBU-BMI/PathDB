@@ -19,11 +19,16 @@ class ThemeInfoTest extends BrowserTestBase {
   public static $modules = ['theme_test'];
 
   /**
-   * The theme handler used in this test for enabling themes.
-   *
-   * @var \Drupal\Core\Extension\ThemeHandler
+   * {@inheritdoc}
    */
-  protected $themeHandler;
+  protected $defaultTheme = 'stark';
+
+  /**
+   * The theme installer used in this test for enabling themes.
+   *
+   * @var \Drupal\Core\Extension\ThemeInstallerInterface
+   */
+  protected $themeInstaller;
 
   /**
    * The theme manager used in this test.
@@ -45,7 +50,7 @@ class ThemeInfoTest extends BrowserTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->themeHandler = $this->container->get('theme_handler');
+    $this->themeInstaller = $this->container->get('theme_installer');
     $this->themeManager = $this->container->get('theme.manager');
     $this->state = $this->container->get('state');
   }
@@ -54,7 +59,7 @@ class ThemeInfoTest extends BrowserTestBase {
    * Tests stylesheets-remove.
    */
   public function testStylesheets() {
-    $this->themeHandler->install(['test_basetheme', 'test_subtheme']);
+    $this->themeInstaller->install(['test_basetheme', 'test_subtheme']);
     $this->config('system.theme')
       ->set('default', 'test_subtheme')
       ->save();
@@ -66,16 +71,16 @@ class ThemeInfoTest extends BrowserTestBase {
     // should work nevertheless.
     $this->drupalGet('theme-test/info/stylesheets');
 
-    $this->assertIdentical(1, count($this->xpath('//link[contains(@href, :href)]', [':href' => "$base/base-add.css"])), "$base/base-add.css found");
-    $this->assertIdentical(0, count($this->xpath('//link[contains(@href, :href)]', [':href' => "base-remove.css"])), "base-remove.css not found");
+    $this->assertCount(1, $this->xpath('//link[contains(@href, :href)]', [':href' => "$base/base-add.css"]), "$base/base-add.css found");
+    $this->assertCount(0, $this->xpath('//link[contains(@href, :href)]', [':href' => "base-remove.css"]), "base-remove.css not found");
 
-    $this->assertIdentical(1, count($this->xpath('//link[contains(@href, :href)]', [':href' => "$sub/sub-add.css"])), "$sub/sub-add.css found");
-    $this->assertIdentical(0, count($this->xpath('//link[contains(@href, :href)]', [':href' => "sub-remove.css"])), "sub-remove.css not found");
-    $this->assertIdentical(0, count($this->xpath('//link[contains(@href, :href)]', [':href' => "base-add.sub-remove.css"])), "base-add.sub-remove.css not found");
+    $this->assertCount(1, $this->xpath('//link[contains(@href, :href)]', [':href' => "$sub/sub-add.css"]), "$sub/sub-add.css found");
+    $this->assertCount(0, $this->xpath('//link[contains(@href, :href)]', [':href' => "sub-remove.css"]), "sub-remove.css not found");
+    $this->assertCount(0, $this->xpath('//link[contains(@href, :href)]', [':href' => "base-add.sub-remove.css"]), "base-add.sub-remove.css not found");
 
     // Verify that CSS files with the same name are loaded from both the base theme and subtheme.
-    $this->assertIdentical(1, count($this->xpath('//link[contains(@href, :href)]', [':href' => "$base/samename.css"])), "$base/samename.css found");
-    $this->assertIdentical(1, count($this->xpath('//link[contains(@href, :href)]', [':href' => "$sub/samename.css"])), "$sub/samename.css found");
+    $this->assertCount(1, $this->xpath('//link[contains(@href, :href)]', [':href' => "$base/samename.css"]), "$base/samename.css found");
+    $this->assertCount(1, $this->xpath('//link[contains(@href, :href)]', [':href' => "$sub/samename.css"]), "$sub/samename.css found");
 
   }
 
@@ -83,7 +88,7 @@ class ThemeInfoTest extends BrowserTestBase {
    * Tests that changes to the info file are picked up.
    */
   public function testChanges() {
-    $this->themeHandler->install(['test_theme']);
+    $this->themeInstaller->install(['test_theme']);
     $this->config('system.theme')->set('default', 'test_theme')->save();
     $this->themeManager->resetActiveTheme();
 

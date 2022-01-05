@@ -28,6 +28,11 @@ class SearchCommentCountToggleTest extends BrowserTestBase {
   protected static $modules = ['node', 'comment', 'search', 'dblog'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to search and post comments.
    *
    * @var \Drupal\user\UserInterface
@@ -47,7 +52,13 @@ class SearchCommentCountToggleTest extends BrowserTestBase {
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
 
     // Create searching user.
-    $this->searchingUser = $this->drupalCreateUser(['search content', 'access content', 'access comments', 'post comments', 'skip comment approval']);
+    $this->searchingUser = $this->drupalCreateUser([
+      'search content',
+      'access content',
+      'access comments',
+      'post comments',
+      'skip comment approval',
+    ]);
 
     // Log in with sufficient privileges.
     $this->drupalLogin($this->searchingUser);
@@ -70,11 +81,6 @@ class SearchCommentCountToggleTest extends BrowserTestBase {
 
     // First update the index. This does the initial processing.
     $this->container->get('plugin.manager.search')->createInstance('node_search')->updateIndex();
-
-    // Then, run the shutdown function. Testing is a unique case where indexing
-    // and searching has to happen in the same request, so running the shutdown
-    // function manually is needed to finish the indexing process.
-    search_update_totals();
   }
 
   /**

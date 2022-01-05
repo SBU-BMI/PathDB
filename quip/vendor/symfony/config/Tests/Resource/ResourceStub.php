@@ -17,17 +17,17 @@ class ResourceStub implements SelfCheckingResourceInterface
 {
     private $fresh = true;
 
-    public function setFresh($isFresh)
+    public function setFresh(bool $isFresh): void
     {
         $this->fresh = $isFresh;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return 'stub';
     }
 
-    public function isFresh($timestamp)
+    public function isFresh($timestamp): bool
     {
         return $this->fresh;
     }

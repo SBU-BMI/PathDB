@@ -7,7 +7,6 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityForm;
 
 /**
@@ -38,8 +37,6 @@ abstract class DateFormatFormBase extends EntityForm {
    *   The date format storage.
    */
   public function __construct(DateFormatterInterface $date_formatter, ConfigEntityStorageInterface $date_format_storage) {
-    $date = new DrupalDateTime();
-
     $this->dateFormatter = $date_formatter;
     $this->dateFormatStorage = $date_format_storage;
   }
@@ -50,7 +47,7 @@ abstract class DateFormatFormBase extends EntityForm {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('date.formatter'),
-      $container->get('entity.manager')->getStorage('date_format')
+      $container->get('entity_type.manager')->getStorage('date_format')
     );
   }
 

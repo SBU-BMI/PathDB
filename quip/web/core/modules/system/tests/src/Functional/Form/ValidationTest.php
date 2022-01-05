@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\system\Functional\Form;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Render\Element;
 use Drupal\Tests\BrowserTestBase;
 
@@ -18,6 +19,11 @@ class ValidationTest extends BrowserTestBase {
    * @var array
    */
   public static $modules = ['form_test'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Tests #element_validate and #validate.
@@ -68,7 +74,7 @@ class ValidationTest extends BrowserTestBase {
     $this->drupalPostForm(NULL, ['name' => 'validate'], 'Save');
     $this->assertNoFieldByName('name', '#value changed by #validate', 'Form element #value was not altered.');
     $this->assertNoText('Name value: value changed by setValueForElement() in #validate', 'Form element value in $form_state was not altered.');
-    $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+    $this->assertText('The form has become outdated.');
   }
 
   /**
@@ -100,7 +106,7 @@ class ValidationTest extends BrowserTestBase {
         ':id' => 'edit-' . $type,
         ':expected' => $expected,
       ]);
-      $this->assertTrue(!empty($element), format_string('The @type button has the proper formnovalidate attribute.', ['@type' => $type]));
+      $this->assertTrue(!empty($element), new FormattableMarkup('The @type button has the proper formnovalidate attribute.', ['@type' => $type]));
     }
     // The button with full server-side validation should not have the
     // 'formnovalidate' attribute.

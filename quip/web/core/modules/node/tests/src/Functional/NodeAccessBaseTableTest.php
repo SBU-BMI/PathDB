@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\node\Functional;
 
+use Drupal\Core\Database\Database;
 use Drupal\node\Entity\NodeType;
 
 /**
@@ -17,6 +18,11 @@ class NodeAccessBaseTableTest extends NodeTestBase {
    * @var array
    */
   public static $modules = ['node_access_test', 'views'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * The installation profile to use with this test.
@@ -94,7 +100,10 @@ class NodeAccessBaseTableTest extends NodeTestBase {
     // Array of nids marked private.
     $private_nodes = [];
     for ($i = 0; $i < $num_simple_users; $i++) {
-      $simple_users[$i] = $this->drupalCreateUser(['access content', 'create article content']);
+      $simple_users[$i] = $this->drupalCreateUser([
+        'access content',
+        'create article content',
+      ]);
     }
     foreach ($simple_users as $this->webUser) {
       $this->drupalLogin($this->webUser);
@@ -122,10 +131,11 @@ class NodeAccessBaseTableTest extends NodeTestBase {
         $this->nodesByUser[$this->webUser->id()][$node->id()] = $is_private;
       }
     }
-    $this->publicTid = db_query('SELECT tid FROM {taxonomy_term_field_data} WHERE name = :name AND default_langcode = 1', [':name' => 'public'])->fetchField();
-    $this->privateTid = db_query('SELECT tid FROM {taxonomy_term_field_data} WHERE name = :name AND default_langcode = 1', [':name' => 'private'])->fetchField();
-    $this->assertTrue($this->publicTid, 'Public tid was found');
-    $this->assertTrue($this->privateTid, 'Private tid was found');
+    $connection = Database::getConnection();
+    $this->publicTid = $connection->query('SELECT tid FROM {taxonomy_term_field_data} WHERE name = :name AND default_langcode = 1', [':name' => 'public'])->fetchField();
+    $this->privateTid = $connection->query('SELECT tid FROM {taxonomy_term_field_data} WHERE name = :name AND default_langcode = 1', [':name' => 'private'])->fetchField();
+    $this->assertNotEmpty($this->publicTid, 'Public tid was found');
+    $this->assertNotEmpty($this->privateTid, 'Private tid was found');
     foreach ($simple_users as $this->webUser) {
       $this->drupalLogin($this->webUser);
       // Check own nodes to see that all are readable.
@@ -138,7 +148,7 @@ class NodeAccessBaseTableTest extends NodeTestBase {
           else {
             $should_be_visible = TRUE;
           }
-          $this->assertResponse($should_be_visible ? 200 : 403, strtr('A %private node by user %uid is %visible for user %current_uid.', [
+          $this->assertSession()->statusCodeEquals($should_be_visible ? 200 : 403, strtr('A %private node by user %uid is %visible for user %current_uid.', [
             '%private' => $is_private ? 'private' : 'public',
             '%uid' => $uid,
             '%visible' => $should_be_visible ? 'visible' : 'not visible',
@@ -153,13 +163,18 @@ class NodeAccessBaseTableTest extends NodeTestBase {
     }
 
     // Now test that a user with 'node test view' permissions can view content.
-    $access_user = $this->drupalCreateUser(['access content', 'create article content', 'node test view', 'search content']);
+    $access_user = $this->drupalCreateUser([
+      'access content',
+      'create article content',
+      'node test view',
+      'search content',
+    ]);
     $this->drupalLogin($access_user);
 
     foreach ($this->nodesByUser as $private_status) {
       foreach ($private_status as $nid => $is_private) {
         $this->drupalGet('node/' . $nid);
-        $this->assertResponse(200);
+        $this->assertSession()->statusCodeEquals(200);
       }
     }
 
@@ -175,7 +190,7 @@ class NodeAccessBaseTableTest extends NodeTestBase {
     foreach ($this->nodesByUser as $private_status) {
       foreach ($private_status as $nid => $is_private) {
         $this->drupalGet('node/' . $nid);
-        $this->assertResponse(200);
+        $this->assertSession()->statusCodeEquals(200);
       }
     }
 
@@ -198,7 +213,7 @@ class NodeAccessBaseTableTest extends NodeTestBase {
       $this->nidsVisible = [];
       foreach ($this->xpath("//a[text()='Read more']") as $link) {
         // See also testTranslationRendering() in NodeTranslationUITest.
-        $this->assertTrue(preg_match('|node/(\d+)$|', $link->getAttribute('href'), $matches), 'Read more points to a node');
+        $this->assertEquals(1, preg_match('|node/(\d+)$|', $link->getAttribute('href'), $matches), 'Read more points to a node');
         $this->nidsVisible[$matches[1]] = TRUE;
       }
       foreach ($this->nodesByUser as $uid => $data) {

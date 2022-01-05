@@ -27,6 +27,11 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $entityTypeId = 'media';
 
   /**
@@ -343,15 +348,13 @@ class MediaTest extends ResourceTestBase {
    */
   public function testPostIndividual() {
     // @todo Mimic \Drupal\Tests\rest\Functional\EntityResource\Media\MediaResourceTestBase::testPost()
-    // @todo Later, use https://www.drupal.org/project/jsonapi/issues/2958554 to upload files rather than the REST module.
+    // @todo Later, use https://www.drupal.org/project/drupal/issues/2958554 to upload files rather than the REST module.
     parent::testPostIndividual();
   }
   // @codingStandardsIgnoreEnd
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Determine if this override should be removed in https://www.drupal.org/project/jsonapi/issues/2952522
    */
   protected function getExpectedGetRelationshipDocumentData($relationship_field_name, EntityInterface $entity = NULL) {
     $data = parent::getExpectedGetRelationshipDocumentData($relationship_field_name, $entity);

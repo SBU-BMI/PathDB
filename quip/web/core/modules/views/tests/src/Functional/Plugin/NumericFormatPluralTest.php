@@ -22,6 +22,11 @@ class NumericFormatPluralTest extends ViewTestBase {
   public static $modules = ['views_ui', 'file', 'language', 'locale'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Views used by this test.
    *
    * @var array
@@ -31,7 +36,10 @@ class NumericFormatPluralTest extends ViewTestBase {
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
-    $web_user = $this->drupalCreateUser(['administer views', 'administer languages']);
+    $web_user = $this->drupalCreateUser([
+      'administer views',
+      'administer languages',
+    ]);
     $this->drupalLogin($web_user);
   }
 

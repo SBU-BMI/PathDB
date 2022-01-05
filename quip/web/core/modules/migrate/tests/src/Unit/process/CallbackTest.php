@@ -19,7 +19,7 @@ class CallbackTest extends MigrateProcessTestCase {
   public function testCallback($callable) {
     $configuration = ['callable' => $callable];
     $this->plugin = new Callback($configuration, 'map', []);
-    $value = $this->plugin->transform('FooBar', $this->migrateExecutable, $this->row, 'destinationproperty');
+    $value = $this->plugin->transform('FooBar', $this->migrateExecutable, $this->row, 'destination_property');
     $this->assertSame('foobar', $value);
   }
 
@@ -39,7 +39,8 @@ class CallbackTest extends MigrateProcessTestCase {
    * @dataProvider providerCallbackExceptions
    */
   public function testCallbackExceptions($message, $configuration) {
-    $this->setExpectedException(\InvalidArgumentException::class, $message);
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage($message);
     $this->plugin = new Callback($configuration, 'map', []);
   }
 

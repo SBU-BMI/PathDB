@@ -20,6 +20,11 @@ class ErrorHandlerTest extends BrowserTestBase {
   public static $modules = ['error_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test the error handler.
    */
   public function testErrorHandler() {
@@ -46,7 +51,7 @@ class ErrorHandlerTest extends BrowserTestBase {
     // Set error reporting to display verbose notices.
     $this->config('system.logging')->set('error_level', ERROR_REPORTING_DISPLAY_VERBOSE)->save();
     $this->drupalGet('error-test/generate-warnings');
-    $this->assertResponse(200, 'Received expected HTTP status code.');
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertErrorMessage($error_notice);
     $this->assertErrorMessage($error_warning);
     $this->assertErrorMessage($error_user_notice);
@@ -61,7 +66,7 @@ class ErrorHandlerTest extends BrowserTestBase {
     // Set error reporting to collect notices.
     $config->set('error_level', ERROR_REPORTING_DISPLAY_ALL)->save();
     $this->drupalGet('error-test/generate-warnings');
-    $this->assertResponse(200, 'Received expected HTTP status code.');
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertErrorMessage($error_notice);
     $this->assertErrorMessage($error_warning);
     $this->assertErrorMessage($error_user_notice);
@@ -70,7 +75,7 @@ class ErrorHandlerTest extends BrowserTestBase {
     // Set error reporting to not collect notices.
     $config->set('error_level', ERROR_REPORTING_DISPLAY_SOME)->save();
     $this->drupalGet('error-test/generate-warnings');
-    $this->assertResponse(200, 'Received expected HTTP status code.');
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertNoErrorMessage($error_notice);
     $this->assertErrorMessage($error_warning);
     $this->assertErrorMessage($error_user_notice);
@@ -79,7 +84,7 @@ class ErrorHandlerTest extends BrowserTestBase {
     // Set error reporting to not show any errors.
     $config->set('error_level', ERROR_REPORTING_HIDE)->save();
     $this->drupalGet('error-test/generate-warnings');
-    $this->assertResponse(200, 'Received expected HTTP status code.');
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertNoErrorMessage($error_notice);
     $this->assertNoErrorMessage($error_warning);
     $this->assertNoErrorMessage($error_user_notice);
@@ -100,7 +105,7 @@ class ErrorHandlerTest extends BrowserTestBase {
     ];
     $error_pdo_exception = [
       '%type' => 'DatabaseExceptionWrapper',
-      '@message' => 'SELECT * FROM bananas_are_awesome',
+      '@message' => 'SELECT b.* FROM {bananas_are_awesome} b',
       '%function' => 'Drupal\error_test\Controller\ErrorTestController->triggerPDOException()',
       '%line' => 64,
       '%file' => drupal_get_path('module', 'error_test') . '/error_test.module',
@@ -121,10 +126,12 @@ class ErrorHandlerTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(500);
     // We cannot use assertErrorMessage() since the exact error reported
     // varies from database to database. Check that the SQL string is displayed.
-    $this->assertText($error_pdo_exception['%type'], format_string('Found %type in error page.', $error_pdo_exception));
-    $this->assertText($error_pdo_exception['@message'], format_string('Found @message in error page.', $error_pdo_exception));
-    $error_details = format_string('in %function (line ', $error_pdo_exception);
-    $this->assertRaw($error_details, format_string("Found '@message' in error page.", ['@message' => $error_details]));
+    $this->assertText($error_pdo_exception['%type'], new FormattableMarkup('Found %type in error page.', $error_pdo_exception));
+    // Assert statement improved since static queries adds table alias in the
+    // error message.
+    $this->assertSession()->pageTextContains($error_pdo_exception['@message']);
+    $error_details = new FormattableMarkup('in %function (line ', $error_pdo_exception);
+    $this->assertRaw($error_details, new FormattableMarkup("Found '@message' in error page.", ['@message' => $error_details]));
 
     $this->drupalGet('error-test/trigger-renderer-exception');
     $this->assertSession()->statusCodeEquals(500);
@@ -136,8 +143,8 @@ class ErrorHandlerTest extends BrowserTestBase {
       ->save();
 
     $this->drupalGet('error-test/trigger-exception');
-    $this->assertFalse($this->drupalGetHeader('X-Drupal-Cache'));
-    $this->assertIdentical(strpos($this->drupalGetHeader('Cache-Control'), 'public'), FALSE, 'Received expected HTTP status line.');
+    $this->assertNull($this->drupalGetHeader('X-Drupal-Cache'));
+    $this->assertSession()->responseHeaderNotContains('Cache-Control', 'public');
     $this->assertSession()->statusCodeEquals(500);
     $this->assertNoErrorMessage($error_exception);
   }
@@ -147,7 +154,7 @@ class ErrorHandlerTest extends BrowserTestBase {
    */
   public function assertErrorMessage(array $error) {
     $message = new FormattableMarkup('%type: @message in %function (line ', $error);
-    $this->assertRaw($message, format_string('Found error message: @message.', ['@message' => $message]));
+    $this->assertRaw($message, new FormattableMarkup('Found error message: @message.', ['@message' => $message]));
   }
 
   /**
@@ -155,7 +162,7 @@ class ErrorHandlerTest extends BrowserTestBase {
    */
   public function assertNoErrorMessage(array $error) {
     $message = new FormattableMarkup('%type: @message in %function (line ', $error);
-    $this->assertNoRaw($message, format_string('Did not find error message: @message.', ['@message' => $message]));
+    $this->assertNoRaw($message, new FormattableMarkup('Did not find error message: @message.', ['@message' => $message]));
   }
 
   /**
@@ -165,7 +172,7 @@ class ErrorHandlerTest extends BrowserTestBase {
    *   TRUE, if there are no messages.
    */
   protected function assertNoMessages() {
-    return $this->assertFalse($this->xpath('//div[contains(@class, "messages")]'), 'Ensures that also no messages div exists, which proves that no messages were generated by the error handler, not even an empty one.');
+    return $this->assertEmpty($this->xpath('//div[contains(@class, "messages")]'), 'Ensures that also no messages div exists, which proves that no messages were generated by the error handler, not even an empty one.');
   }
 
 }

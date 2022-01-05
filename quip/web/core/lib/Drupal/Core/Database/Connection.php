@@ -2,6 +2,8 @@
 
 namespace Drupal\Core\Database;
 
+use Drupal\Core\Database\Query\Condition;
+
 /**
  * Base Database API class.
  *
@@ -155,6 +157,13 @@ abstract class Connection {
   protected $escapedAliases = [];
 
   /**
+   * Post-root (non-nested) transaction commit callbacks.
+   *
+   * @var callable[]
+   */
+  protected $rootTransactionEndCallbacks = [];
+
+  /**
    * Constructs a Connection object.
    *
    * @param \PDO $connection
@@ -212,12 +221,6 @@ abstract class Connection {
    *
    * A given query can be customized with a number of option flags in an
    * associative array:
-   * - target: The database "target" against which to execute a query. Valid
-   *   values are "default" or "replica". The system will first try to open a
-   *   connection to a database specified with the user-supplied key. If one
-   *   is not available, it will silently fall back to the "default" target.
-   *   If multiple databases connections are specified with the same target,
-   *   one will be selected at random for the duration of the request.
    * - fetch: This element controls how rows from a result set will be
    *   returned. Legal values include PDO::FETCH_ASSOC, PDO::FETCH_BOTH,
    *   PDO::FETCH_OBJ, PDO::FETCH_NUM, or a string representing the name of a
@@ -260,7 +263,6 @@ abstract class Connection {
    */
   protected function defaultOptions() {
     return [
-      'target' => 'default',
       'fetch' => \PDO::FETCH_OBJ,
       'return' => Database::RETURN_STATEMENT,
       'throw_exception' => TRUE,
@@ -542,7 +544,7 @@ abstract class Connection {
    * "/ * Exploit * / DROP TABLE node. -- * / UPDATE example SET field2=..."
    * @endcode
    *
-   * Unless the comment is sanitised first, the SQL server would drop the
+   * Unless the comment is sanitized first, the SQL server would drop the
    * node table and ignore the rest of the SQL statement.
    *
    * @param string $comment
@@ -583,7 +585,7 @@ abstract class Connection {
    *   Typically, $options['return'] will be set by a default or by a query
    *   builder, and should not be set by a user.
    *
-   * @return \Drupal\Core\Database\StatementInterface|int|null
+   * @return \Drupal\Core\Database\StatementInterface|int|string|null
    *   This method will return one of the following:
    *   - If either $options['return'] === self::RETURN_STATEMENT, or
    *     $options['return'] is not set (due to self::defaultOptions()),
@@ -592,7 +594,7 @@ abstract class Connection {
    *     returns the number of rows affected by the query
    *     (not the number matched).
    *   - If $options['return'] === self::RETURN_INSERT_ID,
-   *     returns the generated insert ID of the last query.
+   *     returns the generated insert ID of the last query as a string.
    *   - If either $options['return'] === self::RETURN_NULL, or
    *     an exception occurs and $options['throw_exception'] evaluates to FALSE,
    *     returns NULL.
@@ -606,6 +608,9 @@ abstract class Connection {
   public function query($query, array $args = [], $options = []) {
     // Use default values if not already set.
     $options += $this->defaultOptions();
+    if (isset($options['target'])) {
+      @trigger_error('Passing a \'target\' key to \\Drupal\\Core\\Database\\Connection::query $options argument is deprecated in drupal:8.0.x and will be removed before drupal:9.0.0. Instead, use \\Drupal\\Core\\Database\\Database::getConnection($target)->query(). See https://www.drupal.org/node/2993033', E_USER_DEPRECATED);
+    }
 
     try {
       // We allow either a pre-bound statement object or a literal string.
@@ -623,7 +628,11 @@ abstract class Connection {
         // semicolons should only be needed for special cases like defining a
         // function or stored procedure in SQL. Trim any trailing delimiter to
         // minimize false positives.
-        $query = rtrim($query, ";  \t\n\r\0\x0B");
+        $trim_chars = "  \t\n\r\0\x0B";
+        if (empty($options['allow_delimiter_in_query'])) {
+          $trim_chars .= ';';
+        }
+        $query = rtrim($query, $trim_chars);
         if (strpos($query, ';') !== FALSE && empty($options['allow_delimiter_in_query'])) {
           throw new \InvalidArgumentException('; is not supported in SQL strings. Use only one statement at a time.');
         }
@@ -769,6 +778,7 @@ abstract class Connection {
    *
    * @param string $class
    *   The class for which we want the potentially driver-specific class.
+   *
    * @return string
    *   The name of the class that should be used for this driver.
    */
@@ -780,6 +790,11 @@ abstract class Connection {
       }
       $driver_class = $this->connectionOptions['namespace'] . '\\' . $class;
       $this->driverClasses[$class] = class_exists($driver_class) ? $driver_class : $class;
+      if ($this->driverClasses[$class] === 'Condition') {
+        // @todo Deprecate the fallback for contrib and custom drivers in 9.1.x
+        //   in https://www.drupal.org/project/drupal/issues/3120036.
+        $this->driverClasses[$class] = Condition::class;
+      }
     }
     return $this->driverClasses[$class];
   }
@@ -942,6 +957,22 @@ abstract class Connection {
   }
 
   /**
+   * Prepares and returns a CONDITION query object.
+   *
+   * @param string $conjunction
+   *   The operator to use to combine conditions: 'AND' or 'OR'.
+   *
+   * @return \Drupal\Core\Database\Query\Condition
+   *   A new Condition query object.
+   *
+   * @see \Drupal\Core\Database\Query\Condition
+   */
+  public function condition($conjunction) {
+    $class = $this->getDriverClass('Condition');
+    return new $class($conjunction);
+  }
+
+  /**
    * Escapes a database name string.
    *
    * Force all database names to be strictly alphanumeric-plus-underscore.
@@ -1032,7 +1063,7 @@ abstract class Connection {
    * For example, the following does a case-insensitive query for all rows whose
    * name starts with $prefix:
    * @code
-   * $result = db_query(
+   * $result = $injected_connection->query(
    *   'SELECT * FROM person WHERE name LIKE :pattern',
    *   array(':pattern' => $injected_connection->escapeLike($prefix) . '%')
    * );
@@ -1137,6 +1168,14 @@ abstract class Connection {
         $rolled_back_other_active_savepoints = TRUE;
       }
     }
+
+    // Notify the callbacks about the rollback.
+    $callbacks = $this->rootTransactionEndCallbacks;
+    $this->rootTransactionEndCallbacks = [];
+    foreach ($callbacks as $callback) {
+      call_user_func($callback, FALSE);
+    }
+
     $this->connection->rollBack();
     if ($rolled_back_other_active_savepoints) {
       throw new TransactionOutOfOrderException();
@@ -1206,7 +1245,37 @@ abstract class Connection {
   }
 
   /**
-   * Internal function: commit all the transaction layers that can commit.
+   * Adds a root transaction end callback.
+   *
+   * These callbacks are invoked immediately after the transaction has been
+   * committed.
+   *
+   * It can for example be used to avoid deadlocks on write-heavy tables that
+   * do not need to be part of the transaction, like cache tag invalidations.
+   *
+   * Another use case is that services using alternative backends like Redis and
+   * Memcache cache implementations can replicate the transaction-behavior of
+   * the database cache backend and avoid race conditions.
+   *
+   * An argument is passed to the callbacks that indicates whether the
+   * transaction was successful or not.
+   *
+   * @param callable $callback
+   *   The callback to invoke.
+   *
+   * @see \Drupal\Core\Database\Connection::doCommit()
+   */
+  public function addRootTransactionEndCallback(callable $callback) {
+    if (!$this->transactionLayers) {
+      throw new \LogicException('Root transaction end callbacks can only be added when there is an active transaction.');
+    }
+    $this->rootTransactionEndCallbacks[] = $callback;
+  }
+
+  /**
+   * Commit all the transaction layers that can commit.
+   *
+   * @internal
    */
   protected function popCommittableTransactions() {
     // Commit all the committable layers.
@@ -1219,13 +1288,31 @@ abstract class Connection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!$this->connection->commit()) {
-          throw new TransactionCommitFailedException();
-        }
+        $this->doCommit();
       }
       else {
         $this->query('RELEASE SAVEPOINT ' . $name);
       }
+    }
+  }
+
+  /**
+   * Do the actual commit, invoke post-commit callbacks.
+   *
+   * @internal
+   */
+  protected function doCommit() {
+    $success = $this->connection->commit();
+    if (!empty($this->rootTransactionEndCallbacks)) {
+      $callbacks = $this->rootTransactionEndCallbacks;
+      $this->rootTransactionEndCallbacks = [];
+      foreach ($callbacks as $callback) {
+        call_user_func($callback, $success);
+      }
+    }
+
+    if (!$success) {
+      throw new TransactionCommitFailedException();
     }
   }
 
@@ -1296,7 +1383,7 @@ abstract class Connection {
    * Returns the type of database driver.
    *
    * This is not necessarily the same as the type of the database itself. For
-   * instance, there could be two MySQL drivers, mysql and mysql_mock. This
+   * instance, there could be two MySQL drivers, mysql and mysqlMock. This
    * function would return different values for each, but both would return
    * "mysql" for databaseType().
    *
@@ -1414,8 +1501,8 @@ abstract class Connection {
   /**
    * Prepares a statement for execution and returns a statement object
    *
-   * Emulated prepared statements does not communicate with the database server
-   * so this method does not check the statement.
+   * Emulated prepared statements do not communicate with the database server so
+   * this method does not check the statement.
    *
    * @param string $statement
    *   This must be a valid SQL statement for the target database server.
@@ -1490,10 +1577,6 @@ abstract class Connection {
   /**
    * Creates an array of database connection options from a URL.
    *
-   * @internal
-   *   This method should not be called. Use
-   *   \Drupal\Core\Database\Database::convertDbUrlToConnectionInfo() instead.
-   *
    * @param string $url
    *   The URL.
    * @param string $root
@@ -1506,6 +1589,10 @@ abstract class Connection {
    * @throws \InvalidArgumentException
    *   Exception thrown when the provided URL does not meet the minimum
    *   requirements.
+   *
+   * @internal
+   *   This method should only be called from
+   *   \Drupal\Core\Database\Database::convertDbUrlToConnectionInfo().
    *
    * @see \Drupal\Core\Database\Database::convertDbUrlToConnectionInfo()
    */
@@ -1552,12 +1639,10 @@ abstract class Connection {
   /**
    * Creates a URL from an array of database connection options.
    *
-   * @internal
-   *   This method should not be called. Use
-   *   \Drupal\Core\Database\Database::getConnectionInfoAsUrl() instead.
-   *
    * @param array $connection_options
-   *   The array of connection options for a database connection.
+   *   The array of connection options for a database connection. An additional
+   *   key of 'module' is added by Database::getConnectionInfoAsUrl() for
+   *   drivers provided my contributed or custom modules for convenience.
    *
    * @return string
    *   The connection info as a URL.
@@ -1565,6 +1650,10 @@ abstract class Connection {
    * @throws \InvalidArgumentException
    *   Exception thrown when the provided array of connection options does not
    *   meet the minimum requirements.
+   *
+   * @internal
+   *   This method should only be called from
+   *   \Drupal\Core\Database\Database::getConnectionInfoAsUrl().
    *
    * @see \Drupal\Core\Database\Database::getConnectionInfoAsUrl()
    */
@@ -1591,6 +1680,11 @@ abstract class Connection {
     }
 
     $db_url .= '/' . $connection_options['database'];
+
+    // Add the module when the driver is provided by a module.
+    if (isset($connection_options['module'])) {
+      $db_url .= '?module=' . $connection_options['module'];
+    }
 
     if (isset($connection_options['prefix']['default']) && $connection_options['prefix']['default'] !== '') {
       $db_url .= '#' . $connection_options['prefix']['default'];

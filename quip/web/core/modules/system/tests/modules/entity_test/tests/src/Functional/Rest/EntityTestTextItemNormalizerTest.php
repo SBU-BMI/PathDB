@@ -22,6 +22,11 @@ class EntityTestTextItemNormalizerTest extends EntityTestResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $format = 'json';
 
   /**
@@ -149,7 +154,7 @@ class EntityTestTextItemNormalizerTest extends EntityTestResourceTestBase {
    */
   public function testGetWithFormat($text_format_id, array $expected_cache_tags) {
     FilterFormat::create([
-      'name' => 'Pablo Piccasso',
+      'name' => 'Pablo Picasso',
       'format' => 'pablo',
       'langcode' => 'es',
       'filters' => [],

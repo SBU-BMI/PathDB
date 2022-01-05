@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ldap_servers;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
@@ -35,21 +38,20 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $server = Server::load($entity->id());
-
+    /** @var \Drupal\ldap_servers\Entity\Server $entity */
     $row = [];
-    $row['label'] = $this->getLabel($entity);
-    $row['bind_method'] = ucfirst($server->getFormattedBind());
-    if ($server->get('bind_method') == 'service_account') {
-      $row['binddn'] = $server->get('binddn');
+    $row['label'] = $entity->label();
+    $row['bind_method'] = ucfirst((string) $entity->getFormattedBind());
+    if ($entity->get('bind_method') === 'service_account') {
+      $row['binddn'] = $entity->get('binddn');
     }
     else {
       $row['binddn'] = $this->t('N/A');
     }
-    $row['status'] = $server->get('status') ? 'Yes' : 'No';
-    $row['address'] = $server->get('address');
-    $row['port'] = $server->get('port');
-    $row['current_status'] = $this->checkStatus($server);
+    $row['status'] = $entity->get('status') ? 'Yes' : 'No';
+    $row['address'] = $entity->get('address');
+    $row['port'] = $entity->get('port');
+    $row['current_status'] = $this->checkStatus($entity);
 
     $fields = [
       'bind_method',
@@ -59,8 +61,9 @@ class ServerListBuilder extends ConfigEntityListBuilder {
       'port',
     ];
 
+    $stored_entity = $this->storage->loadUnchanged($entity->id());
     foreach ($fields as $field) {
-      if ($entity->get($field) != $server->get($field)) {
+      if ($entity->get($field) !== $stored_entity->get($field)) {
         $row[$field] .= ' ' . $this->t('(overridden)');
       }
     }
@@ -71,44 +74,43 @@ class ServerListBuilder extends ConfigEntityListBuilder {
   /**
    * Format a server status response.
    *
-   * @param string $server
+   * @param \Drupal\ldap_servers\Entity\Server $server
    *   Server.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The status string.
    */
-  private function checkStatus($server) {
-    $connection_result = $server->connect();
+  private function checkStatus(Server $server): TranslatableMarkup {
+    /** @var \Drupal\ldap_servers\LdapBridge $bridge */
+    $bridge = \Drupal::service('ldap.bridge');
+    $bridge->setServer($server);
+
     if ($server->get('status')) {
-      if ($connection_result == Server::LDAP_SUCCESS) {
-        $bind_result = $server->bind();
-        if ($bind_result == Server::LDAP_SUCCESS) {
-          return t('Server available');
-        }
-        else {
-          return t('Configuration valid, bind failed.');
-        }
+      if ($bridge->bind()) {
+        $result = $this->t('Server available');
       }
       else {
-        return t('Configuration invalid, cannot connect.');
+        $result = $this->t('Binding issues, please see log.');
       }
     }
     else {
-      return t('Deactivated');
+      $result = $this->t('Deactivated');
     }
+
+    return $result;
   }
 
   /**
    * Get Operations.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface|\Drupal\ldap_servers\ServerInterface $entity
    *   Entity interface.
    *
    * @return array
    *   Available operations in dropdown.
    */
   public function getOperations(EntityInterface $entity) {
-    $operations = parent::getDefaultOperations($entity);
+    $operations = $this->getDefaultOperations($entity);
     if (!isset($operations['test'])) {
       $operations['test'] = [
         'title' => $this->t('Test'),
@@ -116,7 +118,7 @@ class ServerListBuilder extends ConfigEntityListBuilder {
         'url' => Url::fromRoute('entity.ldap_server.test_form', ['ldap_server' => $entity->id()]),
       ];
     }
-    if ($entity->get('status') == 1) {
+    if ($entity->get('status')) {
       $operations['disable'] = [
         'title' => $this->t('Disable'),
         'weight' => 15,

@@ -9,10 +9,8 @@
 
 namespace Drupal\Sniffs\Commenting;
 
-use Drupal\Sniffs\Commenting\FunctionCommentSniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\AbstractVariableSniff;
-use PHP_CodeSniffer\Util\Tokens;
 
 /**
  * Parses and verifies class property doc comments.
@@ -47,6 +45,9 @@ class VariableCommentSniff extends AbstractVariableSniff
             T_VAR,
             T_STATIC,
             T_WHITESPACE,
+            T_STRING,
+            T_NS_SEPARATOR,
+            T_NULLABLE,
         ];
 
         $commentEnd = $phpcsFile->findPrevious($ignore, ($stackPtr - 1), null, true);
@@ -74,14 +75,6 @@ class VariableCommentSniff extends AbstractVariableSniff
             }
 
             return;
-        } else if ($tokens[$commentEnd]['code'] !== T_DOC_COMMENT_CLOSE_TAG) {
-            return;
-        } else {
-            // Make sure the comment we have found belongs to us.
-            $commentFor = $phpcsFile->findNext([T_VARIABLE, T_CLASS, T_INTERFACE], ($commentEnd + 1));
-            if ($commentFor !== $stackPtr) {
-                return;
-            }
         }//end if
 
         $commentStart = $tokens[$commentEnd]['comment_opener'];

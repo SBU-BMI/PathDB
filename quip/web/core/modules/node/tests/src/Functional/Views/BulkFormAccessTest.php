@@ -25,6 +25,11 @@ class BulkFormAccessTest extends NodeTestBase {
   public static $modules = ['node_test_views', 'node_access_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Views used by this test.
    *
    * @var array
@@ -47,7 +52,7 @@ class BulkFormAccessTest extends NodeTestBase {
     // Create Article node type.
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
 
-    $this->accessHandler = \Drupal::entityManager()->getAccessControlHandler('node');
+    $this->accessHandler = \Drupal::entityTypeManager()->getAccessControlHandler('node');
 
     node_access_test_add_field(NodeType::load('article'));
 
@@ -123,6 +128,22 @@ class BulkFormAccessTest extends NodeTestBase {
     // Re-load the node and check the status.
     $node = Node::load($node->id());
     $this->assertTrue($node->isPublished(), 'The node is still published.');
+
+    // Try to delete the node and check that we are not redirected to the
+    // conformation form but stay on the content view.
+    $this->assertNotEmpty($this->cssSelect('#views-form-test-node-bulk-form-page-1'));
+    $edit = [
+      'node_bulk_form[0]' => TRUE,
+      'action' => 'node_delete_action',
+    ];
+    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply to selected items'));
+    // Test that the action message isn't shown.
+    $this->assertRaw(new FormattableMarkup('No access to execute %action on the @entity_type_label %entity_label.', [
+      '%action' => 'Delete content',
+      '@entity_type_label' => 'Content',
+      '%entity_label' => $node->label(),
+    ]));
+    $this->assertNotEmpty($this->cssSelect('#views-form-test-node-bulk-form-page-1'));
   }
 
   /**
@@ -140,7 +161,12 @@ class BulkFormAccessTest extends NodeTestBase {
       'uid' => $author->id(),
     ]);
     // Create an account that may view the private node, but not delete it.
-    $account = $this->drupalCreateUser(['access content', 'administer nodes', 'delete own article content', 'node test view']);
+    $account = $this->drupalCreateUser([
+      'access content',
+      'administer nodes',
+      'delete own article content',
+      'node test view',
+    ]);
     // Create a node that may be deleted too, to ensure the delete confirmation
     // page is shown later. In node_access_test.module, nodes may only be
     // deleted by the author.

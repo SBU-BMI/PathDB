@@ -5,6 +5,8 @@
  * Module file for ldap_query.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityInterface;
 
@@ -17,10 +19,8 @@ function ldap_query_help($route_name, RouteMatchInterface $route_match) {
     t('This module does nothing in and of itself.  It should only be
     enabled and configured if another module requires it.') . '</p>';
 
-  switch ($route_name) {
-    case 'ldap_query.admin_form':
-      $output = '<p>' . $help . '</p>';
-      return $output;
+  if ($route_name === 'ldap_query.admin_form') {
+    return '<p>' . $help . '</p>';
   }
 }
 
@@ -30,7 +30,7 @@ function ldap_query_help($route_name, RouteMatchInterface $route_match) {
 function ldap_query_entity_operation(EntityInterface $entity) {
   $operations = [];
   if (\Drupal::currentUser()->hasPermission('administer ldap')) {
-    if ($entity->getEntityType()->id() == 'ldap_query_entity') {
+    if ($entity->getEntityType()->id() === 'ldap_query_entity') {
       $operations['query_test'] = [
         'title' => t('Test'),
         'weight' => 10,

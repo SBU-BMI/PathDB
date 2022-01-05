@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ruleset name="rules">
-  <description>Default PHP CodeSniffer configuration for Rules.</description>
+<ruleset name="typed_data">
+  <description>Default PHP CodeSniffer configuration for Typed Data</description>
   <file>.</file>
-  
-  <exclude-pattern>./vendor/</exclude-pattern>
-  <exclude-pattern>./config/</exclude-pattern>
 
-  <arg name="extensions" value="inc,install,module,php,profile,test,theme,yml"/>
+  <arg name="extensions" value="inc,install,module,php,profile,txt,yml"/>
+  <!-- Use 's' to print the full sniff name in the report. -->
   <arg value="s"/>
-  
-  <rule ref="Drupal.NamingConventions.ValidVariableName.LowerCamelName">
-    <!-- Annotations must use the same property names as in the configuration. -->
-    <exclude-pattern>src/Annotation</exclude-pattern>
-  </rule>
+  <arg value="-colors"/>
 
-  <!--Blacklist of coding standard rules that are not yet fixed. -->
-  <rule ref="Drupal">
-    <exclude name="Drupal.Commenting.DocComment.MissingShort"/>
-  </rule>
+  <!-- ignore all files that match these patterns -->
+  <exclude-pattern>vendor</exclude-pattern>
+  <exclude-pattern>_ignore*</exclude-pattern>
+
+  <!-- Include all Drupal and DrupalPractice sniffs by default, then adjust. -->
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
 
   <rule ref="DrupalPractice">
     <!-- Allow empty lines after comments, we don't care. -->
     <exclude name="DrupalPractice.Commenting.CommentEmptyLine"/>
   </rule>
 
-  <!-- We always want short array syntax only. -->
-  <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
-
   <rule ref="Drupal.Files.TxtFileLineLength.TooLong">
-    <exclude-pattern>README.md</exclude-pattern>
+    <exclude-pattern>README.*</exclude-pattern>
   </rule>
 </ruleset>

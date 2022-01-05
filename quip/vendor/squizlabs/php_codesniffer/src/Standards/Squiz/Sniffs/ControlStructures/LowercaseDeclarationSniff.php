@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\ControlStructures;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 
 class LowercaseDeclarationSniff implements Sniff
 {
@@ -34,6 +34,7 @@ class LowercaseDeclarationSniff implements Sniff
             T_WHILE,
             T_TRY,
             T_CATCH,
+            T_MATCH,
         ];
 
     }//end register()

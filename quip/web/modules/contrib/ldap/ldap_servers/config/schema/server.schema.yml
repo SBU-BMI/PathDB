@@ -24,13 +24,10 @@ ldap_servers.server.*:
       label: 'LDAP Server port'
     timeout:
       type: integer
-      label: 'Network timeout'
-    tls:
-      type: boolean
-      label: 'Use Start-TLS'
-    followrefs:
-      type: boolean
-      label: 'Follow LDAP Referrals'
+      label: 'Timeout'
+    encryption:
+      type: string
+      label: 'Encryption'
     weight:
       type: integer
       label: 'Weight'
@@ -44,14 +41,16 @@ ldap_servers.server.*:
       type: string
       label: 'Password for non-anonymous search'
     basedn:
-      type: string
+      type: sequence
       label: 'Base DNs for LDAP users, groups, and other entries.'
+      sequence:
+        type: string
     user_attr:
       type: string
-      label: 'AuthName attribute'
+      label: 'Authentication name attribute'
     account_name_attr:
       type: string
-      label: 'AccountName attribute'
+      label: 'Account name attribute'
     mail_attr:
       type: string
       label: 'Email attribute'
@@ -78,7 +77,7 @@ ldap_servers.server.*:
       label: 'DN of testing username, e.g. cn=hpotter,ou=people,dc=hogwarts,dc=edu'
     grp_unused:
       type: boolean
-      label: 'Groups are not relevant to this Drupal site.  This is generally true if LDAP Groups and LDAP Authorization are not in use.'
+      label: 'Groups are not relevant to this Drupal site. This is generally true if LDAP Groups and LDAP Authorization are not in use.'
     grp_object_cat:
       type: string
       label: 'Name of Group Object Class'
@@ -98,7 +97,7 @@ ldap_servers.server.*:
       type: string
       label: 'User attribute held in "LDAP Group Entry Attribute Holding..."'
     grp_derive_from_dn:
-      type: string
+      type: boolean
       label: "Groups are derived from user's LDAP entry DN."
     grp_derive_from_dn_attr:
       type: string
@@ -108,10 +107,4 @@ ldap_servers.server.*:
       label: 'Testing LDAP Group DN'
     grp_test_grp_dn_writeable:
       type: string
-      label: 'Testing LDAP Group DN that is writable.  WARNING the test script for the server will create, delete, and add members to this group!'
-    search_pagination:
-      type: boolean
-      label: 'Use LDAP Pagination.'
-    search_page_size:
-      type: integer
-      label: 'Pagination size limit.'
+      label: 'Testing LDAP Group DN that is writable. WARNING the test script for the server will create, delete, and add members to this group!'

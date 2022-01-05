@@ -8,6 +8,7 @@ use const T_CLASS;
 use const T_DOC_COMMENT;
 use const T_EXTENDS;
 use const T_FUNCTION;
+use const T_NEW;
 use const T_PAAMAYIM_NEKUDOTAYIM;
 use const T_PRIVATE;
 use const T_PROTECTED;
@@ -18,6 +19,7 @@ use const T_VAR;
 use const T_VARIABLE;
 use function array_merge;
 use function file_get_contents;
+use function is_array;
 use function ltrim;
 use function preg_match;
 use function sprintf;
@@ -161,7 +163,7 @@ class StaticReflectionParser implements ReflectionProviderInterface
                     $docComment = $token[1];
                     break;
                 case T_CLASS:
-                    if ($last_token !== T_PAAMAYIM_NEKUDOTAYIM) {
+                    if ($last_token !== T_PAAMAYIM_NEKUDOTAYIM && $last_token !== T_NEW) {
                         $this->docComment['class'] = $docComment;
                         $docComment                = '';
                     }
@@ -187,6 +189,9 @@ class StaticReflectionParser implements ReflectionProviderInterface
                     // string.
                     while (($token = $tokenParser->next()) && $token[0] !== T_STRING) {
                         continue;
+                    }
+                    if ($token === null) {
+                        break;
                     }
                     $methodName                              = $token[1];
                     $this->docComment['method'][$methodName] = $docComment;
@@ -221,7 +226,7 @@ class StaticReflectionParser implements ReflectionProviderInterface
                     break;
             }
 
-            $last_token = $token[0];
+            $last_token = is_array($token) ? $token[0] : false;
         }
     }
 

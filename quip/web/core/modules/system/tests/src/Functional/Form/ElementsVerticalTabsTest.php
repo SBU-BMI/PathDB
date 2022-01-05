@@ -21,6 +21,11 @@ class ElementsVerticalTabsTest extends BrowserTestBase {
   public static $modules = ['form_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with permission to access vertical_tab_test_tabs.
    *
    * @var \Drupal\user\UserInterface
@@ -37,7 +42,9 @@ class ElementsVerticalTabsTest extends BrowserTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $this->adminUser = $this->drupalCreateUser(['access vertical_tab_test tabs']);
+    $this->adminUser = $this->drupalCreateUser([
+      'access vertical_tab_test tabs',
+    ]);
     $this->webUser = $this->drupalCreateUser();
     $this->drupalLogin($this->adminUser);
   }

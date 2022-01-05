@@ -35,5 +35,5 @@ ldap_query.ldap_query_entity.*:
       type: integer
       label: 'How aliases should be handled'
     scope:
-      type: integer
+      type: string
       label: 'Scope of search'

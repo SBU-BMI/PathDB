@@ -8,7 +8,7 @@ use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
-use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
+use \Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Base test for Display Suite.
@@ -21,6 +21,8 @@ abstract class TestBase extends BrowserTestBase {
   use EntityReferenceTestTrait;
   use FieldUiTestTrait;
   use TaxonomyTestTrait;
+
+  protected $defaultTheme = 'classy';
 
   /**
    * Modules to install.
@@ -40,7 +42,7 @@ abstract class TestBase extends BrowserTestBase {
     'ds_test',
     'ds_switch_view_mode',
     'layout_discovery',
-    'field_group',
+    //'field_group',
   ];
 
   /**
@@ -90,6 +92,7 @@ abstract class TestBase extends BrowserTestBase {
     $this->adminUser = $this->drupalCreateUser([
       'access content',
       'access in-place editing',
+      'access user profiles',
       'admin classes',
       'admin display suite',
       'admin fields',

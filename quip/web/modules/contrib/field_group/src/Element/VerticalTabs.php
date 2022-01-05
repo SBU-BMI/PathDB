@@ -4,11 +4,12 @@ namespace Drupal\field_group\Element;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Element\RenderCallbackInterface;
 
 /**
  * Provides extra processing and pre rendering on the vertical tabs.
  */
-class VerticalTabs {
+class VerticalTabs implements RenderCallbackInterface {
 
   /**
    * Pre render the group to support #group parameter.
@@ -44,6 +45,18 @@ class VerticalTabs {
       // not render it.
       elseif (Element::children($element['#groups'][$group])) {
         $element['#printed'] = TRUE;
+      }
+    }
+
+    // Search for the correct default active tab.
+    $group_identifier = implode('][', $element['#parents']);
+    if (!empty($element['#groups'][$group_identifier])) {
+      $children = Element::children($element['#groups'][$group_identifier], TRUE);
+      foreach ($children as $key) {
+        if (!empty($element['#groups'][$group_identifier][$key]['#open'])) {
+          $element['#default_tab'] = $element['#groups'][$group_identifier][$key]['#id'];
+          $element[str_replace('][', '__', $group_identifier) . '__active_tab']['#value'] = $element['#default_tab'];
+        }
       }
     }
 

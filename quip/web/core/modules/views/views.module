@@ -5,7 +5,6 @@
  * Primarily Drupal hooks and global API functions to manipulate views.
  */
 
-use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -16,8 +15,9 @@ use Drupal\views\Plugin\Derivative\ViewsLocalTask;
 use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Entity\View;
-use Drupal\views\Render\ViewsRenderPipelineMarkup;
+use Drupal\views\Form\ViewsFormMainForm;
 use Drupal\views\Views;
+use Drupal\views\ViewsConfigUpdater;
 
 /**
  * Implements hook_help().
@@ -60,7 +60,7 @@ function views_views_pre_render($view) {
           'view_name' => $view->storage->id(),
           'view_display_id' => $view->current_display,
           'view_args' => Html::escape(implode('/', $view->args)),
-          'view_path' => Html::escape(Url::fromRoute('<current>')->toString()),
+          'view_path' => Html::escape(\Drupal::service('path.current')->getPath()),
           'view_base_path' => $view->getPath(),
           'view_dom_id' => $view->dom_id,
           // To fit multiple views on a page, the programmer may have
@@ -399,7 +399,7 @@ function views_add_contextual_links(&$render_element, $location, $display_id, ar
         $args = [];
         $valid = TRUE;
         if (!empty($link['route_parameters_names'])) {
-          $view_storage = \Drupal::entityManager()
+          $view_storage = \Drupal::entityTypeManager()
             ->getStorage('view')
             ->load($view_id);
           foreach ($link['route_parameters_names'] as $parameter_name => $property) {
@@ -624,39 +624,19 @@ function views_disable_view(View $view) {
  * @param array $element
  *   An associative array containing the properties of the element.
  *   Properties used: #substitutions, #children.
+ *
  * @return array
  *   The $element with prepared variables ready for #theme 'form'
  *   in views_form_views_form.
+ *
+ * @deprecated in drupal:8.8.0 and is removed from drupal:9.0.0. Use
+ *   \Drupal\views\Form\ViewsFormMainForm::preRenderViewsForm() instead.
+ *
+ * @see https://www.drupal.org/node/2966725
  */
 function views_pre_render_views_form_views_form($element) {
-  // Placeholders and their substitutions (usually rendered form elements).
-  $search = [];
-  $replace = [];
-
-  // Add in substitutions provided by the form.
-  foreach ($element['#substitutions']['#value'] as $substitution) {
-    $field_name = $substitution['field_name'];
-    $row_id = $substitution['row_id'];
-
-    $search[] = $substitution['placeholder'];
-    $replace[] = isset($element[$field_name][$row_id]) ? \Drupal::service('renderer')->render($element[$field_name][$row_id]) : '';
-  }
-  // Add in substitutions from hook_views_form_substitutions().
-  $substitutions = \Drupal::moduleHandler()->invokeAll('views_form_substitutions');
-  foreach ($substitutions as $placeholder => $substitution) {
-    $search[] = Html::escape($placeholder);
-    // Ensure that any replacements made are safe to make.
-    if (!($substitution instanceof MarkupInterface)) {
-      $substitution = Html::escape($substitution);
-    }
-    $replace[] = $substitution;
-  }
-
-  // Apply substitutions to the rendered output.
-  $output = str_replace($search, $replace, \Drupal::service('renderer')->render($element['output']));
-  $element['output'] = ['#markup' => ViewsRenderPipelineMarkup::create($output)];
-
-  return $element;
+  @trigger_error('views_pre_render_views_form_views_form() is deprecated in Drupal 8.8.0 and will be removed before Drupal 9.0.0. Use \Drupal\views\Form\ViewsFormMainForm::preRenderViewsForm() instead. See https://www.drupal.org/node/2966725', E_USER_DEPRECATED);
+  return ViewsFormMainForm::preRenderViewsForm($element);
 }
 
 /**
@@ -798,6 +778,7 @@ function views_embed_view($name, $display_id = 'default') {
  *   Everything after #views-tab- is the display ID, e.g. page_1.
  * @param ...
  *   Any additional parameters will be passed as arguments.
+ *
  * @return array
  *   An array containing an object for each view item.
  */
@@ -865,37 +846,9 @@ function views_view_delete(EntityInterface $entity) {
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
- *
- * Provides a BC layer for modules providing old configurations.
  */
 function views_view_presave(ViewEntityInterface $view) {
-  $displays = $view->get('display');
-  $changed = FALSE;
-  foreach ($displays as $display_name => &$display) {
-    if (isset($display['display_options']['fields'])) {
-      foreach ($display['display_options']['fields'] as $field_name => &$field) {
-        if (isset($field['plugin_id']) && $field['plugin_id'] === 'entity_link') {
-          // Add any missing settings for entity_link.
-          if (!isset($field['output_url_as_text'])) {
-            $field['output_url_as_text'] = FALSE;
-            $changed = TRUE;
-          }
-          if (!isset($field['absolute'])) {
-            $field['absolute'] = FALSE;
-            $changed = TRUE;
-          }
-        }
-        elseif (isset($field['plugin_id']) && $field['plugin_id'] === 'node_path') {
-          // Convert the use of node_path to entity_link.
-          $field['plugin_id'] = 'entity_link';
-          $field['field'] = 'view_node';
-          $field['output_url_as_text'] = TRUE;
-          $changed = TRUE;
-        }
-      }
-    }
-  }
-  if ($changed) {
-    $view->set('display', $displays);
-  }
+  /** @var \Drupal\views\ViewsConfigUpdater $config_updater */
+  $config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  $config_updater->updateAll($view);
 }

@@ -71,7 +71,10 @@ class HtmlElement extends FieldGroupFormatterBase {
     $element['#attributes'] = $element_attributes;
     if ($this->getSetting('show_label')) {
       $element['#title_element'] = $this->getSetting('label_element');
-      $element['#title'] = Html::escape($this->t($this->getLabel()));
+      $element['#title'] = $this->getLabel();
+      // Prevent \Drupal\content_translation\ContentTranslationHandler::addTranslatabilityClue()
+      // from adding an incorrect suffix to the field group title.
+      $element['#multilingual'] = TRUE;
       $element['#title_attributes'] = new Attribute();
 
       if (!empty($this->getSetting('label_element_classes'))) {

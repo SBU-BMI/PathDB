@@ -12,6 +12,11 @@ class InstallerExistingConfigSyncDriectoryProfileMismatchTest extends InstallerE
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected $profile = 'testing_config_install_multilingual';
 
   /**
@@ -37,7 +42,6 @@ class InstallerExistingConfigSyncDriectoryProfileMismatchTest extends InstallerE
 
   protected function setUpSite() {
     // This step will not occur because there is an error.
-    return;
   }
 
   /**

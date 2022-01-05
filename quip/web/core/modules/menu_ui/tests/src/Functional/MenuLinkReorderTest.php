@@ -26,6 +26,11 @@ class MenuLinkReorderTest extends BrowserTestBase {
   public static $modules = ['menu_ui', 'test_page_test', 'node', 'block'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test creating, editing, deleting menu links via node form widget.
    */
   public function testDefaultMenuLinkReorder() {
@@ -35,7 +40,7 @@ class MenuLinkReorderTest extends BrowserTestBase {
 
     // Assert that the Home link is available.
     $this->drupalGet('test-page');
-    $this->assertLink('Home');
+    $this->assertSession()->linkExists('Home');
 
     // The administrator user that can re-order menu links.
     $this->administrator = $this->drupalCreateUser([
@@ -53,14 +58,14 @@ class MenuLinkReorderTest extends BrowserTestBase {
 
     // The link is still there.
     $this->drupalGet('test-page');
-    $this->assertLink('Home');
+    $this->assertSession()->linkExists('Home');
 
     // Clear all caches.
     $this->drupalPostForm('admin/config/development/performance', [], t('Clear all caches'));
 
     // Clearing all caches should not affect the state of the menu link.
     $this->drupalGet('test-page');
-    $this->assertLink('Home');
+    $this->assertSession()->linkExists('Home');
 
   }
 

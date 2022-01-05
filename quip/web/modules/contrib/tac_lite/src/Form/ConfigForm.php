@@ -2,6 +2,7 @@
 
 namespace Drupal\tac_lite\Form;
 
+use Drupal\Core\Url;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -31,7 +32,7 @@ class ConfigForm extends ConfigFormBase {
     if (!count($vocabularies)) {
       $form['body'] = [
         '#markup' => $this->t('You must <a href=":url">create a vocabulary</a> before you can use
-          tac_lite.', [':url' => \Drupal::url('entity.taxonomy_vocabulary.add_form')]),
+          tac_lite.', [':url' => Url::fromRoute('entity.taxonomy_vocabulary.add_form')->toString()]),
       ];
       return $form;
     }
@@ -96,9 +97,9 @@ class ConfigForm extends ConfigFormBase {
       node_access_rebuild(TRUE);
     }
     else {
-      drupal_set_message($this->t('Do not forget to <a href=:url>rebuild node access permissions </a> after you have configured taxonomy-based access.', [
-        ':url' => \Drupal::url('node.configure_rebuild_confirm'),
-      ]), 'warning');
+      $this->messenger()->addWarning($this->t('Do not forget to <a href=:url>rebuild node access permissions </a> after you have configured taxonomy-based access.', [
+        ':url' => Url::fromRoute('node.configure_rebuild_confirm')->toString(),
+      ]));
     }
     // And rebuild menus, in case the number of schemes has changed.
     \Drupal::service('router.builder')->rebuild();

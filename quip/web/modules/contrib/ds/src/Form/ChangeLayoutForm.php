@@ -210,12 +210,20 @@ class ChangeLayoutForm extends FormBase {
     // Create new third party settings.
     $third_party_settings = $old_layout;
     $third_party_settings['layout']['id'] = $new_layout_key;
+    $third_party_settings['layout']['library'] = NULL;
     if ($library = $new_layout->getLibrary()) {
       $third_party_settings['layout']['library'] = $library;
     }
     unset($third_party_settings['regions']);
 
+    // Default wrappers.
+    $third_party_settings['layout']['settings']['wrappers'] = [];
+    foreach ($new_layout->getRegions() as $region_name => $content) {
+      $third_party_settings['layout']['settings']['wrappers'][$region_name] = 'div';
+    }
+
     // Map old regions to new ones.
+    $fields = [];
     foreach ($old_layout_info->getRegions() as $region => $region_title) {
       $new_region = $form_state->getValue('ds_' . $region);
       if ($new_region != '' && isset($old_layout['regions'][$region])) {
@@ -224,6 +232,7 @@ class ChangeLayoutForm extends FormBase {
             $third_party_settings['regions'][$new_region] = [];
           }
           $third_party_settings['regions'][$new_region][] = $field;
+          $fields[$field] = $new_region;
         }
       }
     }
@@ -236,6 +245,29 @@ class ChangeLayoutForm extends FormBase {
     foreach (array_keys($third_party_settings) as $key) {
       $entity_display->setThirdPartySetting('ds', $key, $third_party_settings[$key]);
     }
+
+    // Map regions on fields.
+    foreach ($entity_display->getComponents() as $name => $options) {
+      if (isset($options['region']) && isset($fields[$name])) {
+        $options['region'] = $fields[$name];
+        $entity_display->setComponent($name, $options);
+      }
+    }
+
+    // Map field groups, if available.
+    $groups = $entity_display->getThirdPartySettings('field_group');
+    if (!empty($groups)) {
+      foreach (array_keys($groups) as $group_name) {
+        $region = 'hidden';
+        if (isset($fields[$group_name])) {
+          $region = $fields[$group_name];
+        }
+        $groups[$group_name]['region'] = $region;
+        $entity_display->setThirdPartySetting('field_group', $group_name, $groups[$group_name]);
+      }
+    }
+
+    // Now save.
     $entity_display->save();
 
     // Clear entity info cache.

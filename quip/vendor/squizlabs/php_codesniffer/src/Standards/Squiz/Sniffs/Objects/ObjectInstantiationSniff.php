@@ -9,8 +9,8 @@
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Objects;
 
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 class ObjectInstantiationSniff implements Sniff
@@ -50,6 +50,8 @@ class ObjectInstantiationSniff implements Sniff
         $allowedTokens = [
             T_EQUAL        => true,
             T_DOUBLE_ARROW => true,
+            T_FN_ARROW     => true,
+            T_MATCH_ARROW  => true,
             T_THROW        => true,
             T_RETURN       => true,
             T_INLINE_THEN  => true,

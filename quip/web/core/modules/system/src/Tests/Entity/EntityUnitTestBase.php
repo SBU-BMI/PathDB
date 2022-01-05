@@ -12,7 +12,7 @@ use Drupal\user\Entity\User;
 /**
  * Defines an abstract test base for entity unit tests.
  *
- * @deprecated in Drupal 8.1.0, will be removed before Drupal 9.0.0. Use
+ * @deprecated in drupal:8.1.0 and is removed from drupal:9.0.0. Use
  *   \Drupal\KernelTests\Core\Entity\EntityKernelTestBase instead.
  */
 abstract class EntityUnitTestBase extends KernelTestBase {
@@ -22,7 +22,14 @@ abstract class EntityUnitTestBase extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['user', 'system', 'field', 'text', 'filter', 'entity_test'];
+  public static $modules = [
+    'user',
+    'system',
+    'field',
+    'text',
+    'filter',
+    'entity_test',
+  ];
 
   /**
    * The entity manager service.

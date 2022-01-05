@@ -21,6 +21,11 @@ class BlockUiTest extends BrowserTestBase {
    */
   public static $modules = ['block', 'block_test', 'help', 'condition_test'];
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
+
   protected $regions;
 
   /**
@@ -84,13 +89,15 @@ class BlockUiTest extends BrowserTestBase {
     $elements = $this->xpath('//div[contains(@class, "region-highlighted")]/div[contains(@class, "block-region") and contains(text(), :title)]', [':title' => 'Highlighted']);
     $this->assertTrue(!empty($elements), 'Block demo regions are shown.');
 
-    \Drupal::service('theme_handler')->install(['test_theme']);
+    // Ensure that other themes can use the block demo page.
+    \Drupal::service('theme_installer')->install(['test_theme']);
     $this->drupalGet('admin/structure/block/demo/test_theme');
     $this->assertEscaped('<strong>Test theme</strong>');
 
-    \Drupal::service('theme_handler')->install(['stable']);
+    // Ensure that a hidden theme cannot use the block demo page.
+    \Drupal::service('theme_installer')->install(['stable']);
     $this->drupalGet('admin/structure/block/demo/stable');
-    $this->assertResponse(404, 'Hidden themes that are not the default theme are not supported by the block demo screen');
+    $this->assertSession()->statusCodeEquals(404);
   }
 
   /**
@@ -145,20 +152,23 @@ class BlockUiTest extends BrowserTestBase {
     \Drupal::service('theme_installer')->install(['stable', 'stark']);
     $this->drupalGet('admin/structure/block');
     $theme_handler = \Drupal::service('theme_handler');
-    $this->assertLink($theme_handler->getName('classy'));
-    $this->assertLink($theme_handler->getName('stark'));
-    $this->assertNoLink($theme_handler->getName('stable'));
+    $this->assertSession()->linkExists($theme_handler->getName('classy'));
+    $this->assertSession()->linkExists($theme_handler->getName('stark'));
+    $this->assertSession()->linkNotExists($theme_handler->getName('stable'));
 
+    // Ensure that a hidden theme cannot use the block demo page.
     $this->drupalGet('admin/structure/block/list/stable');
-    $this->assertResponse(404, 'Placing blocks through UI is not possible for a hidden base theme.');
+    $this->assertSession()->statusCodeEquals(404);
 
+    // Ensure that a hidden theme set as the admin theme can use the block demo
+    // page.
     \Drupal::configFactory()->getEditable('system.theme')->set('admin', 'stable')->save();
     \Drupal::service('router.builder')->rebuildIfNeeded();
     $this->drupalPlaceBlock('local_tasks_block', ['region' => 'header', 'theme' => 'stable']);
     $this->drupalGet('admin/structure/block');
-    $this->assertLink($theme_handler->getName('stable'));
+    $this->assertSession()->linkExists($theme_handler->getName('stable'));
     $this->drupalGet('admin/structure/block/list/stable');
-    $this->assertResponse(200, 'Placing blocks through UI is possible for a hidden base theme that is the admin theme.');
+    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -351,11 +361,11 @@ class BlockUiTest extends BrowserTestBase {
     $arguments = [':message' => 'Only digits are allowed'];
     $pattern = '//div[contains(@class,"messages messages--error")]/div[contains(text()[2],:message)]';
     $elements = $this->xpath($pattern, $arguments);
-    $this->assertTrue($elements, 'Plugin error message found in parent form.');
+    $this->assertNotEmpty($elements, 'Plugin error message found in parent form.');
 
     $error_class_pattern = '//div[contains(@class,"form-item-settings-digits")]/input[contains(@class,"error")]';
     $error_class = $this->xpath($error_class_pattern);
-    $this->assertTrue($error_class, 'Plugin error class found in parent form.');
+    $this->assertNotEmpty($error_class, 'Plugin error class found in parent form.');
   }
 
   /**
@@ -367,9 +377,9 @@ class BlockUiTest extends BrowserTestBase {
     $block = reset($this->blocks);
     // Ensure that the enable and disable routes are protected.
     $this->drupalGet('admin/structure/block/manage/' . $block->id() . '/disable');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     $this->drupalGet('admin/structure/block/manage/' . $block->id() . '/enable');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
   }
 
 }

@@ -21,15 +21,17 @@ if [ ! -d /data/tmp ]; then
 	mkdir -p /data/tmp
 	chmod a=rwx,o+t /data/tmp
 fi
+# clear default ssl.conf
+FILE=/etc/httpd/conf.d/ssl.conf
+if [ -f "$FILE" ]; then
+    echo "$FILE exists"
+    rm -f $FILE
+fi
 # clear any stale httpd.pid files
 FILE=/var/run/httpd/httpd.pid
 if [ -f "$FILE" ]; then
     echo "$FILE exists"
     rm -f $FILE
-fi
-# check to see if custom theme file exists
-if [ ! -f "/config/pathdb/w3-theme-custom.css" ]; then
-        cp /build/w3-theme-custom.css /config/pathdb/w3-theme-custom.css
 fi
 # check to see of PathDB MySQL defaults file exists
 if [ ! -f "/config/pathdbmysql.cnf" ]; then
@@ -98,6 +100,9 @@ if [ ! -d /data/pathdb/mysql ]; then
 	chgrp -R 0 /data/pathdb/mysql
 	chmod -R g=u /data/pathdb/mysql
 fi
+#<<<<<<< dev-merge
+#       /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
+#=======
 
 if [ ! -d /data/pathdb/mysql ]; then
 # PathDB not initialized.  Create default MySQL database and make PathDB changes
@@ -169,15 +174,55 @@ else
 	# replace user=mysql with UID of non-root user from container
 	sed -i 's/user=mysql/user='"$UID"'/g' /config/pathdbmysql.cnf
     /usr/bin/mysqld_safe --defaults-file=/config/pathdbmysql.cnf &
+#>>>>>>> k8s-develop
 	until mysqladmin status
 	do
     	sleep 3
 	done
     httpd -f /config/httpd.conf
 	cd /quip/web
+	/quip/vendor/bin/drush -y theme:install bootstrap
+        /quip/vendor/bin/drush -y pm:enable css_editor
+	/quip/vendor/bin/drush -y pm:enable user_current_paths
+        /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
+	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap
+	/quip/vendor/bin/drush -y config-set system.theme default bootstrap
+	/quip/vendor/bin/drush config-delete block.block.bartik_branding
+	/quip/vendor/bin/drush config-delete block.block.bartik_account_menu
+	/quip/vendor/bin/drush config-delete block.block.bartik_breadcrumbs
+	/quip/vendor/bin/drush config-delete block.block.bartik_content
+	/quip/vendor/bin/drush config-delete block.block.bartik_footer
+	/quip/vendor/bin/drush config-delete block.block.bartik_help
+	/quip/vendor/bin/drush config-delete block.block.bartik_local_actions
+	/quip/vendor/bin/drush config-delete block.block.bartik_local_tasks
+	/quip/vendor/bin/drush config-delete block.block.bartik_main_menu
+	/quip/vendor/bin/drush config-delete block.block.bartik_messages
+	/quip/vendor/bin/drush config-delete block.block.bartik_page_title
+	/quip/vendor/bin/drush config-delete block.block.bartik_powered
+	/quip/vendor/bin/drush config-delete block.block.bartik_tools
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_account_menu
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_branding
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_breadcrumbs
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_content
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_help
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_local_actions
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_local_tasks
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_main_menu
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_messages
+	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_page_title
+	/quip/vendor/bin/drush -y theme:uninstall drupal8_w3css_theme
+	/quip/vendor/bin/drush -y theme:uninstall bartik
+	#/quip/vendor/bin/drush -y theme:uninstall seven
+	/quip/vendor/bin/drush -y pm:uninstall ds_extras ds_switch_view_mode ds
+        /quip/vendor/bin/drush config-delete field.storage.node.field_map_type
+        mkdir /data/tmp2
+	cp -f /quip/config-update/field.storage.node.field_map_type.yml /data/tmp2
+	/quip/vendor/bin/drush -y config:import --partial --source /data/tmp2
 	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
+	/quip/vendor/bin/drush -y pm:enable moderated_content_bulk_publish
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
-fi
+	/quip/vendor/bin/drush -y user:cancel archon
+
 while true; do sleep 1000; done
 
