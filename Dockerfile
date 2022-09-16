@@ -6,7 +6,7 @@ MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 ### update OS
 RUN yum update -y && yum clean all
 RUN yum -y install wget which zip unzip bind-utils epel-release
-RUN rpm -Uvh http://mirror.bebout.net/remi/enterprise/remi-release-7.rpm
+RUN rpm -Uvh http://mirror.usi.edu/pub/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php73
 RUN yum -y install httpd openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip php-ldap
 RUN yum -y install mariadb-server mariadb-client git
