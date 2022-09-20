@@ -17,12 +17,12 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
    *
    * @var array
    */
-  public static $modules = ['node'];
+  protected static $modules = ['node'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
@@ -67,6 +67,7 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
       'list' => [[0, 'en', 'node', 1]],
       'some_data' => [],
       'action_label' => '',
+      'finished_callback' => [TestViewsBulkOperationsBatch::class, 'finished'],
     ];
     $batch = TestViewsBulkOperationsBatch::getBatch($data);
     $this->assertArrayHasKey('title', $batch);
@@ -128,6 +129,7 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
       'display_id' => 'test_display',
       'batch_size' => $batch_size,
       'list' => [],
+      'finished_callback' => [TestViewsBulkOperationsBatch::class, 'finished'],
     ];
     $context = [
       'sandbox' => [

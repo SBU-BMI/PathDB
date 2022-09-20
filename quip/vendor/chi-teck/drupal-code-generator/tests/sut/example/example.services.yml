@@ -1,3 +1,0 @@
-services:
-  example:
-    class: Drupal\example\Example

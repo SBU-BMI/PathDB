@@ -34,7 +34,7 @@ class DynamicUserHelpLink extends DeriverBase implements ContainerDeriverInterfa
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, $base_plugin_id) {
+  public static function create(ContainerInterface $container, $base_plugin_id): DynamicUserHelpLink {
     return new static($container->get('config.factory'));
   }
 

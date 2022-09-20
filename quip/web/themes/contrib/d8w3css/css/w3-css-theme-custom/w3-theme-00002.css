@@ -39,6 +39,8 @@ a,
 .w3-button {
   transition: 0.4s !important;
 }
+
+.w3-hover-over:hover,
 #open-nav-inner:hover,
 #open-search:hover,
 .w3-button:hover {

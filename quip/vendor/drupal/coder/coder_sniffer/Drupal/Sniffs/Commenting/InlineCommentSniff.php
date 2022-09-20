@@ -69,6 +69,7 @@ class InlineCommentSniff implements Sniff
             );
 
             $ignore = [
+                T_ATTRIBUTE,
                 T_CLASS,
                 T_INTERFACE,
                 T_TRAIT,
@@ -346,7 +347,11 @@ class InlineCommentSniff implements Sniff
 
         // Only check the end of comment character if the start of the comment
         // is a letter, indicating that the comment is just standard text.
-        if (preg_match('/^\p{L}/u', $commentText) === 1) {
+        // Also, when the comment starts with cspell: don't check the end of the
+        // comment.
+        if (preg_match('/^\p{L}/u', $commentText) === 1
+            && strpos($commentText, 'cspell:') !== 0
+        ) {
             $commentCloser   = $commentText[(strlen($commentText) - 1)];
             $acceptedClosers = [
                 'full-stops'             => '.',

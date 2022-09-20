@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\ldap_authentication\Controller;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Handles the actual testing of credentials and authentication of users.
@@ -181,6 +182,35 @@ class LoginValidatorLoginForm extends LoginValidatorBase {
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Check credentials on an signed-in user from the account.
+   *
+   * This helper function is intended for the user edit form to allow
+   * the constraint validator to check against LDAP for the current password.
+   *
+   * @param \Drupal\user\UserInterface $account
+   *   User account.
+   *
+   * @return int
+   *   Authentication status.
+   */
+  public function validateCredentialsLoggedIn(UserInterface $account): int {
+    $this->drupalUser = $account;
+    $data = $this->externalAuth->getAuthData($account->id(), 'ldap_user');
+    if (!empty($data) && $data['authname']) {
+      $this->authName = $data['authname'];
+      $this->drupalUserAuthMapped = TRUE;
+    }
+
+    $this->detailLog->log(
+      '%auth_name : Testing existing credentials authentication',
+      ['%auth_name' => $this->authName],
+      'ldap_authentication'
+    );
+
+    return $this->testCredentials();
   }
 
 }

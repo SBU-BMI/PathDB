@@ -42,14 +42,14 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_authentication_admin_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames(): array {
     return ['ldap_authentication.settings'];
   }
 
@@ -70,7 +70,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): LdapAuthenticationAdminForm {
     return new static(
       $container->get('config.factory'),
       $container->get('module_handler'),
@@ -81,15 +81,20 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config('ldap_authentication.settings');
 
     $query_result = $this->storage->getQuery()->execute();
+    /** @var \Drupal\ldap_servers\Entity\Server[] $servers */
     $servers = $this->storage->loadMultiple($query_result);
     $authenticationServers = [];
     foreach ($servers as $sid => $ldap_server) {
-      $enabled = ($ldap_server->get('status')) ? 'Enabled' : 'Disabled';
-      $authenticationServers[$sid] = $ldap_server->get('label') . ' (' . $ldap_server->get('address') . ') Status: ' . $enabled;
+      $authenticationServers[$sid] = sprintf(
+        '%s (%s) Status: %s',
+        $ldap_server->get('label'),
+        $ldap_server->get('address'),
+        $ldap_server->get('status') ? 'Enabled' : 'Disabled'
+      );
     }
 
     if (count($authenticationServers) === 0) {
@@ -353,14 +358,13 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Add form data to object and save or create.
     $values = $form_state->getValues();
     $this->config('ldap_authentication.settings')

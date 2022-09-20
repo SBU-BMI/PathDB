@@ -103,21 +103,24 @@ processor_settings:
     weights:
       preprocess_index: -10
   ignorecase:
+    weights:
+      preprocess_index: -48
+      preprocess_query: -50
     all_fields: true
     fields:
       - clinicaltrialsubjectid
       - imageid
       - name
       - studyid
-    weights:
-      preprocess_index: -48
-      preprocess_query: -50
   language_with_fallback: {  }
   rendered_item:
     weights:
       add_properties: 0
       pre_index_save: -10
   tokenizer:
+    weights:
+      preprocess_index: -46
+      preprocess_query: -49
     all_fields: true
     fields:
       - clinicaltrialsubjectid
@@ -127,13 +130,11 @@ processor_settings:
     spaces: ''
     overlap_cjk: 1
     minimum_word_size: '3'
-    weights:
-      preprocess_index: -46
-      preprocess_query: -49
 tracker_settings:
   default:
     indexing_order: fifo
 options:
   cron_limit: 50
   index_directly: true
+  track_changes_in_references: true
 server: default_server

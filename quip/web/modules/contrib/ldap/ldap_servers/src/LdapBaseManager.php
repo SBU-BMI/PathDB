@@ -143,6 +143,8 @@ abstract class LdapBaseManager {
    *
    * @return bool|Entry
    *   Return ldap entry or false.
+   *
+   * @todo Entry/null would be better for type hints.
    */
   public function checkDnExistsIncludeData(string $dn, array $attributes) {
     if (!$this->checkAvailability()) {
@@ -208,7 +210,7 @@ abstract class LdapBaseManager {
    * @return \Symfony\Component\Ldap\Entry[]
    *   An array of matching entries combined from all DN.
    */
-  public function searchAllBaseDns($filter, array $attributes = []): array {
+  public function searchAllBaseDns(string $filter, array $attributes = []): array {
     $all_entries = [];
 
     if (!$this->checkAvailability()) {
@@ -237,7 +239,11 @@ abstract class LdapBaseManager {
       }
     }
 
-    return array_merge(...$results);
+    if (!empty($results)) {
+      $results = array_merge(...$results);
+    }
+
+    return $results;
   }
 
   /**

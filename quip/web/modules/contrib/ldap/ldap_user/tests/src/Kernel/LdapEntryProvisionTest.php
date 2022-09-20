@@ -6,13 +6,16 @@ namespace Drupal\Tests\ldap_user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
-use Drupal\ldap_servers\FakeBridge;
+use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
+use Drupal\ldap_user\Event\LdapUserLoginEvent;
 use Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use Symfony\Component\Ldap\Adapter\ExtLdap\EntryManager;
 
 /**
- * @coversDefaultClass \Drupal\ldap_servers\Processor\TokenProcessor
+ * Token processor tests.
+ *
  * @group ldap
  */
 class LdapEntryProvisionTest extends KernelTestBase {
@@ -32,12 +35,13 @@ class LdapEntryProvisionTest extends KernelTestBase {
    */
   protected static $modules = [
     'externalauth',
-    'ldap_servers',
-    'ldap_user',
-    'ldap_query',
     'ldap_authentication',
-    'user',
+    'ldap_query',
+    'ldap_servers',
+    'ldap_servers_dummy',
+    'ldap_user',
     'system',
+    'user',
   ];
 
   /**
@@ -48,6 +52,11 @@ class LdapEntryProvisionTest extends KernelTestBase {
   private $subscriber;
 
   /**
+   * @var \Drupal\user\Entity\User|false
+   */
+  private $user;
+
+  /**
    * Test setup.
    */
   public function setUp(): void {
@@ -55,6 +64,7 @@ class LdapEntryProvisionTest extends KernelTestBase {
 
     $this->installSchema('system', 'sequences');
     $this->installEntitySchema('user');
+    $this->installSchema('externalauth', 'authmap');
 
     $server = Server::create([
       'id' => 'test',
@@ -67,12 +77,22 @@ class LdapEntryProvisionTest extends KernelTestBase {
     $server->save();
     $this->config('ldap_user.settings')
       ->set('ldapEntryProvisionTriggers', [
-        LdapEntryProvisionSubscriber::EVENT_CREATE_LDAP_ENTRY,
-        LdapEntryProvisionSubscriber::EVENT_SYNC_TO_LDAP_ENTRY,
+        LdapUserAttributesInterface::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION,
       ])
       ->set('ldapEntryProvisionServer', $server->id())
       ->set('ldapUserSyncMappings', [
         LdapUserAttributesInterface::PROVISION_TO_LDAP => [
+          'dn' => [
+            'ldap_attr' => '[dn]',
+            'user_attr' => 'cn=[property.name],ou=people,dc=hogwarts,dc=edu',
+            'convert' => FALSE,
+            'user_tokens' => '',
+            'config_module' => 'ldap_user',
+            'prov_module' => 'ldap_user',
+            'prov_events' => [
+              'create_ldap_entry',
+            ],
+          ],
           'mail' => [
             'ldap_attr' => '[mail]',
             'user_attr' => '[property.mail]',
@@ -88,11 +108,11 @@ class LdapEntryProvisionTest extends KernelTestBase {
       ])
       ->save();
 
-    // @todo Replace bridge with FakeBridge.
     $fake_bridge = new FakeBridge(
       $this->container->get('logger.channel.ldap_user'),
       $this->container->get('entity_type.manager')
     );
+    $fake_bridge->setServer($server);
     $this->container->set('ldap.bridge', $fake_bridge);
 
     $this->subscriber = new LdapEntryProvisionSubscriber(
@@ -108,41 +128,31 @@ class LdapEntryProvisionTest extends KernelTestBase {
   }
 
   /**
-   * Helper function to test private methods.
-   *
-   * @param string $name
-   *   Method name.
-   * @param array $arguments
-   *   Method arguments.
-   *
-   * @return mixed
-   *   Method result.
-   */
-  protected function invokeNonPublic(string $name, array $arguments) {
-    $reflection = new \ReflectionClass(get_class($this->subscriber));
-    $method = $reflection->getMethod($name);
-    $method->setAccessible(TRUE);
-    return $method->invokeArgs($this->subscriber, $arguments);
-  }
-
-  /**
    * Test building the entry.
    */
-  public function testEntry(): void {
-    $user = $this->createUser();
-    $this->subscriber->setUser($user);
-    self::assertEquals('test', $this->config('ldap_user.settings')
-      ->get('ldapEntryProvisionServer'));
-    $this->invokeNonPublic('loadServer', []);
-    /** @var \Symfony\Component\Ldap\Entry $entry */
-    $entry = $this->invokeNonPublic('buildLdapEntry', [LdapEntryProvisionSubscriber::EVENT_CREATE_LDAP_ENTRY]);
-    $tokens = $this->subscriber->getTokens();
-    self::assertEquals($user->getEmail(), $tokens['[property.mail]']);
-    self::assertEquals($user->getEmail(), $entry->getAttribute('mail', FALSE)[0]);
-    self::markTestIncomplete('TODO: We still need to fix & test case sensitive here like we did for the token processor.');
-    // We can simplify since the record *to* LDAP does not care about case.
-    // We only need to make sure that the Drupal token isn't an issue
-    // (or let the user know how to fix it).
+  public function testLoginCreate(): void {
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
+    $ldap = $this->container->get('ldap.bridge')->get();
+    $response = $this->getMockBuilder(EntryManager::class)
+      ->disableOriginalConstructor()
+      ->getMock();
+    $response
+      ->expects(self::once())
+      ->method('add')
+      ->willReturnCallback(function ($entry): bool {
+        self::assertSame($this->user->getEmail(), $entry->getAttribute('mail')[0]);
+        // This is not a derived DN.
+        self::assertSame(
+          'cn=' . $this->user->getAccountName() . ',ou=people,dc=hogwarts,dc=edu',
+          $entry->getDn()
+        );
+        return TRUE;
+      });
+
+    $ldap->setEntryManagerResponse($response);
+    $this->user = $this->createUser();
+    $this->user->save();
+    $this->subscriber->login(new LdapUserLoginEvent($this->user));
   }
 
 }

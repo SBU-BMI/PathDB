@@ -8,9 +8,12 @@
   <arg value="s"/>
   <arg value="-colors"/>
 
-  <!-- ignore all files that match these patterns -->
+  <!-- Ignore all files that match these patterns. By default the full file  -->
+  <!-- path is checked, unless type=relative is used. There is an implied * -->
+  <!-- wildcard at each end and periods and slashes must be escaped using \ -->
   <exclude-pattern>vendor</exclude-pattern>
-  <exclude-pattern>_ignore*</exclude-pattern>
+  <exclude-pattern>\/_+ignore</exclude-pattern>
+  <exclude-pattern>interdif</exclude-pattern>
 
   <!-- Include all Drupal and DrupalPractice sniffs by default, then adjust. -->
   <rule ref="Drupal"/>

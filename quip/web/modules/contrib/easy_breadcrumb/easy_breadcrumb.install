@@ -104,8 +104,8 @@ function easy_breadcrumb_update_8006() {
 
   // Change 'capitalizator_ignored_words' and 'capitalizator_forced_words' to be
   // lists rather than maps.
-  $config->set(EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS, array_values($config->get(EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS) ?: []));
-  $config->set(EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS, array_values($config->get(EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS) ?: []));
+  $config->set(EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS, array_values([$config->get(EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS)] ?: []));
+  $config->set(EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS, array_values([$config->get(EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS)] ?: []));
 
   $config->save(TRUE);
 }
@@ -128,7 +128,4 @@ function easy_breadcrumb_install() {
   $messenger = \Drupal::messenger();
   $help_url = 'https://www.drupal.org/docs/8/modules/easy-breadcrumb';
   $messenger->addMessage("Easy Breadcrumb documentation is found in the help module or at $help_url.");
-
-  // Clear the cache so that the breadcrumbs appear after install.
-  drupal_flush_all_caches();
 }

@@ -61,7 +61,7 @@ class UserHelpTabAccess implements AccessInterface {
    * @return bool
    *   Whether user is allowed to see tab or not.
    */
-  public function accessLdapHelpTab() {
+  public function accessLdapHelpTab(): bool {
     $mode = $this->config->get('authenticationMode');
     if ($mode === 'mixed') {
       if ($this->externalAuth->get($this->currentUser->id(), 'ldap_user')) {

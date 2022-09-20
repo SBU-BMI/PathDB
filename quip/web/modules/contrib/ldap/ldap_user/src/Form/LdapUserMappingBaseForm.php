@@ -4,13 +4,48 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_user\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers\Mapping;
+use Drupal\ldap_user\FieldProvider;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the form to configure user configuration and field mapping.
  */
-abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
+abstract class LdapUserMappingBaseForm extends ConfigFormBase implements LdapUserAttributesInterface {
+
+  /**
+   * Module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandler
+   */
+  protected $moduleHandler;
+
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Field provider.
+   *
+   * @var \Drupal\ldap_user\FieldProvider
+   */
+  protected $fieldProvider;
+
+  /**
+   * Current config.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $currentConfig;
 
   /**
    * Events.
@@ -36,6 +71,41 @@ abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
   /**
    * {@inheritdoc}
    */
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    ModuleHandler $module_handler,
+    EntityTypeManagerInterface $entity_type_manager,
+    FieldProvider $field_provider
+  ) {
+    parent::__construct($config_factory);
+    $this->moduleHandler = $module_handler;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->fieldProvider = $field_provider;
+    $this->currentConfig = $this->config('ldap_user.settings');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('module_handler'),
+      $container->get('entity_type.manager'),
+      $container->get('ldap_user.field_provider')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEditableConfigNames(): array {
+    return ['ldap_user.settings'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
 
@@ -43,11 +113,9 @@ abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
       if (isset($mapping['configured_mapping']) && $mapping['configured_mapping'] == 1) {
         // Check that the source is not empty for the selected field to sync
         // to Drupal.
-        if (!empty($mapping['source'])) {
-          if (empty($mapping['target'])) {
-            $formElement = $form['mappings'][$key];
-            $form_state->setError($formElement, $this->t('Missing attribute'));
-          }
+        if (!empty($mapping['source']) && empty($mapping['target'])) {
+          $formElement = $form['mappings'][$key];
+          $form_state->setError($formElement, $this->t('Missing attribute'));
         }
       }
     }
@@ -114,7 +182,7 @@ abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
 
     $mappings = $this->currentConfig->get('ldapUserSyncMappings');
     $mappings[$this->direction] = $this->syncMappingsFromForm($form_state->getValues());
@@ -197,7 +265,7 @@ abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
    *   Row.
    */
   protected function setSpecificMapping(Mapping $mapping, array $row): void {
-    // Sub form does it's variant here.
+    // Sub form does its variant here.
   }
 
   /**
@@ -214,7 +282,7 @@ abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
    *   Row.
    */
   protected function getMappingRow(Mapping $mapping, array $target_fields, int $row_id): array {
-    // Sub form does it's variant here.
+    // Sub form does its variant here.
     return [];
   }
 
@@ -302,7 +370,7 @@ abstract class LdapUserMappingBaseForm extends LdapUserBaseForm {
    * @param array $form
    *   The form being passed in.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state, passed by reference so we can modify.
+   *   The form state, passed by reference so that we can modify.
    */
   public function mappingsAddAnother(array &$form, FormStateInterface $form_state): void {
     $form_state->set('row_count', ($form_state->get('row_count') + 1));

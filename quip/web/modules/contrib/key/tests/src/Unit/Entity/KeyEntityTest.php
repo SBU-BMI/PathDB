@@ -79,7 +79,7 @@ class KeyEntityTest extends KeyTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $definition = [
@@ -90,9 +90,7 @@ class KeyEntityTest extends KeyTestBase {
     $plugin = new AuthenticationKeyType($this->key_type_settings, 'authentication', $definition);
 
     // Mock the KeyTypeManager service.
-    $this->keyTypeManager = $this->getMockBuilder('\Drupal\key\Plugin\KeyPluginManager')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->keyTypeManager = $this->createMock('\Drupal\key\Plugin\KeyPluginManager');
 
     $this->keyTypeManager->expects($this->any())
       ->method('getDefinitions')
@@ -114,9 +112,7 @@ class KeyEntityTest extends KeyTestBase {
     $plugin = new ConfigKeyProvider($this->key_provider_settings, 'config', $definition);
 
     // Mock the KeyProviderManager service.
-    $this->keyProviderManager = $this->getMockBuilder('\Drupal\key\Plugin\KeyPluginManager')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->keyProviderManager = $this->createMock('\Drupal\key\Plugin\KeyPluginManager');
 
     $this->keyProviderManager->expects($this->any())
       ->method('getDefinitions')
@@ -142,9 +138,7 @@ class KeyEntityTest extends KeyTestBase {
     $plugin = new NoneKeyInput($this->key_input_settings, 'none', $definition);
 
     // Mock the KeyInputManager service.
-    $this->keyInputManager = $this->getMockBuilder('\Drupal\key\Plugin\KeyPluginManager')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->keyInputManager = $this->createMock('\Drupal\key\Plugin\KeyPluginManager');
 
     $this->keyInputManager->expects($this->any())
       ->method('getDefinitions')

@@ -9,7 +9,8 @@ use Drupal\ldap_servers\Entity\Server;
 use Symfony\Component\Ldap\Entry;
 
 /**
- * @coversDefaultClass \Drupal\ldap_servers\Entity\Server
+ * Server tests.
+ *
  * @group ldap
  */
 class ServerTest extends KernelTestBase {
@@ -110,6 +111,22 @@ class ServerTest extends KernelTestBase {
     $this->server->set('unique_persistent_attr_binary', TRUE);
     $userOpenLdap->setAttribute('guid', ['Rr0by/+kSEKzVGoWnkpQ4Q==']);
     self::assertEquals('52723062792f2b6b53454b7a56476f576e6b705134513d3d', $this->server->derivePuidFromLdapResponse($userOpenLdap));
+  }
+
+  /**
+   * Test non-latin DN.
+   */
+  public function testNonLatinDn(): void {
+
+    $this->server->set('account_name_attr', '');
+    $this->server->set('user_attr', 'cn');
+    $this->server->set('mail_attr', 'mail');
+    $this->server->set('unique_persistent_attr', 'guid');
+
+    $userOpenLdap = new Entry('cn=zażółćgęśląjaźń,ou=people,dc=hogwarts,dc=edu', [
+      'cn' => [0 => 'zażółćgęśląjaźń'],
+    ]);
+    self::assertEquals('zażółćgęśląjaźń', $this->server->deriveUsernameFromLdapResponse($userOpenLdap));
   }
 
   /**

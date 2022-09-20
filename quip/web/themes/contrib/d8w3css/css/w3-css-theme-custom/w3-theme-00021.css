@@ -151,6 +151,7 @@ ul.primary > li {
   border-color: #510e55 !important;
 }
 /* Hover Color  */
+.w3-hover-over:hover,
 .w3-button:hover,
 #open-search:hover,
 #open-nav-inner:hover,

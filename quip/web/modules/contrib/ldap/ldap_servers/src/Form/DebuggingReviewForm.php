@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Serialization\Yaml;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function is_array;
 
 /**
  * Form to allow for debugging review.
@@ -41,7 +42,7 @@ class DebuggingReviewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_servers_debugging_review';
   }
 
@@ -68,7 +69,7 @@ class DebuggingReviewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): DebuggingReviewForm {
     return new static(
       $container->get('config.factory'),
       $container->get('module_handler'),
@@ -85,14 +86,14 @@ class DebuggingReviewForm extends FormBase {
    * @return string
    *   Raw configuration data.
    */
-  private function printConfig($configName) {
+  private function printConfig(string $configName): string {
     return '<pre>' . Yaml::encode($this->config($configName)->getRawData()) . '</pre>';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
 
     $form['title'] = [
       '#markup' => '<h1>' . $this->t('LDAP Debugging Review') . '</h1>',
@@ -198,42 +199,59 @@ class DebuggingReviewForm extends FormBase {
    */
   private function parsePhpModules(): array {
     ob_start();
-    phpinfo();
-    $s = ob_get_contents();
-    ob_end_clean();
+    phpinfo(INFO_MODULES);
+    $output = ob_get_clean();
+    $output = strip_tags($output, '<h2><th><td>');
+    $output = preg_replace('/<th[^>]*>([^<]+)<\/th>/', "<info>\\1</info>", $output);
+    $output = preg_replace('/<td[^>]*>([^<]+)<\/td>/', "<info>\\1</info>", $output);
+    /** @var string[] $rows */
+    $rows = preg_split('/(<h2>[^<]+<\/h2>)/', $output, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $modules = [];
+    if (is_array($rows)) {
+      $rowCount = count($rows);
+      // First line with CSS can be ignored.
+      for ($i = 1; $i < $rowCount - 1; $i++) {
+        $this->extractModule($rows[$i], $rows[$i + 1], $modules);
+      }
+    }
+    return $modules;
+  }
 
-    $s = strip_tags($s, '<h2><th><td>');
-    $s = preg_replace('/<th[^>]*>([^<]+)<\/th>/', "<info>\\1</info>", $s);
-    $s = preg_replace('/<td[^>]*>([^<]+)<\/td>/', "<info>\\1</info>", $s);
-    $vtmp = preg_split('/(<h2>[^<]+<\/h2>)/', $s, -1, PREG_SPLIT_DELIM_CAPTURE);
-    $vmodules = [];
-    $items = count($vtmp);
-    for ($i = 1; $i < $items; $i++) {
-      if (preg_match('/<h2>([^<]+)<\/h2>/', $vtmp[$i], $vmat)) {
-        $vname = trim($vmat[1]);
-        $vtmp2 = explode("\n", $vtmp[$i + 1]);
-        foreach ($vtmp2 as $vone) {
-          $vpat = '<info>([^<]+)<\/info>';
-          $vpat3 = "/$vpat\s*$vpat\s*$vpat/";
-          $vpat2 = "/$vpat\s*$vpat/";
-          // 3 columns.
-          if (preg_match($vpat3, $vone, $vmat)) {
-            $vmodules[$vname][trim($vmat[1])] = [trim($vmat[2]), trim($vmat[3])];
-          }
-          // 2 columns.
-          elseif (preg_match($vpat2, $vone, $vmat)) {
-            $vmodules[$vname][trim($vmat[1])] = trim($vmat[2]);
-          }
+  /**
+   * Extract module information.
+   *
+   * @param string $row
+   *   Row.
+   * @param string $nextRow
+   *   Next row.
+   * @param array $modules
+   *   Extracted modules data.
+   */
+  private function extractModule(string $row, string $nextRow, array &$modules): void {
+    if (preg_match('/<h2>([^<]+)<\/h2>/', $row, $headingMatches)) {
+      $moduleName = trim($headingMatches[1]);
+      $moduleInfos = explode("\n", $nextRow);
+      foreach ($moduleInfos as $info) {
+        $infoPattern = '<info>([^<]+)<\/info>';
+        // 3 columns.
+        if (preg_match("/$infoPattern\s*$infoPattern\s*$infoPattern/", $info, $infoMatches)) {
+          $modules[$moduleName][trim($infoMatches[1])] = [
+            trim($infoMatches[2]),
+            trim($infoMatches[3]),
+          ];
+        }
+        // 2 columns.
+        elseif (preg_match("/$infoPattern\s*$infoPattern/", $info, $infoMatches)) {
+          $modules[$moduleName][trim($infoMatches[1])] = trim($infoMatches[2]);
         }
       }
     }
-    return $vmodules;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Nothing to submit.
   }
 

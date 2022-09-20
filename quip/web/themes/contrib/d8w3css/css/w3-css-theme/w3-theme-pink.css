@@ -50,7 +50,9 @@
   color: #fff !important;
   background-color: #790c30 !important;
 }
-.w3-theme {
+.w3-theme,
+.close-nav,
+.mobile-nav {
   color: #fff !important;
   background-color: #e91e63 !important;
 }

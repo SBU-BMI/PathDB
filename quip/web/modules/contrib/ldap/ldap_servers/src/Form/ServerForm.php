@@ -25,7 +25,7 @@ class ServerForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, FormStateInterface $form_state) {
+  public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
 
     /** @var \Drupal\ldap_servers\Entity\Server $server */
@@ -447,7 +447,7 @@ class ServerForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, FormStateInterface $form_state) {
+  public function save(array $form, FormStateInterface $form_state): void {
     if ($form_state->getValue('bind_method') !== 'service_account') {
       $this->entity->set('binddn', NULL);
       $this->entity->set('bindpw', NULL);

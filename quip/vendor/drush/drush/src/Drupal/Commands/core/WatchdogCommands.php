@@ -1,32 +1,34 @@
 <?php
+
 namespace Drush\Drupal\Commands\core;
 
 use Consolidation\OutputFormatters\StructuredData\PropertyList;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Logger\RfcLogLevel;
+use Drupal\user\Entity\User;
 use Drush\Commands\DrushCommands;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\Html;
 use Drush\Drupal\DrupalUtil;
 use Drush\Exceptions\UserAbortException;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class WatchdogCommands extends DrushCommands
 {
-
     /**
      * Show watchdog messages.
      *
      * @command watchdog:show
      * @param $substring A substring to look search in error messages.
-     * @option count The number of messages to show. Defaults to 10.
+     * @option count The number of messages to show.
      * @option severity Restrict to messages of a given severity level.
      * @option type Restrict to messages of a given type.
      * @option extended Return extended information about each message.
-     * @usage  drush watchdog-show
+     * @usage  drush watchdog:show
      *   Show a listing of most recent 10 messages.
-     * @usage drush watchdog:show "cron run succesful"
-     *   Show a listing of most recent 10 messages containing the string "cron run succesful".
+     * @usage drush watchdog:show "cron run successful"
+     *   Show a listing of most recent 10 messages containing the string <info>cron run successful</info>.
      * @usage drush watchdog:show --count=46
      *   Show a listing of most recent 46 messages.
      * @usage drush watchdog:show --severity=Notice
@@ -46,7 +48,7 @@ class WatchdogCommands extends DrushCommands
      *   username: Username
      * @default-fields wid,date,type,severity,message
      * @filter-default-field message
-     * @return \Consolidation\OutputFormatters\StructuredData\RowsOfFields
+     * @return RowsOfFields
      */
     public function show($substring = '', $options = ['format' => 'table', 'count' => 10, 'severity' => self::REQ, 'type' => self::REQ, 'extended' => false])
     {
@@ -65,6 +67,7 @@ class WatchdogCommands extends DrushCommands
         }
         if (empty($table)) {
             $this->logger()->notice(dt('No log messages available.'));
+            return;
         } else {
             return new RowsOfFields($table);
         }
@@ -75,11 +78,11 @@ class WatchdogCommands extends DrushCommands
      *
      * @command watchdog:list
      * @param $substring A substring to look search in error messages.
-     * @option count The number of messages to show. Defaults to 10.
+     * @option count The number of messages to show.
      * @option extended Return extended information about each message.
      * @option severity Restrict to messages of a given severity level.
      * @option type Restrict to messages of a given type.
-     * @usage  drush watchdog-list
+     * @usage  drush watchdog:list
      *   Prompt for message type or severity, then run watchdog-show.
      * @aliases wd-list,watchdog-list
      * @hidden-options type,severity
@@ -94,18 +97,76 @@ class WatchdogCommands extends DrushCommands
      *   date: Date
      *   username: Username
      * @default-fields wid,date,type,severity,message
-     * @return \Consolidation\OutputFormatters\StructuredData\RowsOfFields
      */
-    public function watchdogList($substring = '', $options = ['format' => 'table', 'count' => 10, 'extended' => false])
+    public function watchdogList($substring = '', $options = ['format' => 'table', 'count' => 10, 'extended' => false]): RowsOfFields
     {
         return $this->show($substring, $options);
     }
 
     /**
-     * @hook interact watchdog-list
-     * @throws \Drush\Exceptions\UserAbortException
+     * Tail watchdog messages.
+     *
+     * @command watchdog:tail
+     * @param OutputInterface $output
+     * @param $substring A substring to look search in error messages.
+     * @option severity Restrict to messages of a given severity level.
+     * @option type Restrict to messages of a given type.
+     * @option extended Return extended information about each message.
+     * @usage  drush watchdog:tail
+     *   Continuously tail watchdog messages.
+     * @usage drush watchdog:tail "cron run successful"
+     *   Continously tail watchdog messages, filtering on the string <info>cron run successful</info>.
+     * @usage drush watchdog:tail --severity=Notice
+     *   Continously tail watchdog messages, filtering severity of notice.
+     * @usage drush watchdog:tail --type=php
+     *   Continously tail watchdog messages, filtering on type equals php.
+     * @aliases wd-tail,wt,watchdog-tail
+     * @validate-module-enabled dblog
+     * @version 10.6
      */
-    public function interactList($input, $output)
+    public function tail(OutputInterface $output, $substring = '', $options = ['severity' => self::REQ, 'type' => self::REQ, 'extended' => false]): void
+    {
+        $where = $this->where($options['type'], $options['severity'], $substring);
+        if (empty($where['where'])) {
+            $where = [
+              'where' => 'wid > :wid',
+              'args' => [],
+            ];
+        } else {
+            $where['where'] .= " AND wid > :wid";
+        }
+
+        $last_seen_wid = 0;
+        $iteration = 1;
+        while (true) {
+            $iteration++;
+            $where['args'][':wid'] = $last_seen_wid;
+            $query = Database::getConnection()->select('watchdog', 'w')
+                ->fields('w')
+                ->orderBy('wid', 'DESC');
+            if ($last_seen_wid === 0) {
+                $query->range(0, 10);
+            }
+            $query->where($where['where'], $where['args']);
+
+            $rsc = $query->execute();
+            while ($result = $rsc->fetchObject()) {
+                if ($result->wid > $last_seen_wid) {
+                    $last_seen_wid = $result->wid;
+                }
+                $row = $this->formatResult($result, $options['extended']);
+                $msg = "{$row->wid}\t{$row->date}\t{$row->type}\t{$row->severity}\t{$row->message}";
+                $output->writeln($msg);
+            }
+            sleep(2);
+        }
+    }
+
+    /**
+     * @hook interact watchdog-list
+     * @throws UserAbortException
+     */
+    public function interactList($input, $output): void
     {
 
         $choices['-- types --'] = dt('== message types ==');
@@ -146,9 +207,8 @@ class WatchdogCommands extends DrushCommands
      *   Delete all messages of type cron.
      * @aliases wd-del,wd-delete,wd,watchdog-delete
      * @validate-module-enabled dblog
-     * @return void
      */
-    public function delete($substring = '', $options = ['severity' => self::REQ, 'type' => self::REQ])
+    public function delete($substring = '', $options = ['severity' => self::REQ, 'type' => self::REQ]): void
     {
         if ($substring == 'all') {
             $this->output()->writeln(dt('All watchdog messages will be deleted.'));
@@ -157,7 +217,7 @@ class WatchdogCommands extends DrushCommands
             }
             $ret = Database::getConnection()->truncate('watchdog')->execute();
             $this->logger()->success(dt('All watchdog messages have been deleted.'));
-        } else if (is_numeric($substring)) {
+        } elseif (is_numeric($substring)) {
             $this->output()->writeln(dt('Watchdog message #!wid will be deleted.', ['!wid' => $substring]));
             if (!$this->io()->confirm(dt('Do you want to continue?'))) {
                 throw new UserAbortException();
@@ -169,7 +229,7 @@ class WatchdogCommands extends DrushCommands
                 throw new \Exception(dt('Watchdog message #!wid does not exist.', ['!wid' => $substring]));
             }
         } else {
-            if ((empty($substring))&&(!isset($options['type']))&&(!isset($options['severity']))) {
+            if ((empty($substring)) && (!isset($options['type'])) && (!isset($options['severity']))) {
                 throw new \Exception(dt('No options provided.'));
             }
             $where = $this->where($options['type'], $options['severity'], $substring, 'OR');
@@ -191,10 +251,8 @@ class WatchdogCommands extends DrushCommands
      * @param $id Watchdog Id
      * @aliases wd-one,watchdog-show-one
      * @validate-module-enabled dblog
-     *
-     * @return \Consolidation\OutputFormatters\StructuredData\PropertyList
      */
-    public function showOne($id, $options = ['format' => 'yaml'])
+    public function showOne($id, $options = ['format' => 'yaml']): PropertyList
     {
         $rsc = Database::getConnection()->select('watchdog', 'w')
             ->fields('w')
@@ -222,13 +280,13 @@ class WatchdogCommands extends DrushCommands
      * @return
      *   An array with structure ('where' => string, 'args' => array())
      */
-    protected function where($type = null, $severity = null, $filter = null, $criteria = 'AND')
+    protected function where($type = null, $severity = null, $filter = null, $criteria = 'AND'): array
     {
         $args = [];
         $conditions = [];
         if ($type) {
             $types = $this->messageTypes();
-            if (array_search($type, $types) === false) {
+            if (!in_array($type, $types)) {
                 $msg = "Unrecognized message type: !type.\nRecognized types are: !types.";
                 throw new \Exception(dt($msg, ['!type' => $type, '!types' => implode(', ', $types)]));
             }
@@ -256,7 +314,7 @@ class WatchdogCommands extends DrushCommands
         }
         if ($filter) {
             $conditions[] = "message LIKE :filter";
-            $args[':filter'] = '%'.$filter.'%';
+            $args[':filter'] = '%' . $filter . '%';
         }
 
         $where = implode(" $criteria ", $conditions);
@@ -281,7 +339,7 @@ class WatchdogCommands extends DrushCommands
         $result->severity = trim(DrupalUtil::drushRender($severities[$result->severity]));
 
         // Date.
-        $result->date = format_date($result->timestamp, 'custom', 'd/M H:i');
+        $result->date = date('d/M H:i', $result->timestamp);
         unset($result->timestamp);
 
         // Message.
@@ -305,11 +363,7 @@ class WatchdogCommands extends DrushCommands
                 unset($result->referer);
             }
             // Username.
-            if ($account = user_load($result->uid)) {
-                $result->username = $account->name;
-            } else {
-                $result->username = dt('Anonymous');
-            }
+            $result->username = ($account = User::load($result->uid)) ? $account->name : dt('Anonymous');
             unset($result->uid);
             $message_length = PHP_INT_MAX;
         }

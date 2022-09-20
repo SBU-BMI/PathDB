@@ -35,7 +35,7 @@ class KeyAdminTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->adminUser = $this->drupalCreateUser(['administer keys']);
@@ -65,7 +65,7 @@ class KeyAdminTest extends BrowserTestBase {
       'id' => 'testing_key',
       'label' => 'Testing Key',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
 
     // Go to the Key list page.
     $this->drupalGet('admin/config/system/keys');

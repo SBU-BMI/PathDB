@@ -112,7 +112,7 @@ class LdapAttribute extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function usesGroupBy() {
+  public function usesGroupBy(): bool {
     return FALSE;
   }
 

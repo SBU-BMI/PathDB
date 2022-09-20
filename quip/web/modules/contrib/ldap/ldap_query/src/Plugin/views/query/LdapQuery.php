@@ -46,7 +46,7 @@ class LdapQuery extends QueryPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(ViewExecutable $view) {
+  public function build(ViewExecutable $view): void {
     // Store the view in the object to be able to use it later.
     $this->view = $view;
 
@@ -62,7 +62,7 @@ class LdapQuery extends QueryPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getCacheMaxAge() {
+  public function getCacheMaxAge(): int {
     return 0;
   }
 

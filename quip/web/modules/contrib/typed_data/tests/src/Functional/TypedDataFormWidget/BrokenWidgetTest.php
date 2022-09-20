@@ -8,7 +8,7 @@ use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
- * Class BrokenWidgetTest.
+ * Tests operation of the 'broken' TypedDataForm widget plugin.
  *
  * @group typed_data
  *
@@ -26,7 +26,7 @@ class BrokenWidgetTest extends FormWidgetBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->widget = $this->getFormWidgetManager()->createInstance('broken');
   }
@@ -38,7 +38,7 @@ class BrokenWidgetTest extends FormWidgetBrowserTestBase {
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('any')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('binary')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('boolean')));
-    $this->assertTrue($this->widget->isApplicable(DataDefinition::create('datetime_iso8601')));;
+    $this->assertTrue($this->widget->isApplicable(DataDefinition::create('datetime_iso8601')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('duration_iso8601')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('email')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('float')));

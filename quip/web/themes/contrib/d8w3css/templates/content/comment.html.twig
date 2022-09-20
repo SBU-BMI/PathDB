@@ -13,11 +13,11 @@
  *   {{ content|without('field_example') }}
  *   @endcode
  * - created: Formatted date and time for when the comment was created.
- *   Preprocess functions can reformat it by calling format_date() with the
- *   desired parameters on the 'comment.created' variable.
+ *   Preprocess functions can reformat it by calling DateFormatter::format()
+ *   with the desired parameters on the 'comment.created' variable.
  * - changed: Formatted date and time for when the comment was last changed.
- *   Preprocess functions can reformat it by calling format_date() with the
- *   desired parameters on the 'comment.changed' variable.
+ *   Preprocess functions can reformat it by calling DateFormatter::format()
+ *   with the desired parameters on the 'comment.changed' variable.
  * - permalink: Comment permalink.
  * - submitted: Submission information created from author and created
  *   during template_preprocess_comment().
@@ -45,7 +45,7 @@
  *
  * These variables are provided to give context about the parent comment (if
  * any):
- * - comment_parent: Full parent comment entity (if any).
+ * - parent_comment: Full parent comment entity (if any).
  * - parent_author: Equivalent to author for the parent comment.
  * - parent_created: Equivalent to created for the parent comment.
  * - parent_changed: Equivalent to changed for the parent comment.
@@ -59,7 +59,7 @@
  *
  * These two variables are provided for context:
  * - comment: Full comment object.
- * - entity: Entity the comments are attached to.
+ * - commented_entity: Entity the comments are attached to.
  *
  * @see template_preprocess_comment()
  */
@@ -90,13 +90,14 @@
     <p class="comment__author">{{ author }}</p>
     <p class="comment__time">{{ created }}</p>
     <p class="comment__permalink">{{ permalink }}</p>
+
     {#
-      Indicate the semantic relationship between parent and child comments
-      for accessibility. The list is difficult to navigate in a screen
-      reader without this information.
+      Indicate the semantic relationship between parent and child comments for
+      accessibility. The list is difficult to navigate in a screen reader
+      without this information.
     #}
     {% if parent %}
-      <p class="visually-hidden">{{ parent }}</p>
+      <p class="parent visually-hidden">{{ parent }}</p>
     {% endif %}
   </footer>
 

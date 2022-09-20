@@ -10,7 +10,8 @@ use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_user\FieldProvider;
 
 /**
- * @coversDefaultClass \Drupal\ldap_user\FieldProvider
+ * Field Provider tests.
+ *
  * @group ldap
  */
 class FieldProviderTest extends KernelTestBase implements LdapUserAttributesInterface {
@@ -51,6 +52,7 @@ class FieldProviderTest extends KernelTestBase implements LdapUserAttributesInte
     $this->server = Server::create([
       'id' => 'example',
       'picture_attr' => 'picture_field',
+      'user_attr' => 'cn',
       'mail_attr' => 'mail',
       'unique_persistent_attr' => 'guid',
       'drupalAcctProvisionServer' => 'example',
@@ -132,14 +134,14 @@ class FieldProviderTest extends KernelTestBase implements LdapUserAttributesInte
       $container->get('entity_field.manager')
     );
 
-    $processor->loadAttributes(FieldProvider::PROVISION_TO_DRUPAL, $this->server);
-    $data = $processor->getConfigurableAttributesSyncedOnEvent(FieldProvider::EVENT_CREATE_DRUPAL_USER);
-    self::assertCount(6, $data);
+    $processor->loadAttributes(LdapUserAttributesInterface::PROVISION_TO_DRUPAL, $this->server);
+    $data = $processor->getConfigurableAttributesSyncedOnEvent(LdapUserAttributesInterface::EVENT_CREATE_DRUPAL_USER);
+    self::assertCount(2, $data);
     self::assertCount(2, $data['[property.name]']->getProvisioningEvents());
-    $data = $processor->getConfigurableAttributesSyncedOnEvent(FieldProvider::EVENT_SYNC_TO_LDAP_ENTRY);
+    $data = $processor->getConfigurableAttributesSyncedOnEvent(LdapUserAttributesInterface::EVENT_SYNC_TO_LDAP_ENTRY);
     self::assertEmpty($data);
 
-    $data = $processor->getAttributesSyncedOnEvent(FieldProvider::EVENT_CREATE_DRUPAL_USER);
+    $data = $processor->getAttributesSyncedOnEvent(LdapUserAttributesInterface::EVENT_CREATE_DRUPAL_USER);
     self::assertEquals('not configurable', $data['[field.ldap_user_current_dn]']->getNotes());
     self::assertTrue($data['[property.picture]']->isEnabled());
     self::assertEquals('ldap_user', $data['[property.picture]']->getProvisioningModule());
@@ -148,16 +150,16 @@ class FieldProviderTest extends KernelTestBase implements LdapUserAttributesInte
 
     self::assertTrue($processor->attributeIsSyncedOnEvent(
       '[property.name]',
-      FieldProvider::EVENT_SYNC_TO_DRUPAL_USER));
+      LdapUserAttributesInterface::EVENT_SYNC_TO_DRUPAL_USER));
     self::assertFalse($processor->attributeIsSyncedOnEvent(
       '[field.test_field]',
-      FieldProvider::EVENT_SYNC_TO_DRUPAL_USER));
+      LdapUserAttributesInterface::EVENT_SYNC_TO_DRUPAL_USER));
 
     self::assertEquals('[guid]', $data['[field.ldap_user_puid]']->getLdapAttribute());
 
     $this->server->set('mail_template', '[cn]@example.com');
-    $processor->loadAttributes(FieldProvider::PROVISION_TO_DRUPAL, $this->server);
-    $data = $processor->getAttributesSyncedOnEvent(FieldProvider::EVENT_SYNC_TO_DRUPAL_USER);
+    $processor->loadAttributes(LdapUserAttributesInterface::PROVISION_TO_DRUPAL, $this->server);
+    $data = $processor->getAttributesSyncedOnEvent(LdapUserAttributesInterface::EVENT_SYNC_TO_DRUPAL_USER);
     self::assertEquals('[cn]@example.com', $data['[property.mail]']->getLdapAttribute());
   }
 

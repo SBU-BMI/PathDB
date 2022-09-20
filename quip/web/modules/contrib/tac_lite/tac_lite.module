@@ -4,15 +4,17 @@
  * Control access to site content based on taxonomy, roles and users.
  */
 
-use Drupal\node\NodeInterface;
-use Drupal\taxonomy\Entity\Term;
-use Drupal\Core\Url;
-use Drupal\tac_lite\Form\SchemeForm;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Link;
 use Drupal\Core\Database\Query\Condition;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Render\Renderer;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
+use Drupal\tac_lite\Form\SchemeForm;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_help().
@@ -139,7 +141,7 @@ function tac_lite_node_get_terms($node) {
               $term = Term::load($item['target_id']);
             }
             if ($term) {
-              $terms[$node->id()][$term->getVocabularyId()][$term->id()] = $term;
+              $terms[$node->id()][$term->bundle()][$term->id()] = $term;
             }
           }
         }
@@ -174,20 +176,16 @@ function tac_lite_node_grants(AccountInterface $account, $op) {
  * Users are granted access to terms either because of who they are,
  * or because of the roles they have.
  */
-function _tac_lite_user_tids($account, $scheme, $config) {
+function _tac_lite_user_tids($account, $scheme) {
   // Grant id 0 is reserved for nodes which were not given a grant id
   // when they were created. By adding 0 to the grant id, we let the
   // user view those nodes.
   $grants = [0];
-  $config = \Drupal::config('tac_lite.settings');
-  $schemes = $config->get('tac_lite_schemes');
-  for ($i = 1; $i <= $schemes; $i++) {
-    $data = \Drupal::service('user.data')->get('tac_lite', $account->id(), 'tac_lite_scheme_' . $i) ?: [];
-    if (count($data)) {
-      foreach ($data as $tids) {
-        if (count($tids)) {
-          $grants = array_merge($grants, $tids);
-        }
+  $data = \Drupal::service('user.data')->get('tac_lite', $account->id(), 'tac_lite_scheme_' . $scheme) ?: [];
+  if (count($data)) {
+    foreach ($data as $tids) {
+      if (count($tids)) {
+        $grants = array_merge($grants, $tids);
       }
     }
   }
@@ -206,6 +204,9 @@ function _tac_lite_user_tids($account, $scheme, $config) {
       }
     }
   }
+
+  // Remove any duplicates.
+  $grants = array_unique($grants);
 
   // Because of some flakiness in the form API and the form we insert under
   // user settings, we may have a bogus entry with vid set
@@ -232,11 +233,13 @@ function tac_lite_query_term_access_alter(AlterableInterface $query) {
   // The terms this user is allowed to see.
   $term_visibility = FALSE;
   $tids = [];
+  $visibility_scheme_ids = [];
   for ($i = 1; $i <= $schemes; $i++) {
     $config = SchemeForm::tacLiteConfig($i);
     if ($config['term_visibility']) {
-      $tids = array_merge($tids, _tac_lite_user_tids($account, $i, $config));
+      $tids = array_merge($tids, _tac_lite_user_tids($account, $i));
       $term_visibility = TRUE;
+      $visibility_scheme_ids[] = $i;
     }
   }
 
@@ -258,5 +261,75 @@ function tac_lite_query_term_access_alter(AlterableInterface $query) {
     $or->condition($primary_table . '.tid', $tids, 'IN');
     $or->condition('tac_td.vid', $vids, 'NOT IN');
     $query->condition($or);
+
+    _tac_lite_apply_cache_contexts_to_render_context($visibility_scheme_ids);
+  }
+}
+
+/**
+ * Bubbles-up appropriate TAC-Lite cache contexts to the current render context.
+ *
+ * This ensures that the current render context has a
+ * 'user.tac_lite_grants:$scheme_id' cache context.
+ *
+ * (This pattern was adapted from changes made to node_query_node_access_alter()
+ * in #2557815 as a backstop to ensure that any render context that includes
+ * taxonomy terms affected by TAC Lite is invalidated when a user's TAC Lite
+ * permissions change).
+ *
+ * @param int[] $scheme_ids
+ *   The IDs of the TAC Lite schemes for which a cache context needs to be
+ *   added to the render context.
+ *
+ * @throws \Exception
+ *   If the renderer fails to render with the added cache contexts.
+ */
+function _tac_lite_apply_cache_contexts_to_render_context(array $scheme_ids) {
+  $request = \Drupal::requestStack()->getCurrentRequest();
+
+  $renderer = \Drupal::service('renderer');
+  assert($renderer instanceof Renderer);
+
+  if ($request->isMethodCacheable() && $renderer->hasRenderContext()) {
+    $cache_contexts = array_map(
+      function ($scheme_id) {
+        return 'user.tac_lite_grants:' . $scheme_id;
+      },
+      $scheme_ids
+    );
+
+    $build = [
+      '#cache' => ['contexts' => $cache_contexts],
+    ];
+
+    $renderer->render($build);
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * @noinspection PhpUnused
+ */
+function tac_lite_entity_type_alter(array &$entity_types) {
+  $term_entity_type = $entity_types['taxonomy_term'] ?? NULL;
+
+  if ($term_entity_type !== NULL) {
+    assert($term_entity_type instanceof ContentEntityTypeInterface);
+
+    // Make listings of Taxonomy Terms aware of the TAC Lite grant cache
+    // context. This is used by listing controllers and Views to ensure that
+    // rendered listings are cached separately for different combinations of
+    // user-level TAC Lite grants, so two users with different grants, or the
+    // same user with different grants at two different points in time, end up
+    // with different results.
+    //
+    // See \Drupal\views\Plugin\views\cache\CachePluginBase::getCacheTags()
+    $list_contexts = $term_entity_type->getListCacheContexts();
+    $list_contexts[] = 'user.tac_lite_grants';
+
+    // Content entities don't provide a way for us to add items to the list, so
+    // we have to replace it in its entirety.
+    $term_entity_type->set('list_cache_contexts', array_unique($list_contexts));
   }
 }

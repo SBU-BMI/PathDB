@@ -12,7 +12,7 @@ use Drupal\Core\TypedData\Exception\MissingDataException;
 use Drupal\typed_data\Exception\InvalidArgumentException;
 
 /**
- * Class DataFetcherTest.
+ * Tests operation of the DataFetcher class.
  *
  * @group typed_data
  *
@@ -49,11 +49,9 @@ class DataFetcherTest extends KernelTestBase {
   protected $entityTypeManager;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'typed_data',
     'system',
     'node',
@@ -65,7 +63,7 @@ class DataFetcherTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('user');
@@ -191,16 +189,8 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testFetchingValueAtInvalidPosition() {
-    // @todo In Drupal 8.8.x PHPUnit 8 functions needs to be used.
-    // Remove this once 8.7.x is unsupported.
-    // @see https://www.drupal.org/project/typed_data/issues/3096756
-    if (version_compare(substr(\Drupal::VERSION, 0, 3), '8.8', '>=')) {
-      $this->expectException(MissingDataException::class);
-      $this->expectExceptionMessage("Unable to apply data selector 'field_integer.0.value' at 'field_integer.0'");
-    }
-    else {
-      $this->setExpectedException(MissingDataException::class, "Unable to apply data selector 'field_integer.0.value' at 'field_integer.0'");
-    }
+    $this->expectException(MissingDataException::class);
+    $this->expectExceptionMessage("Unable to apply data selector 'field_integer.0.value' at 'field_integer.0'");
     $this->node->field_integer->setValue([]);
 
     // This should trigger an exception.
@@ -213,16 +203,8 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testFetchingInvalidProperty() {
-    // @todo In Drupal 8.8.x PHPUnit 8 functions needs to be used.
-    // Remove this once 8.7.x is unsupported.
-    // @see https://www.drupal.org/project/typed_data/issues/3096756
-    if (version_compare(substr(\Drupal::VERSION, 0, 3), '8.8', '>=')) {
-      $this->expectException(InvalidArgumentException::class);
-      $this->expectExceptionMessage("Unable to apply data selector 'field_invalid.0.value' at 'field_invalid'");
-    }
-    else {
-      $this->setExpectedException(InvalidArgumentException::class, "Unable to apply data selector 'field_invalid.0.value' at 'field_invalid'");
-    }
+    $this->expectException(InvalidArgumentException::class);
+    $this->expectExceptionMessage("Unable to apply data selector 'field_invalid.0.value' at 'field_invalid'");
     // This should trigger an exception.
     $this->dataFetcher
       ->fetchDataByPropertyPath($this->node->getTypedData(), 'field_invalid.0.value')
@@ -245,15 +227,7 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testFetchingNotExistingListItem() {
-    // @todo In Drupal 8.8.x PHPUnit 8 functions needs to be used.
-    // Remove this once 8.7.x is unsupported.
-    // @see https://www.drupal.org/project/typed_data/issues/3096756
-    if (version_compare(substr(\Drupal::VERSION, 0, 3), '8.8', '>=')) {
-      $this->expectException(MissingDataException::class);
-    }
-    else {
-      $this->setExpectedException(MissingDataException::class);
-    }
+    $this->expectException(MissingDataException::class);
     $this->node->field_integer->setValue([]);
 
     // This will throw an exception.
@@ -266,16 +240,8 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testFetchingFromEmptyData() {
-    // @todo In Drupal 8.8.x PHPUnit 8 functions needs to be used.
-    // Remove this once 8.7.x is unsupported.
-    // @see https://www.drupal.org/project/typed_data/issues/3096756
-    if (version_compare(substr(\Drupal::VERSION, 0, 3), '8.8', '>=')) {
-      $this->expectException(MissingDataException::class);
-      $this->expectExceptionMessage("Unable to apply data selector 'field_integer.0.value' at 'field_integer': Unable to get property field_integer as no entity has been provided.");
-    }
-    else {
-      $this->setExpectedException(MissingDataException::class, "Unable to apply data selector 'field_integer.0.value' at 'field_integer': Unable to get property field_integer as no entity has been provided.");
-    }
+    $this->expectException(MissingDataException::class);
+    $this->expectExceptionMessage("Unable to apply data selector 'field_integer.0.value' at 'field_integer': Unable to get property field_integer as no entity has been provided.");
     $data_empty = $this->typedDataManager->create(EntityDataDefinition::create('node'));
     // This should trigger an exception.
     $this->dataFetcher

@@ -80,13 +80,17 @@ fi
         #  chown -R apache:apache /quip/config-local
         #fi
         #/quip/vendor/bin/drush -y config:export --destination /quip/config-local
+	/usr/bin/mysql mysql -v -e "ALTER USER 'root'@'localhost' IDENTIFIED BY ''; flush privileges" > /root/logme
         httpd -f /config/httpd.conf
 	cd /quip/web
 	/quip/vendor/bin/drush -y theme:install bootstrap
         /quip/vendor/bin/drush -y pm:enable css_editor
+	/quip/vendor/bin/drush -y pm:enable pathauto
 	/quip/vendor/bin/drush -y pm:enable user_current_paths
         /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
-	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap
+	/quip/vendor/bin/drush -y pm:uninstall color
+	/quip/vendor/bin/drush -y pm:uninstall redirect_after_login
+	/quip/vendor/bin/drush -y config-set system.theme admin seven
 	/quip/vendor/bin/drush -y config-set system.theme default bootstrap
 	/quip/vendor/bin/drush config-delete block.block.bartik_branding
 	/quip/vendor/bin/drush config-delete block.block.bartik_account_menu
@@ -113,17 +117,15 @@ fi
 	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_page_title
 	/quip/vendor/bin/drush -y theme:uninstall drupal8_w3css_theme
 	/quip/vendor/bin/drush -y theme:uninstall bartik
-	#/quip/vendor/bin/drush -y theme:uninstall seven
 	/quip/vendor/bin/drush -y pm:uninstall ds_extras ds_switch_view_mode ds
-        /quip/vendor/bin/drush config-delete field.storage.node.field_map_type
-        mkdir /data/tmp2
-	cp -f /quip/config-update/field.storage.node.field_map_type.yml /data/tmp2
-	/quip/vendor/bin/drush -y config:import --partial --source /data/tmp2
-	/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
+        #/quip/vendor/bin/drush config-delete field.storage.node.field_map_type
+        #mkdir /data/tmp2
+	#cp -f /quip/config-update/field.storage.node.field_map_type.yml /data/tmp2
+	#/quip/vendor/bin/drush -y config:import --partial --source /data/tmp2
+	#/quip/vendor/bin/drush -y config:import --partial --source /quip/config-update/
 	/quip/vendor/bin/drush -y pm:enable moderated_content_bulk_publish
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 	/quip/vendor/bin/drush -y user:cancel archon
-
 while true; do sleep 1000; done
 

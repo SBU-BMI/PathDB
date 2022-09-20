@@ -21,7 +21,7 @@ trait LdapTransformationTraits {
    *   Escaped string.
    */
   protected function ldapEscapeDn($value): string {
-    if (function_exists('ldap_escape')) {
+    if (\function_exists('ldap_escape')) {
       $value = ldap_escape($value, '', LDAP_ESCAPE_DN);
     }
     else {
@@ -53,7 +53,7 @@ trait LdapTransformationTraits {
    *   Escaped string.
    */
   protected function ldapEscapeFilter($value): string {
-    if (function_exists('ldap_escape')) {
+    if (\function_exists('ldap_escape')) {
       $value = ldap_escape($value, '', LDAP_ESCAPE_FILTER);
     }
     else {
@@ -173,9 +173,9 @@ trait LdapTransformationTraits {
     $rdn = array_map(static function ($attribute) {
       $attribute = trim($attribute);
       // This is a workaround for OpenLDAP escaping Unicode values.
-      $key_value = explode('=', $attribute);
-      $key_value[1] = str_replace('%', '\\', urlencode($key_value[1]));
-      return implode('=', $key_value);
+      [$key, $value] = explode('=', $attribute);
+      $value = str_replace('%', '\\', urlencode($value));
+      return implode('=', [$key, $value]);
     }, $rdn);
     return ['count' => count($rdn)] + $rdn;
   }
@@ -200,8 +200,9 @@ trait LdapTransformationTraits {
     $rdn = array_map(static function ($attribute) {
       $attribute = trim($attribute);
       // This is a workaround for OpenLDAP escaping Unicode values.
-      $key_value = explode('=', $attribute);
-      return str_replace('%', '\\', urlencode($key_value[1]));
+      /** @var string[] $elements */
+      $elements = explode('=', $attribute);
+      return str_replace('%', '\\', urlencode($elements[1]));
     }, $rdn);
     return ['count' => count($rdn)] + $rdn;
   }

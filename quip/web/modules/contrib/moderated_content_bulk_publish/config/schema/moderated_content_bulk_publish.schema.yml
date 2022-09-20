@@ -1,0 +1,61 @@
+# Schema for the configuration files of the moderated_content_bulk_publish module.
+# set up the actions for bulk operations for publish, archive and unpublish on /admin/content and /admin/content/moderated views.
+action.configuration.unpublish_current_revision_action:
+  type: action_configuration_default
+  label: 'Unpublish current revision'
+
+action.configuration.publish_latest_revision_action:
+  type: action_configuration_default
+  label: 'Publish latest revision'
+
+action.configuration.archive_current_revision_action:
+  type: action_configuration_default
+  label: 'Archive current revision'
+
+# set up the actions for bulk operations for pin and unpin content on /admin/content view.
+action.configuration.pin_content_action:
+  type: action_configuration_default
+  label: 'Pin Content'
+action.configuration.unpin_content_action:
+  type: action_configuration_default
+  label: 'Unpin Content'
+
+moderated_content_bulk_publish.settings:
+  type: config_object
+  label: 'Moderated Content Bulk Publish settings'
+  mapping:
+    publish:
+      type: mapping
+      label: 'Publish action settings'
+      mapping:
+        state:
+          type: mapping
+          mapping:
+            published:
+              type: string
+    unpublish:
+      type: mapping
+      label: 'Unpublish action settings'
+      mapping:
+        state:
+          type: mapping
+          mapping:
+            archived:
+              type: string
+            draft:
+              type: string
+    archive:
+      type: mapping
+      label: 'Archive action settings'
+      mapping:
+        state:
+          type: mapping
+          mapping:
+            archived:
+              type: string
+    enable_dialog_node_edit_form:
+      type: boolean
+      label: 'Enable dialog on node edit form'
+    enable_dialog_admin_content:
+      type: boolean
+      label: 'Enable dialog on admin content listing'

@@ -7,16 +7,18 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
 /**
  * Implements hook_requirements().
  */
-function ldap_servers_requirements($phase) {
+function ldap_servers_requirements($phase): array {
   $requirements = [];
 
-  if (version_compare(phpversion(), '5.6.0') < 0) {
+  if (version_compare(phpversion(), '7.2.0') < 0) {
     $requirements['php_ldap_version'] = [
       'title' => t('PHP Version for LDAP'),
-      'description' => t('Your PHP installation is too old for the LDAP module. Please upgrade to at least 5.6, 7.1 is recommended.'),
+      'description' => t('Your PHP installation is too old for the LDAP module. Please upgrade to at least 7.2.'),
       'severity' => REQUIREMENT_ERROR,
       'value' => phpversion(),
     ];
@@ -35,6 +37,15 @@ function ldap_servers_requirements($phase) {
       'severity' => REQUIREMENT_ERROR,
       'value' => t('Missing'),
       'description' => t('The LDAP extension of PHP is not available. Please consult your distribution to discover how to install it.'),
+    ];
+  }
+
+  if (!class_exists('Symfony\Component\Ldap\Ldap')) {
+    $requirements['ldap_library_present'] = [
+      'title' => t('LDAP library'),
+      'severity' => REQUIREMENT_ERROR,
+      'value' => t('Missing \Symfony\Component\Ldap\Ldap'),
+      'description' => t('You are missing a critical dependency, you should install via Composer which provides it.'),
     ];
   }
 
@@ -70,7 +81,7 @@ function ldap_servers_update_8301() {
 /**
  * Removes HTTPS checking.
  */
-function ldap_servers_update_8302() {
+function ldap_servers_update_8302(): TranslatableMarkup {
   $config_factory = \Drupal::configFactory();
   $config = $config_factory->getEditable('ldap_servers.settings');
   $config->delete();
@@ -81,7 +92,7 @@ function ldap_servers_update_8302() {
 /**
  * Adds default timeout to all servers.
  */
-function ldap_servers_update_8303() {
+function ldap_servers_update_8303(): TranslatableMarkup {
   /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
   $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
   $servers = $storage->getQuery()->execute();
@@ -97,20 +108,20 @@ function ldap_servers_update_8303() {
  * Force server attributes to be lowercase.
  */
 function ldap_servers_update_8304() {
- // Update removed due to upstream support in symfony/ldap.
+  // Update removed due to upstream support in symfony/ldap.
 }
 
 /**
  * Removal of double-escaping.
  */
-function ldap_servers_update_8305() {
+function ldap_servers_update_8305(): TranslatableMarkup {
   return t('Escaping of field data now relies solely on Twig auto-escaping. If you have created custom code make sure it takes this into account. See https://www.drupal.org/project/ldap/issues/2969097 for details.');
 }
 
 /**
  * Paged search removal.
  */
-function ldap_servers_update_8401() {
+function ldap_servers_update_8401(): TranslatableMarkup {
   return t('Paged search has been removed in favor of more robust data retrieval. Please retest your configuration if you have used paged search.');
 }
 
@@ -119,9 +130,9 @@ function ldap_servers_update_8401() {
  */
 function ldap_servers_update_8402() {
   $config_factory = \Drupal::configFactory();
-  $config_old = $config_factory->getEditable('ldap_servers.settings');
+  $config_old = $config_factory->getEditable('ldap_help.settings');
   if ($config_old) {
-    $config_new = $config_factory->getEditable('ldap_help.settings');
+    $config_new = $config_factory->getEditable('ldap_servers.settings');
     $config_new->set('watchdog_detail', $config_old->get('watchdog_detail'));
     $config_new->save();
     $config_old->delete();
@@ -136,10 +147,13 @@ function ldap_servers_update_8403() {
   $servers = $storage->getQuery()->execute();
   /** @var \Drupal\ldap_servers\Entity\Server $server */
   foreach ($storage->loadMultiple($servers) as $server) {
-    $split = preg_split('/\r\n|\r|\n/', $server->get('basedn'));
-    $server->set('basedn', $split);
-    $server->save();
+    if (is_string($server->get('basedn')))  {
+      $split = preg_split('/\r\n|\r|\n/', $server->get('basedn'));
+      $server->set('basedn', $split);
+      $server->save();
+    }
   }
+  return t('Base DN settings were updated, please verify your server configuration.');
 }
 
 /**
@@ -158,4 +172,5 @@ function ldap_servers_update_8404() {
     }
     $server->save();
   }
+  return t('Encryption settings were updated, please verify your server configuration.');
 }

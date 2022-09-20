@@ -13,8 +13,8 @@ plugin: 'block_content:17eec47a-e4aa-4020-aae7-ba86347d94dd'
 settings:
   id: 'block_content:17eec47a-e4aa-4020-aae7-ba86347d94dd'
   label: 'QuIP Footer'
-  provider: block_content
   label_display: '0'
+  provider: block_content
   status: true
   info: ''
   view_mode: full

@@ -8,7 +8,7 @@ use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
- * Class TextInputWidgetTest.
+ * Tests operation of the 'textarea' TypedDataForm widget plugin.
  *
  * @group typed_data
  *
@@ -26,7 +26,7 @@ class TextareaWidgetTest extends FormWidgetBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->widget = $this->getFormWidgetManager()->createInstance('textarea');
   }
@@ -38,7 +38,7 @@ class TextareaWidgetTest extends FormWidgetBrowserTestBase {
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('any')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('binary')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('boolean')));
-    $this->assertFalse($this->widget->isApplicable(DataDefinition::create('datetime_iso8601')));;
+    $this->assertFalse($this->widget->isApplicable(DataDefinition::create('datetime_iso8601')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('duration_iso8601')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('email')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('float')));
@@ -86,8 +86,17 @@ class TextareaWidgetTest extends FormWidgetBrowserTestBase {
   public function testValidation() {
     $context_definition = ContextDefinition::create('text')
       ->setLabel('Test text area')
-      ->setDescription('Enter text, minimum 40 characters.')
-      ->addConstraint('Length', ['min' => 40]);
+      ->setDescription('Enter text, minimum 40 characters.');
+    // Omitting the 'allowEmptyString' argument in Symfony 4+ (which is used in
+    // Drupal 9.0+) gives a deprecation warning, but this option does not exist
+    // in Symfony 3.4 (which is used in Drupal 8.8 and 8.9).
+    // @see https://www.drupal.org/project/typed_data/issues/3161000
+    if (version_compare(\Drupal::VERSION, '9.0', '>=')) {
+      $context_definition->addConstraint('Length', ['min' => 40, 'allowEmptyString' => FALSE]);
+    }
+    else {
+      $context_definition->addConstraint('Length', ['min' => 40]);
+    }
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
     $this->drupalLogin($this->createUser([], NULL, TRUE));

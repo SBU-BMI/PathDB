@@ -11,6 +11,7 @@ textarea {
   border: 1px solid #d3d8dd !important;
 }
 
+.w3-hover-over:hover,
 .w3-button:hover {
   color: #637381 !important;
   background-color: #e6e9ec !important;

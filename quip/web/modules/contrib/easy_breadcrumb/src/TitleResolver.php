@@ -7,9 +7,13 @@ use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Controller\ControllerResolverInterface;
+use Drupal\Core\StringTranslation\TranslationInterface;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 
 /**
  * Class TitleResolver.
@@ -33,24 +37,21 @@ class TitleResolver extends ControllerTitleResolver {
   /**
    * Constructs a new EntityDisplayRebuilder.
    *
+   * @param \Drupal\Core\Controller\ControllerResolverInterface $controller_resolver
+   *   The controller resolver.
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
+   *   The translation manager.
+   * @param \Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface $argument_resolver
+   *   The argument resolver.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(ControllerResolverInterface $controller_resolver, TranslationInterface $string_translation, ArgumentResolverInterface $argument_resolver, EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory) {
+    parent::__construct($controller_resolver, $string_translation, $argument_resolver);
     $this->entityTypeManager = $entity_type_manager;
     $this->config = $config_factory->get(EasyBreadcrumbConstants::MODULE_SETTINGS);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('config.factory')
-    );
   }
 
   /**
@@ -64,11 +65,10 @@ class TitleResolver extends ControllerTitleResolver {
     if ($route_parts[0] === 'entity' && $route_parts[2] === 'canonical') {
       $entity_type = $route_parts[1];
       $entity = $this->entityTypeManager->getStorage($entity_type)->load($params[$entity_type]);
-
     }
     if ($entity !== NULL) {
       $alternative_title_field = $this->config->get(EasyBreadcrumbConstants::ALTERNATIVE_TITLE_FIELD);
-      if ($entity->hasField($alternative_title_field) && !$entity->get($alternative_title_field)
+      if ($entity instanceof FieldableEntityInterface && $entity->hasField($alternative_title_field) && !$entity->get($alternative_title_field)
         ->isEmpty()) {
         return Xss::filter($entity->get($alternative_title_field)->value);
       }

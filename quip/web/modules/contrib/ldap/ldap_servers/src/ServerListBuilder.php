@@ -23,7 +23,7 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    * Calling the parent::buildHeader() adds a column for the possible actions
    * and inserts the 'edit' and 'delete' links as defined for the entity type.
    */
-  public function buildHeader() {
+  public function buildHeader(): array {
     $header['label'] = $this->t('Name');
     $header['bind_method'] = $this->t('Method');
     $header['binddn'] = $this->t('Account');
@@ -37,8 +37,12 @@ class ServerListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildRow(EntityInterface $entity) {
+  public function buildRow(EntityInterface $entity): array {
     /** @var \Drupal\ldap_servers\Entity\Server $entity */
+    $entityWithoutOverrides = $entity;
+    /** @var \Drupal\ldap_servers\Entity\Server $entity_with_overrides */
+    $entity = $this->storage->load($entity->id());
+
     $row = [];
     $row['label'] = $entity->label();
     $row['bind_method'] = ucfirst((string) $entity->getFormattedBind());
@@ -61,9 +65,8 @@ class ServerListBuilder extends ConfigEntityListBuilder {
       'port',
     ];
 
-    $stored_entity = $this->storage->loadUnchanged($entity->id());
     foreach ($fields as $field) {
-      if ($entity->get($field) !== $stored_entity->get($field)) {
+      if ($entity->get($field) !== $entityWithoutOverrides->get($field)) {
         $row[$field] .= ' ' . $this->t('(overridden)');
       }
     }
@@ -109,7 +112,7 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    * @return array
    *   Available operations in dropdown.
    */
-  public function getOperations(EntityInterface $entity) {
+  public function getOperations(EntityInterface $entity): array {
     $operations = $this->getDefaultOperations($entity);
     if (!isset($operations['test'])) {
       $operations['test'] = [

@@ -46,7 +46,7 @@ function css_editor_form_system_theme_settings_alter(&$form, FormStateInterface 
       '#tree' => TRUE,
     );
     // Switch to enable/disable customization.
-    $form['css_editor']['css_enabled'] = array(
+    $form['css_editor']['enabled'] = array(
       '#title' => t('Enable or disable custom CSS:'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('enabled'),

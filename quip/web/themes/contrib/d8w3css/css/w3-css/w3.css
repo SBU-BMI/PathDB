@@ -1,4 +1,4 @@
-﻿/* W3.CSS 4.13 June 2019 by Jan Egil and Borge Refsnes */
+﻿/* W3.CSS 4.15 December 2020 by Jan Egil and Borge Refsnes */
 html {
   box-sizing: border-box;
 }
@@ -8,6 +8,7 @@ html {
 *:after {
   box-sizing: inherit;
 }
+
 /* Extract from normalize.css by Nicolas Gallagher and Jonathan Neal git.io/normalize */
 html {
   -ms-text-size-adjust: 100%;
@@ -69,6 +70,7 @@ a:hover {
 abbr[title] {
   border-bottom: none;
   text-decoration: underline;
+  text-decoration: underline dotted;
 }
 
 b,
@@ -213,6 +215,7 @@ textarea {
   -webkit-appearance: button;
   font: inherit;
 }
+
 /* End extract */
 html,
 body {
@@ -251,6 +254,18 @@ h6 {
 
 .w3-serif {
   font-family: serif;
+}
+
+.w3-sans-serif {
+  font-family: sans-serif;
+}
+
+.w3-cursive {
+  font-family: cursive;
+}
+
+.w3-monospace {
+  font-family: monospace;
 }
 
 h1,
@@ -471,8 +486,8 @@ a {
   color: #000;
 }
 
-.w3-dropdown-hover:hover>.w3-button:first-child,
-.w3-dropdown-click:hover>.w3-button:first-child {
+.w3-dropdown-hover:hover > .w3-button:first-child,
+.w3-dropdown-click:hover > .w3-button:first-child {
   background-color: #ccc;
   color: #000;
 }
@@ -735,6 +750,7 @@ a {
   .w3-col.m12 {
     width: 99.99999%;
   }
+
 }
 
 @media (min-width:993px) {
@@ -785,6 +801,7 @@ a {
   .w3-col.l12 {
     width: 99.99999%;
   }
+
 }
 
 .w3-rest {
@@ -848,6 +865,7 @@ a {
   .w3-auto {
     max-width: 95%;
   }
+
 }
 
 @media (max-width:600px) {
@@ -888,6 +906,7 @@ a {
   .w3-dropdown-click.w3-mobile .w3-button {
     width: 100%;
   }
+
 }
 
 @media (max-width:768px) {
@@ -898,6 +917,7 @@ a {
   .w3-modal {
     padding-top: 50px;
   }
+
 }
 
 @media (min-width:993px) {
@@ -912,12 +932,14 @@ a {
   .w3-sidebar.w3-collapse {
     display: block !important;
   }
+
 }
 
 @media (max-width:992px) and (min-width:601px) {
   .w3-hide-medium {
     display: none !important;
   }
+
 }
 
 @media (max-width:992px) {
@@ -933,6 +955,7 @@ a {
   .w3-auto {
     max-width: 100%;
   }
+
 }
 
 .w3-top,
@@ -1132,6 +1155,7 @@ a {
   100% {
     transform: rotate(359deg);
   }
+
 }
 
 .w3-animate-fading {
@@ -1150,6 +1174,7 @@ a {
   100% {
     opacity: 0;
   }
+
 }
 
 .w3-animate-opacity {
@@ -1164,6 +1189,7 @@ a {
   to {
     opacity: 1;
   }
+
 }
 
 .w3-animate-top {
@@ -1181,6 +1207,7 @@ a {
     top: 0;
     opacity: 1;
   }
+
 }
 
 .w3-animate-left {
@@ -1198,6 +1225,7 @@ a {
     left: 0;
     opacity: 1;
   }
+
 }
 
 .w3-animate-right {
@@ -1215,6 +1243,7 @@ a {
     right: 0;
     opacity: 1;
   }
+
 }
 
 .w3-animate-bottom {
@@ -1232,6 +1261,7 @@ a {
     bottom: 0;
     opacity: 1;
   }
+
 }
 
 .w3-animate-zoom {
@@ -1246,6 +1276,7 @@ a {
   to {
     transform: scale(1);
   }
+
 }
 
 .w3-animate-input {
@@ -1455,6 +1486,22 @@ a {
   padding-bottom: 64px !important;
 }
 
+.w3-padding-top-64 {
+  padding-top: 64px !important;
+}
+
+.w3-padding-top-48 {
+  padding-top: 48px !important;
+}
+
+.w3-padding-top-32 {
+  padding-top: 32px !important;
+}
+
+.w3-padding-top-24 {
+  padding-top: 24px !important;
+}
+
 .w3-left {
   float: left !important;
 }
@@ -1462,7 +1509,7 @@ a {
 .w3-right {
   float: right !important;
 }
-
+.w3-hover-over:hover,
 .w3-button:hover {
   color: #000 !important;
   background-color: #ccc !important;
@@ -1476,6 +1523,7 @@ a {
 .w3-hover-none:hover {
   box-shadow: none !important;
 }
+
 /* Colors */
 .w3-amber,
 .w3-hover-amber:hover {

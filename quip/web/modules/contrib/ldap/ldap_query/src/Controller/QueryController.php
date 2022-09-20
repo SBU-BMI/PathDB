@@ -85,7 +85,7 @@ class QueryController {
    * @param string $id
    *   ID.
    */
-  public function load($id): void {
+  public function load(string $id): void {
     $this->qid = $id;
     $this->query = $this->storage->load($this->qid);
   }
@@ -107,7 +107,7 @@ class QueryController {
    *   Optional parameter to override filters. Useful for Views and other
    *   queries requiring filtering.
    */
-  public function execute($filter = NULL): void {
+  public function execute(?string $filter = NULL): void {
     if ($this->query) {
       if ($filter === NULL) {
         $filter = $this->query->getFilter();
@@ -138,7 +138,7 @@ class QueryController {
               ->toArray();
           }
           catch (LdapException $e) {
-            $this->logger->warning('LDAP query exception %message', ['@message' => $e->getMessage()]);
+            $this->logger->warning('LDAP query exception @message', ['@message' => $e->getMessage()]);
             $ldap_response = FALSE;
           }
 

@@ -21,8 +21,7 @@ function ldap_servers_help($route_name, RouteMatchInterface $route_match) {
       return $output;
 
     case 'entity.ldap_server.collection':
-      $output = '<p>' . t('More than one LDAP server configuration can exist for a physical LDAP server. Multiple configurations for the same physical LDAP server are useful in cases such as either different base DN for authentication and authorization or service accounts with different privileges for different purposes.') . '</p>';
-      return $output;
+      return '<p>' . t('More than one LDAP server configuration can exist for a physical LDAP server. Multiple configurations for the same physical LDAP server are useful in cases such as either different base DN for authentication and authorization or service accounts with different privileges for different purposes.') . '</p>';
   }
 }
 

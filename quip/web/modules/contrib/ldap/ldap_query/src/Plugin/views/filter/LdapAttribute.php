@@ -18,63 +18,63 @@ class LdapAttribute extends StringFilter {
   /**
    * {@inheritdoc}
    */
-  public function operator() {
+  public function operator(): string {
     return $this->operator === '=' ? '=' : '!=';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function opEqual($field) {
+  public function opEqual($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, $this->value, $this->operator());
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opContains($field) {
+  protected function opContains($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, "*$this->value*", '=');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opStartsWith($field) {
+  protected function opStartsWith($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, "$this->value*", '=');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opNotStartsWith($field) {
+  protected function opNotStartsWith($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, "$this->value*", '!=');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opEndsWith($field) {
+  protected function opEndsWith($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, "*$this->value", '=');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opNotEndsWith($field) {
+  protected function opNotEndsWith($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, "*$this->value", '!=');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opNotLike($field) {
+  protected function opNotLike($field): void {
     $this->query->addWhere($this->options['group'], $this->realField, "*$this->value*", '!=');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function opEmpty($field) {
+  protected function opEmpty($field): void {
     if ($this->operator === 'empty') {
       $this->query->addWhere($this->options['group'], $this->realField, '*', '!=');
     }

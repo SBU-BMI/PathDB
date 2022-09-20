@@ -2660,3 +2660,18 @@ mail: Sprout.Ponoma@Hogwarts.edu
 uid: 20012
 userPassword: {SHA}nU4eI71bcnBGqeO0t9tXvY1u5oQ=
 
+
+dn: cn=tażółćgęśląjaźń,ou=people,dc=hogwarts,dc=edu
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: tażółćgęśląjaźń
+sn: Ażółćgęśląjaźń
+businessCategory: instructor
+businessCategory: college director
+displayName: Test Ażółćgęśląjaźń
+givenName: Test
+mail: tazolcgeslajazn@hogwarts.edu
+uid: 20013
+userPassword: {SHA}nU4eI71bcnBGqeO0t9tXvY1u5oQ=

@@ -12,12 +12,10 @@ field_name: field_map_type
 entity_type: node
 bundle: map
 label: 'Map Type'
-description: ''
+description: 'Map types'
 required: true
 translatable: false
-default_value:
-  -
-    value: TIL
+default_value: {  }
 default_value_callback: ''
 settings: {  }
 field_type: list_string

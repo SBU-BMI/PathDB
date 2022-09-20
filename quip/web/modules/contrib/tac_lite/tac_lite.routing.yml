@@ -13,6 +13,8 @@ tac_lite.user_access:
     _title: 'Access by Taxonomy'
   requirements:
     _permission: 'administer tac_lite'
+    _entity_access: 'user.view'
+    user: \d+
 
 route_callbacks:
   - '\Drupal\tac_lite\Routing\TacLiteSchemes::routes'

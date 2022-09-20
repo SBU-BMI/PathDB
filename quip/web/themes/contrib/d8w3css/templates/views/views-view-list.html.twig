@@ -26,7 +26,7 @@
   <{{ list.type }}{{ list.attributes }}{{ attributes.addClass('w3-ul') }}>
 
     {% for row in rows %}
-      <li{{ row.attributes.addClass('w3-panel') }}>{{ row.content }}</li>
+      <li{{ row.attributes.addClass('w3-panel') }}>{{- row.content -}}</li>
     {% endfor %}
 
   </{{ list.type }}>

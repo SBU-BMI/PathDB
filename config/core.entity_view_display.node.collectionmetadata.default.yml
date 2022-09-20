@@ -15,25 +15,25 @@ bundle: collectionmetadata
 mode: default
 content:
   field_collection:
-    weight: 101
+    type: entity_reference_label
     label: above
     settings:
       link: true
     third_party_settings: {  }
-    type: entity_reference_label
+    weight: 101
     region: content
   links:
-    weight: 100
     settings: {  }
     third_party_settings: {  }
+    weight: 100
     region: content
   randomfiles:
-    weight: 102
+    type: file_default
     label: above
     settings:
       use_description_as_link_text: true
     third_party_settings: {  }
-    type: file_default
+    weight: 102
     region: content
 hidden:
   search_api_excerpt: true

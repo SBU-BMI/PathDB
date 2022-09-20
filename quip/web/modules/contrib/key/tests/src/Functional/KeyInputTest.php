@@ -35,7 +35,7 @@ class KeyInputTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->adminUser = $this->drupalCreateUser(['administer keys']);
@@ -57,7 +57,7 @@ class KeyInputTest extends BrowserTestBase {
       'key_type' => 'authentication',
       'key_input_settings[key_value]' => str_pad('', 4000, 'z'),
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
+    $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains(sprintf('The key %s has been added.', $edit['label']));
 
     // Go to the Key page.

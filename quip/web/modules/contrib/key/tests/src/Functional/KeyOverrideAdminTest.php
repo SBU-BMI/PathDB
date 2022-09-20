@@ -13,7 +13,7 @@ class KeyOverrideAdminTest extends BrowserTestBase {
 
   use KeyTestTrait;
 
-  public static $modules = ['key'];
+  protected static $modules = ['key'];
 
   /**
    * {@inheritdoc}
@@ -23,7 +23,7 @@ class KeyOverrideAdminTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->createTestKey('key_foo');
     $this->createTestKeyConfigOverride('test_override', 'key_foo');

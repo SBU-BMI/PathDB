@@ -60,7 +60,7 @@ class CredentialsStorage {
    * @param bool $validate
    *   Defaults to false.
    */
-  public static function testCredentials($validate): void {
+  public static function testCredentials(bool $validate): void {
     self::$validate = $validate;
   }
 

@@ -195,7 +195,7 @@ class EasyBreadcrumbGeneralSettingsForm extends ConfigFormBase {
     $details_advanced[EasyBreadcrumbConstants::CUSTOM_PATHS] = [
       '#type' => 'textarea',
       '#title' => $this->t('Paths to replace with custom breadcrumbs'),
-      '#description' => $this->t('Enter a line separated list of internal paths followed by breadcrumb pattern. Separate crumbs from their path with a vertical bar ("|"). Separate crumbs with double-colon ("::"). Omit the URL to display an unlinked crumb. Fields will be trimmed to remove extra start/end spaces, so you can use them to help format your input, if desired. Replaced Titles will not be processed on custom paths. Excluded paths listed here will have breadcrumbs added. Examples (with and without extra spacing):<br><code>/news/archive/site_launched  ::  News | /news  ::  Archive | /news/archive  ::  Site Launched<br>/your/path::LinkedCrumb1|url1::LinkedCrumb2|url2::UnlinkedCrumb3</code><br><p>It is also possible to express the path to be matched as a <a href="https://www.php.net/manual/en/book.pcre.php" target="_blank">regex expression</a>. "regex!" must be added to the start of the path to match in order for it to be interpreted as regex:<br><code>regex!/news/archive/\d{4} ::  News | /news  ::  Archive | /news/archive</code><p>Expressions can even include matching groups which can be referenced in the path of a segment path:<br><code>regex!/groups/([^/]*)/info :: Groups | /groups :: Group | /groups/$1</code></p>'),
+      '#description' => $this->t('Enter a line separated list of internal paths followed by breadcrumb pattern. Separate crumbs from their path with a vertical bar ("|"). Separate crumbs with double-colon ("::"). Omit the URL to display an unlinked crumb. Fields will be trimmed to remove extra start/end spaces, so you can use them to help format your input, if desired. Replaced Titles will not be processed on custom paths. Excluded paths listed here will have breadcrumbs added. Examples (with and without extra spacing):<br><code>/news/archive/site_launched  ::  News | /news  ::  Archive | /news/archive  ::  Site Launched<br>/your/path::LinkedCrumb1|url1::LinkedCrumb2|url2::UnlinkedCrumb3</code><br><p>It is also possible to express the path to be matched as a <a href="https://www.php.net/manual/en/book.pcre.php" target="_blank">regex expression</a>. "regex!" must be added to the start of the path to match in order for it to be interpreted as regex:<br><code>regex!/news/archive/\d{4} ::  News | /news  ::  Archive | /news/archive</code><p>Expressions can even include matching groups which can be referenced in the path of a segment path:<br><code>regex!/groups/([^/]*)/info :: Groups | /groups :: Group | /groups/$1</code></p><p>To use the current page title as a title component, use <code>&lt;title&gt;</code></p>'),
       '#default_value' => $custom_paths,
     ];
 
@@ -262,7 +262,7 @@ class EasyBreadcrumbGeneralSettingsForm extends ConfigFormBase {
 
     // Formats the ignored-words array as space separated list of words
     // (word1 word2 wordN) before displaying them.
-    $capitalizator_ignored_words_arr = $config->get(EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS);
+    $capitalizator_ignored_words_arr = $config->get(EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS) ?? [];
     $capitalizator_ignored_words = @implode(' ', $capitalizator_ignored_words_arr);
 
     $details_advanced[EasyBreadcrumbConstants::CAPITALIZATOR_IGNORED_WORDS] = [
@@ -283,7 +283,7 @@ class EasyBreadcrumbGeneralSettingsForm extends ConfigFormBase {
 
     // Formats the forced-words array as space separated list of words
     // (word1 word2 wordN) before displaying them.
-    $capitalizator_forced_words_arr = $config->get(EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS);
+    $capitalizator_forced_words_arr = $config->get(EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS) ?? [];
     $capitalizator_forced_words = @implode(' ', $capitalizator_forced_words_arr);
 
     $details_advanced[EasyBreadcrumbConstants::CAPITALIZATOR_FORCED_WORDS] = [
@@ -339,7 +339,7 @@ class EasyBreadcrumbGeneralSettingsForm extends ConfigFormBase {
     ];
 
     $details_advanced[EasyBreadcrumbConstants::TRUNCATOR_LENGTH] = [
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => $this->t("Set the limit of truncation"),
       '#default_value' => $config->get(EasyBreadcrumbConstants::TRUNCATOR_LENGTH),
       '#states' => [

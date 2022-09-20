@@ -61,15 +61,15 @@ d8w3css-global-components:
     - core/drupalSettings
     - core/jquery.once
 
-d8w3css-match-height:
-  version: VERSION
-  header: false
-  js:
-    js/jquery.matchHeight.js: { preprocess: false }
-    js/enable.matchHeight.js: { attributes: { defer: true } }
-  dependencies:
-    - core/jquery
-    - core/drupal
+#d8w3css-match-height:
+#  version: VERSION
+#  header: false
+#  js:
+#    js/jquery.matchHeight.js: { preprocess: false }
+#    js/enable.matchHeight.js: { attributes: { defer: true } }
+#  dependencies:
+#    - core/jquery
+#    - core/drupal
 
 d8w3css-full-opacity:
   version: VERSION

@@ -322,7 +322,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
     }
 
     // Exclude users who have been manually flagged as excluded.
-    if ($this->drupalUser->get('ldap_user_ldap_exclude')->value == 1) {
+    if ($this->drupalUser->get('ldap_user_ldap_exclude')->getString() === '1') {
       $this->detailLog->log(
         '%username: User flagged as excluded.',
         ['%username' => $this->authName],
@@ -410,12 +410,21 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
    *   Response text.
    */
   protected function additionalDebuggingResponse(int $authenticationResult): TranslatableMarkup {
-    $information = $this->t('(unknown issue)');
-    if ($authenticationResult === self::AUTHENTICATION_FAILURE_FIND) {
-      $information = $this->t('(not found)');
-    }
-    elseif ($authenticationResult === self::AUTHENTICATION_FAILURE_CREDENTIALS) {
-      $information = $this->t('(wrong credentials)');
+    switch ($authenticationResult) {
+      case self::AUTHENTICATION_FAILURE_FIND:
+        $information = $this->t('(not found)');
+        break;
+
+      case self::AUTHENTICATION_FAILURE_CREDENTIALS:
+        $information = $this->t('(wrong credentials)');
+        break;
+
+      case self::AUTHENTICATION_SUCCESS:
+        $information = $this->t('(no issue)');
+        break;
+
+      default:
+        $information = $this->t('(unknown issue)');
     }
     return $information;
   }
@@ -733,9 +742,10 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
       $users = $this->entityTypeManager
         ->getStorage('user')
         ->loadByProperties(['mail' => $this->serverDrupalUser->deriveEmailFromLdapResponse($this->ldapEntry)]);
-      $account_with_same_email = $users ? reset($users) : FALSE;
-      if ($account_with_same_email) {
+
+      if (count($users) > 0) {
         /** @var \Drupal\user\UserInterface $account_with_same_email */
+        $account_with_same_email = reset($users);
         $this->logger
           ->error('LDAP user with DN %dn has a naming conflict with a local Drupal user %conflict_name',
             [
@@ -748,15 +758,14 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
         ->addError($this->t('Another user already exists in the system with the same login name. You should contact the system administrator in order to solve this conflict.'));
       return FALSE;
     }
-    else {
-      $this->externalAuth->save($this->drupalUser, 'ldap_user', $this->authName);
-      $this->drupalUserAuthMapped = TRUE;
-      $this->detailLog->log(
-        'Set authmap for LDAP user %username',
-        ['%username' => $this->authName],
-        'ldap_authentication'
-      );
-    }
+
+    $this->externalAuth->save($this->drupalUser, 'ldap_user', $this->authName);
+    $this->drupalUserAuthMapped = TRUE;
+    $this->detailLog->log(
+      'Set authmap for LDAP user %username',
+      ['%username' => $this->authName],
+      'ldap_authentication'
+    );
     return TRUE;
   }
 

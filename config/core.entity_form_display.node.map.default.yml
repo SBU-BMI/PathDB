@@ -5,11 +5,11 @@ dependencies:
   config:
     - field.field.node.map.execution_id
     - field.field.node.map.field_map
-    - field.field.node.map.field_map_type
     - field.field.node.map.field_target_collection
     - field.field.node.map.field_wsi
     - node.type.map
   module:
+    - content_moderation
     - file
 id: node.map.default
 targetEntityType: node
@@ -17,41 +17,41 @@ bundle: map
 mode: default
 content:
   execution_id:
+    type: string_textfield
     weight: 26
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   field_map:
+    type: file_generic
     weight: 2
+    region: content
     settings:
       progress_indicator: throbber
     third_party_settings: {  }
-    type: file_generic
-    region: content
-  field_map_type:
-    weight: 1
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
-    region: content
   field_target_collection:
+    type: options_select
     weight: 0
+    region: content
     settings: {  }
     third_party_settings: {  }
-    type: options_select
-    region: content
   field_wsi:
     type: entity_reference_autocomplete
     weight: 3
     region: content
     settings:
       match_operator: CONTAINS
+      match_limit: 10
       size: 60
       placeholder: ''
-      match_limit: 10
+    third_party_settings: {  }
+  moderation_state:
+    type: moderation_state_default
+    weight: 100
+    region: content
+    settings: {  }
     third_party_settings: {  }
 hidden:
   created: true

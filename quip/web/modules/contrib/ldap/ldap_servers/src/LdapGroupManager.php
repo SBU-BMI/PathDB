@@ -387,7 +387,7 @@ class LdapGroupManager extends LdapBaseManager {
     array $tested_group_dns,
     int $level,
     int $max_levels,
-    $object_classes = NULL
+    ?array $object_classes = NULL
   ): void {
     if (!$this->checkAvailability()) {
       return;

@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * Install default config with module settings.
+ */
+function moderated_content_bulk_publish_update_8201() {
+  $config = \Drupal::configFactory()
+    ->getEditable('moderated_content_bulk_publish.settings');
+  $config->set('langcode', 'en');
+  $config->set('publish', [
+    'state' => [
+      'published' => 'published',
+    ],
+  ]);
+  $config->set('unpublish', [
+    'state' => [
+      'archived' => 'archived',
+      'draft' => 'draft',
+    ],
+  ]);
+  $config->set('archive', [
+    'state' => [
+      'archived' => 'archived',
+    ],
+  ]);
+  $config->save();
+}

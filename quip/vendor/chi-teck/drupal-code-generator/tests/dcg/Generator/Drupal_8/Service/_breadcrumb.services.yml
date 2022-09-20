@@ -1,5 +1,0 @@
-services:
-  example.breadcrumb:
-    class: Drupal\example\ExampleBreadcrumbBuilder
-    tags:
-      - { name: breadcrumb_builder, priority: 1000 }

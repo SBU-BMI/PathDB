@@ -1,0 +1,5 @@
+moderated_content_bulk_publish.settings:
+  route_name: moderated_content_bulk_publish.settings.form
+  title: 'Moderated content bulk publish'
+  description: 'Configure settings for Moderated content bulk publish.'
+  parent: system.admin_config_content

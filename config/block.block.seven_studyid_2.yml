@@ -18,12 +18,12 @@ plugin: 'facet_block:study_id'
 settings:
   id: 'facet_block:study_id'
   label: 'Study ID'
-  provider: facets
   label_display: visible
+  provider: facets
   block_id: studyid_2
 visibility:
   request_path:
     id: request_path
-    pages: "/imagesearch\r\n/imagesearch/*"
     negate: false
     context_mapping: {  }
+    pages: "/imagesearch\r\n/imagesearch/*"

@@ -1,0 +1,3 @@
+authorization.consumer.plugin.dummy:
+  type: mapping
+  label: 'Dummy does not provide consumer settings.'

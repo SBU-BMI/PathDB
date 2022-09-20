@@ -614,6 +614,11 @@ class Bar {
   public ?Bar $bar;
 
   /**
+   * A typed property may omit @var.
+   */
+  public Bar $baz;
+
+  /**
    * Public static variables use camelCase, too.
    *
    * @var string
@@ -1175,7 +1180,7 @@ function test6(array $names) {
 
 }
 
-list(,, $bundle) = entity_extract_ids('node', $entity);
+[,, $bundle] = entity_extract_ids('node', $entity);
 
 l("<i class='icon icon-industrial-building'></i>", 'node/add/job', array(
   'attributes' => array('title' => t('add job')),
@@ -1735,21 +1740,21 @@ interface Test5Interface {
    *   Just some Example param.
    * @param ...
    *   Any additional arguments are passed on to the functions called by
-   *   drupal_form_submit(), including the unique form constructor function.
+   *   self::submitForm(), including the unique form constructor function.
    *   For example, the node_edit form requires that a node object be passed
    *   in here when it is called. Arguments that need to be passed by reference
-   *   should not be included here, but rather placed directly in the $form
-   *   build info array so that the reference can be preserved. For example, a
-   *   form builder function with the following signature:
+   *   should not be included here, but rather placed directly in the
+   *   $form_state build info array so that the reference can be preserved. For
+   *   example, a form builder function with the following signature:
    *   @code
-   *   function mymodule_form($form, &$form_state, &$object) {
+   *   function mymodule_form($form, FormStateInterface &$form_state, &$object) {
    *   }
    *   @endcode
-   *   would be called via drupal_form_submit() as follows:
+   *   would be called via self::submitForm() as follows:
    *   @code
-   *   $form_state['values'] = $my_form_values;
-   *   $form_state['build_info']['args'] = array(&$object);
-   *   drupal_form_submit('mymodule_form', $form_state);
+   *   $form_state->setValues($my_form_values);
+   *   $form_state->addBuildInfo('args', [&$object]);
+   *   \Drupal::formBuilder()->submitForm('mymodule_form', $form_state);
    *   @endcode
    */
   public function test1($param1);
@@ -1798,5 +1803,19 @@ interface Test5Interface {
    *   And this is the end.
    */
   public function test3();
+
+}
+
+/**
+ * Test PHP attributes.
+ */
+class TestPhpAttributes {
+
+  /**
+   * Tests method with PHP attribute and docblock.
+   */
+  #[\ReturnTypeWillChange]
+  public function attributes(): void {
+  }
 
 }

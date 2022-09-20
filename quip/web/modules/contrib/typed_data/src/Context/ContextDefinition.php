@@ -74,7 +74,7 @@ class ContextDefinition extends ContextDefinitionCore implements ContextDefiniti
     if (isset($values['class']) && !in_array(ContextDefinitionInterface::class, class_implements($values['class']))) {
       throw new ContextException('ContextDefinition class must implement ' . ContextDefinitionInterface::class . '.');
     }
-    // Default to Typed data context definition class.
+    // Default to Typed Data context definition class.
     $values['class'] = isset($values['class']) ? $values['class'] : ContextDefinition::class;
     if (!isset($values['value'])) {
       $values['value'] = 'any';

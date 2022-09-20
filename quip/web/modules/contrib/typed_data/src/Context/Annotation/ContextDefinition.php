@@ -7,7 +7,7 @@ use Drupal\Core\Annotation\Translation;
 use Drupal\typed_data\Context\ContextDefinition as TypedDataContextDefinition;
 
 /**
- * Extends the core context definition annotation object for Typed data.
+ * Extends the core context definition annotation object for Typed Data.
  *
  * Ensures context definitions use
  * \Drupal\typed_data\Context\ContextDefinitionInterface.
@@ -42,7 +42,7 @@ class ContextDefinition extends CoreContextDefinition {
    * Returns the value of an annotation.
    *
    * @return \Drupal\typed_data\Context\ContextDefinitionInterface
-   *   Return the Typed data version of the ContextDefinitionInterface.
+   *   Return the Typed Data version of the ContextDefinitionInterface.
    */
   public function get() {
     return $this->definition;

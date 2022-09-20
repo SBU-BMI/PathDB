@@ -92,8 +92,8 @@ class EasyBreadcrumbStructuredDataJsonLd implements ContainerInjectionInterface 
           $item = $link->getUrl()->setAbsolute(TRUE)->toString();
 
           // Escape " to produce valid json for titles with "" in them.
-          $name = str_replace('"','\"', $name);
-          $item = str_replace('"','\"', $item);
+          $name = str_replace('"', '\"', $name);
+          $item = str_replace('"', '\"', $item);
 
           // Add a comma before each item except the first.
           if ($position > 1) {

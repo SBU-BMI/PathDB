@@ -15,11 +15,9 @@ use Drupal\KernelTests\KernelTestBase;
 class TextDataTypeTest extends KernelTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = ['system', 'typed_data'];
+  protected static $modules = ['system', 'typed_data'];
 
   /**
    * Tests that the Text datatype is instantiated correctly.
@@ -34,15 +32,15 @@ class TextDataTypeTest extends KernelTestBase {
 
     // Check that the new object is an instance of TypedDataInterface and of
     // StringInterface (not TextInterface).
-    $this->assertTrue($typed_data instanceof TypedDataInterface, 'Typed data object is an instance of the typed data interface.');
-    $this->assertTrue($typed_data instanceof StringInterface, 'Typed data object is an instance of StringInterface).');
+    $this->assertInstanceOf(TypedDataInterface::class, $typed_data, 'Typed Data object is an instance of the typed data interface.');
+    $this->assertInstanceOf(StringInterface::class, $typed_data, 'Typed Data object is an instance of StringInterface).');
 
     // Check basic get and set functionality.
-    $this->assertTrue($typed_data->getValue() === $value, 'Text value was fetched.');
+    $this->assertSame($value, $typed_data->getValue(), 'Text value was fetched.');
     $this->assertEquals(0, $typed_data->validate()->count());
     $new_value = $this->randomString() . "\r\n" . $this->randomString();
     $typed_data->setValue($new_value);
-    $this->assertTrue($typed_data->getValue() === $new_value, 'Text value was changed.');
+    $this->assertSame($new_value, $typed_data->getValue(), 'Text value was changed.');
     $this->assertEquals(0, $typed_data->validate()->count());
   }
 

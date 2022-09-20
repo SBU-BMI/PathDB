@@ -1,7 +1,0 @@
-action.configuration.example_foo:
-  type: mapping
-  label: 'Configuration for "Foo" action'
-  mapping:
-    title:
-      type: string
-      label: Title

@@ -1,0 +1,6 @@
+authorization.provider_mappings.plugin.dummy:
+  type: mapping
+  mapping:
+    query:
+      type: string
+      label: 'Query'

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Drupal8 W3CSS Theme.theme.
+ * W3CSS Theme.theme.
  *
  * Filename:     drupal8_w3css_theme.theme
  * Website:      http://www.flashwebcenter.com
@@ -23,11 +23,11 @@ $form['drupal8_w3css_theme_settings']['w3_external_libraries'] = [
 ];
 $form['drupal8_w3css_theme_settings']['w3_external_libraries']['d8w3css_font_awesome_4'] = [
   '#type' => 'checkbox',
-  '#title' => t('Load font awesome 4.7 locally. This is for use with the Drupal8 W3CSS Theme'),
+  '#title' => t('Load font awesome 4.7 locally. This is for use with the W3CSS Theme'),
   '#default_value' => theme_get_setting('d8w3css_font_awesome_4'),
 ];
 $form['drupal8_w3css_theme_settings']['w3_external_libraries']['d8w3css_google_font'] = [
   '#type' => 'checkbox',
-  '#title' => t('Load Google fonts locally. This is for use with the Drupal8 W3CSS Theme'),
+  '#title' => t('Load Google fonts locally. This is for use with the W3CSS Theme'),
   '#default_value' => theme_get_setting('d8w3css_google_font'),
 ];

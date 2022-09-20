@@ -19,11 +19,7 @@ abstract class FormWidgetBrowserTestBase extends BrowserTestBase {
   use TypedDataTrait;
 
   /**
-   * Minimum modules to enable.
-   *
-   * Additional modules can be defined in the specific tests that need them.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'typed_data',

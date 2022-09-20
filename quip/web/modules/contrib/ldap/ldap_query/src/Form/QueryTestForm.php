@@ -25,7 +25,7 @@ class QueryTestForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_query_test_form';
   }
 
@@ -39,7 +39,7 @@ class QueryTestForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): QueryTestForm {
     return new static($container->get('ldap.query'));
   }
 

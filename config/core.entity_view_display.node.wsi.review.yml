@@ -35,35 +35,36 @@ third_party_settings:
     group_tabbers:
       children:
         - group_image
+      label: Tabbers
       parent_name: ''
+      region: header
       weight: 31
       format_type: tabs
       format_settings:
-        id: ''
         classes: ''
+        id: ''
         direction: horizontal
-      label: Tabbers
-      region: header
     group_image:
       children: {  }
+      label: Image
       parent_name: group_tabbers
+      region: header
       weight: 38
       format_type: tab
       format_settings:
-        id: ''
         classes: ''
+        id: ''
         formatter: open
         description: ''
-      label: Image
-      region: header
   layout_builder:
-    allow_custom: false
     enabled: true
+    allow_custom: false
     sections:
       -
         layout_id: layout_onecol
         layout_settings:
           label: 'Moderation Area'
+          context_mapping: {  }
         components:
           9abd3888-b9b9-46f8-8af3-d62db5deaf81:
             uuid: 9abd3888-b9b9-46f8-8af3-d62db5deaf81
@@ -71,23 +72,24 @@ third_party_settings:
             configuration:
               id: 'field_block:node:wsi:moderation_state'
               label: 'Moderation state'
-              provider: layout_builder
               label_display: '0'
-              formatter:
-                label: inline
-                type: content_moderation_state
-                settings: {  }
-                third_party_settings: {  }
+              provider: layout_builder
               context_mapping:
                 entity: layout_builder.entity
                 view_mode: view_mode
-            additional: {  }
+              formatter:
+                type: content_moderation_state
+                label: inline
+                settings: {  }
+                third_party_settings: {  }
             weight: 0
+            additional: {  }
         third_party_settings: {  }
       -
         layout_id: layout_threecol_section
         layout_settings:
           label: BAM
+          context_mapping: {  }
           column_widths: 33-34-33
         components:
           60c96cc9-e05d-43c1-a289-a0fe25928c9a:
@@ -96,57 +98,57 @@ third_party_settings:
             configuration:
               id: 'field_block:node:wsi:studyid'
               label: 'Study ID'
-              provider: layout_builder
               label_display: visible
-              formatter:
-                label: inline
-                type: string
-                settings:
-                  link_to_entity: false
-                third_party_settings: {  }
+              provider: layout_builder
               context_mapping:
                 entity: layout_builder.entity
                 view_mode: view_mode
-            additional: {  }
+              formatter:
+                type: string
+                label: inline
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
             weight: 0
+            additional: {  }
           f835cf63-799a-410d-be70-965b0f51433a:
             uuid: f835cf63-799a-410d-be70-965b0f51433a
             region: second
             configuration:
               id: 'field_block:node:wsi:clinicaltrialsubjectid'
               label: '​Subject ID'
-              provider: layout_builder
               label_display: visible
-              formatter:
-                label: inline
-                type: string
-                settings:
-                  link_to_entity: false
-                third_party_settings: {  }
+              provider: layout_builder
               context_mapping:
                 entity: layout_builder.entity
                 view_mode: view_mode
-            additional: {  }
+              formatter:
+                type: string
+                label: inline
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
             weight: 0
+            additional: {  }
           18623158-c039-474f-8e62-62f42b152e24:
             uuid: 18623158-c039-474f-8e62-62f42b152e24
             region: third
             configuration:
               id: 'field_block:node:wsi:imageid'
               label: 'Image ID'
-              provider: layout_builder
               label_display: visible
-              formatter:
-                label: inline
-                type: string
-                settings:
-                  link_to_entity: false
-                third_party_settings: {  }
+              provider: layout_builder
               context_mapping:
                 entity: layout_builder.entity
                 view_mode: view_mode
-            additional: {  }
+              formatter:
+                type: string
+                label: inline
+                settings:
+                  link_to_entity: false
+                third_party_settings: {  }
             weight: 0
+            additional: {  }
         third_party_settings: {  }
 id: node.wsi.review
 targetEntityType: node
@@ -154,45 +156,45 @@ bundle: wsi
 mode: review
 content:
   acquisitiondatetime:
-    weight: 5
+    type: datetime_default
     label: above
     settings:
-      format_type: medium
       timezone_override: ''
+      format_type: medium
     third_party_settings: {  }
-    type: datetime_default
+    weight: 5
     region: header
   clinicaltrialsubjectid:
-    weight: 16
+    type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 16
     region: header
   content_moderation_control:
+    settings: {  }
+    third_party_settings: {  }
     weight: 0
     region: header
-    settings: {  }
-    third_party_settings: {  }
   field_bulk_upload:
-    weight: 4
+    type: entity_reference_label
     label: inline
     settings:
       link: true
     third_party_settings: {  }
-    type: entity_reference_label
+    weight: 4
     region: header
   field_collection:
-    weight: 2
+    type: entity_reference_label
     label: inline
     settings:
       link: true
     third_party_settings: {  }
-    type: entity_reference_label
+    weight: 2
     region: header
   imagedvolumeheight:
-    weight: 6
+    type: number_decimal
     label: above
     settings:
       thousand_separator: ''
@@ -200,10 +202,10 @@ content:
       scale: 2
       prefix_suffix: true
     third_party_settings: {  }
-    type: number_decimal
+    weight: 6
     region: header
   imagedvolumewidth:
-    weight: 14
+    type: number_decimal
     label: above
     settings:
       thousand_separator: ''
@@ -211,55 +213,55 @@ content:
       scale: 2
       prefix_suffix: true
     third_party_settings: {  }
-    type: number_decimal
+    weight: 14
     region: header
   imageid:
-    weight: 11
+    type: string
     label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 11
     region: header
   links:
-    weight: 1
-    region: header
     settings: {  }
     third_party_settings: {  }
+    weight: 1
+    region: header
   lossyimagecompression:
-    weight: 7
+    type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 7
     region: header
   lossyimagecompressionmethod:
-    weight: 8
+    type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 8
     region: header
   md5:
-    weight: 15
+    type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 15
     region: header
   patientid:
-    weight: 12
+    type: string
     label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 12
     region: header
   referencepixelphysicalvaluex:
-    weight: 9
+    type: number_decimal
     label: above
     settings:
       thousand_separator: ''
@@ -267,10 +269,10 @@ content:
       scale: 2
       prefix_suffix: true
     third_party_settings: {  }
-    type: number_decimal
+    weight: 9
     region: header
   referencepixelphysicalvaluey:
-    weight: 10
+    type: number_decimal
     label: above
     settings:
       thousand_separator: ''
@@ -278,15 +280,15 @@ content:
       scale: 2
       prefix_suffix: true
     third_party_settings: {  }
-    type: number_decimal
+    weight: 10
     region: header
   studyid:
-    weight: 13
+    type: string
     label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 13
     region: header
 hidden:
   field_iip_path: true

@@ -1,0 +1,14 @@
+name: Authorization Test
+type: module
+description: Helper module for testing authorization.
+package: Testing
+core: 8.x
+core_version_requirement: ^8 || ^9
+hidden: true
+dependencies:
+  - authorization:authorization
+
+# Information added by Drupal.org packaging script on 2021-09-11
+version: '8.x-1.0-beta6'
+project: 'authorization'
+datestamp: 1631389170

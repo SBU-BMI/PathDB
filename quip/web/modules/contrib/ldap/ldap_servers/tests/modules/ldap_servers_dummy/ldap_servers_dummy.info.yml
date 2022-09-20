@@ -1,0 +1,11 @@
+name: 'LDAP Servers Dummy'
+description: 'Allows for mocking the connection to symfony/ldap.'
+type: module
+core_version_requirement: ^8.7.7 || ^9
+package: Testing
+hidden: true
+
+# Information added by Drupal.org packaging script on 2022-01-05
+version: '8.x-4.3'
+project: 'ldap'
+datestamp: 1641412023

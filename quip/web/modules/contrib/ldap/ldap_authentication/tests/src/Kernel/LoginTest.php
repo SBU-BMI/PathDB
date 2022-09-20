@@ -8,8 +8,8 @@ use Drupal\Core\Form\FormState;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\ldap_servers\FakeBridge;
-use Drupal\ldap_servers\FakeCollection;
+use Drupal\ldap_servers_dummy\FakeBridge;
+use Drupal\ldap_servers_dummy\FakeCollection;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Symfony\Component\Ldap\Entry;
 
@@ -24,13 +24,14 @@ class LoginTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'externalauth',
+    'ldap_authentication',
+    'ldap_query',
+    'ldap_servers',
+    'ldap_servers_dummy',
+    'ldap_user',
     'system',
     'user',
-    'externalauth',
-    'ldap_servers',
-    'ldap_authentication',
-    'ldap_user',
-    'ldap_query',
   ];
 
   /**
@@ -143,20 +144,9 @@ class LoginTest extends KernelTestBase {
   }
 
   /**
-   * Test exclusive user mode.
-   */
-  public function testExclusiveUserMode() {
-    $this->markTestIncomplete('Test missing.');
-    // @todo Write test
-    // assert right credentials LDAP
-    // assert local Drupal user without mapping (associated, not associated)
-    // see example data.
-  }
-
-  /**
    * Test the whitelist.
    */
-  public function testWhiteListPresent() {
+  public function testWhiteListPresent(): void {
     $this->config('ldap_authentication.settings')
       ->set('allowOnlyIfTextInDn', [
         'hpotter',
@@ -177,7 +167,7 @@ class LoginTest extends KernelTestBase {
   /**
    * Test the whitelist.
    */
-  public function testWhiteListMissing() {
+  public function testWhiteListMissing(): void {
     $this->config('ldap_authentication.settings')
       ->set('allowOnlyIfTextInDn', [
         'HGRANGER',

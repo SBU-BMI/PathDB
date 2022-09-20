@@ -52,7 +52,7 @@ class LdapDetailLog {
    * @param string $module
    *   Logging channel to use.
    */
-  public function log($message, array $context = [], $module = 'ldap_servers') {
+  public function log(string $message, array $context = [], string $module = 'ldap_servers'): void {
     if ($this->config->get('watchdog_detail')) {
       $this->loggerFactory->get($module)->debug($message, $context);
     }

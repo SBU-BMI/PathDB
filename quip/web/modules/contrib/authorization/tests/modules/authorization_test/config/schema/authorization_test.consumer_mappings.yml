@@ -1,0 +1,7 @@
+authorization.consumer_mappings.plugin.dummy:
+  label: 'Consumer map'
+  type: mapping
+  mapping:
+    role:
+      type: string
+      label: 'Role'

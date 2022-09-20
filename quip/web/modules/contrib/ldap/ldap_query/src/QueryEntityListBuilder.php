@@ -16,7 +16,7 @@ class QueryEntityListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildHeader() {
+  public function buildHeader(): array {
     $header['label'] = $this->t('LDAP Query');
     $header['server_id'] = $this->t('Server');
     $header['status'] = $this->t('Enabled');
@@ -26,7 +26,7 @@ class QueryEntityListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildRow(EntityInterface $entity) {
+  public function buildRow(EntityInterface $entity): array {
     /** @var \Drupal\ldap_query\QueryEntityInterface $entity */
     $row['label'] = $entity->label();
     $server = Server::load($entity->get('server_id'));

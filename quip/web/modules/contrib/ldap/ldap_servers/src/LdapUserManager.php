@@ -12,6 +12,7 @@ use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Exception\LdapException;
+use function is_array;
 
 /**
  * LDAP User Manager.
@@ -132,14 +133,13 @@ class LdapUserManager extends LdapBaseManager {
   protected function convertPasswordForActiveDirectoryUnicodePwd($password) {
     // This function can be called with $attributes['unicodePwd'] as an array.
     if (!is_array($password)) {
-      return mb_convert_encoding("\"{$password}\"", "UTF-16LE");
+      return mb_convert_encoding(sprintf('"%s"', $password), 'UTF-16LE');
     }
-    else {
-      // Presumably there is no use case for there being more than one password
-      // in the $attributes array, hence it will be at index 0 and we return in
-      // kind.
-      return [mb_convert_encoding("\"{$password[0]}\"", "UTF-16LE")];
-    }
+
+    // Presumably there is no use case for there being more than one password
+    // in the $attributes array, hence it will be at index 0, and we return in
+    // kind.
+    return [mb_convert_encoding(sprintf('"%s"', $password[0]), 'UTF-16LE')];
   }
 
   /**
@@ -148,40 +148,41 @@ class LdapUserManager extends LdapBaseManager {
    * @param string $puid
    *   As returned from ldap_read or other LDAP function (can be binary).
    *
-   * @return false|\Drupal\user\UserInterface|\Drupal\Core\Entity\EntityInterface
+   * @return \Drupal\user\UserInterface|null
    *   The updated user or error.
    */
-  public function getUserAccountFromPuid($puid) {
-    if (!$this->checkAvailability()) {
-      return FALSE;
-    }
-    $storage = $this->entityTypeManager->getStorage('user');
-    $query = $storage->getQuery();
-    $query->condition('ldap_user_puid_sid', $this->server->id(), '=')
-      ->condition('ldap_user_puid', $puid, '=')
-      ->condition('ldap_user_puid_property', $this->server->getUniquePersistentAttribute(), '=')
-      ->accessCheck(FALSE);
-    $result = $query->execute();
+  public function getUserAccountFromPuid(string $puid): ?UserInterface {
+    $result = NULL;
 
-    if (empty($result)) {
-      return FALSE;
+    if ($this->checkAvailability()) {
+      $storage = $this->entityTypeManager->getStorage('user');
+      $query = $storage->getQuery();
+      $query->condition('ldap_user_puid_sid', $this->server->id(), '=')
+        ->condition('ldap_user_puid', $puid, '=')
+        ->condition('ldap_user_puid_property', $this->server->getUniquePersistentAttribute(), '=')
+        ->accessCheck(FALSE);
+      $queryResult = $query->execute();
+
+      if (count($queryResult) === 1) {
+        /** @var \Drupal\user\UserInterface $result */
+        $result = $storage->load(array_values($queryResult)[0]);
+      }
+
+      if (count($queryResult) > 1) {
+        $uids = implode(',', $queryResult);
+        $this->logger->error(
+          'Multiple users (uids: %uids) with same puid (puid=%puid, sid=%sid, ldap_user_puid_property=%ldap_user_puid_property)',
+          [
+            '%uids' => $uids,
+            '%puid' => $puid,
+            '%id' => $this->server->id(),
+            '%ldap_user_puid_property' => $this->server->getUniquePersistentAttribute(),
+          ]
+        );
+      }
     }
 
-    if (count($result) > 1) {
-      $uids = implode(',', $result);
-      $this->logger->error(
-        'Multiple users (uids: %uids) with same puid (puid=%puid, sid=%sid, ldap_user_puid_property=%ldap_user_puid_property)',
-        [
-          '%uids' => $uids,
-          '%puid' => $puid,
-          '%id' => $this->server->id(),
-          '%ldap_user_puid_property' => $this->server->getUniquePersistentAttribute(),
-        ]
-      );
-      return FALSE;
-    }
-
-    return $storage->load(array_values($result)[0]);
+    return $result;
   }
 
   /**

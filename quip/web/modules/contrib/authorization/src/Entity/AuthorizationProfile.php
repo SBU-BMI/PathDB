@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization\Entity;
 
+use Drupal\authorization\consumer\ConsumerInterface;
+use Drupal\authorization\provider\ProviderInterface;
 use Drupal\authorization\AuthorizationResponse;
 use Drupal\authorization\AuthorizationSkipAuthorization;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -183,7 +187,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return string
    *   Provider ID.
    */
-  public function getProviderId(): string {
+  public function getProviderId(): ?string {
     return $this->provider;
   }
 
@@ -193,7 +197,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return string
    *   Consumer ID.
    */
-  public function getConsumerId(): string {
+  public function getConsumerId(): ?string {
     return $this->consumer;
   }
 
@@ -203,13 +207,12 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return bool
    *   Provider valid.
    */
-  public function hasValidProvider(): ?bool {
+  public function hasValidProvider(): bool {
     if ($this->provider_plugin_manager->getDefinition($this->getProviderId(), FALSE)) {
       return TRUE;
     }
-    else {
-      return FALSE;
-    }
+
+    return FALSE;
   }
 
   /**
@@ -218,22 +221,21 @@ class AuthorizationProfile extends ConfigEntityBase {
    * @return bool
    *   Consumer valid.
    */
-  public function hasValidConsumer(): ?bool {
+  public function hasValidConsumer(): bool {
     if ($this->consumer_plugin_manager->getDefinition($this->getconsumerId(), FALSE)) {
       return TRUE;
     }
-    else {
-      return FALSE;
-    }
+
+    return FALSE;
   }
 
   /**
    * Get the active provider.
    *
-   * @return \Drupal\authorization\provider\ProviderInterface
+   * @return \Drupal\authorization\provider\ProviderInterface|null
    *   The active provider.
    */
-  public function getProvider(): \Drupal\authorization\provider\ProviderInterface {
+  public function getProvider(): ?ProviderInterface {
     if (!$this->provider_plugin || $this->getProviderId() !== $this->provider_plugin->getPluginId()) {
       $this->loadProviderPlugin();
     }
@@ -243,10 +245,10 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * Get the active consumer.
    *
-   * @return \Drupal\authorization\consumer\ConsumerInterface
+   * @return \Drupal\authorization\consumer\ConsumerInterface|null
    *   The active consumer.
    */
-  public function getConsumer(): \Drupal\authorization\consumer\ConsumerInterface {
+  public function getConsumer(): ?ConsumerInterface {
     if (!$this->consumer_plugin || $this->getConsumerId() !== $this->consumer_plugin->getPluginId()) {
       $this->loadConsumerPlugin();
     }
@@ -429,13 +431,13 @@ class AuthorizationProfile extends ConfigEntityBase {
       $proposals = $provider->getProposals($user);
     }
     catch (AuthorizationSkipAuthorization $e) {
-      return new AuthorizationResponse($this->t('@name (skipped)', ['@name' => $this->label]), TRUE, []);
+      return new AuthorizationResponse((string) $this->t('@name (skipped)', ['@name' => $this->label]), TRUE, []);
     }
 
     $proposals = $provider->sanitizeProposals($proposals);
 
     $applied_grants = [];
-    // TODO: This could be made more elegant with methods on this class checking
+    // @todo This could be made more elegant with methods on this class checking
     // for support on this and not checking here the array key directly.
     $create_consumers = $this->get('synchronization_actions')['create_consumers'] ?? FALSE;
     $revoke_provision = $this->get('synchronization_actions')['revoke_provider_provisioned'] ?? FALSE;
@@ -461,6 +463,7 @@ class AuthorizationProfile extends ConfigEntityBase {
     if ($user_save === TRUE) {
       $user->save();
     }
+
     return new AuthorizationResponse($this->label, FALSE, $applied_grants);
   }
 

@@ -80,7 +80,7 @@ class LdapBridge implements LdapBridgeInterface {
   /**
    * {@inheritdoc}
    */
-  public function setServerById($sid): void {
+  public function setServerById(string $sid): void {
     $server = $this->entityManager->load($sid);
     /** @var \Drupal\ldap_servers\Entity\Server $server */
     if ($server) {

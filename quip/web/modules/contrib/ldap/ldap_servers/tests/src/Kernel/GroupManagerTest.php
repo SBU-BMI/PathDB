@@ -6,7 +6,7 @@ namespace Drupal\Tests\ldap_servers\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
-use Drupal\ldap_servers\FakeBridge;
+use Drupal\ldap_servers_dummy\FakeBridge;
 use Symfony\Component\Ldap\Entry;
 
 /**
@@ -19,7 +19,11 @@ class GroupManagerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['ldap_servers', 'externalauth'];
+  protected static $modules = [
+    'externalauth',
+    'ldap_servers',
+    'ldap_servers_dummy',
+  ];
 
   /**
    * Server.
@@ -69,6 +73,14 @@ class GroupManagerTest extends KernelTestBase {
     $group_manager->setServer($this->server);
     $result = $group_manager->groupUserMembershipsFromUserAttr($entry);
     self::assertEquals($memberships, $result);
+
+    $this->server->set('grp_user_memb_attr', 'invalidAttribute');
+    $result = $group_manager->groupUserMembershipsFromUserAttr($entry);
+    self::assertEmpty($result);
+
+    $this->server->set('grp_user_memb_attr_exists', FALSE);
+    $result = $group_manager->groupUserMembershipsFromUserAttr($entry);
+    self::assertEmpty($result);
   }
 
 }

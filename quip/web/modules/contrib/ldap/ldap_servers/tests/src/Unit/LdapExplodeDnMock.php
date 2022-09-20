@@ -15,7 +15,7 @@ class LdapExplodeDnMock {
    * @return array
    *   DN exploded, input ignored.
    */
-  public static function ldapExplodeDn($input) {
+  public static function ldapExplodeDn($input): array {
     return [
       'count' => 4,
       0 => 'cn=hpotter',

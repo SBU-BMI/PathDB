@@ -1,7 +1,0 @@
-foo.settings:
-  type: config_object
-  label: Foo settings
-  mapping:
-    example:
-      type: string
-      label: Example

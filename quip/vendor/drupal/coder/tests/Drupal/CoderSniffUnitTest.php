@@ -60,7 +60,7 @@ abstract class CoderSniffUnitTest extends TestCase
      *
      * @return void
      */
-    protected function setUp()
+    public function setUp(): void
     {
         $class = get_class($this);
 

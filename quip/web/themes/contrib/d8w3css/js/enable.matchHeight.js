@@ -1,6 +1,6 @@
 /**
  * @file
- * Defines Javascript behaviors for the drupal8 w3css theme.
+ * Defines Javascript behaviors for the W3CSS Theme.
  */
 
 (function ($, Drupal) {

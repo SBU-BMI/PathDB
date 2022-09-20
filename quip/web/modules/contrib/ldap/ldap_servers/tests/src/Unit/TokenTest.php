@@ -10,7 +10,8 @@ use Symfony\Component\Ldap\Entry;
 use Drupal\ldap_servers\Processor\TokenProcessor;
 
 /**
- * @coversDefaultClass \Drupal\ldap_servers\Processor\TokenProcessor
+ * Token tests.
+ *
  * @group ldap
  */
 class TokenTest extends UnitTestCase {

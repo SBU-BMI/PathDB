@@ -15,21 +15,21 @@ class LdapDebugSettings extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_servers_debug_settings';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames(): array {
     return ['ldap_servers.settings'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
 
     $form['#title'] = 'Configure LDAP Preferences';
     $form['watchdog_detail'] = [
@@ -44,7 +44,7 @@ class LdapDebugSettings extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->config('ldap_servers.settings')
       ->set('watchdog_detail', $form_state->getValue('watchdog_detail'))
       ->save();

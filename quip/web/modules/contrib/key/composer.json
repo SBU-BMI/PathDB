@@ -3,20 +3,17 @@
   "type": "drupal-module",
   "description": "Provides the ability to manage site-wide keys",
   "keywords": ["Drupal"],
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "homepage": "http://drupal.org/project/key",
   "minimum-stability": "dev",
   "support": {
     "issues": "http://drupal.org/project/key",
-    "source": "http://cgit.drupalcode.org/key"
-  },
-  "require": {
-    "drupal/core": "^8.7.7 || ^9"
+    "source": "https://git.drupalcode.org/project/key"
   },
   "extra": {
     "drush": {
       "services": {
-        "drush.services.yml": "^9"
+        "drush.services.yml": ">=9"
       }
     }
   }
