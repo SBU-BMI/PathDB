@@ -10,6 +10,7 @@ use \Drupal\node\Entity\Node;
 use \Drupal\file\Entity\File;
 use \Drupal\jwt\Authentication\Provider\JwtAuth;
 use Drupal\jwt\JsonWebToken\JsonWebToken;
+use Drupal\Core\File\FileSystemInterface;
 
 /**
  * Implements hook_help().
@@ -77,7 +78,7 @@ function quip_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
                 		$entity->field_wsiimage->display = 1;
                 	}
                 	$uri = $entity->field_wsiimage->entity->getFileUri();
-              		$uri = drupal_realpath($uri);
+			$uri = \Drupal::service('file_system')->realpath($uri);
 			$height = $entity->get('imagedvolumewidth')->getValue()[0]['value'];
 			$width = $entity->get('imagedvolumeheight')->getValue()[0]['value'];
               		$uri = "/data/images/".substr($uri,23);
