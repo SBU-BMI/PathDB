@@ -1,0 +1,29 @@
+uuid: 70c67e3d-4979-4acb-b87c-765a3214d345
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.fixme.body
+    - node.type.fixme
+  module:
+    - text
+    - user
+id: node.fixme.default
+targetEntityType: node
+bundle: fixme
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  search_api_excerpt: true

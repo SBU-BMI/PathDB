@@ -778,5 +778,4 @@ $settings['entity_update_backup'] = TRUE;
 #   include $app_root . '/' . $site_path . '/settings.local.php';
 # }
 $settings['config_sync_directory'] = '/data/pathdb/config/sync';
-
 $settings['file_private_path'] = '/data/pathdb/files';$databases['default']['default'] = array (  'database' => 'QuIP',  'username' => 'root',  'password' => '',  'prefix' => '',  'host' => 'localhost',  'port' => '',  'namespace' => 'Drupal\Core\Database\Driver\mysql',  'driver' => 'mysql',);$settings['hash_salt'] = '3163ca60-e485-41d7-80e6-d91788978ca9';

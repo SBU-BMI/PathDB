@@ -1,4 +1,4 @@
-uuid: 0a96a690-3d2d-48e2-9de1-45af07711358
+uuid: a0742880-3fbc-43d7-80dc-49c7bf113a3a
 langcode: en
 status: true
 dependencies:
@@ -14,26 +14,11 @@ field_name: field_map_type
 entity_type: node
 type: list_string
 settings:
-  allowed_values:
-    -
-      value: TIL
-      label: TIL
-    -
-      value: Pyradiomics
-      label: Pyradiomics
-    -
-      value: Cancer
-      label: Cancer
-    -
-      value: Area
-      label: Area
-    -
-      value: Perimeter
-      label: Perimeter
+  allowed_values: {  }
   allowed_values_function: ''
 module: options
 locked: false
-cardinality: -1
+cardinality: 1
 translatable: true
 indexes: {  }
 persist_with_no_fields: false

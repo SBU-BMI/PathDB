@@ -13,7 +13,6 @@ module:
   breakpoint: 0
   bulk_update_fields: 0
   ckeditor: 0
-  color: 0
   comment: 0
   config: 0
   content_moderation: 0
@@ -61,7 +60,6 @@ module:
   quickedit: 0
   quip: 0
   rdf: 0
-  redirect_after_login: 0
   rest: 0
   restui: 0
   search_api: 0

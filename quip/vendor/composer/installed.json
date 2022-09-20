@@ -2959,17 +2959,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "9.4.5",
-            "version_normalized": "9.4.5.0",
+            "version": "9.4.6",
+            "version_normalized": "9.4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "23b4d51ee5bd8b506a97bd21c5635ce18b7abd76"
+                "reference": "a5c83e4ac0d8eb46f06a97a8b85bcbfa08a70701"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/23b4d51ee5bd8b506a97bd21c5635ce18b7abd76",
-                "reference": "23b4d51ee5bd8b506a97bd21c5635ce18b7abd76",
+                "url": "https://api.github.com/repos/drupal/core/zipball/a5c83e4ac0d8eb46f06a97a8b85bcbfa08a70701",
+                "reference": "a5c83e4ac0d8eb46f06a97a8b85bcbfa08a70701",
                 "shasum": ""
             },
             "require": {
@@ -3049,7 +3049,7 @@
                 "drupal/core-uuid": "self.version",
                 "drupal/core-version": "self.version"
             },
-            "time": "2022-08-03T16:33:29+00:00",
+            "time": "2022-09-20T13:22:39+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -3123,14 +3123,14 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/9.4.5"
+                "source": "https://github.com/drupal/core/tree/9.4.6"
             },
             "install-path": "../../web/core"
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "9.4.5",
-            "version_normalized": "9.4.5.0",
+            "version": "9.4.6",
+            "version_normalized": "9.4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -3176,14 +3176,14 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-composer-scaffold/tree/9.4.5"
+                "source": "https://github.com/drupal/core-composer-scaffold/tree/9.4.6"
             },
             "install-path": "../drupal/core-composer-scaffold"
         },
         {
             "name": "drupal/core-dev",
-            "version": "9.4.5",
-            "version_normalized": "9.4.5.0",
+            "version": "9.4.6",
+            "version_normalized": "9.4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-dev.git",
@@ -3228,14 +3228,14 @@
             ],
             "description": "require-dev dependencies from drupal/drupal; use in addition to drupal/core-recommended to run tests from drupal/core.",
             "support": {
-                "source": "https://github.com/drupal/core-dev/tree/9.4.5"
+                "source": "https://github.com/drupal/core-dev/tree/9.4.6"
             },
             "install-path": null
         },
         {
             "name": "drupal/core-project-message",
-            "version": "9.4.5",
-            "version_normalized": "9.4.5.0",
+            "version": "9.4.6",
+            "version_normalized": "9.4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-project-message.git",
@@ -3272,23 +3272,23 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-project-message/tree/9.4.5"
+                "source": "https://github.com/drupal/core-project-message/tree/9.5.0-beta1"
             },
             "install-path": "../drupal/core-project-message"
         },
         {
             "name": "drupal/core-recommended",
-            "version": "9.4.5",
-            "version_normalized": "9.4.5.0",
+            "version": "9.4.6",
+            "version_normalized": "9.4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-recommended.git",
-                "reference": "a809ecbcfb7c8737c93159cf48246e040efdaf47"
+                "reference": "d8b7fa96de13d4e7c9ec3c5d9769cc87b74d7986"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/a809ecbcfb7c8737c93159cf48246e040efdaf47",
-                "reference": "a809ecbcfb7c8737c93159cf48246e040efdaf47",
+                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/d8b7fa96de13d4e7c9ec3c5d9769cc87b74d7986",
+                "reference": "d8b7fa96de13d4e7c9ec3c5d9769cc87b74d7986",
                 "shasum": ""
             },
             "require": {
@@ -3297,7 +3297,7 @@
                 "doctrine/annotations": "~1.13.2",
                 "doctrine/lexer": "~1.2.3",
                 "doctrine/reflection": "~1.2.3",
-                "drupal/core": "9.4.5",
+                "drupal/core": "9.4.6",
                 "egulias/email-validator": "~3.2",
                 "guzzlehttp/guzzle": "~6.5.8",
                 "guzzlehttp/promises": "~1.5.1",
@@ -3352,7 +3352,7 @@
             "conflict": {
                 "webflo/drupal-core-strict": "*"
             },
-            "time": "2022-08-03T16:33:29+00:00",
+            "time": "2022-09-20T13:22:39+00:00",
             "type": "metapackage",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -3360,7 +3360,7 @@
             ],
             "description": "Core and its dependencies with known-compatible minor versions. Require this project INSTEAD OF drupal/core.",
             "support": {
-                "source": "https://github.com/drupal/core-recommended/tree/9.4.5"
+                "source": "https://github.com/drupal/core-recommended/tree/9.4.6"
             },
             "install-path": null
         },

@@ -44,7 +44,7 @@
         "drupal/moderated_content_bulk_publish": "^2.0",
         "drupal/pathauto": "^1.11",
         "drupal/prepopulate": "^2.2",
-        "drupal/redirect_after_login": "^2.5",
+        "drupal/redirect_after_login": "^2.7",
         "drupal/restrict_by_ip": "4.x-dev",
         "drupal/restui": "^1.17",
         "drupal/search_api": "^1.14",
