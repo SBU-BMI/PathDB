@@ -1,0 +1,7 @@
+moderated_content_bulk_publish.settings.form:
+  path: '/admin/config/content/moderated-content-bulk-publish'
+  defaults:
+    _form: '\Drupal\moderated_content_bulk_publish\Form\SettingsForm'
+    _title: 'Moderated content bulk publish'
+  requirements:
+    _permission: 'administer site configuration'

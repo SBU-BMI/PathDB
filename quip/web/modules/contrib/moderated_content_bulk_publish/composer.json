@@ -1,0 +1,21 @@
+{
+  "name": "drupal/moderated_content_bulk_publish",
+  "description": "The Moderated Content Bulk Publish module does what it says from the /admin/content view.",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/moderated_content_bulk_publish",
+  "authors": [
+    {
+      "name": "See all contributors",
+      "homepage": "https://www.drupal.org/node/3070758/committers"
+    }
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/moderated_content_bulk_publish",
+    "source": "git://git.drupal.org/project/moderated_content_bulk_publish.git"
+  },
+  "license": "GPL-2.0+",
+  "require": {
+    "drupal/pathauto": "^1.8",
+    "drupal/views_bulk_operations": "^4.0"
+  }
+}

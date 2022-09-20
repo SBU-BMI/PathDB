@@ -1,0 +1,11 @@
+langcode: en
+publish:
+  state:
+    published: published
+unpublish:
+  state:
+    archived: archived
+    draft: draft
+archive:
+  state:
+    archived: archived

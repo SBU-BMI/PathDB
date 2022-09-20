@@ -1,0 +1,6 @@
+services:
+  cache_context.user.tac_lite_grants:
+    class: Drupal\tac_lite\Cache\TacLiteGrantsCacheContext
+    arguments: ['@current_user']
+    tags:
+      - { name: cache.context }

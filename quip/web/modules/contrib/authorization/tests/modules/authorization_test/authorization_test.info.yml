@@ -1,0 +1,9 @@
+name: Authorization Test
+type: module
+description: Helper module for testing authorization.
+package: Testing
+core: 8.x
+core_version_requirement: ^8 || ^9
+hidden: true
+dependencies:
+  - authorization:authorization

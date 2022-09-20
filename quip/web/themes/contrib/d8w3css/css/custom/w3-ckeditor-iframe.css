@@ -1,0 +1,21 @@
+.cke_editable {
+  font-family: "Helvetica", sans-serif;
+  font-size: 16px;
+  line-height: 26px;
+  background-color: transparent!important;
+}
+.cke_editable p,
+.cke_editable div,
+.cke_editable li,
+.cke_editable span,
+.cke_editable h1,
+.cke_editable h2,
+.cke_editable h3,
+.cke_editable h4,
+.cke_editable h5,
+.cke_editable h6,
+.cke_editable table,
+.cke_editable tr {
+  font-family: "Helvetica", sans-serif;
+  color: #4f4f4f;
+}

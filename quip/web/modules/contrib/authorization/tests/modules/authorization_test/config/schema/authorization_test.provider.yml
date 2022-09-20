@@ -1,0 +1,3 @@
+authorization.provider.plugin.dummy:
+  type: mapping
+  label: 'Dummy does not provide provider settings.'

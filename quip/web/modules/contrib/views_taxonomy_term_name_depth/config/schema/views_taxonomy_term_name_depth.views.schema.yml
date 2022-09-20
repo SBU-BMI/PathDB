@@ -1,0 +1,19 @@
+views.argument.taxonomy_index_name_depth:
+    type: views_argument
+    label: 'Taxonomy Index Name Depth'
+    mapping:
+        depth:
+            type: string
+            label: 'Depth'
+        break_phrase:
+            type: boolean
+            label: 'Allow multiple values'
+        use_taxonomy_term_path:
+            type: boolean
+            label: 'Use taxonomy term path'
+        vocabularies:
+            type: sequence
+            label: 'Vocabularies'
+            sequence:
+                type: string
+                label: 'Vocabulary'
