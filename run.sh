@@ -89,7 +89,7 @@ fi
         /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
 	/quip/vendor/bin/drush -y pm:uninstall color
 	/quip/vendor/bin/drush -y pm:uninstall redirect_after_login
-	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap
+	/quip/vendor/bin/drush -y config-set system.theme admin seven
 	/quip/vendor/bin/drush -y config-set system.theme default bootstrap
 	/quip/vendor/bin/drush config-delete block.block.bartik_branding
 	/quip/vendor/bin/drush config-delete block.block.bartik_account_menu
@@ -116,7 +116,6 @@ fi
 	/quip/vendor/bin/drush config-delete block.block.drupal8_w3css_theme_page_title
 	/quip/vendor/bin/drush -y theme:uninstall drupal8_w3css_theme
 	/quip/vendor/bin/drush -y theme:uninstall bartik
-	#/quip/vendor/bin/drush -y theme:uninstall seven
 	/quip/vendor/bin/drush -y pm:uninstall ds_extras ds_switch_view_mode ds
         /quip/vendor/bin/drush config-delete field.storage.node.field_map_type
         mkdir /data/tmp2
