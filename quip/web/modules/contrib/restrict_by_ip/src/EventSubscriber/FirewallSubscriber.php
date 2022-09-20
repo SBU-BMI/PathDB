@@ -3,12 +3,12 @@
 namespace Drupal\restrict_by_ip\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\restrict_by_ip\LoginFirewallInterface;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 /**
- * Class FirewallSubscriber.
+ * Triggers the restrict by IP login firewall.
  *
  * @package Drupal\restrict_by_ip
  */
@@ -37,25 +37,25 @@ class FirewallSubscriber implements EventSubscriberInterface {
   }
 
   /**
-  * Registers the methods in this class that should be listeners.
-  *
-  * @return array
-  *   An array of event listener definitions.
-  */
-  static function getSubscribedEvents() {
+   * Registers the methods in this class that should be listeners.
+   *
+   * @return array
+   *   An array of event listener definitions.
+   */
+  public static function getSubscribedEvents() {
     $events['kernel.request'] = ['loginFirewall'];
 
     return $events;
   }
 
   /**
-   * This method is called whenever the kernel.request event is
-   * dispatched.
+   * This method is called whenever the kernel.request event is dispatched.
    *
-   * @param GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   *   The event.
    */
-   public function loginFirewall(GetResponseEvent $event) {
-     $this->loginFirewall->execute($this->currentUser);
-   }
+  public function loginFirewall(GetResponseEvent $event) {
+    $this->loginFirewall->execute($this->currentUser);
+  }
 
 }

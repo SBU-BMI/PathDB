@@ -13,6 +13,7 @@ namespace Symfony\Component\Validator\Tests\Constraints;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Validator\Exception\InvalidArgumentException;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -84,5 +85,26 @@ class RegexTest extends TestCase
 
         $this->assertSame('((?![0-9]$|[a-z]+).)*', $constraint->pattern);
         $this->assertSame('foobar', $constraint->getHtmlPattern());
+    }
+
+    public function testNormalizerCanBeSet()
+    {
+        $regex = new Regex(['pattern' => '/^[0-9]+$/', 'normalizer' => 'trim']);
+
+        $this->assertEquals('trim', $regex->normalizer);
+    }
+
+    public function testInvalidNormalizerThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "normalizer" option must be a valid callable ("string" given).');
+        new Regex(['pattern' => '/^[0-9]+$/', 'normalizer' => 'Unknown Callable']);
+    }
+
+    public function testInvalidNormalizerObjectThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "normalizer" option must be a valid callable ("stdClass" given).');
+        new Regex(['pattern' => '/^[0-9]+$/', 'normalizer' => new \stdClass()]);
     }
 }

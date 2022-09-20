@@ -12,7 +12,11 @@
 namespace Symfony\Component\DependencyInjection\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Parameter;
+use Symfony\Component\DependencyInjection\Reference;
 
 class DefinitionTest extends TestCase
 {
@@ -26,6 +30,18 @@ class DefinitionTest extends TestCase
         $this->assertEquals(['foo'], $def->getArguments(), '__construct() takes an optional array of arguments as its second argument');
     }
 
+    /**
+     * @group legacy
+     * @expectedDeprecation Passing an instance of Symfony\Component\DependencyInjection\Parameter as class name to Symfony\Component\DependencyInjection\Definition in deprecated in Symfony 4.4 and will result in a TypeError in 5.0. Please pass the string "%parameter%" instead.
+     */
+    public function testConstructorWithParameter()
+    {
+        $parameter = new Parameter('parameter');
+
+        $def = new Definition($parameter);
+        $this->assertSame($parameter, $def->getClass(), '__construct() accepts Parameter instances');
+    }
+
     public function testSetGetFactory()
     {
         $def = new Definition();
@@ -35,6 +51,9 @@ class DefinitionTest extends TestCase
 
         $def->setFactory('Foo::bar');
         $this->assertEquals(['Foo', 'bar'], $def->getFactory(), '->setFactory() converts string static method call to the array');
+
+        $def->setFactory($ref = new Reference('baz'));
+        $this->assertSame([$ref, '__invoke'], $def->getFactory(), '->setFactory() converts service reference to class invoke call');
         $this->assertSame(['factory' => true], $def->getChanges());
     }
 
@@ -45,8 +64,37 @@ class DefinitionTest extends TestCase
         $this->assertEquals('foo', $def->getClass(), '->getClass() returns the class name');
     }
 
+    /**
+     * @group legacy
+     * @expectedDeprecation Passing an instance of Symfony\Component\DependencyInjection\Parameter as class name to Symfony\Component\DependencyInjection\Definition in deprecated in Symfony 4.4 and will result in a TypeError in 5.0. Please pass the string "%parameter%" instead.
+     */
+    public function testSetGetClassWithParameter()
+    {
+        $def = new Definition();
+        $parameter = new Parameter('parameter');
+        $this->assertSame($parameter, $def->setClass($parameter)->getClass(), '->getClass() returns the parameterized class name');
+    }
+
+    /**
+     * @group legacy
+     * @expectedDeprecation The class name passed to Symfony\Component\DependencyInjection\Definition is expected to be a string. Passing a stdClass is deprecated in Symfony 4.4 and will result in a TypeError in 5.0.
+     */
+    public function testSetGetClassWithObject()
+    {
+        $def = new Definition();
+        $classObject = new \stdClass();
+        $this->assertSame($classObject, $def->setClass($classObject)->getClass(), '->getClass() returns the parameterized class name');
+    }
+
     public function testSetGetDecoratedService()
     {
+        $def = new Definition('stdClass');
+        $this->assertNull($def->getDecoratedService());
+        $def->setDecoratedService('foo', 'foo.renamed', 5, ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        $this->assertEquals(['foo', 'foo.renamed', 5, ContainerInterface::NULL_ON_INVALID_REFERENCE], $def->getDecoratedService());
+        $def->setDecoratedService(null);
+        $this->assertNull($def->getDecoratedService());
+
         $def = new Definition('stdClass');
         $this->assertNull($def->getDecoratedService());
         $def->setDecoratedService('foo', 'foo.renamed', 5);
@@ -69,7 +117,7 @@ class DefinitionTest extends TestCase
 
         $def = new Definition('stdClass');
 
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('The decorated service inner name for "foo" must be different than the service name itself.');
 
         $def->setDecoratedService('foo', 'foo');
@@ -91,15 +139,21 @@ class DefinitionTest extends TestCase
         $this->assertEquals([['foo', ['foo']]], $def->getMethodCalls(), '->getMethodCalls() returns the methods to call');
         $this->assertSame($def, $def->addMethodCall('bar', ['bar']), '->addMethodCall() implements a fluent interface');
         $this->assertEquals([['foo', ['foo']], ['bar', ['bar']]], $def->getMethodCalls(), '->addMethodCall() adds a method to call');
+        $this->assertSame($def, $def->addMethodCall('foobar', ['foobar'], true), '->addMethodCall() implements a fluent interface with third parameter');
+        $this->assertEquals([['foo', ['foo']], ['bar', ['bar']], ['foobar', ['foobar'], true]], $def->getMethodCalls(), '->addMethodCall() adds a method to call');
         $this->assertTrue($def->hasMethodCall('bar'), '->hasMethodCall() returns true if first argument is a method to call registered');
         $this->assertFalse($def->hasMethodCall('no_registered'), '->hasMethodCall() returns false if first argument is not a method to call registered');
         $this->assertSame($def, $def->removeMethodCall('bar'), '->removeMethodCall() implements a fluent interface');
+        $this->assertTrue($def->hasMethodCall('foobar'), '->hasMethodCall() returns true if first argument is a method to call registered');
+        $this->assertSame($def, $def->removeMethodCall('foobar'), '->removeMethodCall() implements a fluent interface');
         $this->assertEquals([['foo', ['foo']]], $def->getMethodCalls(), '->removeMethodCall() removes a method to call');
+        $this->assertSame($def, $def->setMethodCalls([['foobar', ['foobar'], true]]), '->setMethodCalls() implements a fluent interface with third parameter');
+        $this->assertEquals([['foobar', ['foobar'], true]], $def->getMethodCalls(), '->addMethodCall() adds a method to call');
     }
 
     public function testExceptionOnEmptyMethodCall()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Method name cannot be empty.');
         $def = new Definition('stdClass');
         $def->addMethodCall('');
@@ -158,7 +212,9 @@ class DefinitionTest extends TestCase
         $this->assertFalse($def->isDeprecated(), '->isDeprecated() returns false by default');
         $this->assertSame($def, $def->setDeprecated(true), '->setDeprecated() implements a fluent interface');
         $this->assertTrue($def->isDeprecated(), '->isDeprecated() returns true if the instance should not be used anymore.');
-        $this->assertSame('The "deprecated_service" service is deprecated. You should stop using it, as it will soon be removed.', $def->getDeprecationMessage('deprecated_service'), '->getDeprecationMessage() should return a formatted message template');
+
+        $def->setDeprecated(true, '%service_id%');
+        $this->assertSame('deprecated_service', $def->getDeprecationMessage('deprecated_service'), '->getDeprecationMessage() should return given formatted message template');
     }
 
     /**
@@ -166,7 +222,7 @@ class DefinitionTest extends TestCase
      */
     public function testSetDeprecatedWithInvalidDeprecationTemplate($message)
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $def = new Definition('stdClass');
         $def->setDeprecated(false, $message);
     }
@@ -178,6 +234,7 @@ class DefinitionTest extends TestCase
             "With \ns" => ["invalid \n message %service_id%"],
             'With */s' => ['invalid */ message %service_id%'],
             'message not containing require %service_id% variable' => ['this is deprecated'],
+            'template not containing require %service_id% variable' => [true],
         ];
     }
 
@@ -250,7 +307,7 @@ class DefinitionTest extends TestCase
 
     public function testGetArgumentShouldCheckBounds()
     {
-        $this->expectException('OutOfBoundsException');
+        $this->expectException(\OutOfBoundsException::class);
         $def = new Definition('stdClass');
 
         $def->addArgument('foo');
@@ -259,7 +316,7 @@ class DefinitionTest extends TestCase
 
     public function testReplaceArgumentShouldCheckBounds()
     {
-        $this->expectException('OutOfBoundsException');
+        $this->expectException(\OutOfBoundsException::class);
         $this->expectExceptionMessage('The index "1" is not in the range [0, 0].');
         $def = new Definition('stdClass');
 
@@ -269,7 +326,7 @@ class DefinitionTest extends TestCase
 
     public function testReplaceArgumentWithoutExistingArgumentsShouldCheckBounds()
     {
-        $this->expectException('OutOfBoundsException');
+        $this->expectException(\OutOfBoundsException::class);
         $this->expectExceptionMessage('Cannot replace arguments if none have been configured yet.');
         $def = new Definition('stdClass');
         $def->replaceArgument(0, 'bar');
@@ -352,22 +409,6 @@ class DefinitionTest extends TestCase
         $this->assertSame([], $def->getChanges());
     }
 
-    /**
-     * @group legacy
-     */
-    public function testTypes()
-    {
-        $def = new Definition('stdClass');
-
-        $this->assertEquals([], $def->getAutowiringTypes());
-        $this->assertSame($def, $def->setAutowiringTypes(['Foo']));
-        $this->assertEquals(['Foo'], $def->getAutowiringTypes());
-        $this->assertSame($def, $def->addAutowiringType('Bar'));
-        $this->assertTrue($def->hasAutowiringType('Bar'));
-        $this->assertSame($def, $def->removeAutowiringType('Foo'));
-        $this->assertEquals(['Bar'], $def->getAutowiringTypes());
-    }
-
     public function testShouldAutoconfigure()
     {
         $def = new Definition('stdClass');
@@ -379,9 +420,25 @@ class DefinitionTest extends TestCase
     public function testAddError()
     {
         $def = new Definition('stdClass');
-        $this->assertEmpty($def->getErrors());
+        $this->assertFalse($def->hasErrors());
         $def->addError('First error');
         $def->addError('Second error');
         $this->assertSame(['First error', 'Second error'], $def->getErrors());
+    }
+
+    public function testMultipleMethodCalls()
+    {
+        $def = new Definition('stdClass');
+
+        $def->addMethodCall('configure', ['arg1']);
+        $this->assertTrue($def->hasMethodCall('configure'));
+        $this->assertCount(1, $def->getMethodCalls());
+
+        $def->addMethodCall('configure', ['arg2']);
+        $this->assertTrue($def->hasMethodCall('configure'));
+        $this->assertCount(2, $def->getMethodCalls());
+
+        $def->removeMethodCall('configure');
+        $this->assertFalse($def->hasMethodCall('configure'));
     }
 }

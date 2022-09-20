@@ -1,3 +1,6 @@
+_core:
+  default_config_hash: 9DgabkLztscclWQDjei_mAOpxP6xdbp_Iu5L5z6Nsbg
+langcode: en
 sids: {  }
 authenticationMode: mixed
 loginUIUsernameTxt: ''
@@ -18,6 +21,3 @@ allowOnlyIfTextInDn: {  }
 excludeIfTextInDn: {  }
 excludeIfNoAuthorizations: null
 skipAdministrators: true
-langcode: en
-_core:
-  default_config_hash: 9DgabkLztscclWQDjei_mAOpxP6xdbp_Iu5L5z6Nsbg

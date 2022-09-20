@@ -18,6 +18,7 @@ use Drupal\ldap_servers\Processor\TokenProcessor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Exception\LdapException;
+use function in_array;
 
 /**
  * Use Drupal\Core\Form\FormBase;.
@@ -53,13 +54,6 @@ class ServerTestForm extends EntityForm {
   protected $config;
 
   /**
-   * Module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandler
-   */
-  protected $moduleHandler;
-
-  /**
    * Token processor.
    *
    * @var \Drupal\ldap_servers\Processor\TokenProcessor
@@ -90,7 +84,7 @@ class ServerTestForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_servers_test_form';
   }
 
@@ -129,7 +123,7 @@ class ServerTestForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): ServerTestForm {
     return new static(
       $container->get('config.factory'),
       $container->get('module_handler'),
@@ -143,7 +137,7 @@ class ServerTestForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $ldap_server = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $ldap_server = NULL): array {
     if ($ldap_server) {
       $this->ldapServer = $ldap_server;
     }
@@ -312,7 +306,7 @@ class ServerTestForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
     $server = Server::load($values['id']);
 
@@ -329,9 +323,9 @@ class ServerTestForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Pass data back to form builder.
-    $form_state->setRebuild(TRUE);
+    $form_state->setRebuild();
 
     $values = $form_state->getValues();
     $this->ldapServer = Server::load($values['id']);
@@ -395,7 +389,7 @@ class ServerTestForm extends EntityForm {
    * @return array
    *   Response.
    */
-  private function testGroupDn($group_dn, $username): array {
+  private function testGroupDn(string $group_dn, ?string $username): array {
 
     $ldap = $this->ldapBridge->get();
     try {
@@ -541,17 +535,16 @@ class ServerTestForm extends EntityForm {
    * @param string $input
    *   Input string.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   * @return string
    *   Escaped string.
    */
-  public static function binaryCheck($input) {
+  public static function binaryCheck(string $input): string {
     if (preg_match('~[^\x20-\x7E\t\r\n]~', $input) > 0) {
       $truncatedString = Unicode::truncate($input, 120, FALSE, TRUE);
-      return t('Binary (excerpt): @excerpt', ['@excerpt' => $truncatedString]);
+      return (string) t('Binary (excerpt): @excerpt', ['@excerpt' => $truncatedString]);
     }
-    else {
-      return $input;
-    }
+
+    return $input;
   }
 
   /**
@@ -563,11 +556,24 @@ class ServerTestForm extends EntityForm {
    * @return \Symfony\Component\Ldap\Entry|false
    *   Entry.
    */
-  public function testUserMapping($drupal_username) {
+  public function testUserMapping(string $drupal_username) {
     $this->ldapGroupManager->setServerById($this->ldapServer->id());
     $ldap_user = $this->ldapGroupManager->matchUsernameToExistingLdapEntry($drupal_username);
 
-    if (!$ldap_user) {
+    if ($ldap_user) {
+      $this->resultsTables['basic'][] = [
+        'class' => 'color-success',
+        'data' => [
+          $this->t('Found test user %username by searching on  %user_attr = %username.',
+            [
+              '%username' => $drupal_username,
+              '%user_attr' => $this->ldapServer->getAuthenticationNameAttribute(),
+            ]
+          ),
+        ],
+      ];
+    }
+    else {
       $this->resultsTables['basic'][] = [
         'class' => 'color-error',
         'data' => [
@@ -581,19 +587,6 @@ class ServerTestForm extends EntityForm {
       ];
       $this->exception = TRUE;
     }
-    else {
-      $this->resultsTables['basic'][] = [
-        'class' => 'color-success',
-        'data' => [
-          $this->t('Found test user %username by searching on  %user_attr = %username.',
-            [
-              '%username' => $drupal_username,
-              '%user_attr' => $this->ldapServer->getAuthenticationNameAttribute(),
-            ]
-          ),
-        ],
-      ];
-    }
     return $ldap_user;
   }
 
@@ -606,7 +599,7 @@ class ServerTestForm extends EntityForm {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   Output message.
    */
-  private function booleanResult($input): TranslatableMarkup {
+  private function booleanResult(bool $input): TranslatableMarkup {
     if ($input) {
       return $this->t('PASS');
     }
@@ -622,7 +615,7 @@ class ServerTestForm extends EntityForm {
    * @param string $member
    *   The CN of the member to test.
    */
-  private function testWritableGroup($new_group, $member): void {
+  private function testWritableGroup(string $new_group, string $member): void {
     if (!$this->ldapGroupManager->setServerById($this->ldapServer->id())) {
       return;
     }
@@ -692,7 +685,7 @@ class ServerTestForm extends EntityForm {
     ];
 
     // Try to remove group with member in it.
-    $result = $this->ldapGroupManager->groupRemoveGroup($new_group, TRUE);
+    $result = $this->ldapGroupManager->groupRemoveGroup($new_group);
     $this->resultsTables['group1'][] = [
       $this->t('Remove group @group with member in it (not allowed)', ['@group' => $new_group]),
       $this->booleanResult(!$result),
@@ -720,7 +713,7 @@ class ServerTestForm extends EntityForm {
       ];
     }
     else {
-      $this->ldapGroupManager->groupRemoveGroup($new_group, TRUE);
+      $this->ldapGroupManager->groupRemoveGroup($new_group);
       $this->resultsTables['group1'][] = [
         $this->t('Remove group @group if empty', ['@group' => $new_group]),
         $this->booleanResult(!($this->ldapGroupManager->checkDnExists($new_group))),
@@ -767,14 +760,12 @@ class ServerTestForm extends EntityForm {
    * Test the connection.
    */
   private function testConnection(): void {
-
     if (!$this->ldapBridge->bind()) {
       $this->resultsTables['basic'][] = [
         'class' => 'color-error',
         'data' => [$this->t('Failed to connect and bind to LDAP server, see logs for details.')],
       ];
       $this->exception = TRUE;
-      return;
     }
   }
 

@@ -12,7 +12,7 @@ use Drupal\typed_data\Widget\FormWidgetManagerTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class FormWidgetExampleForm.
+ * Provides a form to demonstrate all TypedDataFormWidgets.
  */
 class FormWidgetExampleForm extends FormBase {
 
@@ -82,6 +82,16 @@ class FormWidgetExampleForm extends FormBase {
           ->setLabel('Filter format')
           ->setDescription('Some example selection.');
 
+      case 'datetime':
+        return ContextDefinition::create('datetime_iso8601')
+          ->setLabel('Example datetime')
+          ->setDescription('Some example datetime.');
+
+      case 'datetime_range':
+        return ContextDefinition::create('any')
+          ->setLabel('Example datetime range')
+          ->setDescription('Some example datetime range.');
+
       case 'broken':
         return ContextDefinition::create('string')
           ->setLabel('Example string');
@@ -113,9 +123,15 @@ class FormWidgetExampleForm extends FormBase {
     $form['data'] = $widget->form($data, $subform_state);
 
     $form['actions']['#type'] = 'actions';
+    // 'Submit' will save the widget value.
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => 'Submit',
+    ];
+    // 'Reset' will erase the saved value and revert to default.
+    $form['actions']['reset'] = [
+      '#type' => 'submit',
+      '#value' => 'Reset',
     ];
     return $form;
   }
@@ -148,14 +164,26 @@ class FormWidgetExampleForm extends FormBase {
     $widget_id = $form_state->get('widget_id');
     $widget = $this->getFormWidgetManager()->createInstance($widget_id);
 
-    $subform_state = SubformState::createWithParents(['data'], $form, $form_state);
-    $data = $this->getTypedDataManager()
-      ->create($context_definition->getDataDefinition());
-    $widget->extractFormValues($data, $subform_state);
+    if (($triggering_element = $form_state->getTriggeringElement()) && ($triggering_element['#id'] == 'edit-reset')) {
+      // Erase the widget data.
+      $this->state->set('typed_data_widgets.' . $widget_id, NULL);
+      $this->messenger()->addMessage($this->t('Value reset to default'));
+    }
+    else {
+      $subform_state = SubformState::createWithParents(['data'], $form, $form_state);
+      $data = $this->getTypedDataManager()
+        ->create($context_definition->getDataDefinition());
+      $widget->extractFormValues($data, $subform_state);
 
-    // Read and write widget configuration via the state.
-    $this->state->set('typed_data_widgets.' . $widget_id, $data->getValue());
-    $this->messenger()->addMessage($this->t('Value saved'));
+      // Read and write widget configuration via the state.
+      $this->state->set('typed_data_widgets.' . $widget_id, $data->getValue());
+      // Display the value saved. Use print_r in case the value is an array.
+      $this->messenger()->addMessage(
+        $this->t('Value saved: %value', [
+          '%value' => print_r($data->getValue(), TRUE),
+        ])
+      );
+    }
   }
 
 }

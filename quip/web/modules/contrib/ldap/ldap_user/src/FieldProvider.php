@@ -14,6 +14,7 @@ use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers\Mapping;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use function in_array;
 
 /**
  * Provides the basic and required fields needed for user mappings.
@@ -109,7 +110,7 @@ class FieldProvider implements LdapUserAttributesInterface {
   public function loadAttributes(string $direction, Server $server): array {
     $this->server = $server;
     $this->direction = $direction;
-    if ($this->direction === self::PROVISION_TO_DRUPAL && $this->server) {
+    if ($this->direction === self::PROVISION_TO_DRUPAL) {
       $this->addDn();
 
       if ($this->server->getUniquePersistentAttribute()) {
@@ -182,10 +183,12 @@ class FieldProvider implements LdapUserAttributesInterface {
    *   Is synced.
    */
   public function attributeIsSyncedOnEvent(string $name, string $event): bool {
-    if (isset($this->attributes[$name]) && $this->attributes[$name]->isEnabled()) {
-      if (in_array($event, $this->attributes[$name]->getProvisioningEvents(), TRUE)) {
-        return TRUE;
-      }
+    if (
+      isset($this->attributes[$name]) &&
+      $this->attributes[$name]->isEnabled() &&
+      in_array($event, $this->attributes[$name]->getProvisioningEvents(), TRUE)
+    ) {
+      return TRUE;
     }
     return FALSE;
   }
@@ -199,7 +202,7 @@ class FieldProvider implements LdapUserAttributesInterface {
    * @return \Drupal\ldap_servers\Mapping[]
    *   Mapping.
    */
-  public function getAttributesSyncedOnEvent($event): array {
+  public function getAttributesSyncedOnEvent(string $event): array {
     $synced_attributes = [];
     foreach ($this->attributes as $key => $attribute) {
       if ($attribute->isEnabled() &&
@@ -265,7 +268,7 @@ class FieldProvider implements LdapUserAttributesInterface {
         'ldap_user',
         'ldap_servers'
       );
-      $this->attributes[$key]->setNotes($this->t('configure at %edit_link', $tokens));
+      $this->attributes[$key]->setNotes((string) $this->t('configure at %edit_link', $tokens));
     }
 
     $this->attributes['[field.ldap_user_puid_sid]']->setLdapAttribute($this->server->id());
@@ -321,7 +324,7 @@ class FieldProvider implements LdapUserAttributesInterface {
    * @return string
    *   Tokenized.
    */
-  private function addTokens($input): string {
+  private function addTokens(string $input): string {
     return '[' . $input . ']';
   }
 
@@ -441,16 +444,13 @@ class FieldProvider implements LdapUserAttributesInterface {
       'ldap_user'
     );
 
-    // Load active Drupal user fields.
+    // Load the remaining active unmanaged Drupal fields.
     // @todo Consider not hard-coding the other properties.
     $user_fields = $this->entityFieldManager
       ->getFieldStorageDefinitions('user');
     foreach ($user_fields as $field_name => $field_instance) {
       $field_id = sprintf('[field.%s]', $field_name);
-      if (isset($this->attributes[$field_id])) {
-        $this->attributes[$field_id]->setConfigurable(TRUE);
-      }
-      else {
+      if (!isset($this->attributes[$field_id])) {
         $this->attributes[$field_id] = new Mapping(
           $field_id,
           (string) $this->t('Field: @label', ['@label' => $field_instance->getLabel()]),

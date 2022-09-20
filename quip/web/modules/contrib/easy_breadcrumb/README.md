@@ -76,7 +76,7 @@ MAINTAINERS
 
  * Greg Boggs - https://www.drupal.org/u/greg-boggs
  * Neslee Canil Pinto - https://www.drupal.org/u/neslee-canil-pinto
- * Jeff Mahoney (loopduplicate) - https://www.drupal.org/u/loopduplicate
+* Brooke Mahoney (loopduplicate) - https://www.drupal.org/u/loopduplicate
 
 Supporting organization:
 

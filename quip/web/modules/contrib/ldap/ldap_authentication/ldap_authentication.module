@@ -67,7 +67,6 @@ function ldap_authentication_core_override_user_login_authenticate_validate(arra
  *   The form.
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *   The form state.
- *
  */
 function ldap_authentication_user_pass_validate(array &$form, FormStateInterface $form_state) {
   $config = \Drupal::config('ldap_authentication.settings');
@@ -118,7 +117,7 @@ function ldap_authentication_user_pass_validate(array &$form, FormStateInterface
  * Alter user editing form (profile form) based on LDAP authentication
  * configuration.
  *
- * @TODO: This function hides corner cases and does not consistently embed the
+ * @todo This function hides corner cases and does not consistently embed the
  * help text.
  */
 function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $form_state) {
@@ -139,7 +138,7 @@ function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $fo
 
     if (!ldap_authentication_show_password_field($user)) {
       if ($config->get('passwordOption') === 'hide') {
-        // TODO: Allow for the case where email changes are allowed to show
+        // @todo Allow for the case where email changes are allowed to show
         // current pass.
         $form['account']['current_pass']['#access'] = FALSE;
         $form['account']['pass']['#access'] = FALSE;
@@ -167,7 +166,7 @@ function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $fo
  * @return bool
  *   Password status.
  */
-function ldap_authentication_show_password_field($user = NULL) {
+function ldap_authentication_show_password_field($user = NULL): bool {
 
   if (!$user) {
     $user = \Drupal::currentUser();
@@ -239,7 +238,7 @@ function ldap_authentication_user_login_authenticate_validate(array $form, FormS
  * @param string $form_id
  *   The form ID.
  */
-function _ldap_authentication_login_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+function _ldap_authentication_login_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
   /** @var \Drupal\ldap_authentication\AuthenticationServers $authentication_servers */
   $authentication_servers = \Drupal::service('ldap_authentication.servers');
   if (!$authentication_servers->authenticationServersAvailable()) {
@@ -268,7 +267,7 @@ function _ldap_authentication_login_form_alter(array &$form, FormStateInterface 
       array_splice($form['#validate'], $key + 1, 0, 'ldap_authentication_user_login_authenticate_validate');
 
     }
-   }
+  }
 
   // Add help information for entering in username/password.
   if ($config->get('loginUIUsernameTxt')) {

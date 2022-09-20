@@ -19,44 +19,44 @@ bundle: map
 mode: default
 content:
   execution_id:
-    weight: 4
+    type: string
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    type: string
+    weight: 4
     region: content
   field_map:
-    weight: 1
+    type: file_default
     label: inline
     settings:
       use_description_as_link_text: true
     third_party_settings: {  }
-    type: file_default
+    weight: 1
     region: content
   field_map_type:
-    weight: 0
+    type: list_default
     label: inline
     settings: {  }
     third_party_settings: {  }
-    type: list_default
+    weight: 0
     region: content
   field_target_collection:
-    weight: 2
+    type: entity_reference_label
     label: inline
     settings:
       link: false
     third_party_settings: {  }
-    type: entity_reference_label
+    weight: 2
     region: content
   field_wsi:
     type: entity_reference_label
-    weight: 3
-    region: content
     label: inline
     settings:
       link: true
     third_party_settings: {  }
+    weight: 3
+    region: content
 hidden:
   links: true
   search_api_excerpt: true

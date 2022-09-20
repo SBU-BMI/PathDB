@@ -3,13 +3,14 @@
 namespace Drupal\views_taxonomy_term_name_depth\Plugin\views\argument;
 
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\pathauto\AliasCleanerInterface;
 
 /**
  * Argument handler for taxonomy terms with depth.
@@ -36,21 +37,44 @@ class IndexNameDepth extends ArgumentPluginBase {
   protected $database;
 
   /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * The pathauto alias cleaner service.
+   *
+   * @var \Drupal\pathauto\AliasCleanerInterface
+   */
+  protected $pathautoAliasCleaner;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityStorageInterface $termStorage, Connection $database) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityStorageInterface $termStorage, Connection $database, ModuleHandlerInterface $module_handler, AliasCleanerInterface $pathauto_alias_cleaner) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->termStorage = $termStorage;
     $this->database = $database;
+    $this->moduleHandler = $module_handler;
+    $this->pathautoAliasCleaner = $pathauto_alias_cleaner;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity.manager')
-      ->getStorage('taxonomy_term'), $container->get('database'));
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager')->getStorage('taxonomy_term'),
+      $container->get('database'),
+      $container->get('module_handler'),
+      $container->get('pathauto.alias_cleaner')
+    );
   }
 
   /**
@@ -151,7 +175,7 @@ class IndexNameDepth extends ArgumentPluginBase {
 
     // Now build the subqueries.
     if (is_string($tids)) {
-      if (\Drupal::service('module_handler')->moduleExists('pathauto')) {
+      if ($this->moduleHandler->moduleExists('pathauto')) {
         $query = $this->database->select('taxonomy_term_field_data', 't')
           ->fields('t', ['tid', 'name']);
 
@@ -164,9 +188,7 @@ class IndexNameDepth extends ArgumentPluginBase {
 
         // Iterate results.
         foreach ($results as $row) {
-          // Service container for alias cleaner.
-          $alias = \Drupal::service('pathauto.alias_cleaner');
-          if ($alias->cleanString($row->name) == $alias->cleanString($tids)) {
+          if ($this->pathautoAliasCleaner->cleanString($row->name) == $this->pathautoAliasCleaner->cleanString($tids)) {
             $tids = $row->tid;
           }
         }
@@ -227,7 +249,7 @@ class IndexNameDepth extends ArgumentPluginBase {
   public function title() {
     $term = $this->termStorage->load($this->argument);
     // Check the use of pathauto module.
-    if (\Drupal::service('module_handler')->moduleExists('pathauto')) {
+    if ($this->moduleHandler->moduleExists('pathauto')) {
       $query = $this->database->select('taxonomy_term_field_data', 't')
         ->fields('t', ['tid', 'name']);
 
@@ -241,8 +263,7 @@ class IndexNameDepth extends ArgumentPluginBase {
       // Iterate results.
       foreach ($results as $row) {
         // Service container for alias cleaner.
-        $alias = \Drupal::service('pathauto.alias_cleaner');
-        if ($alias->cleanString($row->name) == $alias->cleanString($this->argument)) {
+        if ($this->pathautoAliasCleaner->cleanString($row->name) == $this->pathautoAliasCleaner->cleanString($this->argument)) {
           $tid = $row->tid;
           $term = current($this->termStorage->loadByProperties(['tid' => $tid]));
           break;

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Drupal8 W3CSS Theme.theme.
+ * W3CSS Theme.theme.
  *
  * Filename:     drupal8_w3css_theme.theme
  * Website:      http://www.flashwebcenter.com
@@ -45,8 +45,16 @@ $form['drupal8_w3css_theme_settings']['w3_colors'] = [
     <td>w3-link-red-hover, w3-link-green-hover, w3-link-blue-hover, w3-link-yellow-hover, w3-link-white-hover, w3-link-black-hover, w3-link-grey-hover, w3-link-amber-hover, w3-link-aqua-hover, w3-link-light-blue-hover, w3-link-brown-hover, w3-link-cyan-hover, w3-link-blue-grey-hover, w3-link-blue-gray-hover, w3-link-light-green-hover, w3-link-indigo-hover, w3-link-khaki-hover, w3-link-lime-hover, w3-link-orange-hover, w3-link-deep-orange-hover, w3-link-pink-hover, w3-link-purple-hover, w3-link-deep-purple-hover, w3-link-sand-hover, w3-link-teal-hover, w3-link-light-gray-hover, w3-link-light-grey-hover, w3-link-dark-gray-hover, w3-link-dark-grey-hover</td>
   </tr>
   <tr>
+    <th>Button Colors:</th>
+    <td>w3-button-red, w3-button-green, w3-button-blue, w3-button-yellow, w3-button-white, w3-button-black, w3-button-gray, w3-button-grey, w3-button-amber, w3-button-aqua, w3-button-light-blue, w3-button-brown, w3-button-cyan, w3-button-blue-grey, w3-button-blue-gray, w3-button-light-green, w3-button-indigo, w3-button-khaki, w3-button-lime, w3-button-orange, w3-button-deep-orange, w3-button-pink, w3-button-purple, w3-button-deep-purple, w3-button-sand, w3-button-teal, w3-button-light-gray, w3-button-light-grey, w3-button-dark-gray, w3-button-dark-grey</td>
+  </tr>
+  <tr>
+    <th>Button Hover Colors:</th>
+    <td>w3-button-red-hover, w3-button-green-hover, w3-button-blue-hover, w3-button-yellow-hover, w3-button-white-hover, w3-button-black-hover, w3-button-gray-hover, w3-button-grey-hover, w3-button-amber-hover, w3-button-aqua-hover, w3-button-light-blue-hover, w3-button-brown-hover, w3-button-cyan-hover, w3-button-blue-grey-hover, w3-button-blue-gray-hover, w3-button-light-green-hover, w3-button-indigo-hover, w3-button-khaki-hover, w3-button-lime-hover, w3-button-orange-hover, w3-button-deep-orange-hover, w3-button-pink-hover, w3-button-purple-hover, w3-button-deep-purple-hover, w3-button-sand-hover, w3-button-teal-hover, w3-button-light-gray-hover, w3-button-light-grey-hover, w3-button-dark-gray-hover, w3-button-dark-grey-hover</td>
+  </tr>
+  <tr>
     <th>To Disable:</th>
-    <td>To disable shadow: w3-box-shadow-0 | To disable border: w3-border-0 | To disable border round: w3-round-0 | To disable margin: w3-margin-0 | To disable padding: w3-padding-0 | To disable the whole page opacity: w3-animate-opacity-disabled </td>
+    <td>To disable shadow: w3-box-shadow-0 | To disable border: w3-border-0 | To disable border round: w3-round-0 | To disable margin: w3-margin-0 | To disable padding: w3-padding-0 | To disable the whole page opacity: w3-animate-opacity-disabled | To disable 100 percent image inside any link: w3-disabled-has-image | To disable text transform: text-transform-none </td>
   </tr>
 </table>'),
 ];

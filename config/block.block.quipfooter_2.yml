@@ -17,8 +17,8 @@ plugin: 'block_content:707d9aef-6374-43a2-98d0-b65b7f6855a2'
 settings:
   id: 'block_content:707d9aef-6374-43a2-98d0-b65b7f6855a2'
   label: QuIPFooter
-  provider: block_content
   label_display: '0'
+  provider: block_content
   status: true
   info: ''
   view_mode: full

@@ -61,7 +61,7 @@ class ParameterBagTest extends TestCase
             $bag->get('baba');
             $this->fail('->get() throws an Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException if the key does not exist');
         } catch (\Exception $e) {
-            $this->assertInstanceOf('Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException', $e, '->get() throws an Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException if the key does not exist');
+            $this->assertInstanceOf(ParameterNotFoundException::class, $e, '->get() throws an Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException if the key does not exist');
             $this->assertEquals('You have requested a non-existent parameter "baba".', $e->getMessage(), '->get() throws an Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException if the key does not exist');
         }
     }
@@ -102,28 +102,20 @@ class ParameterBagTest extends TestCase
         $this->assertFalse($bag->has('bar'), '->has() returns false if a parameter is not defined');
     }
 
-    /**
-     * @group legacy
-     * @expectedDeprecation Parameter names will be made case sensitive in Symfony 4.0. Using "BAR" instead of "bar" is deprecated since Symfony 3.4.
-     * @expectedDeprecation Parameter names will be made case sensitive in Symfony 4.0. Using "Foo" instead of "foo" is deprecated since Symfony 3.4.
-     * @expectedDeprecation Parameter names will be made case sensitive in Symfony 4.0. Using "FOO" instead of "foo" is deprecated since Symfony 3.4.
-     * @expectedDeprecation Parameter names will be made case sensitive in Symfony 4.0. Using "Foo" instead of "foo" is deprecated since Symfony 3.4.
-     */
     public function testMixedCase()
     {
         $bag = new ParameterBag([
             'foo' => 'foo',
             'bar' => 'bar',
+            'BAR' => 'baz',
         ]);
 
         $bag->remove('BAR');
-        $this->assertEquals(['foo' => 'foo'], $bag->all(), '->remove() converts key to lowercase before removing');
+        $this->assertEquals(['foo' => 'foo', 'bar' => 'bar'], $bag->all());
 
         $bag->set('Foo', 'baz1');
-        $this->assertEquals('baz1', $bag->get('foo'), '->set() converts the key to lowercase');
-        $this->assertEquals('baz1', $bag->get('FOO'), '->get() converts the key to lowercase');
-
-        $this->assertTrue($bag->has('Foo'), '->has() converts the key to lowercase');
+        $this->assertEquals('foo', $bag->get('foo'));
+        $this->assertEquals('baz1', $bag->get('Foo'));
     }
 
     public function testResolveValue()

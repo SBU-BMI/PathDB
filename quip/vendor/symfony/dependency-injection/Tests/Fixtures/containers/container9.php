@@ -3,19 +3,21 @@
 require_once __DIR__.'/../includes/classes.php';
 require_once __DIR__.'/../includes/foo.php';
 
+use Bar\FooClass;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Parameter;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\ExpressionLanguage\Expression;
 
 $container = new ContainerBuilder();
 $container
-    ->register('foo', '\Bar\FooClass')
+    ->register('foo', FooClass::class)
     ->addTag('foo', ['foo' => 'foo'])
     ->addTag('foo', ['bar' => 'bar', 'baz' => 'baz'])
+    ->addTag('nullable', ['bar' => 'bar', 'baz' => null])
     ->setFactory(['Bar\\FooClass', 'getInstance'])
     ->setArguments(['foo', new Reference('foo.baz'), ['%foo%' => 'foo is %foo%', 'foobar' => '%foo%'], true, new Reference('service_container')])
     ->setProperties(['foo' => 'bar', 'moo' => new Reference('foo.baz'), 'qux' => ['%foo%' => 'foo is %foo%', 'foobar' => '%foo%']])
@@ -161,6 +163,13 @@ $container
     ->setPublic(true)
 ;
 $container
+    ->register('BAR', 'stdClass')
+    ->setProperty('bar', new Reference('bar'))
+    ->setPublic(true)
+;
+$container->register('bar2', 'stdClass')->setPublic(true);
+$container->register('BAR2', 'stdClass')->setPublic(true);
+$container
     ->register('tagged_iterator_foo', 'Bar')
     ->addTag('foo')
     ->setPublic(false)
@@ -172,5 +181,12 @@ $container
 ;
 $container->setAlias('alias_for_foo', 'foo')->setPublic(true);
 $container->setAlias('alias_for_alias', 'alias_for_foo')->setPublic(true);
+
+$container->register('runtime_error', 'stdClass')
+    ->addArgument(new Reference('errored_definition', ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE))
+    ->setPublic(true);
+
+$container->register('errored_definition', 'stdClass')
+    ->addError('Service "errored_definition" is broken.');
 
 return $container;

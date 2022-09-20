@@ -338,7 +338,14 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
       /** @var string $lowercase_key */
       $lowercase_key = \mb_strtolower($key);
 
-      if ($config['filter_and_mappings']['use_first_attr_as_groupid']) {
+      // The string check should not be necessary, it's a guard against a
+      // misconfiguration such as someone setting use_first_attr_as_groupid
+      // while not getting group information from a DN but rather the user
+      // that is not in DN format.
+      if (
+        $config['filter_and_mappings']['use_first_attr_as_groupid'] &&
+        strpos($authorization_id, '=') !== FALSE
+      ) {
         $attr_parts = self::splitDnWithAttributes($authorization_id);
         unset($attr_parts['count']);
         if (count($attr_parts) > 0) {
@@ -365,12 +372,12 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
     parent::validateRowForm($form, $form_state);
 
     foreach ($form_state->getValues() as $value) {
-      if (isset($value['provider_mappings'])) {
-        if ($value['provider_mappings']['is_regex'] == 1) {
-          if (@preg_match($value['provider_mappings']['query'], '') === FALSE) {
-            $form_state->setErrorByName('mapping', $this->t('Invalid regular expression'));
-          }
-        }
+      if (
+        isset($value['provider_mappings']) &&
+        $value['provider_mappings']['is_regex'] == 1 &&
+        @preg_match($value['provider_mappings']['query'], '') === FALSE
+      ) {
+        $form_state->setErrorByName('mapping', $this->t('Invalid regular expression'));
       }
     }
   }

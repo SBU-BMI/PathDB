@@ -26,7 +26,7 @@ class ComparisonTest_Class
         $this->value = $value;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->value;
     }
@@ -82,19 +82,19 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
      */
     public function testThrowsConstraintExceptionIfNoValueOrPropertyPath($options)
     {
-        $this->expectException('Symfony\Component\Validator\Exception\ConstraintDefinitionException');
+        $this->expectException(ConstraintDefinitionException::class);
         $this->expectExceptionMessage('requires either the "value" or "propertyPath" option to be set.');
         $this->createConstraint($options);
     }
 
     public function testThrowsConstraintExceptionIfBothValueAndPropertyPath()
     {
-        $this->expectException('Symfony\Component\Validator\Exception\ConstraintDefinitionException');
+        $this->expectException(ConstraintDefinitionException::class);
         $this->expectExceptionMessage('requires only one of the "value" or "propertyPath" options to be set, not both.');
-        $this->createConstraint(([
+        $this->createConstraint([
             'value' => 'value',
             'propertyPath' => 'propertyPath',
-        ]));
+        ]);
     }
 
     /**
@@ -112,10 +112,7 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
         $this->assertNoViolation();
     }
 
-    /**
-     * @return array
-     */
-    public function provideAllValidComparisons()
+    public function provideAllValidComparisons(): array
     {
         // The provider runs before setUp(), so we need to manually fix
         // the default timezone
@@ -169,15 +166,9 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
         $this->validator->validate(5, $constraint);
     }
 
-    /**
-     * @return array
-     */
-    abstract public function provideValidComparisons();
+    abstract public function provideValidComparisons(): array;
 
-    /**
-     * @return array
-     */
-    abstract public function provideValidComparisonsToPropertyPath();
+    abstract public function provideValidComparisonsToPropertyPath(): array;
 
     /**
      * @dataProvider provideAllInvalidComparisons
@@ -209,6 +200,28 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
             ->assertRaised();
     }
 
+    public function testInvalidComparisonToPropertyPathAddsPathAsParameter()
+    {
+        [$dirtyValue, $dirtyValueAsString, $comparedValue, $comparedValueString, $comparedValueType] = current($this->provideAllInvalidComparisons());
+
+        $constraint = $this->createConstraint(['propertyPath' => 'value']);
+        $constraint->message = 'Constraint Message';
+
+        $object = new ComparisonTest_Class($comparedValue);
+
+        $this->setObject($object);
+
+        $this->validator->validate($dirtyValue, $constraint);
+
+        $this->buildViolation('Constraint Message')
+            ->setParameter('{{ value }}', $dirtyValueAsString)
+            ->setParameter('{{ compared_value }}', $comparedValueString)
+            ->setParameter('{{ compared_value_path }}', 'value')
+            ->setParameter('{{ compared_value_type }}', $comparedValueType)
+            ->setCode($this->getErrorCode())
+            ->assertRaised();
+    }
+
     /**
      * @dataProvider throwsOnInvalidStringDatesProvider
      */
@@ -220,7 +233,7 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
         $this->validator->validate($value, $constraint);
     }
 
-    public function throwsOnInvalidStringDatesProvider()
+    public function throwsOnInvalidStringDatesProvider(): array
     {
         $constraint = $this->createConstraint([
             'value' => 'foo',
@@ -254,15 +267,13 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
                 ->setParameter('{{ value }}', $dirtyValueAsString)
                 ->setParameter('{{ compared_value }}', 'null')
                 ->setParameter('{{ compared_value_type }}', 'NULL')
+                ->setParameter('{{ compared_value_path }}', 'value')
                 ->setCode($this->getErrorCode())
                 ->assertRaised();
         }
     }
 
-    /**
-     * @return array
-     */
-    public function provideAllInvalidComparisons()
+    public function provideAllInvalidComparisons(): array
     {
         // The provider runs before setUp(), so we need to manually fix
         // the default timezone
@@ -275,24 +286,16 @@ abstract class AbstractComparisonValidatorTestCase extends ConstraintValidatorTe
         return $comparisons;
     }
 
-    /**
-     * @return array
-     */
-    abstract public function provideInvalidComparisons();
+    abstract public function provideInvalidComparisons(): array;
 
     abstract public function provideComparisonsToNullValueAtPropertyPath();
 
     /**
      * @param array|null $options Options for the constraint
-     *
-     * @return Constraint
      */
-    abstract protected function createConstraint(array $options = null);
+    abstract protected function createConstraint(array $options = null): Constraint;
 
-    /**
-     * @return string|null
-     */
-    protected function getErrorCode()
+    protected function getErrorCode(): ?string
     {
         return null;
     }

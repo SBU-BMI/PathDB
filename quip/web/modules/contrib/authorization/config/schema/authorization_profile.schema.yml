@@ -4,12 +4,16 @@ authorization.authorization_profile.*:
   mapping:
     id:
       type: string
-      label: 'ID'
+      label: ID
     label:
       type: label
-      label: 'Label'
+      label: Label
+    description:
+      type: text
+      label: Description
     uuid:
-      type: string
+      type: uuid
+      label: UUID
     provider:
       type: string
       label: 'Provider Plugin ID'

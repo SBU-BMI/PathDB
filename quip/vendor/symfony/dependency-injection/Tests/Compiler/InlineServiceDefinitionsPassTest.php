@@ -16,9 +16,9 @@ use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use Symfony\Component\DependencyInjection\Compiler\InlineServiceDefinitionsPass;
-use Symfony\Component\DependencyInjection\Compiler\RepeatedPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Reference;
 
 class InlineServiceDefinitionsPassTest extends TestCase
@@ -26,7 +26,7 @@ class InlineServiceDefinitionsPassTest extends TestCase
     public function testProcess()
     {
         $container = new ContainerBuilder();
-        $container
+        $inlineable = $container
             ->register('inlinable.service')
             ->setPublic(false)
         ;
@@ -39,8 +39,9 @@ class InlineServiceDefinitionsPassTest extends TestCase
         $this->process($container);
 
         $arguments = $container->getDefinition('service')->getArguments();
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Definition', $arguments[0]);
-        $this->assertSame($container->getDefinition('inlinable.service'), $arguments[0]);
+        $this->assertInstanceOf(Definition::class, $arguments[0]);
+        $this->assertSame($inlineable, $arguments[0]);
+        $this->assertFalse($container->has('inlinable.service'));
     }
 
     public function testProcessDoesNotInlinesWhenAliasedServiceIsShared()
@@ -70,7 +71,7 @@ class InlineServiceDefinitionsPassTest extends TestCase
             ->register('foo')
             ->setShared(false)
         ;
-        $container
+        $bar = $container
             ->register('bar')
             ->setPublic(false)
             ->setShared(false)
@@ -88,8 +89,9 @@ class InlineServiceDefinitionsPassTest extends TestCase
         $this->assertEquals($container->getDefinition('foo'), $arguments[0]);
         $this->assertNotSame($container->getDefinition('foo'), $arguments[0]);
         $this->assertSame($ref, $arguments[1]);
-        $this->assertEquals($container->getDefinition('bar'), $arguments[2]);
-        $this->assertNotSame($container->getDefinition('bar'), $arguments[2]);
+        $this->assertEquals($bar, $arguments[2]);
+        $this->assertNotSame($bar, $arguments[2]);
+        $this->assertFalse($container->has('bar'));
     }
 
     public function testProcessDoesNotInlineMixedServicesLoop()
@@ -113,7 +115,7 @@ class InlineServiceDefinitionsPassTest extends TestCase
 
     public function testProcessThrowsOnNonSharedLoops()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException');
+        $this->expectException(ServiceCircularReferenceException::class);
         $this->expectExceptionMessage('Circular reference detected for service "bar", path: "bar -> foo -> bar".');
         $container = new ContainerBuilder();
         $container
@@ -323,36 +325,36 @@ class InlineServiceDefinitionsPassTest extends TestCase
         $this->assertSame('inline', (string) $values[0]);
     }
 
-    /**
-     * @group legacy
-     */
-    public function testGetInlinedServiceIdData()
+    public function testDoNotInline()
     {
         $container = new ContainerBuilder();
+        $container->register('decorated1', 'decorated1')->addTag('container.do_not_inline');
+        $container->register('decorated2', 'decorated2')->addTag('container.do_not_inline');
+        $container->setAlias('alias2', 'decorated2');
+
         $container
-            ->register('inlinable.service')
-            ->setPublic(false)
-        ;
-        $container
-            ->register('non_inlinable.service')
+            ->register('s1', 's1')
+            ->setDecoratedService('decorated1')
             ->setPublic(true)
-        ;
+            ->setProperties(['inner' => new Reference('s1.inner')]);
 
         $container
-            ->register('other_service')
-            ->setArguments([new Reference('inlinable.service')])
-        ;
+            ->register('s2', 's2')
+            ->setDecoratedService('alias2')
+            ->setPublic(true)
+            ->setProperties(['inner' => new Reference('s2.inner')]);
 
-        $inlinePass = new InlineServiceDefinitionsPass();
-        $repeatedPass = new RepeatedPass([new AnalyzeServiceReferencesPass(), $inlinePass]);
-        $repeatedPass->process($container);
+        $container->compile();
 
-        $this->assertEquals(['inlinable.service' => ['other_service']], $inlinePass->getInlinedServiceIds());
+        $this->assertFalse($container->hasAlias('alias2'));
+        $this->assertEquals(new Reference('decorated2'), $container->getDefinition('s2')->getProperties()['inner']);
+        $this->assertEquals(new Reference('s1.inner'), $container->getDefinition('s1')->getProperties()['inner']);
+        $this->assertSame('decorated2', $container->getDefinition('decorated2')->getClass());
+        $this->assertSame('decorated1', $container->getDefinition('s1.inner')->getClass());
     }
 
     protected function process(ContainerBuilder $container)
     {
-        $repeatedPass = new RepeatedPass([new AnalyzeServiceReferencesPass(), new InlineServiceDefinitionsPass()]);
-        $repeatedPass->process($container);
+        (new InlineServiceDefinitionsPass(new AnalyzeServiceReferencesPass()))->process($container);
     }
 }

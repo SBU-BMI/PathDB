@@ -76,6 +76,7 @@
   border-color: #e91e63 !important;
 }
 /* custom work */
+.w3-hover-over:hover,
 .w3-button:hover {
   background-color: #fbd2e0 !important;
   color: #790c30 !important;

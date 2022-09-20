@@ -288,13 +288,6 @@ class Server extends ConfigEntityBase implements ServerInterface {
   protected $port;
 
   /**
-   * Enabled.
-   *
-   * @var bool
-   */
-  protected $status;
-
-  /**
    * DN of testing username.
    *
    * @var string

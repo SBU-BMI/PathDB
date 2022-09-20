@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * @file
  * Contains authorization.module.
@@ -11,15 +13,11 @@ use Drupal\Core\Routing\RouteMatchInterface;
  * Implements hook_help().
  */
 function authorization_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    // Main module help for the authorization module.
-    case 'help.page.authorization':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Authorization API connects up providers (for example LDAP) with consumers (for example Organic Groups or Drupal roles).') . '</p>';
-      return $output;
-
-    default:
+  if ($route_name === 'help.page.authorization') {
+    $output = '';
+    $output .= '<h3>' . t('About') . '</h3>';
+    $output .= '<p>' . t('Authorization API connects up providers (for example LDAP) with consumers (for example Organic Groups or Drupal roles).') . '</p>';
+    return $output;
   }
 }
 

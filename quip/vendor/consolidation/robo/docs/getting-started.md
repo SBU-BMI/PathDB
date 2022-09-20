@@ -23,15 +23,20 @@ All public methods of the RoboFile class will be treated as **commands**. You ca
 
 ``` php
 <?php
+
+use Robo\Symfony\ConsoleIO;
+
 class RoboFile extends \Robo\Tasks
 {
-    function hello($world)
+    function hello(ConsoleIO $io, $world)
     {
-        $this->say("Hello, $world");
+        $io->say("Hello, $world");
     }
 }
 ?>
 ```
+
+**Note:** The class ConsoleIO *isa* SymfonyStyle, and therefore has access to all of the Symfony styling methods. It also adds a few Robo extensions such as the `say()` and `yell()` output styles. This parameter may be omitted for commands that do not perofrom any output.
 
 When we run:
 
@@ -40,21 +45,22 @@ robo hello davert
 ➜ Hello, davert
 ```
 
-Method names should be camelCased. In CLI `camelCased` method will be available as `camel:cased` command.
-`longCamelCased` method will be transformed to `long:camel-cased` command.
+**Note:** This assumes you have installed Robo by downloading the [robo.phar](https://robo.li/robo.phar) file and copied it to a directory in your `$PATH`. For example, `cp robo.phar ~/bin/robo`.
 
-**Note:** This assumes you have installed Robo by downloading the [robo.phar](http://robo.li/robo.phar) file and copied it to a directory in your `$PATH`. For example, `cp robo.phar ~/bin/robo`.
+Method names in a RoboFile should be camelCased. When called from the CLI, `camelCased` methods will be available as commands formatted as `camel:cased`.
+`longCamelCased` methods will be transformed to commands formatted as `long:camel-cased`.
 
 ### Arguments
 
 All method parameters without default values are treated as required arguments. In our example command `hello` requires one argument.
+
 If you pass a default value to parameter the argument becomes optional:
 
 ``` php
 <?php
-    function hello($world = 'world')
+    function hello(ConsoleIO $io, $world = 'world')
     {
-        $this->say("Hello, $world");
+        $io->say("Hello, $world");
     }
 ?>
 ```
@@ -64,13 +70,13 @@ robo hello
 ➜ Hello, world
 ```
 
-To accept multiple, variable arguments, define a parameter as an `array`; Robo will then pass all CLI arguments in this variable:
+To accept multiple, variable arguments, typehint a parameter as an `array`; Robo will then pass all CLI arguments in this variable:
 
 ``` php
 <?php
-    function hello(array $world)
+    function hello(ConsoleIO $io, array $world)
     {
-        $this->say("Hello, " . implode(', ', $world));
+        $io->say("Hello, " . implode(', ', $world));
     }
 ?>
 ```
@@ -82,13 +88,13 @@ robo hello davert jon bill bob
 
 ### Options
 
-To define command options you should define the last method parameter as an associative array where the keys define the option names and the values provide each option's default values:
+To define command options you should define the last method parameter as an associative array where the keys define the option names and the values provide each option's default value:
 
 ``` php
 <?php
-    function hello($opts = ['silent' => false])
+    function hello(ConsoleIO $io, $opts = ['silent' => false])
     {
-        if (!$opts['silent']) $this->say("Hello, world");
+        if (!$opts['silent']) $io->say("Hello, world");
     }
 ?>
 ```
@@ -104,14 +110,14 @@ A one-character shortcut can be specified for option:
 
 ``` php
 <?php
-    function hello($opts = ['silent|s' => false])
+    function hello(ConsoleIO $io, $opts = ['silent|s' => false])
     {
-        if (!$opts['silent']) $this->say("Hello, world");
+        if (!$opts['silent']) $io->say("Hello, world");
     }
 ?>
 ```
 
-Now command can be executed with '-s' to run in silent mode: 
+Now command can be executed with '-s' to run in silent mode:
 
 ```
 robo hello -s
@@ -119,17 +125,18 @@ robo hello -s
 
 The default value for options must be one of:
 
-- The boolean value `false`, which indicates that the option takes no value.
+- The boolean value `false`, which indicates that the option takes no value; the variable will be `true` if the option appears on the commandline, and will be false otherwise.
+- The boolean value `true`, which indicates that the variable should be true unless the option is disabled on the commandline via the flag `--no-foo` or `--foo=0` (for `$opts = ['foo' => true]`).
 - A **string** containing the default value for options that may be provided a value, but are not required to.
 - NULL for options that may be provided an optional value, but that have no default when a value is not provided.
 - The special value InputOption::VALUE_REQUIRED, which indicates that the user must provide a value for the option whenever it is used.
 - An empty array, which indicates that the option may appear multiple times on the command line.
 
-No other values should be used for the default value. For example, `$options = ['a' => 1]` is **incorrect**; instead, use `$options = ['a' => '1']`. Similarly, `$options = ['a' => true]` is unsupported, or at least not useful, as this would indicate that the value of `--a` was always `true`, whether or not it appeared on the command line.
+No other values should be used for the default value. For example, `$options = ['a' => 1]` is **incorrect**; instead, use `$options = ['a' => '1']`.
 
 ### Load From Other Robofile
 
-Robo can execute commands from a different RoboFile, eg. located in different directory or with a different filename.  
+Robo can execute commands from a different RoboFile, eg. located in different directory or with a different filename.
 You can specify the path to another RoboFile by including the `--load-from` option:
 
 ```
@@ -145,21 +152,23 @@ Additional notes:
 
 ### Pass-Through Arguments
 
-Sometimes you need to pass arguments from your command into a task. A command line after the `--` characters is treated as one argument.
-Any special character like `-` will be passed into without change.
+Sometimes you need to pass arguments from your command into a task. A command line after the `--` delimiter is passed as a single parameter containing all of the following arguments.
+Any special characters such as `-` will be passed into without change.
 
 ``` php
 <?php
-    function ls(array $args)
+    function ls(ConsoleIO $io, array $args)
     {
         $this->taskExec('ls')->args($args)->run();
     }
 ?>
 ```
 
+**Note:** Creating tasks without a builder, e.g. `$this->taskExec()` as shown above, is deprecated. See the [Collections](/collections.md) documentation for the preferred way to declare tasks.
+
 ```
 robo ls -- Robo -c --all
- [Robo\Task\ExecTask] running ls Robo -c --all
+ [ExecTask] running ls Robo -c --all
  .  ..  CHANGELOG.md  codeception.yml  composer.json  composer.lock  docs  .git  .gitignore  .idea  LICENSE  README.md  robo  RoboFile.php  robo.phar  src  tests  .travis.yml  vendor
 ```
 
@@ -188,7 +197,7 @@ The help text for a command in a RoboFile may be provided in Doc-Block comments.
  * @option $graphic Display the sequence graphically using cube
  *                  representation
  */
-public function fibonacci($start, $steps, $opts = ['graphic' => false])
+public function fibonacci(ConsoleIO $io, $start, $steps, $opts = ['graphic' => false])
 {
 }
 ?>
@@ -222,7 +231,7 @@ Help:
 
 Arguments and options are populated from annotations.
 
-Initially added with [PR by @jonsa](https://github.com/consolidation/Robo/pull/71); now provided by the [consolidation/annotated-command](https://github.com/consolidation/annotated-command) project, which was factored out from Robo.
+Initially added with [PR by @jonsa](https://github.com/consolidation/robo/pull/71); now provided by the [consolidation/annotated-command](https://github.com/consolidation/annotated-command) project, which was factored out from Robo.
 
 ### Ignored methods
 
@@ -233,7 +242,7 @@ Robo ignores any method of your RoboFile that begins with `get` or `set`. These 
     /**
      * @command set-alignment
      */
-    function setAlignment($value)
+    function setAlignment(ConsoleIO $io, $value)
     {
         ...
     }
@@ -249,7 +258,7 @@ For details on how to add custom tasks to Robo, see the [extending](extending.md
 ### Shortcuts
 
 Some tasks may have shortcuts. If a task does not require multi-step configuration, it can be executed with a single line:
- 
+
 ```php
 <?php
 $this->_exec('ps aux');
@@ -284,13 +293,13 @@ class RoboFile
 {
     use Robo\Task\Base\loadShortcuts;
 
-    function test()
+    function test(ConsoleIO $io)
     {
         $res1 = $this->_exec('phpunit tests/integration');
         $res2 = $this->_exec('phpunit tests/unit');
 
         // print message when tests passed
-        if ($res1->wasSuccessful() and $res2->wasSuccessful()) $this->say("All tests passed");
+        if ($res1->wasSuccessful() and $res2->wasSuccessful()) $io->say("All tests passed");
     }
 }
 ?>
@@ -320,6 +329,7 @@ There is a global `stopOnFail` method as well, that can be used to stop a comman
 ```
 $this->stopOnFail(true);
 ```
+Note, however, that using [Collections](/collections.md) is preferred.
 
 ### Progress
 
@@ -337,17 +347,17 @@ An example of this is shown below:
 class MyTask extends BaseTask
 {
     protected $steps = 10;
-    
+
     public function progressIndicatorSteps()
     {
         return $this->steps;
     }
-    
+
     public function run()
     {
         $exitCode = 0;
         $errorMessage = "";
-    
+
         $this->startProgressIndicator();
         for ($i = 0; $i < $this->steps; ++$i) {
             $this->advanceProgressIndicator();
@@ -381,9 +391,9 @@ For example, given the following Robo command:
 
 ``` php
 <?php
-    function hello($opts = ['who' => 'unknown'])
+    function hello(ConsoleIO $io, $opts = ['who' => 'unknown'])
     {
-        $this->say("Hello, " . $opts['who']);
+        $io->say("Hello, " . $opts['who']);
     }
 ?>
 ```
@@ -458,7 +468,7 @@ RoboFiles that wish to provide default configuration values that can be overridd
 class RoboFile
 {
     public function __construct()
-    {    
+    {
         Robo\Task\Remote\Ssh::configure('remoteDir', '/srv/www');
     }
 }
@@ -472,7 +482,7 @@ Sometimes, a RoboFile might want to define its own private configuration file to
 class RoboFile
 {
     public function __construct()
-    {    
+    {
         Robo::loadConfiguration([__DIR__ . '/myconf.yml']);
     }
 }
@@ -515,7 +525,7 @@ It is preferable for commands that look up and display information should avoid 
 Robo is designed to work well with Composer. To use Robo scripts in your Composer-based project, simply add `robo` to your composer.json file:
 ```
 $ cd myproject
-$ composer require consolidation/Robo:~1
+$ composer require consolidation/robo:^2
 $ ./vendor/bin/robo mycommand
 ```
 If you do not want to type the whole path to Robo, you may add `./vendor/bin` to your `$PATH` (relative paths work), or use `composer exec` to find and run Robo:
@@ -530,7 +540,7 @@ When using Robo in your project, it is convenient to define Composer scripts tha
 {
     "name": "myorg/myproject",
     "require": {
-        "consolidation/Robo": "~1"
+        "consolidation/robo": "^2"
     },
     "scripts": {
         "test": "composer robo test",
@@ -551,7 +561,7 @@ This will call the public methods `test()` and `phar()` in your RoboFile.php whe
 
 Advertising your build commands as Composer scripts is a useful way to provide the key commands used for testing, building or packaging your application. Also, if your application should happen to provide a commandline tool to perform the operations of the application itself, then defining your build commands in their own RoboFile provides desirable separation, keeping your build commands out of the help and list commands of your primary script.
 
-If you would like to simplify the output of your script (e.g. when running on a CI service), replace the `--ansi` option in the example above with `--no-ansi`, and  colored terminal output and progress bars will be disabled. 
+If you would like to simplify the output of your script (e.g. when running on a CI service), replace the `--ansi` option in the example above with `--no-ansi`, and  colored terminal output and progress bars will be disabled.
 
 ## Robo as a Framework
 

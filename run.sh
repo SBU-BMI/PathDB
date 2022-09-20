@@ -84,6 +84,7 @@ fi
 	cd /quip/web
 	/quip/vendor/bin/drush -y theme:install bootstrap
         /quip/vendor/bin/drush -y pm:enable css_editor
+	/quip/vendor/bin/drush -y pm:enable pathauto
 	/quip/vendor/bin/drush -y pm:enable user_current_paths
         /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
 	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap

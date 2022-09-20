@@ -37,7 +37,7 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_authentication_profile_update_form';
   }
 
@@ -57,7 +57,7 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): LdapAuthenticationProfileUpdateForm {
     return new static(
       $container->get('current_user'),
       $container->get('entity_type.manager')
@@ -67,7 +67,7 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     if (EmailTemplateService::profileNeedsUpdate()) {
       $form['mail'] = [
         '#type' => 'textfield',
@@ -90,18 +90,16 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     if (!filter_var($form_state->getValue(['mail']), FILTER_VALIDATE_EMAIL)) {
       $form_state->setErrorByName('mail', $this->t('You must specify a valid email address.'));
     }
     $users = $this->entityTypeManager->getStorage('user')
       ->loadByProperties(['mail' => $form_state->getValue(['mail'])]);
-    $existing = $users ? reset($users) : FALSE;
-    if ($existing) {
+    if (count($users) > 0) {
       $form_state->setErrorByName('mail', $this->t('This email address is already in use.'));
     }
-    $pattern = $this->configFactory()->get('ldap_authentication.settings')->get('emailTemplateUsagePromptRegex');
-    $regex = '`' . $pattern . '`i';
+    $regex = sprintf('`%s`i', $this->configFactory()->get('ldap_authentication.settings')->get('emailTemplateUsagePromptRegex'));
     if (preg_match($regex, $form_state->getValue(['mail']))) {
       $form_state->setErrorByName('mail', $this->t('This email address still matches the invalid email template.'));
     }
@@ -110,7 +108,7 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     /** @var \Drupal\user\Entity\User $user */
     $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser->id());
     $user->set('mail', $form_state->getValue('mail'));

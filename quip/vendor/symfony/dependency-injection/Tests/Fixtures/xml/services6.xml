@@ -47,6 +47,7 @@
     <service id="decorator_service" decorates="decorated" />
     <service id="decorator_service_with_name" decorates="decorated" decoration-inner-name="decorated.pif-pouf"/>
     <service id="decorator_service_with_name_and_priority" decorates="decorated" decoration-inner-name="decorated.pif-pouf" decoration-priority="5"/>
+    <service id="decorator_service_with_name_and_priority_and_on_invalid" decorates="decorated" decoration-inner-name="decorated.pif-pouf" decoration-priority="5" decoration-on-invalid="ignore"/>
     <service id="new_factory1" class="FooBarClass">
       <factory function="factory" />
     </service>
@@ -58,6 +59,9 @@
     </service>
     <service id="new_factory4" class="BazClass">
       <factory method="getInstance" />
+    </service>
+    <service id="new_factory5" class="FooBarClass">
+      <factory service="baz" />
     </service>
     <service id="alias_for_foo" alias="foo" />
     <service id="another_alias_for_foo" alias="foo" public="false" />

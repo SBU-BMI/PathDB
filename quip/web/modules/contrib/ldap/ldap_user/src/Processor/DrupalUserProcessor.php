@@ -17,6 +17,7 @@ use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_servers\Logger\LdapDetailLog;
 use Drupal\ldap_servers\Processor\TokenProcessor;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
+use Drupal\ldap_servers\ServerInterface;
 use Drupal\ldap_user\Event\LdapUserLoginEvent;
 use Drupal\ldap_user\FieldProvider;
 use Drupal\Core\Utility\Token;
@@ -250,8 +251,7 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     }
     // Exclude users who have been manually flagged as excluded, everyone else
     // is fine.
-    return $account->get('ldap_user_ldap_exclude') &&
-      $account->get('ldap_user_ldap_exclude')->value == 1;
+    return $account->get('ldap_user_ldap_exclude')->getString() === '1';
   }
 
   /**
@@ -282,15 +282,22 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     $ldap_server = $this->entityTypeManager
       ->getStorage('ldap_server')
       ->load($this->config->get('drupalAcctProvisionServer'));
+
     $load_by_name = $this->entityTypeManager
       ->getStorage('user')
       ->loadByProperties(['name' => $drupal_username]);
-    $this->account = $load_by_name ? reset($load_by_name) : FALSE;
-    if (!$this->account) {
+    if (!$load_by_name) {
       $this->logger->error('Failed to LDAP associate Drupal account %drupal_username because account not found', ['%drupal_username' => $drupal_username]);
       return FALSE;
     }
 
+    if (!$ldap_server instanceof ServerInterface) {
+      $this->logger->error('Failed to load a valid LDAP server from configuration');
+      return FALSE;
+    }
+    $this->ldapUserManager->setServer($ldap_server);
+
+    $this->account = reset($load_by_name);
     $this->ldapEntry = $this->ldapUserManager->matchUsernameToExistingLdapEntry($drupal_username);
     if (!$this->ldapEntry) {
       $this->logger->error('Failed to LDAP associate Drupal account %drupal_username because corresponding LDAP entry not found', ['%drupal_username' => $drupal_username]);
@@ -384,17 +391,17 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
    *   TRUE on success, FALSE on error or failure because of invalid user.
    */
   public function ldapExcludeDrupalAccount(string $drupalUsername): bool {
-    $account = $this->entityTypeManager
+    /** @var \Drupal\user\Entity\User $account */
+    $accounts = $this->entityTypeManager
       ->getStorage('user')
-      ->load($drupalUsername);
-    if (!$account) {
+      ->loadByProperties(['name' => $drupalUsername]);
+    if (!$accounts) {
       $this->logger->error('Failed to exclude user from LDAP association because Drupal account %username was not found', ['%username' => $drupalUsername]);
       return FALSE;
     }
-
+    $account = reset($accounts);
     $account->set('ldap_user_ldap_exclude', 1);
-    $account->save();
-    return (boolean) $account;
+    return (bool) $account->save();
   }
 
   /**
@@ -640,7 +647,7 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
   }
 
   /**
-   * For a Drupal account, query LDAP, get all user fields and save.
+   * For a Drupal account, query LDAP, get all user fields and set them.
    *
    * @return bool
    *   Attempts to sync, reports failure if unsuccessful.
@@ -808,7 +815,7 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
   }
 
   /**
-   * Resets the processor so it can be used for additional queries.
+   * Resets the processor so that it can be used for additional queries.
    */
   public function reset(): void {
     $this->account = NULL;

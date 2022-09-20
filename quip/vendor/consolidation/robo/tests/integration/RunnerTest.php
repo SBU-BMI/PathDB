@@ -1,20 +1,20 @@
 <?php
 namespace Robo;
 
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Robo\Traits\TestTasksTrait;
 
 class RunnerTest extends TestCase
 {
     use TestTasksTrait;
-    use Task\Base\loadTasks;
+    use Task\Base\Tasks;
 
     /**
      * @var \Robo\Runner
      */
     private $runner;
 
-    public function setup()
+    public function setUp(): void
     {
         $container = $this->initTestTasksTrait();
         $this->runner = new \Robo\Runner('\Robo\RoboFileFixture');
@@ -23,8 +23,8 @@ class RunnerTest extends TestCase
 
     public function testThrowsExceptionWhenNoContainerAvailable()
     {
-        \PHPUnit_Framework_TestCase::setExpectedExceptionRegExp(
-            '\RuntimeException',
+        $this->expectException('\RuntimeException');
+        $this->expectExceptionMessageMatches(
             '/container is not initialized yet.*/'
         );
         Robo::unsetContainer();
@@ -51,13 +51,12 @@ class RunnerTest extends TestCase
         $this->runner->execute($argv, null, null, $this->capturedOutputStream());
 
         $expected = <<<EOT
->  The parameters passed are:
+The parameters passed are:
 array (
   0 => 'a',
   1 => 'b',
   2 => 'c',
 )
-
 EOT;
         $this->assertOutputEquals($expected);
     }
@@ -81,19 +80,18 @@ EOT;
         $argv = ['placeholder', 'test:symfony', 'a', 'b', 'c', '--foo=bar', '--foo=baz', '--foo=boz'];
         $this->runner->execute($argv, null, null, $this->capturedOutputStream());
         $expected = <<<EOT
->  The parameters passed are:
+The parameters passed are:
 array (
   0 => 'a',
   1 => 'b',
   2 => 'c',
 )
->  The options passed via --foo are:
+The options passed via --foo are:
 array (
   0 => 'bar',
   1 => 'baz',
   2 => 'boz',
 )
-
 EOT;
         $this->assertOutputEquals($expected);
     }
@@ -104,7 +102,7 @@ EOT;
         $this->runner->execute($argv, null, null, $this->capturedOutputStream());
 
         $expected = <<<EOT
- This is the command-event hook for the test:command-event command.
+This is the command-event hook for the test:command-event command.
  This is the main method for the test:command-event command.
  This is the post-command hook for the test:command-event command.
 EOT;
@@ -177,7 +175,7 @@ EOT;
         $this->assertTrue(file_exists('testRoboFile.php'));
         $commandContents = file_get_contents('testRoboFile.php');
         unlink('testRoboFile.php');
-        $this->assertContains('class RoboTestClass', $commandContents);
+        $this->assertStringContainsString('class RoboTestClass', $commandContents);
     }
 
     public function testTasksStopOnFail()
@@ -259,6 +257,17 @@ EOT;
     public function testRunnerVerbosityThresholdVerbose()
     {
         $argv = ['placeholder', 'test:verbosity-threshold', '-v'];
+        $result = $this->runner->execute($argv, null, null, $this->capturedOutputStream());
+
+        $this->assertOutputContains('This command will print more information at higher verbosity levels');
+        $this->assertOutputContains("Running echo verbose or higher\nverbose or higher");
+        $this->assertOutputNotContains('very verbose or higher');
+        $this->assertEquals(0, $result);
+    }
+
+    public function testRunnerVerbosityThresholdCompatabilityVerbose()
+    {
+        $argv = ['placeholder', 'test:verbosity-threshold-compatability', '-v'];
         $result = $this->runner->execute($argv, null, null, $this->capturedOutputStream());
 
         $this->assertOutputContains('This command will print more information at higher verbosity levels');

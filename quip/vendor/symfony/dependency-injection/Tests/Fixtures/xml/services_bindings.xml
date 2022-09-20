@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <defaults>
+        <defaults public="true">
             <bind key="NonExistent">null</bind>
             <bind key="$quz">quz</bind>
             <bind key="$factory">factory</bind>
@@ -12,6 +12,7 @@
             <bind key="$foo" type="collection">
                 <bind>null</bind>
             </bind>
+            <bind key="iterable $baz" type="tagged_iterator" tag="bar"/>
         </service>
 
         <service id="Symfony\Component\DependencyInjection\Tests\Fixtures\Bar">

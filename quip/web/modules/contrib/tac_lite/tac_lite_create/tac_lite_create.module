@@ -45,7 +45,7 @@ function tac_lite_create_form_alter(&$form, FormStateInterface $form_state, $for
       $config = SchemeForm::tacLiteConfig($i);
       if ((isset($config['tac_lite_create']) && $config['tac_lite_create']) ||
         in_array('grant_update', $config['perms'])) {
-        $tids = array_merge($tids, _tac_lite_user_tids($account, $i, $config));
+        $tids = array_merge($tids, _tac_lite_user_tids($account, $i));
       }
     }
     // Go through all of the fields in the system to find the ones we want use.

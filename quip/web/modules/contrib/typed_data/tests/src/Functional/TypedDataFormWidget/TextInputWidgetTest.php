@@ -8,7 +8,7 @@ use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
- * Class TextInputWidgetTest.
+ * Tests operation of the 'text_input' TypedDataForm widget plugin.
  *
  * @group typed_data
  *
@@ -26,7 +26,7 @@ class TextInputWidgetTest extends FormWidgetBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->widget = $this->getFormWidgetManager()->createInstance('text_input');
   }
@@ -38,7 +38,7 @@ class TextInputWidgetTest extends FormWidgetBrowserTestBase {
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('any')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('binary')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('boolean')));
-    $this->assertTrue($this->widget->isApplicable(DataDefinition::create('datetime_iso8601')));;
+    $this->assertTrue($this->widget->isApplicable(DataDefinition::create('datetime_iso8601')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('duration_iso8601')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('email')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('float')));

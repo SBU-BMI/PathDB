@@ -26,6 +26,8 @@ use Symfony\Component\Translation\PluralizationRules;
  * The goal to cover all languages is to far fetched so this test case is smaller.
  *
  * @author Clemens Tolboom clemens@build2be.nl
+ *
+ * @group legacy
  */
 class PluralizationRulesTest extends TestCase
 {
@@ -55,10 +57,8 @@ class PluralizationRulesTest extends TestCase
      * This array should contain all currently known langcodes.
      *
      * As it is impossible to have this ever complete we should try as hard as possible to have it almost complete.
-     *
-     * @return array
      */
-    public function successLangcodes()
+    public function successLangcodes(): array
     {
         return [
             ['1', ['ay', 'bo', 'cgg', 'dz', 'id', 'ja', 'jbo', 'ka', 'kk', 'km', 'ko', 'ky']],
@@ -77,7 +77,7 @@ class PluralizationRulesTest extends TestCase
      *
      * @return array with nplural together with langcodes
      */
-    public function failingLangcodes()
+    public function failingLangcodes(): array
     {
         return [
             ['1', ['fa']],

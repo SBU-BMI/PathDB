@@ -36,8 +36,8 @@ class ViewsSortTest extends UnitTestCase {
    * Tests something.
    */
   public function testOrder(): void {
-    $this->view->addOrderBy(NULL, 'sn', 'asc', 'sn', []);
-    $this->view->addOrderBy(NULL, 'uid', 'desc', 'uid', []);
+    $this->view->addOrderBy(NULL, 'sn', 'asc', 'sn');
+    $this->view->addOrderBy(NULL, 'uid', 'desc', 'uid');
     $rows = [
       [
         'cn' => ['aaaaaaa'],

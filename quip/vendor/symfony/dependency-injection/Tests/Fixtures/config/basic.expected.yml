@@ -6,4 +6,5 @@ services:
         synthetic: true
     App\BarService:
         class: App\BarService
+        public: true
         arguments: [!service { class: FooClass }]

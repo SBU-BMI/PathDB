@@ -18,7 +18,7 @@ interface LdapBridgeInterface {
    * @param string $sid
    *   Server machine name.
    */
-  public function setServerById($sid): void;
+  public function setServerById(string $sid): void;
 
   /**
    * Set Server.

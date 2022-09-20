@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Drupal8 W3CSS Theme.theme.
+ * W3CSS Theme.theme.
  *
  * Filename:     drupal8_w3css_theme.theme
  * Website:      http://www.flashwebcenter.com

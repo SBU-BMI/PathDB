@@ -13,7 +13,7 @@ namespace Symfony\Component\DependencyInjection\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ChildDefinition;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
+use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
 
 class ChildDefinitionTest extends TestCase
 {
@@ -92,7 +92,7 @@ class ChildDefinitionTest extends TestCase
 
     public function testReplaceArgumentShouldRequireIntegerIndex()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $def = new ChildDefinition('foo');
 
         $def->replaceArgument('0', 'foo');
@@ -119,7 +119,7 @@ class ChildDefinitionTest extends TestCase
 
     public function testGetArgumentShouldCheckBounds()
     {
-        $this->expectException('OutOfBoundsException');
+        $this->expectException(\OutOfBoundsException::class);
         $def = new ChildDefinition('foo');
 
         $def->setArguments([0 => 'foo']);
@@ -128,21 +128,16 @@ class ChildDefinitionTest extends TestCase
         $def->getArgument(1);
     }
 
-    public function testDefinitionDecoratorAliasExistsForBackwardsCompatibility()
-    {
-        $this->assertInstanceOf(ChildDefinition::class, new DefinitionDecorator('foo'));
-    }
-
     public function testCannotCallSetAutoconfigured()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\BadMethodCallException');
+        $this->expectException(BadMethodCallException::class);
         $def = new ChildDefinition('foo');
         $def->setAutoconfigured(true);
     }
 
     public function testCannotCallSetInstanceofConditionals()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\BadMethodCallException');
+        $this->expectException(BadMethodCallException::class);
         $def = new ChildDefinition('foo');
         $def->setInstanceofConditionals(['Foo' => new ChildDefinition('')]);
     }

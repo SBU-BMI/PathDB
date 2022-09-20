@@ -2,304 +2,450 @@
  * @file
  * Custom w3 css classes.
  */
+
 /* Global Classes */
 .w3-animate-opacity {
   animation: opac 3s;
 }
+
 .w3-animate-opacity-disabled {
-  animation: none!important;
+  animation: none !important;
 }
+
 .w3-card {
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0,0,0,0.12);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0,0,0,0.12);
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.12);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12);
 }
+
 .w3-padding-0 {
-  padding: 0!important;
+  padding: 0 !important;
 }
+
 .w3-margin-0 {
-  margin: 0!important;
+  margin: 0 !important;
 }
+
 .w3-box-shadow-0 {
-  box-shadow: none!important;
+  box-shadow: none !important;
 }
+
 .w3-border-0 {
-  border: none!important;
+  border: none !important;
 }
+
 .w3-round-0 {
-  border-radius: 0!important;
+  border-radius: 0 !important;
 }
+
 /* Link Text Color Classes */
 .w3-link-red a {
-  color: #f44336!important;
+  color: #f44336 !important;
 }
+
 .w3-link-green a {
-  color: #4caf50!important;
+  color: #4caf50 !important;
 }
+
 .w3-link-blue a {
-  color: #2196f3!important;
+  color: #2196f3 !important;
 }
+
 .w3-link-yellow a {
-  color: #ffeb3b!important;
+  color: #ffeb3b !important;
 }
+
 .w3-link-white a {
-  color: #fff!important;
+  color: #fff !important;
 }
+
 .w3-link-black a {
-  color: #000!important;
+  color: #000 !important;
 }
+
 .w3-link-grey a,
 .w3-link-gray a {
-  color: #757575!important;
+  color: #757575 !important;
 }
+
 .w3-link-amber a {
-  color: #ffc107!important;
+  color: #ffc107 !important;
 }
+
 .w3-link-aqua a {
-  color: #00ffff!important;
+  color: #00ffff !important;
 }
+
 .w3-link-light-blue a {
-  color: #87ceeb!important;
+  color: #87ceeb !important;
 }
+
 .w3-link-brown a {
-  color: #795548!important;
+  color: #795548 !important;
 }
+
 .w3-link-cyan a {
-  color: #00bcd4!important;
+  color: #00bcd4 !important;
 }
+
 .w3-link-blue-grey a,
 .w3-link-blue-gray a {
-  color: #607d8b!important;
+  color: #607d8b !important;
 }
+
 .w3-link-light-green a {
-  color: #8bc34a!important;
+  color: #8bc34a !important;
 }
+
 .w3-link-indigo a {
-  color: #3f51b5!important;
+  color: #3f51b5 !important;
 }
+
 .w3-link-khaki a {
-  color: #b4aa50!important;
+  color: #b4aa50 !important;
 }
+
 .w3-link-lime a {
-  color: #cddc39!important;
+  color: #cddc39 !important;
 }
+
 .w3-link-orange a {
-  color: #ff9800!important;
+  color: #ff9800 !important;
 }
+
 .w3-link-deep-orange a {
-  color: #ff5722!important;
+  color: #ff5722 !important;
 }
+
 .w3-link-pink a {
-  color: #e91e63!important;
+  color: #e91e63 !important;
 }
+
 .w3-link-purple a {
-  color: #9c27b0!important;
+  color: #9c27b0 !important;
 }
+
 .w3-link-deep-purple a {
-  color: #673ab7!important;
+  color: #673ab7 !important;
 }
+
 .w3-link-sand a {
-  color: #fdf5e6!important;
+  color: #fdf5e6 !important;
 }
+
 .w3-link-teal a {
-  color: #009688!important;
+  color: #009688 !important;
 }
+
 .w3-link-light-gray a,
 .w3-link-light-grey a {
-  color: #f1f1f1!important;
+  color: #f1f1f1 !important;
 }
+
 .w3-link-dark-gray a,
 .w3-link-dark-grey a {
-  color: #3a3a3a!important;
+  color: #3a3a3a !important;
 }
+
 /* Link Background Color Classes Hover */
 .w3-link-bg-red a {
-  background-color: #f44336!important;
+  background-color: #f44336 !important;
 }
+
 .w3-link-bg-green a {
-  background-color: #4caf50!important;
+  background-color: #4caf50 !important;
 }
+
 .w3-link-bg-blue a {
-  background-color: #2196f3!important;
+  background-color: #2196f3 !important;
 }
+
 .w3-link-bg-yellow a {
-  background-color: #ffeb3b!important;
+  background-color: #ffeb3b !important;
 }
+
 .w3-link-bg-white a {
-  background-color: #fff!important;
+  background-color: #fff !important;
 }
+
 .w3-link-bg-black a {
-  background-color: #000!important;
+  background-color: #000 !important;
 }
+
 .w3-link-bg-grey a,
 .w3-link-bg-gray a {
-  background-color: #757575!important;
+  background-color: #757575 !important;
 }
+
 .w3-link-bg-amber a {
-  background-color: #ffc107!important;
+  background-color: #ffc107 !important;
 }
+
 .w3-link-bg-aqua a {
-  background-color: #00ffff!important;
+  background-color: #00ffff !important;
 }
+
 .w3-link-bg-light-blue a {
-  background-color: #87ceeb!important;
+  background-color: #87ceeb !important;
 }
+
 .w3-link-bg-brown a {
-  background-color: #795548!important;
+  background-color: #795548 !important;
 }
+
 .w3-link-bg-cyan a {
-  background-color: #00bcd4!important;
+  background-color: #00bcd4 !important;
 }
+
 .w3-link-bg-blue-grey a,
 .w3-link-bg-blue-gray a {
-  background-color: #607d8b!important;
+  background-color: #607d8b !important;
 }
+
 .w3-link-bg-light-green a {
-  background-color: #8bc34a!important;
+  background-color: #8bc34a !important;
 }
+
 .w3-link-bg-indigo a {
-  background-color: #3f51b5!important;
+  background-color: #3f51b5 !important;
 }
+
 .w3-link-bg-khaki a {
-  background-color: #b4aa50!important;
+  background-color: #b4aa50 !important;
 }
+
 .w3-link-bg-lime a {
-  background-color: #cddc39!important;
+  background-color: #cddc39 !important;
 }
+
 .w3-link-bg-orange a {
-  background-color: #ff9800!important;
+  background-color: #ff9800 !important;
 }
+
 .w3-link-bg-deep-orange a {
-  background-color: #ff5722!important;
+  background-color: #ff5722 !important;
 }
+
 .w3-link-bg-pink a {
-  background-color: #e91e63!important;
+  background-color: #e91e63 !important;
 }
+
 .w3-link-bg-purple a {
-  background-color: #9c27b0!important;
+  background-color: #9c27b0 !important;
 }
+
 .w3-link-bg-deep-purple a {
-  background-color: #673ab7!important;
+  background-color: #673ab7 !important;
 }
+
 .w3-link-bg-sand a {
-  background-color: #fdf5e6!important;
+  background-color: #fdf5e6 !important;
 }
+
 .w3-link-bg-teal a {
-  background-color: #009688!important;
+  background-color: #009688 !important;
 }
+
 .w3-link-bg-light-gray a,
 .w3-link-bg-light-grey a {
-  background-color: #f1f1f1!important;
+  background-color: #f1f1f1 !important;
 }
+
 .w3-link-bg-dark-gray a,
 .w3-link-bg-dark-grey a {
-  background-color: #3a3a3a!important;
+  background-color: #3a3a3a !important;
 }
+
 /* Link Color Classes Hover */
+.w3-button-red button,
+.w3-button-red-hover button:hover,
 .w3-link-red-hover a:hover {
-  color: #fff!important;
-  background-color: #f44336!important;
+  color: #fff !important;
+  background-color: #f44336 !important;
 }
+
+.w3-button-green button,
+.w3-button-green-hover button:hover,
 .w3-link-green-hover a:hover {
-  color: #fff!important;
-  background-color: #4caf50!important;
+  color: #fff !important;
+  background-color: #4caf50 !important;
 }
+
+.w3-button-blue button,
+.w3-button-blue-hover button:hover,
 .w3-link-blue-hover a:hover {
-  color: #fff!important;
-  background-color: #2196f3!important;
+  color: #fff !important;
+  background-color: #2196f3 !important;
 }
+
+.w3-button-yellow button,
+.w3-button-yellow-hover button:hover,
 .w3-link-yellow-hover a:hover {
-  color: #000!important;
-  background-color: #ffeb3b!important;
+  color: #000 !important;
+  background-color: #ffeb3b !important;
 }
+
+.w3-button-white button,
+.w3-button-white-hover button:hover,
 .w3-link-white-hover a:hover {
-  color: #000!important;
-  background-color: #fff!important;
+  color: #000 !important;
+  background-color: #fff !important;
 }
+
+.w3-button-black button,
+.w3-button-black-hover button:hover,
 .w3-link-black-hover a:hover {
-  color: #fff!important;
-  background-color: #000!important;
+  color: #fff !important;
+  background-color: #000 !important;
 }
-.w3-link-grey-hover a:hover,
-.w3-link-gray-hover a:hover {
-  background-color: #757575!important;
-}
+
+.w3-button-amber button,
+.w3-button-amber-hover button:hover,
 .w3-link-amber-hover a:hover {
-  color: #000!important;
-  background-color: #ffc107!important;
+  color: #000 !important;
+  background-color: #ffc107 !important;
 }
+
+.w3-button-aqua button,
+.w3-button-aqua-hover button:hover,
 .w3-link-aqua-hover a:hover {
-  color: #000!important;
-  background-color: #00ffff!important;
+  color: #000 !important;
+  background-color: #00ffff !important;
 }
+
+.w3-button-light-blue button,
+.w3-button-light-blue-hover button:hover,
 .w3-link-light-blue-hover a:hover {
-  color: #000!important;
-  background-color: #87ceeb!important;
+  color: #000 !important;
+  background-color: #87ceeb !important;
 }
+
+.w3-button-brown button,
+.w3-button-brown-hover button:hover,
 .w3-link-brown-hover a:hover {
-  color: #fff!important;
-  background-color: #795548!important;
+  color: #fff !important;
+  background-color: #795548 !important;
 }
+
+.w3-button-cyan button,
+.w3-button-cyan-hover button:hover,
 .w3-link-cyan-hover a:hover {
-  color: #000!important;
-  background-color: #00bcd4!important;
+  color: #000 !important;
+  background-color: #00bcd4 !important;
 }
-.w3-link-blue-grey-hover a:hover,
-.w3-link-blue-gray-hover a:hover {
-  color: #fff!important;
-  background-color: #607d8b!important;
-}
+
+.w3-button-light-green button,
+.w3-button-light-green-hover button:hover,
 .w3-link-light-green-hover a:hover {
-  color: #000!important;
-  background-color: #8bc34a!important;
+  color: #000 !important;
+  background-color: #8bc34a !important;
 }
+
+.w3-button-indigo button,
+.w3-button-indigo-hover button:hover,
 .w3-link-indigo-hover a:hover {
-  color: #fff!important;
-  background-color: #3f51b5!important;
+  color: #fff !important;
+  background-color: #3f51b5 !important;
 }
+
+.w3-button-khaki button,
+.w3-button-khaki-hover button:hover,
 .w3-link-khaki-hover a:hover {
-  color: #000!important;
-  background-color: #b4aa50!important;
+  color: #000 !important;
+  background-color: #b4aa50 !important;
 }
+
+.w3-button-lime button,
+.w3-button-lime-hover button:hover,
 .w3-link-lime-hover a:hover {
-  color: #000!important;
-  background-color: #cddc39!important;
+  color: #000 !important;
+  background-color: #cddc39 !important;
 }
+
+.w3-button-orange button,
+.w3-button-orange-hover button:hover,
 .w3-link-orange-hover a:hover {
-  color: #000!important;
-  background-color: #ff9800!important;
+  color: #000 !important;
+  background-color: #ff9800 !important;
 }
+
+.w3-button-deep-orange button,
+.w3-button-deep-orange-hover button:hover,
 .w3-link-deep-orange-hover a:hover {
-  color: #fff!important;
-  background-color: #ff5722!important;
+  color: #fff !important;
+  background-color: #ff5722 !important;
 }
+
+.w3-button-pink button,
+.w3-button-pink-hover button:hover,
 .w3-link-pink-hover a:hover {
-  color: #fff!important;
-  background-color: #e91e63!important;
+  color: #fff !important;
+  background-color: #e91e63 !important;
 }
+
+.w3-button-purple button,
+.w3-button-purple-hover button:hover,
 .w3-link-purple-hover a:hover {
-  color: #fff!important;
-  background-color: #9c27b0!important;
+  color: #fff !important;
+  background-color: #9c27b0 !important;
 }
+
+.w3-button-deep-purple button,
+.w3-button-deep-purple-hover button:hover,
 .w3-link-deep-purple-hover a:hover {
-  color: #fff!important;
-  background-color: #673ab7!important;
+  color: #fff !important;
+  background-color: #673ab7 !important;
 }
+
+.w3-button-sand button,
+.w3-button-sand-hover button:hover,
 .w3-link-sand-hover a:hover {
-  color: #000!important;
-  background-color: #fdf5e6!important;
+  color: #000 !important;
+  background-color: #fdf5e6 !important;
 }
+
+.w3-button-teal button,
+.w3-button-teal-hover button:hover,
 .w3-link-teal-hover a:hover {
-  color: #fff!important;
-  background-color: #009688!important;
+  color: #fff !important;
+  background-color: #009688 !important;
 }
+
+.w3-button-gray button,
+.w3-button-grey button,
+.w3-button-gray-hover button:hover,
+.w3-button-grey-hover button:hover,
+.w3-link-gray-hover a:hover,
+.w3-link-grey-hover a:hover {
+  background-color: #757575 !important;
+}
+
+.w3-button-blue-gray button,
+.w3-button-blue-grey button,
+.w3-button-blue-gray-hover button:hover,
+.w3-button-blue-grey-hover button:hover,
+.w3-link-blue-gray-hover a:hover,
+.w3-link-blue-grey-hover a:hover {
+  color: #fff !important;
+  background-color: #607d8b !important;
+}
+
+.w3-button-light-gray button,
+.w3-button-light-grey button,
+.w3-button-light-gray-hover button:hover,
+.w3-button-light-grey-hover button:hover,
 .w3-link-light-gray-hover a:hover,
 .w3-link-light-grey-hover a:hover {
-  color: #000!important;
-  background-color: #f1f1f1!important;
+  color: #000 !important;
+  background-color: #f1f1f1 !important;
 }
+
+.w3-button-dark-gray button,
+.w3-button-dark-grey button,
+.w3-button-dark-gray-hover button:hover,
+.w3-button-dark-grey-hover button:hover,
 .w3-link-dark-gray-hover a:hover,
 .w3-link-dark-grey-hover a:hover {
-  color: #fff!important;
-  background-color: #3a3a3a!important;
+  color: #fff !important;
+  background-color: #3a3a3a !important;
 }

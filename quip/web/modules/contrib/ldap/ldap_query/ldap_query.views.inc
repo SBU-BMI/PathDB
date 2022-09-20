@@ -10,7 +10,7 @@ declare(strict_types = 1);
 /**
  * Implements hook_views_data().
  */
-function ldap_query_views_data() {
+function ldap_query_views_data(): array {
   $data['ldap_query']['table']['group'] = t('LDAP Query');
 
   $data['ldap_query']['table']['base'] = [

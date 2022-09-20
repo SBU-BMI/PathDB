@@ -3,7 +3,9 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Bar\FooClass;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Parameter;
+use Symfony\Component\DependencyInjection\Reference;
 
 require_once __DIR__.'/../includes/classes.php';
 require_once __DIR__.'/../includes/foo.php';
@@ -115,12 +117,20 @@ return function (ContainerConfigurator $c) {
     $s->set('lazy_context_ignore_invalid_ref', 'LazyContext')
         ->args([iterator([ref('foo.baz'), ref('invalid')->ignoreOnInvalid()]), iterator([])]);
 
+    $s->set('BAR', 'stdClass')->property('bar', ref('bar'));
+    $s->set('bar2', 'stdClass');
+    $s->set('BAR2', 'stdClass');
+
     $s->set('tagged_iterator_foo', 'Bar')
         ->private()
         ->tag('foo');
 
     $s->set('tagged_iterator', 'Bar')
-        ->args([tagged('foo')]);
+        ->args([tagged_iterator('foo')]);
+
+    $s->set('runtime_error', 'stdClass')
+        ->args([new Reference('errored_definition', ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE)]);
+    $s->set('errored_definition', 'stdClass')->private();
 
     $s->alias('alias_for_foo', 'foo')->private()->public();
     $s->alias('alias_for_alias', ref('alias_for_foo'));

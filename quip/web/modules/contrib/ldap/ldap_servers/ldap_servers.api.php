@@ -35,7 +35,7 @@ function hook_ldap_servers_user_cron(array &$users) {
  * but currently does not need to process user cron batches,
  * it should return FALSE.
  */
-function hook_ldap_servers_user_cron_needed() {
+function hook_ldap_servers_user_cron_needed(): bool {
   return TRUE;
 }
 

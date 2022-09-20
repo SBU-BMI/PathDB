@@ -7,12 +7,13 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Database\Database;
 
 /**
  * Implements hook_requirements().
  */
-function ldap_authentication_requirements($phase) {
+function ldap_authentication_requirements($phase): array {
 
   $requirements = [];
   if ($phase != "install" && Database::getConnection()->schema()->tableExists('ldapauth')) {
@@ -127,17 +128,16 @@ function ldap_authentication_update_8305() {
 /**
  * Add system administrator role for exclusion.
  */
-function ldap_authentication_update_8306() {
+function ldap_authentication_update_8306(): TranslatableMarkup {
   $config = \Drupal::configFactory()
     ->getEditable('ldap_authentication.settings');
-  if ($config->get('authenticationMode') == 'mixed') {
+  if ($config->get('authenticationMode') === 'mixed') {
     $config->set('skipAdministrators', TRUE);
     $config->save();
     return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be excluded from LDAP since mixed mode is active.');
   }
-  else {
-    $config->set('skipAdministrators', FALSE);
-    $config->save();
-    return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be included in LDAP since exclusive mode is active.');
-  }
+
+  $config->set('skipAdministrators', FALSE);
+  $config->save();
+  return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be included in LDAP since exclusive mode is active.');
 }

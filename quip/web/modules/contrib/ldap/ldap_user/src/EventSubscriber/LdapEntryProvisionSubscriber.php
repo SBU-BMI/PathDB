@@ -8,7 +8,6 @@ use Drupal\ldap_servers\LdapTransformationTraits;
 use Drupal\ldap_user\Event\LdapNewUserCreatedEvent;
 use Drupal\ldap_user\Event\LdapUserLoginEvent;
 use Drupal\ldap_user\Event\LdapUserUpdatedEvent;
-use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Ldap\Entry;
 use Drupal\Core\Config\ConfigFactory;
@@ -156,24 +155,11 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[LdapUserLoginEvent::EVENT_NAME] = ['login'];
     $events[LdapNewUserCreatedEvent::EVENT_NAME] = ['userCreated'];
     $events[LdapUserUpdatedEvent::EVENT_NAME] = ['userUpdated'];
     return $events;
-  }
-
-  /**
-   * Set the user.
-   *
-   * This should not be used in practice and is a workaround to ease testing
-   * this class, before we can refactor it.
-   *
-   * @param \Drupal\user\UserInterface $account
-   *   Account.
-   */
-  public function setUser(UserInterface $account): void {
-    $this->account = $account;
   }
 
   /**
@@ -182,10 +168,14 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    * @param \Drupal\ldap_user\Event\LdapUserLoginEvent $event
    *   Event.
    */
-  public function login(LdapUserLoginEvent $event) {
+  public function login(LdapUserLoginEvent $event): void {
     $this->account = $event->account;
     $triggers = $this->config->get('ldapEntryProvisionTriggers');
-    if ($this->provisionLdapEntriesFromDrupalUsers() && in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION, $triggers, TRUE)) {
+    if (
+      $this->provisionLdapEntriesFromDrupalUsers() &&
+      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION, $triggers, TRUE) &&
+      $this->account->get('ldap_user_ldap_exclude')->getString() !== '1'
+    ) {
       $this->loadServer();
       if ($this->checkExistingLdapEntry()) {
         $this->syncToLdapEntry();
@@ -201,25 +191,24 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
   /**
    * Create or update LDAP entries on user update.
    *
-   * @todo Make sure we are not working on excluded accounts, see also
-   * other events.
-   *
    * @param \Drupal\ldap_user\Event\LdapUserUpdatedEvent $event
    *   Event.
    */
-  public function userUpdated(LdapUserUpdatedEvent $event) {
+  public function userUpdated(LdapUserUpdatedEvent $event): void {
     $this->account = $event->account;
-    if ($this->provisionLdapEntriesFromDrupalUsers()) {
-      if (in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE)) {
-        $this->loadServer();
-        if ($this->checkExistingLdapEntry()) {
-          $this->syncToLdapEntry();
-        }
-        else {
-          // This should only be necessary if the entry was deleted on the
-          // directory server.
-          $this->provisionLdapEntry();
-        }
+    if (
+      $this->provisionLdapEntriesFromDrupalUsers() &&
+      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE) &&
+      $this->account->get('ldap_user_ldap_exclude')->getString() !== '1'
+    ) {
+      $this->loadServer();
+      if ($this->checkExistingLdapEntry()) {
+        $this->syncToLdapEntry();
+      }
+      else {
+        // This should only be necessary if the entry was deleted on the
+        // directory server.
+        $this->provisionLdapEntry();
       }
     }
   }
@@ -232,15 +221,17 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    */
   public function userCreated(LdapNewUserCreatedEvent $event): void {
     $this->account = $event->account;
-    if ($this->provisionLdapEntriesFromDrupalUsers()) {
-      if (in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE)) {
-        $this->loadServer();
-        if ($this->checkExistingLdapEntry()) {
-          $this->syncToLdapEntry();
-        }
-        else {
-          $this->provisionLdapEntry();
-        }
+    if (
+      $this->provisionLdapEntriesFromDrupalUsers() &&
+      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE) &&
+      $this->account->get('ldap_user_ldap_exclude')->getString() !== '1'
+    ) {
+      $this->loadServer();
+      if ($this->checkExistingLdapEntry()) {
+        $this->syncToLdapEntry();
+      }
+      else {
+        $this->provisionLdapEntry();
       }
     }
   }
@@ -252,12 +243,8 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    *   Provisioning available.
    */
   private function provisionLdapEntriesFromDrupalUsers(): bool {
-    if ($this->config->get('ldapEntryProvisionServer') &&
-      count(array_filter(array_values($this->config->get('ldapEntryProvisionTriggers')))) > 0) {
-      return TRUE;
-    }
-
-    return FALSE;
+    return $this->config->get('ldapEntryProvisionServer') &&
+      count(array_filter(array_values($this->config->get('ldapEntryProvisionTriggers')))) > 0;
   }
 
   /**
@@ -269,7 +256,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    * @return \Symfony\Component\Ldap\Entry
    *   Entry to send *to* LDAP.
    */
-  private function buildLdapEntry($prov_event): Entry {
+  private function buildLdapEntry(string $prov_event): Entry {
     $dn = '';
     $attributes = [];
 
@@ -318,13 +305,13 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    * @param string $token
    *   Token key.
    */
-  private function fetchDrupalAccountAttribute($token): void {
+  private function fetchDrupalAccountAttribute(string $token): void {
     // Trailing period to allow for empty value.
-    list(
+    [
       $attribute_type,
       $attribute_name,
       $attribute_conversion,
-      ) = explode('.', $token . '.');
+    ] = explode('.', $token . '.');
     $value = NULL;
 
     if ($attribute_type === 'field' || $attribute_type === 'property') {
@@ -357,7 +344,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    * @return string
    *   Field data.
    */
-  private function fetchDrupalAccountField($attribute_name): string {
+  private function fetchDrupalAccountField(string $attribute_name): string {
     $value = '';
     if (is_scalar($this->account->get($attribute_name)->value)) {
       $value = $this->account->get($attribute_name)->value;
@@ -386,7 +373,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    * @return string
    *   Password.
    */
-  private function fetchDrupalAccountPassword($attribute_name): string {
+  private function fetchDrupalAccountPassword(string $attribute_name): string {
     $value = '';
     switch ($attribute_name) {
 
@@ -476,7 +463,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
   /**
    * Load provisioning server from database.
    */
-  private function loadServer() {
+  private function loadServer(): void {
     $this->ldapServer = $this->entityTypeManager
       ->getStorage('ldap_server')
       ->load($this->config->get('ldapEntryProvisionServer'));
@@ -569,7 +556,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    * @param \Symfony\Component\Ldap\Entry $entry
    *   LDAP Entry.
    */
-  private function updateUserProvisioningReferences(Entry $entry) {
+  private function updateUserProvisioningReferences(Entry $entry): void {
     $ldap_user_prov_entry = $this->ldapServer->id() . '|' . $entry->getDn();
     if ($this->account->get('ldap_user_prov_entries') !== NULL) {
       $this->account->set('ldap_user_prov_entries', []);
@@ -597,7 +584,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
   /**
    * Given a Drupal account, sync to related LDAP entry.
    */
-  public function syncToLdapEntry() {
+  private function syncToLdapEntry(): void {
     if (!$this->config->get('ldapEntryProvisionServer')) {
       $this->logger->error('Provisioning server not available');
       return;
@@ -649,16 +636,6 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
       return $this->ldapUserManager->queryAllBaseDnLdapForUsername($authmap);
     }
     return FALSE;
-  }
-
-  /**
-   * Get the tokens.
-   *
-   * @return array
-   *   Tokens.
-   */
-  public function getTokens(): array {
-    return $this->tokens;
   }
 
 }

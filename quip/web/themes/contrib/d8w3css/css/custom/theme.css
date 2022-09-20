@@ -25,6 +25,21 @@ a.d8-has-image > img.w3-image {
   float: left;
 }
 
+.w3-disabled-has-image a.d8-has-image > img.w3-image {
+  width: auto;
+}
+
+.text-transform-none div,
+.text-transform-none h1,
+.text-transform-none h2,
+.text-transform-none h3,
+.text-transform-none h4,
+.text-transform-none h5,
+.text-transform-none h6,
+.text-transform-none a {
+  text-transform: none !important;
+}
+
 a:hover img,
 a:hover div img,
 a.d8-has-image:hover,
@@ -169,12 +184,17 @@ a:hover > img.w3-image {
   float: left;
 }
 
+.field--label-hidden.field__items > .field__item {
+  float: left;
+}
+
 .field--label-above > .field__label,
 .field--label-above > .field__item,
 .field--label-above > .field__items {
   clear: both;
   display: block;
   float: left;
+  width: 100%;
 }
 
 .field--type-h5p .field__label,
@@ -190,7 +210,7 @@ a:hover > img.w3-image {
   padding-left: 0 !important;
 }
 
-.field--label-above > .field__items .field__item {
+.field--label-above > .field__items > .field__item {
   float: left;
 }
 
@@ -224,8 +244,12 @@ ul.links li a {
 
 .field--name-field-tags .field__item a {
   border: none;
-  padding: 7px 14px !important;
+  padding: 7px 12px !important;
   float: left;
+}
+
+.field--name-field-tags .field__label {
+  padding: 7px 0;
 }
 
 .node__content ul.links {
@@ -237,8 +261,9 @@ ul.links li a {
   padding-right: 0 !important;
 }
 
+.field--name-field-tags .field__label,
 .field--name-field-tags .field__item a {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .site-name a,
@@ -264,25 +289,77 @@ table ul.dropbutton li.w3-left.dropbutton-action {
   margin-right: 0 !important;
   line-height: 26px;
 }
-
+.js .dropbutton-widget .dropbutton,
 table ul.dropbutton {
   background-color: white;
   border: 1px solid #e8e8e8;
-  padding: 0 10px !important;
-  border-radius: 10px;
+  padding: 0 !important;
 }
 
+.dropbutton li {
+  padding: 0;
+}
+
+.dropbutton li a {
+  padding: 6px 12px;
+  line-height: 26px;
+  font-size: 14px;
+}
+
+#view-edit-form  .dropbutton li a {
+  padding: 3px 9px;
+}
+.views-ui-display-tab-bucket {
+  padding-top: 11px;
+}
+.js .views-edit-view .dropbutton-wrapper .dropbutton .dropbutton-action > *,
+.views-display-setting,
+.views-display-setting input,
+.views-display-setting .label,
+.views-display-extra-actions a {
+  font-size: 14px!important;
+}
+.views-preview-wrapper {
+  border-color: #eaeaea;
+  padding: 10px;
+  margin: 0 16px 8px 16px;
+}
+.js .views-edit-view .dropbutton-wrapper .dropbutton .dropbutton-action input {
+  margin: 2px 0!important;
+  border: none!important;
+  float: right;
+  width: 100%;
+  text-align: left;
+}
+.view-preview-form > h2,
+.view-preview-form > .w3-section {
+  width: 100%;
+  display: block;
+  clear: both;
+  position: static;
+}
+.dropbutton button {
+  border: 1px solid #e8e8e8;
+  border-left: none;
+  background-color: white;
+}
+
+.js td .dropbutton-wrapper {
+  min-height: 40px;
+}
+.views-filterable-options-controls .form-item {
+  float: left;
+}
 table ul.dropbutton li:first-child {
   margin-right: 10px !important;
+}
+.node-form table ul.dropbutton li:first-child {
+  margin-right: 0 !important;
 }
 
 table ul.dropbutton li.dropbutton-toggle {
   margin-right: 0 !important;
   margin-left: 10px;
-}
-
-table ul.dropbutton li a {
-  line-height: 26px;
 }
 
 .node-preview-container {
@@ -313,10 +390,10 @@ table ul.dropbutton li a {
   display: block;
   margin: 0;
 }
-
+.w3-table-all,
 fieldset,
 .w3-border {
-  border-color: #eaeaea !important;
+  border-color: #eaeaea!important;
 }
 
 .w3-table td,
@@ -340,4 +417,420 @@ body .ui-dialog {
   z-index: 1001 !important;
 }
 
-/**/
+.vertical-tabs .vertical-tabs__panes {
+  padding: 0 16px;
+}
+.views-ui-display-tab-bucket .views-display-setting {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.views-ui-display-tab-bucket .dropbutton-wrapper {
+  top: 1px;
+}
+/*Admin pages */
+.ui-dialog-content .w3-content,
+.admin-context .block-system-main-block .w3-content {
+  max-width: 100%;
+  width: 100%;
+  display: inline-block;
+}
+.admin-context .block-system-main-block .modules-tabs__menu + form.system-modules {
+  width: auto;
+}
+.winnow-clear {
+  top: 4px;
+}
+.system-modules label,
+.system-modules-uninstall label {
+  font-size: 16px;
+}
+.modules-tabs__pane table col.checkbox {
+  width: 3%;
+}
+.block-system-main-block .modules-tabs tr td {
+  vertical-align: baseline;
+}
+.dropbutton input.w3-margin-bottom,
+.dropbutton input.w3-margin-top {
+  margin: 0!important;
+  width: 100%!important;
+  text-align: left;
+  border: none;
+  transition: 0.4s;
+}
+.paragraph-type-top.w3-row:before {
+  display: inline-block;
+  content: none;
+}
+.paragraph-type-top {
+  align-items: center;
+}
+form .field--widget-entity-reference-paragraphs td.field-multiple-drag {
+  width: auto;
+  padding-left: 0;
+}
+/*.ui-dialog-content .w3-responsive,
+.admin-context .block-system-main-block .w3-responsive {
+  max-width: 100%;
+  width: 100%;
+  display: block;
+  clear: both;
+  overflow-x: initial;
+}*/
+.block-system-main-block {
+  padding: 0 16px;
+}
+.block-system-main-block > div,
+.block-system-main-block > form {
+  padding: 0!important;
+}
+.admin-context nav.action-links {
+  list-style: none;
+  margin-left: 16px;
+}
+
+.admin-context nav.action-links li {
+  white-space: normal;
+  display: inline-block;
+  vertical-align: middle;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background-color: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.region-title__action a,
+.admin-context form .form-actions > a {
+  margin: 16px 10px;
+  padding: 9px 16px;
+  display: inline-block;
+}
+
+.region-title__action a {
+  margin: 5px;
+}
+
+.admin-context form .form-actions button,
+.admin-context form .form-actions input {
+  margin: 16px 10px 16px 0;
+}
+
+/* node edit */
+span.admin-link button,
+span.field-edit-link button {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+/* Ckeditor  */
+.cke,
+.cke_inner,
+.cke_top,
+.cke_bottom,
+.cke_contents {
+  border: none !important;
+  box-shadow: none;
+  border-radius: 0;
+  background-color: #f8f8f8;
+}
+.cke {
+  width: auto!important;
+}
+.cke_top {
+  border-radius: 6px 6px 0 0;
+  border: 1px solid #eaeaea !important;
+  border-bottom: none!important;
+}
+.cke_contents {
+  border: 1px solid #eaeaea !important;
+}
+
+.cke_bottom {
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #eaeaea !important;
+  border-top: none!important;
+}
+
+
+.text-format-wrapper > .element-container-wrapper {
+  margin: 8px auto!important;
+  border-radius: 6px;
+  border: 1px solid #eaeaea !important;
+  background-color: #f8f8f8;
+  padding: 8px 16px;
+}
+
+.filter-guidelines-item {
+  font-size: 13px;
+}
+
+.filter-guidelines-item li {
+  padding-left: 0;
+}
+.cke_top ,
+.cke_bottom,
+.cke_contents,
+.text-format-wrapper > .element-container-wrapper {
+  border-color: #eaeaea!important;
+}
+
+.layout__region--content .w3-table-all {
+  border-color: #eaeaea !important;
+}
+
+.layout-node-form .w3-row > fieldset > div,
+.layout-node-form .w3-row > fieldset > div > div {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.layout__region--content > .w3-row > fieldset {
+  margin-bottom: 16px !important;
+  padding-bottom: 16px !important;
+}
+.admin-context .block-local-tasks-block,
+.admin-context #drupal-off-canvas,
+.admin-context .block-system-main-block {
+  font-family: "Helvetica", sans-serif;
+}
+
+.layout-node-form .w3-responsive {
+  overflow-x: unset;
+}
+
+.layout-node-form .paragraph-type-label,
+.layout-node-form .form-item label,
+.layout-node-form .form-item .label {
+  display: inline-block;
+  padding-bottom: 8px;
+  font-weight: normal;
+}
+.layout-node-form .paragraph-type-label {
+  padding-bottom: 0;
+}
+.layout-node-form  .form-type-radio label,
+.layout-node-form  .form-type-checkbox label {
+  padding-bottom: 0;
+  display: inline;
+}
+
+.layout-region-node-footer__content {
+  border-top: none;
+}
+
+.layout-node-form [type=checkbox],
+.layout-node-form [type=radio] {
+  float: left;
+  top: 0;
+}
+
+.layout-node-form th .paragraphs-actions {
+  margin-right: 0 !important;
+}
+
+.layout-node-form .paragraph-top {
+  align-items: center !important;
+}
+
+.layout-node-form .field-multiple-drag {
+  vertical-align: middle !important;
+}
+
+.layout-node-form .paragraphs-actions > .button + .paragraphs-dropdown {
+  margin: 0 8px !important;
+}
+
+.layout-node-form .form-wrapper .paragraphs-dropdown-action.button,
+.layout-node-form .paragraphs-dropdown-actions input {
+  margin: 0 !important;
+}
+
+.layout-region-node-footer__content .form-actions {
+  display: flex;
+}
+
+.layout-node-form .form-actions>input:last-of-type {
+  margin-right: 0;
+}
+
+.layout-node-form div.description,
+.layout-node-form .form-item .w3-small,
+.layout-node-form .form-item .description {
+  padding: 5px !important;
+  margin: 5px 0 !important;
+  display: block;
+}
+
+.layout-node-form .description ul,
+.layout-node-form .description ul li {
+  list-style: none;
+  margin: 0;
+}
+
+.layout-node-form .description .des-spacer {
+  font-weight: bold;
+}
+
+.layout-region-node-secondary .entity-meta div,
+.layout-region-node-secondary .entity-meta table,
+.layout-region-node-secondary .entity-meta details {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.layout-region-node-secondary .entity-meta summary {
+  padding: 0 !important;
+}
+
+.layout-region-node-secondary .entity-meta > div > div,
+.layout-region-node-secondary .entity-meta > details > div {
+  margin: 0 !important;
+}
+
+.vertical-tabs .w3-panel,
+.vertical-tabs .w3-container,
+.vertical-tabs .w3-section {
+  margin-bottom: 0;
+}
+
+.vertical-tabs .w3-panel,
+.vertical-tabs .w3-container,
+.layout-region-node-secondary .entity-meta details .w3-panel,
+.layout-region-node-secondary .entity-meta .fieldset-wrapper,
+.layout-region-node-secondary .entity-meta fieldset {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.layout-region-node-secondary .entity-meta > details[open] {
+  padding: 8px !important;
+  background-color: #f8f8f8 !important;
+}
+
+.layout-region-node-secondary .entity-meta > details[open] summary ~ * {
+  animation: sweep .5s ease-in-out;
+}
+
+@keyframes sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+}
+
+/* admin pages  */
+.block-system-main-block .modules-tabs {
+  margin-right: 16px;
+  margin-left: 16px;
+  border-color: #eaeaea;
+}
+.modules-tabs__pane {
+  margin: 0 0 0 240px!important;
+  padding: 8px 16px !important;
+  background: #f8f8f8;
+  border-left: 1px solid #eaeaea;
+  width: auto;
+}
+.block-system-main-block .modules-tabs tr td {
+  padding: 5px;
+}
+.system-modules td details {
+  margin: 0!important;
+}
+.system-modules td details summary {
+  padding: 6px 0!important;
+}
+.modules-wrapper .requirements {
+  max-width: 100%;
+}
+
+.modules-wrapper .requirements span {
+  display: inline-block;
+}
+
+.item-list--comma-list:before,
+.item-list--comma-list:after,
+.item-list--comma-list li.w3-panel:after,
+.item-list--comma-list li.w3-panel:before {
+  display: inline-block;
+  clear: none !important;
+}
+
+.admin-requirements {
+  text-align: left;
+}
+
+.item-list--comma-list {
+  display: inline-block;
+}
+
+.item-list--comma-list li {
+  padding: 8px 5px;
+}
+.system-status-report__status-title {
+  padding: 8px!important;
+}
+@media screen and (min-width: 993px) {
+  .system-status-general-info__items {
+    display: flex;
+    overflow-x: hidden;
+    flex-wrap: wrap;
+  }
+
+  .system-status-general-info__item {
+    border-color: #eaeaea;
+    flex: 1;
+    flex-basis: 33%;
+    width: 33%;
+  }
+  .system-status-general-info__item:nth-child(2) {
+    flex: 2;
+    flex-basis: 66%;
+  }
+
+  .system-status-general-info__run-cron {
+    margin: 15px 0 5px;
+  }
+}
+.system-status-report__requirements-group details,
+.system-status-report__requirements-group summary {
+  list-style-type: none;
+}
+.system-status-report__entry__value {
+  padding-top: 0!important;
+}
+.system-status-report__status-icon:before {
+  top: 11px;
+  left: -14px;
+}
+
+.system-status-report__requirements-group details {
+  margin-bottom: 5px!important;
+}
+
+/**
+ * Reusable colors.
+ */
+.color-success {
+  color: #325e1c;
+  background-color: #ddffdd!important;
+}
+.color-warning {
+  color: #734c00;
+  background-color: #ffffcc!important;
+}
+.color-error {
+  color: #a51b00;
+  background-color: #ffdddd!important;
+}
+/* CKE */

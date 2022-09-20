@@ -15,14 +15,28 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
+use Symfony\Component\Serializer\Exception\LogicException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
+use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
+use Symfony\Component\Serializer\Mapping\ClassMetadata;
+use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerAwareInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Tests\Fixtures\AbstractDummy;
+use Symfony\Component\Serializer\Tests\Fixtures\AbstractDummyFirstChild;
+use Symfony\Component\Serializer\Tests\Fixtures\AbstractDummySecondChild;
+use Symfony\Component\Serializer\Tests\Fixtures\DummySecondChildQuux;
 
 class AbstractObjectNormalizerTest extends TestCase
 {
@@ -49,7 +63,7 @@ class AbstractObjectNormalizerTest extends TestCase
 
     public function testDenormalizeWithExtraAttributes()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\ExtraAttributesException');
+        $this->expectException(ExtraAttributesException::class);
         $this->expectExceptionMessage('Extra attributes are not allowed ("fooFoo", "fooBar" are unknown).');
         $factory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
         $normalizer = new AbstractObjectNormalizerDummy($factory);
@@ -63,7 +77,7 @@ class AbstractObjectNormalizerTest extends TestCase
 
     public function testDenormalizeWithExtraAttributesAndNoGroupsWithMetadataFactory()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\ExtraAttributesException');
+        $this->expectException(ExtraAttributesException::class);
         $this->expectExceptionMessage('Extra attributes are not allowed ("fooFoo", "fooBar" are unknown).');
         $normalizer = new AbstractObjectNormalizerWithMetadata();
         $normalizer->denormalize(
@@ -118,7 +132,7 @@ class AbstractObjectNormalizerTest extends TestCase
 
     private function getDenormalizerForDummyCollection()
     {
-        $extractor = $this->getMockBuilder(PhpDocExtractor::class)->getMock();
+        $extractor = $this->createMock(PhpDocExtractor::class);
         $extractor->method('getTypes')
             ->will($this->onConsecutiveCalls(
                 [new Type('array', false, null, true, new Type('int'), new Type('object', false, DummyChild::class))],
@@ -173,7 +187,7 @@ class AbstractObjectNormalizerTest extends TestCase
 
     private function getDenormalizerForStringCollection()
     {
-        $extractor = $this->getMockBuilder(PhpDocExtractor::class)->getMock();
+        $extractor = $this->createMock(PhpDocExtractor::class);
         $extractor->method('getTypes')
             ->will($this->onConsecutiveCalls(
                 [new Type('array', false, null, true, new Type('int'), new Type('string'))],
@@ -189,12 +203,84 @@ class AbstractObjectNormalizerTest extends TestCase
         return $denormalizer;
     }
 
+    public function testDenormalizeWithDiscriminatorMapUsesCorrectClassname()
+    {
+        $factory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+
+        $loaderMock = new class() implements ClassMetadataFactoryInterface {
+            public function getMetadataFor($value): ClassMetadataInterface
+            {
+                if (AbstractDummy::class === $value) {
+                    return new ClassMetadata(
+                        AbstractDummy::class,
+                        new ClassDiscriminatorMapping('type', [
+                            'first' => AbstractDummyFirstChild::class,
+                            'second' => AbstractDummySecondChild::class,
+                        ])
+                    );
+                }
+
+                throw new InvalidArgumentException();
+            }
+
+            public function hasMetadataFor($value): bool
+            {
+                return AbstractDummy::class === $value;
+            }
+        };
+
+        $discriminatorResolver = new ClassDiscriminatorFromClassMetadata($loaderMock);
+        $normalizer = new AbstractObjectNormalizerDummy($factory, null, new PhpDocExtractor(), $discriminatorResolver);
+        $serializer = new Serializer([$normalizer]);
+        $normalizer->setSerializer($serializer);
+        $normalizedData = $normalizer->denormalize(['foo' => 'foo', 'baz' => 'baz', 'quux' => ['value' => 'quux'], 'type' => 'second'], AbstractDummy::class);
+
+        $this->assertInstanceOf(DummySecondChildQuux::class, $normalizedData->quux);
+    }
+
+    public function testDenormalizeWithNestedDiscriminatorMap()
+    {
+        $classDiscriminatorResolver = new class() implements ClassDiscriminatorResolverInterface {
+            public function getMappingForClass(string $class): ?ClassDiscriminatorMapping
+            {
+                switch ($class) {
+                    case AbstractDummy::class:
+                        return new ClassDiscriminatorMapping('type', [
+                            'foo' => AbstractDummyFirstChild::class,
+                        ]);
+                    case AbstractDummyFirstChild::class:
+                        return new ClassDiscriminatorMapping('nested_type', [
+                            'bar' => AbstractDummySecondChild::class,
+                        ]);
+                    default:
+                        return null;
+                }
+            }
+
+            public function getMappingForMappedObject($object): ?ClassDiscriminatorMapping
+            {
+                return null;
+            }
+
+            public function getTypeForMappedObject($object): ?string
+            {
+                return null;
+            }
+        };
+
+        $normalizer = new AbstractObjectNormalizerDummy(null, null, null, $classDiscriminatorResolver);
+
+        $denormalizedData = $normalizer->denormalize(['type' => 'foo', 'nested_type' => 'bar'], AbstractDummy::class);
+
+        $this->assertInstanceOf(AbstractDummySecondChild::class, $denormalizedData);
+    }
+
     /**
      * Test that additional attributes throw an exception if no metadata factory is specified.
      */
     public function testExtraAttributesException()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\LogicException');
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('A class metadata factory must be provided in the constructor when setting "allow_extra_attributes" to false.');
         $normalizer = new ObjectNormalizer();
 
@@ -202,12 +288,25 @@ class AbstractObjectNormalizerTest extends TestCase
             'allow_extra_attributes' => false,
         ]);
     }
+
+    public function testNormalizeEmptyObject()
+    {
+        $normalizer = new AbstractObjectNormalizerDummy();
+
+        // This results in objects turning into arrays in some encoders
+        $normalizedData = $normalizer->normalize(new EmptyDummy());
+        $this->assertEquals([], $normalizedData);
+
+        $normalizedData = $normalizer->normalize(new EmptyDummy(), 'any', ['preserve_empty_objects' => true]);
+        $this->assertEquals(new \ArrayObject(), $normalizedData);
+    }
 }
 
 class AbstractObjectNormalizerDummy extends AbstractObjectNormalizer
 {
-    protected function extractAttributes($object, $format = null, array $context = [])
+    protected function extractAttributes($object, $format = null, array $context = []): array
     {
+        return [];
     }
 
     protected function getAttributeValue($object, $attribute, $format = null, array $context = [])
@@ -219,12 +318,15 @@ class AbstractObjectNormalizerDummy extends AbstractObjectNormalizer
         $object->$attribute = $value;
     }
 
-    protected function isAllowedAttribute($classOrObject, $attribute, $format = null, array $context = [])
+    protected function isAllowedAttribute($classOrObject, $attribute, $format = null, array $context = []): bool
     {
-        return \in_array($attribute, ['foo', 'baz']);
+        return \in_array($attribute, ['foo', 'baz', 'quux', 'value']);
     }
 
-    public function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, $format = null)
+    /**
+     * @return object
+     */
+    public function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, string $format = null)
     {
         return parent::instantiateObject($data, $class, $context, $reflectionClass, $allowedAttributes, $format);
     }
@@ -237,6 +339,10 @@ class Dummy
     public $baz;
 }
 
+class EmptyDummy
+{
+}
+
 class AbstractObjectNormalizerWithMetadata extends AbstractObjectNormalizer
 {
     public function __construct()
@@ -244,7 +350,7 @@ class AbstractObjectNormalizerWithMetadata extends AbstractObjectNormalizer
         parent::__construct(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
     }
 
-    protected function extractAttributes($object, $format = null, array $context = [])
+    protected function extractAttributes($object, $format = null, array $context = []): array
     {
     }
 
@@ -287,7 +393,7 @@ class SerializerCollectionDummy implements SerializerInterface, DenormalizerInte
         $this->normalizers = $normalizers;
     }
 
-    public function serialize($data, $format, array $context = [])
+    public function serialize($data, $format, array $context = []): string
     {
     }
 
@@ -306,7 +412,7 @@ class SerializerCollectionDummy implements SerializerInterface, DenormalizerInte
         return null;
     }
 
-    public function supportsDenormalization($data, $type, $format = null)
+    public function supportsDenormalization($data, $type, $format = null): bool
     {
         return true;
     }
@@ -314,7 +420,7 @@ class SerializerCollectionDummy implements SerializerInterface, DenormalizerInte
 
 class AbstractObjectNormalizerCollectionDummy extends AbstractObjectNormalizer
 {
-    protected function extractAttributes($object, $format = null, array $context = [])
+    protected function extractAttributes($object, $format = null, array $context = []): array
     {
     }
 
@@ -327,12 +433,15 @@ class AbstractObjectNormalizerCollectionDummy extends AbstractObjectNormalizer
         $object->$attribute = $value;
     }
 
-    protected function isAllowedAttribute($classOrObject, $attribute, $format = null, array $context = [])
+    protected function isAllowedAttribute($classOrObject, $attribute, $format = null, array $context = []): bool
     {
         return true;
     }
 
-    public function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, $format = null)
+    /**
+     * @return object
+     */
+    public function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, string $format = null)
     {
         return parent::instantiateObject($data, $class, $context, $reflectionClass, $allowedAttributes, $format);
     }
@@ -373,9 +482,9 @@ class ArrayDenormalizerDummy implements DenormalizerInterface, SerializerAwareIn
     /**
      * {@inheritdoc}
      */
-    public function supportsDenormalization($data, $type, $format = null, array $context = [])
+    public function supportsDenormalization($data, $type, $format = null, array $context = []): bool
     {
-        return '[]' === substr($type, -2)
+        return str_ends_with($type, '[]')
             && $this->serializer->supportsDenormalization($data, substr($type, 0, -2), $format, $context);
     }
 

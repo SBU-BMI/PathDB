@@ -12,6 +12,7 @@
 namespace Symfony\Component\Validator\Tests\Mapping;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Validator\Exception\ValidatorException;
 use Symfony\Component\Validator\Mapping\PropertyMetadata;
 use Symfony\Component\Validator\Tests\Fixtures\Entity;
 use Symfony\Component\Validator\Tests\Fixtures\Entity_74;
@@ -19,14 +20,14 @@ use Symfony\Component\Validator\Tests\Fixtures\Entity_74_Proxy;
 
 class PropertyMetadataTest extends TestCase
 {
-    const CLASSNAME = 'Symfony\Component\Validator\Tests\Fixtures\Entity';
-    const CLASSNAME_74 = 'Symfony\Component\Validator\Tests\Fixtures\Entity_74';
-    const CLASSNAME_74_PROXY = 'Symfony\Component\Validator\Tests\Fixtures\Entity_74_Proxy';
-    const PARENTCLASS = 'Symfony\Component\Validator\Tests\Fixtures\EntityParent';
+    private const CLASSNAME = 'Symfony\Component\Validator\Tests\Fixtures\Entity';
+    private const CLASSNAME_74 = 'Symfony\Component\Validator\Tests\Fixtures\Entity_74';
+    private const CLASSNAME_74_PROXY = 'Symfony\Component\Validator\Tests\Fixtures\Entity_74_Proxy';
+    private const PARENTCLASS = 'Symfony\Component\Validator\Tests\Fixtures\EntityParent';
 
     public function testInvalidPropertyName()
     {
-        $this->expectException('Symfony\Component\Validator\Exception\ValidatorException');
+        $this->expectException(ValidatorException::class);
 
         new PropertyMetadata(self::CLASSNAME, 'foobar');
     }
@@ -54,7 +55,7 @@ class PropertyMetadataTest extends TestCase
         $metadata = new PropertyMetadata(self::CLASSNAME, 'internal');
         $metadata->name = 'test';
 
-        $this->expectException('Symfony\Component\Validator\Exception\ValidatorException');
+        $this->expectException(ValidatorException::class);
         $metadata->getPropertyValue($entity);
     }
 

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_servers\Form;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -23,14 +24,14 @@ class ServerEnableDisableForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_servers_enable_disable_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getQuestion() {
+  public function getQuestion(): TranslatableMarkup {
     return $this->t('Are you sure you want to disable/enable entity %name?', ['%name' => $this->entity->label()]);
   }
 
@@ -39,26 +40,25 @@ class ServerEnableDisableForm extends EntityConfirmFormBase {
    *
    * If the delete command is canceled, return to the overview page.
    */
-  public function getCancelUrl() {
+  public function getCancelUrl(): Url {
     return new Url('entity.ldap_server.collection');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getConfirmText() {
-    if ($this->entity->get('status') === 1) {
+  public function getConfirmText(): TranslatableMarkup {
+    if ($this->entity->get('status') == 1) {
       return $this->t('Disable');
     }
-    else {
-      return $this->t('Enable');
-    }
+
+    return $this->t('Enable');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->entity->set('status', !$this->entity->get('status'));
     $this->entity->save();
 

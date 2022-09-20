@@ -9,7 +9,7 @@ dependencies:
 
 configure: entity.ldap_query_entity.collection
 
-# Information added by Drupal.org packaging script on 2021-05-16
-version: '8.x-4.0-beta3'
+# Information added by Drupal.org packaging script on 2022-01-05
+version: '8.x-4.3'
 project: 'ldap'
-datestamp: 1621188711
+datestamp: 1641412023

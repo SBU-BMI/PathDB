@@ -14,6 +14,7 @@ namespace Symfony\Component\DependencyInjection\Tests\Loader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
 
 class IniFileLoaderTest extends TestCase
@@ -21,7 +22,7 @@ class IniFileLoaderTest extends TestCase
     protected $container;
     protected $loader;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->container = new ContainerBuilder();
         $this->loader = new IniFileLoader($this->container, new FileLocator(realpath(__DIR__.'/../Fixtures/').'/ini'));
@@ -45,15 +46,10 @@ class IniFileLoaderTest extends TestCase
 
     /**
      * @dataProvider getTypeConversions
-     * @requires PHP 5.6.1
      * This test illustrates where our conversions differs from INI_SCANNER_TYPED introduced in PHP 5.6.1
      */
     public function testTypeConversionsWithNativePhp($key, $value, $supported)
     {
-        if (\defined('HHVM_VERSION_ID')) {
-            $this->markTestSkipped();
-        }
-
         if (!$supported) {
             $this->markTestSkipped(sprintf('Converting the value "%s" to "%s" is not supported by the IniFileLoader.', $key, $value));
         }
@@ -97,21 +93,21 @@ class IniFileLoaderTest extends TestCase
 
     public function testExceptionIsRaisedWhenIniFileDoesNotExist()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('The file "foo.ini" does not exist (in:');
         $this->loader->load('foo.ini');
     }
 
     public function testExceptionIsRaisedWhenIniFileCannotBeParsed()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The "nonvalid.ini" file is not valid.');
         @$this->loader->load('nonvalid.ini');
     }
 
     public function testExceptionIsRaisedWhenIniFileIsAlmostValid()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The "almostvalid.ini" file is not valid.');
         @$this->loader->load('almostvalid.ini');
     }

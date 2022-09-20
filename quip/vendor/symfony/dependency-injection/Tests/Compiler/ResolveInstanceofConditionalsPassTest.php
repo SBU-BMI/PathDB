@@ -12,11 +12,18 @@
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Resource\ResourceInterface;
+use Symfony\Component\Config\ResourceCheckerInterface;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveInstanceofConditionalsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Contracts\Service\ResetInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 class ResolveInstanceofConditionalsPassTest extends TestCase
 {
@@ -30,7 +37,7 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
 
         (new ResolveInstanceofConditionalsPass())->process($container);
 
-        $parent = 'instanceof.'.parent::class.'.0.foo';
+        $parent = '.instanceof.'.parent::class.'.0.foo';
         $def = $container->getDefinition('foo');
         $this->assertEmpty($def->getInstanceofConditionals());
         $this->assertInstanceOf(ChildDefinition::class, $def);
@@ -174,7 +181,7 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
 
     public function testBadInterfaceThrowsException()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\RuntimeException');
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('"App\FakeInterface" is set as an "instanceof" conditional, but it does not exist.');
         $container = new ContainerBuilder();
         $def = $container->register('normal_service', self::class);
@@ -198,20 +205,40 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
         $this->assertTrue($container->hasDefinition('normal_service'));
     }
 
-    public function testProcessThrowsExceptionForAutoconfiguredCalls()
+    /**
+     * Test that autoconfigured calls are handled gracefully.
+     */
+    public function testProcessForAutoconfiguredCalls()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
-        $this->expectExceptionMessageMatches('/Autoconfigured instanceof for type "PHPUnit[\\\\_]Framework[\\\\_]TestCase" defines method calls but these are not supported and should be removed\./');
         $container = new ContainerBuilder();
-        $container->registerForAutoconfiguration(parent::class)
-            ->addMethodCall('setFoo');
+
+        $expected = [
+            ['setFoo', [
+                'plain_value',
+                '%some_parameter%',
+            ]],
+            ['callBar', []],
+            ['isBaz', []],
+        ];
+
+        $container->registerForAutoconfiguration(parent::class)->addMethodCall('setFoo', $expected[0][1]);
+        $container->registerForAutoconfiguration(self::class)->addMethodCall('callBar');
+
+        $def = $container->register('foo', self::class)->setAutoconfigured(true)->addMethodCall('isBaz');
+        $this->assertEquals(
+            [['isBaz', []]],
+            $def->getMethodCalls(),
+            'Definition shouldn\'t have only one method call.'
+        );
 
         (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $this->assertEquals($expected, $container->findDefinition('foo')->getMethodCalls());
     }
 
     public function testProcessThrowsExceptionForArguments()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Autoconfigured instanceof for type "PHPUnit[\\\\_]Framework[\\\\_]TestCase" defines arguments but these are not supported and should be removed\./');
         $container = new ContainerBuilder();
         $container->registerForAutoconfiguration(parent::class)
@@ -237,7 +264,7 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
 
         (new ResolveInstanceofConditionalsPass())->process($container);
 
-        $abstract = $container->getDefinition('abstract.instanceof.bar');
+        $abstract = $container->getDefinition('.abstract.instanceof.bar');
 
         $this->assertEmpty($abstract->getArguments());
         $this->assertEmpty($abstract->getMethodCalls());
@@ -246,7 +273,30 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
         $this->assertTrue($abstract->isAbstract());
     }
 
-    public function testBindings()
+    public function testProcessForAutoconfiguredBindings()
+    {
+        $container = new ContainerBuilder();
+
+        $container->registerForAutoconfiguration(self::class)
+            ->setBindings([
+                '$foo' => new BoundArgument(234, false),
+                parent::class => new BoundArgument(new Reference('foo'), false),
+            ]);
+
+        $container->register('foo', self::class)
+            ->setAutoconfigured(true)
+            ->setBindings(['$foo' => new BoundArgument(123, false)]);
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $expected = [
+            '$foo' => new BoundArgument(123, false),
+            parent::class => new BoundArgument(new Reference('foo'), false),
+        ];
+        $this->assertEquals($expected, $container->findDefinition('foo')->getBindings());
+    }
+
+    public function testBindingsOnInstanceofConditionals()
     {
         $container = new ContainerBuilder();
         $def = $container->register('foo', self::class)->setBindings(['$toto' => 123]);
@@ -258,5 +308,83 @@ class ResolveInstanceofConditionalsPassTest extends TestCase
         $this->assertSame(['$toto'], array_keys($bindings));
         $this->assertInstanceOf(BoundArgument::class, $bindings['$toto']);
         $this->assertSame(123, $bindings['$toto']->getValues()[0]);
+    }
+
+    public function testDecoratorsAreNotAutomaticallyTagged()
+    {
+        $container = new ContainerBuilder();
+
+        $decorator = $container->register('decorator', self::class);
+        $decorator->setDecoratedService('decorated');
+        $decorator->setInstanceofConditionals([
+            parent::class => (new ChildDefinition(''))->addTag('tag'),
+        ]);
+        $decorator->setAutoconfigured(true);
+        $decorator->addTag('manual');
+
+        $container->registerForAutoconfiguration(parent::class)
+            ->addTag('tag')
+        ;
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+        (new ResolveChildDefinitionsPass())->process($container);
+
+        $this->assertSame(['manual' => [[]]], $container->getDefinition('decorator')->getTags());
+    }
+
+    public function testDecoratorsKeepBehaviorDescribingTags()
+    {
+        $container = new ContainerBuilder();
+
+        $container->setParameter('container.behavior_describing_tags', [
+            'container.service_subscriber',
+            'kernel.reset',
+        ]);
+
+        $container->register('decorator', DecoratorWithBehavior::class)
+            ->setAutoconfigured(true)
+            ->setDecoratedService('decorated')
+        ;
+
+        $container->registerForAutoconfiguration(ResourceCheckerInterface::class)
+            ->addTag('config_cache.resource_checker')
+        ;
+        $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)
+            ->addTag('container.service_subscriber')
+        ;
+        $container->registerForAutoconfiguration(ResetInterface::class)
+            ->addTag('kernel.reset', ['method' => 'reset'])
+        ;
+
+        (new ResolveInstanceofConditionalsPass())->process($container);
+
+        $this->assertEquals([
+            'container.service_subscriber' => [0 => []],
+            'kernel.reset' => [
+                [
+                    'method' => 'reset',
+                ],
+            ],
+        ], $container->getDefinition('decorator')->getTags());
+        $this->assertFalse($container->hasParameter('container.behavior_describing_tags'));
+    }
+}
+
+class DecoratorWithBehavior implements ResetInterface, ResourceCheckerInterface, ServiceSubscriberInterface
+{
+    public function reset()
+    {
+    }
+
+    public function supports(ResourceInterface $metadata)
+    {
+    }
+
+    public function isFresh(ResourceInterface $resource, $timestamp)
+    {
+    }
+
+    public static function getSubscribedServices()
+    {
     }
 }

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization\Form;
 
+use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -12,7 +15,7 @@ use Drupal\authorization\Provider\ProviderPluginManager;
 use Drupal\authorization\Consumer\ConsumerPluginManager;
 
 /**
- * Class AuthorizationProfileForm.
+ * Authorization profile form.
  *
  * @package Drupal\authorization\Form
  */
@@ -47,6 +50,13 @@ class AuthorizationProfileForm extends EntityForm {
   protected $consumer;
 
   /**
+   * Storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $storage;
+
+  /**
    * Constructs a AuthorizationProfileForm object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -56,7 +66,11 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\authorization\Consumer\ConsumerPluginManager $consumer_plugin_manager
    *   The Consumer plugin manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ProviderPluginManager $provider_plugin_manager, ConsumerPluginManager $consumer_plugin_manager) {
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    ProviderPluginManager $provider_plugin_manager,
+    ConsumerPluginManager $consumer_plugin_manager
+  ) {
     $this->storage = $entity_type_manager->getStorage('authorization_profile');
     $this->providerPluginManager = $provider_plugin_manager;
     $this->consumerPluginManager = $consumer_plugin_manager;
@@ -79,7 +93,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return \Drupal\authorization\Entity\AuthorizationProfile
    *   Authorization profile.
    */
-  public function getEntity() {
+  public function getEntity(): AuthorizationProfile {
     return parent::getEntity();
   }
 
@@ -89,7 +103,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return \Drupal\authorization\Provider\ProviderPluginManager
    *   The Provider plugin manager.
    */
-  protected function getProviderPluginManager() {
+  protected function getProviderPluginManager(): ProviderPluginManager {
     return $this->providerPluginManager;
   }
 
@@ -99,14 +113,14 @@ class AuthorizationProfileForm extends EntityForm {
    * @return \Drupal\authorization\Consumer\ConsumerPluginManager
    *   The Consumer plugin manager.
    */
-  protected function getConsumerPluginManager() {
+  protected function getConsumerPluginManager(): ConsumerPluginManager {
     return $this->consumerPluginManager;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, FormStateInterface $form_state) {
+  public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
 
     $this->buildEntityForm($form, $form_state);
@@ -132,7 +146,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   Form state.
    */
-  public function buildEntityForm(array &$form, FormStateInterface $form_state) {
+  public function buildEntityForm(array &$form, FormStateInterface $form_state): void {
     $authorization_profile = $this->getEntity();
 
     $form['label'] = [
@@ -161,7 +175,7 @@ class AuthorizationProfileForm extends EntityForm {
 
     $provider_options = $this->getProviderOptions();
     if ($provider_options) {
-      if (count($provider_options) == 1) {
+      if (count($provider_options) === 1) {
         $authorization_profile->set('provider', key($provider_options));
       }
 
@@ -229,7 +243,7 @@ class AuthorizationProfileForm extends EntityForm {
    *   An associative array mapping Provider plugin IDs to their (HTML-escaped)
    *   labels.
    */
-  protected function getProviderOptions() {
+  protected function getProviderOptions(): array {
     $options = [];
     foreach ($this->getProviderPluginManager()->getDefinitions() as $plugin_id => $plugin_definition) {
       $options[$plugin_id] = Html::escape($plugin_definition['label']);
@@ -245,7 +259,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  private function buildProviderConfigForm(array &$form, FormStateInterface $form_state) {
+  private function buildProviderConfigForm(array &$form, FormStateInterface $form_state): void {
     $authorization_profile = $this->getEntity();
 
     $form['provider_config'] = [
@@ -288,7 +302,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  private function buildConsumerConfigForm(array &$form, FormStateInterface $form_state) {
+  private function buildConsumerConfigForm(array &$form, FormStateInterface $form_state): void {
     $authorization_profile = $this->getEntity();
 
     $form['consumer_config'] = [
@@ -330,7 +344,7 @@ class AuthorizationProfileForm extends EntityForm {
    *   An associative array mapping Consumer plugin IDs to their (HTML-escaped)
    *   labels.
    */
-  protected function getConsumerOptions() {
+  protected function getConsumerOptions(): array {
     $options = [];
     foreach ($this->getConsumerPluginManager()->getDefinitions() as $plugin_id => $plugin_definition) {
       $options[$plugin_id] = Html::escape($plugin_definition['label']);
@@ -349,7 +363,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return array
    *   Returns the form.
    */
-  public static function buildAjaxProviderConfigForm(array $form, FormStateInterface $form_state) {
+  public static function buildAjaxProviderConfigForm(array $form, FormStateInterface $form_state): array {
     // The work is already done in form(), where we rebuild the entity according
     // to the current form values and then create the provider configuration
     // form based on that. So we just need to return the relevant part of the
@@ -368,7 +382,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return array
    *   Returns the provider mappings.
    */
-  public static function buildAjaxProviderRowForm(array $form, FormStateInterface $form_state) {
+  public static function buildAjaxProviderRowForm(array $form, FormStateInterface $form_state): array {
     return $form['provider_mappings'];
   }
 
@@ -383,7 +397,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return array
    *   Returns the form.
    */
-  public static function buildAjaxConsumerConfigForm(array $form, FormStateInterface $form_state) {
+  public static function buildAjaxConsumerConfigForm(array $form, FormStateInterface $form_state): array {
     // The work is already done in form(), where we rebuild the entity according
     // to the current form values and then create the consumer configuration
     // form based on that. So we just need to return the relevant part of the
@@ -402,7 +416,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return array
    *   Returns the consumer mappings in the form.
    */
-  public static function buildAjaxConsumerRowForm(array $form, FormStateInterface $form_state) {
+  public static function buildAjaxConsumerRowForm(array $form, FormStateInterface $form_state): array {
     return $form['consumer_mappings'];
   }
 
@@ -414,7 +428,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  private function buildConditionsForm(array &$form, FormStateInterface $form_state) {
+  private function buildConditionsForm(array &$form, FormStateInterface $form_state): void {
     $authorization_profile = $this->getEntity();
 
     if (!$authorization_profile->hasValidProvider() || !$authorization_profile->hasValidConsumer()) {
@@ -477,7 +491,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  private function buildMappingForm(array &$form, FormStateInterface $form_state) {
+  private function buildMappingForm(array &$form, FormStateInterface $form_state): void {
     $authorization_profile = $this->getEntity();
 
     if (($authorization_profile->hasValidProvider() || $form_state->getValue('provider')) &&
@@ -550,7 +564,7 @@ class AuthorizationProfileForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     parent::validateForm($form, $form_state);
     $authorization_profile = $this->getEntity();
 
@@ -560,7 +574,7 @@ class AuthorizationProfileForm extends EntityForm {
       $input['provider_config'] = [];
       $form_state->set('input', $input);
     }
-    elseif ($form['provider_config']['#type'] == 'details' && $authorization_profile->hasValidProvider()) {
+    elseif ($form['provider_config']['#type'] === 'details' && $authorization_profile->hasValidProvider()) {
       $provider_form_state = new SubFormState($form_state, ['provider_config']);
       $authorization_profile->getProvider()->validateConfigurationForm($form['provider_config'], $provider_form_state);
     }
@@ -571,7 +585,7 @@ class AuthorizationProfileForm extends EntityForm {
       $input['consumer_config'] = [];
       $form_state->set('input', $input);
     }
-    elseif ($form['consumer_config']['#type'] == 'details' && $authorization_profile->hasValidConsumer()) {
+    elseif ($form['consumer_config']['#type'] === 'details' && $authorization_profile->hasValidConsumer()) {
       $consumer_form_state = new SubFormState($form_state, ['consumer_config']);
       $authorization_profile->getConsumer()->validateConfigurationForm($form['consumer_config'], $consumer_form_state);
     }
@@ -592,12 +606,12 @@ class AuthorizationProfileForm extends EntityForm {
     $authorization_profile = $this->getEntity();
 
     // Check before loading the provider plugin so we don't throw an exception.
-    if ($form['provider_config']['#type'] == 'details' && $authorization_profile->hasValidProvider()) {
+    if ($form['provider_config']['#type'] === 'details' && $authorization_profile->hasValidProvider()) {
       $provider_form_state = new SubFormState($form_state, ['provider_config']);
       $authorization_profile->getProvider()->submitConfigurationForm($form['provider_config'], $provider_form_state);
     }
     // Check before loading the consumer plugin so we don't throw an exception.
-    if ($form['consumer_config']['#type'] == 'details' && $authorization_profile->hasValidConsumer()) {
+    if ($form['consumer_config']['#type'] === 'details' && $authorization_profile->hasValidConsumer()) {
       $consumer_form_state = new SubFormState($form_state, ['consumer_config']);
       $authorization_profile->getConsumer()->submitConfigurationForm($form['consumer_config'], $consumer_form_state);
     }
@@ -639,7 +653,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return array
    *   Transformed array.
    */
-  private function extractArrayByName(array $data, $name) {
+  private function extractArrayByName(array $data, $name): array {
     $mapping = [];
     foreach ($data as $value) {
       if (isset($value[$name])) {
@@ -652,7 +666,7 @@ class AuthorizationProfileForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, FormStateInterface $form_state) {
+  public function save(array $form, FormStateInterface $form_state): void {
     $authorization_profile = $this->entity;
     $status = $authorization_profile->save();
 
@@ -682,7 +696,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @return array
    *   The form element we are changing via ajax
    */
-  public function mappingsAjaxCallback(array &$form, FormStateInterface $form_state) {
+  public function mappingsAjaxCallback(array &$form, FormStateInterface $form_state): array {
     return $form['mappings'];
   }
 
@@ -694,7 +708,7 @@ class AuthorizationProfileForm extends EntityForm {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state, passed by reference so we can modify.
    */
-  public function mappingsAddAnother(array &$form, FormStateInterface $form_state) {
+  public function mappingsAddAnother(array &$form, FormStateInterface $form_state): void {
     $form_state->set('mappings_fields', ($form_state->get('mappings_fields') + 1));
     $form_state->setRebuild();
   }

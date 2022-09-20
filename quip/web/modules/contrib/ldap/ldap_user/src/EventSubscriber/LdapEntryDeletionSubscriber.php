@@ -59,8 +59,10 @@ class LdapEntryDeletionSubscriber implements EventSubscriberInterface, LdapUserA
 
   /**
    * {@inheritdoc}
+   *
+   * @uses LdapEntryDeletionSubscriber::deleteProvisionedLdapEntry()
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[LdapUserDeletedEvent::EVENT_NAME] = ['deleteProvisionedLdapEntry'];
     return $events;
   }
@@ -70,14 +72,16 @@ class LdapEntryDeletionSubscriber implements EventSubscriberInterface, LdapUserA
    *
    * Given a Drupal account, delete LDAP entry that was provisioned based on it.
    * This is usually none or one entry but the ldap_user_prov_entries field
-   * supports multiple and thus we are looping through them.
+   * supports multiple, and thus we are looping through them.
    *
    * @param \Drupal\ldap_user\Event\LdapUserDeletedEvent $event
    *   Event.
    */
   public function deleteProvisionedLdapEntry(LdapUserDeletedEvent $event): void {
-    if ($this->config->get('ldapEntryProvisionServer') &&
-    in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE, $this->config->get('ldapEntryProvisionTriggers'))) {
+    if (
+      $this->config->get('ldapEntryProvisionServer') &&
+      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE, $this->config->get('ldapEntryProvisionTriggers'), TRUE)
+    ) {
       /** @var \Drupal\user\Entity\User $account */
       $account = $event->account;
       // Determine server that is associated with user.
@@ -85,7 +89,7 @@ class LdapEntryDeletionSubscriber implements EventSubscriberInterface, LdapUserA
       foreach ($entries as $entry) {
         $parts = explode('|', $entry['value']);
         if (count($parts) === 2) {
-          list($sid, $dn) = $parts;
+          [$sid, $dn] = $parts;
           $tokens = [
             '%sid' => $sid,
             '%dn' => $dn,

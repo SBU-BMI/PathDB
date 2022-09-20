@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\Serializer\Tests\Normalizer;
 
 use PHPUnit\Framework\MockObject\MockObject;
@@ -8,7 +17,9 @@ use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Mapping\AttributeMetadata;
 use Symfony\Component\Serializer\Mapping\ClassMetadata;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
+use Symfony\Component\Serializer\Mapping\Loader\LoaderChain;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
@@ -16,7 +27,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Tests\Fixtures\AbstractNormalizerDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\Dummy;
 use Symfony\Component\Serializer\Tests\Fixtures\NullableConstructorArgumentDummy;
-use Symfony\Component\Serializer\Tests\Fixtures\ProxyDummy;
+use Symfony\Component\Serializer\Tests\Fixtures\NullableOptionalConstructorArgumentDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\StaticConstructorDummy;
 use Symfony\Component\Serializer\Tests\Fixtures\StaticConstructorNormalizer;
 use Symfony\Component\Serializer\Tests\Fixtures\VariadicConstructorTypedArgsDummy;
@@ -34,14 +45,14 @@ class AbstractNormalizerTest extends TestCase
     private $normalizer;
 
     /**
-     * @var ClassMetadataFactoryInterface|MockObject
+     * @var MockObject&ClassMetadataFactoryInterface
      */
     private $classMetadata;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $loader = $this->getMockBuilder('Symfony\Component\Serializer\Mapping\Loader\LoaderChain')->setConstructorArgs([[]])->getMock();
-        $this->classMetadata = $this->getMockBuilder('Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory')->setConstructorArgs([$loader])->getMock();
+        $loader = $this->getMockBuilder(LoaderChain::class)->setConstructorArgs([[]])->getMock();
+        $this->classMetadata = $this->getMockBuilder(ClassMetadataFactory::class)->setConstructorArgs([$loader])->getMock();
         $this->normalizer = new AbstractNormalizerDummy($this->classMetadata);
     }
 
@@ -99,20 +110,11 @@ class AbstractNormalizerTest extends TestCase
         $result = $this->normalizer->getAllowedAttributes('c', [AbstractNormalizer::GROUPS => ['test']], false);
         $this->assertEquals([$a2, $a4], $result);
 
+        $result = $this->normalizer->getAllowedAttributes('c', [AbstractNormalizer::GROUPS => 'test'], false);
+        $this->assertEquals([$a2, $a4], $result);
+
         $result = $this->normalizer->getAllowedAttributes('c', [AbstractNormalizer::GROUPS => ['other']], false);
         $this->assertEquals([$a3, $a4], $result);
-    }
-
-    public function testObjectToPopulateWithProxy()
-    {
-        $proxyDummy = new ProxyDummy();
-
-        $context = [AbstractNormalizer::OBJECT_TO_POPULATE => $proxyDummy];
-
-        $normalizer = new ObjectNormalizer();
-        $normalizer->denormalize(['foo' => 'bar'], 'Symfony\Component\Serializer\Tests\Fixtures\ToBeProxyfiedDummy', null, $context);
-
-        $this->assertSame('bar', $proxyDummy->getFoo());
     }
 
     public function testObjectWithStaticConstructor()
@@ -125,10 +127,23 @@ class AbstractNormalizerTest extends TestCase
         $this->assertNull($dummy->foo);
     }
 
-    /**
-     * @requires PHP 7.1
-     */
     public function testObjectWithNullableConstructorArgument()
+    {
+        $normalizer = new ObjectNormalizer();
+        $dummy = $normalizer->denormalize(['foo' => null], NullableOptionalConstructorArgumentDummy::class);
+
+        $this->assertNull($dummy->getFoo());
+    }
+
+    public function testObjectWithNullableConstructorArgumentWithoutInput()
+    {
+        $normalizer = new ObjectNormalizer();
+        $dummy = $normalizer->denormalize([], NullableOptionalConstructorArgumentDummy::class);
+
+        $this->assertNull($dummy->getFoo());
+    }
+
+    public function testObjectWithNullableNonOptionalConstructorArgument()
     {
         $normalizer = new ObjectNormalizer();
         $dummy = $normalizer->denormalize(['foo' => null], NullableConstructorArgumentDummy::class);
@@ -136,10 +151,16 @@ class AbstractNormalizerTest extends TestCase
         $this->assertNull($dummy->getFoo());
     }
 
+    public function testObjectWithNullableNonOptionalConstructorArgumentWithoutInput()
+    {
+        $normalizer = new ObjectNormalizer();
+        $dummy = $normalizer->denormalize([], NullableConstructorArgumentDummy::class);
+
+        $this->assertNull($dummy->getFoo());
+    }
+
     /**
      * @dataProvider getNormalizer
-     *
-     * @requires PHP 5.6
      */
     public function testObjectWithVariadicConstructorTypedArguments(AbstractNormalizer $normalizer)
     {

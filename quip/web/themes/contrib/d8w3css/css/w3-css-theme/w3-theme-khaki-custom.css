@@ -2,6 +2,7 @@
 .w3-active-pager {
   background-color: #fefef8 !important;
 }
+.w3-hover-over:hover,
 .w3-button:hover {
   /* w3-theme-l4 background color */
   background-color: #fcfae8 !important;

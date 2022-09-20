@@ -1,7 +1,7 @@
 INTRODUCTION:
 --------------------------------------------------------------------------------
 
-Drupal8 W3CSS Theme is using the W3.CSS framework with built-in responsiveness:
+W3CSS Theme is using the W3.CSS framework with built-in responsiveness:
 - Smaller and faster than other CSS frameworks.
 - Easier to learn, and easier to use than other CSS frameworks.
 - Uses standard CSS only (No jQuery or JavaScript library).
@@ -28,10 +28,10 @@ W3CSS Theme and click on Install and set as default and click save.
 
 FEATURES:
 --------------------------------------------------------------------------------
-1- Drupal8 W3CSS Theme is using the W3.CSS framework with built-in
+1- W3CSS Theme is using the W3.CSS framework with built-in
 responsiveness
 
-2- Drupal8 W3CSS Theme has 22 regions.
+2- W3CSS Theme has 22 regions.
 
 - Regions Will show on ALL pages: Header, Primary Menu Vertical, Primary Menu,
 Highlighted, Breadcrumb, Content, Left Sidebar, Right Sidebar, Footer First
@@ -44,62 +44,62 @@ Container.
 Top Second Container, Top Third Container, Bottom First Container, Bottom Second
 Container, Bottom Third Container and Bottom Forth Container.
 
-3- Drupal8 W3CSS Theme has 26 sections with changeable colors. With ww3.css
+3- W3CSS Theme has 26 sections with changeable colors. With ww3.css
 frameworks you can change the background color, text color, text shadow and more
  to any section in your website.  Just simply apply the w3.css class to the
  section.
 
-4- Drupal8 W3CSS Theme comes with ability to change the site width. Just apply
+4- W3CSS Theme comes with ability to change the site width. Just apply
 any of these per-configured classes to your website. (w3-width-100-percent,
 w3-width-2560, w3-width-1920, w3-width-1600, w3-width-1360, w3-width-1280,
 w3-width-1024 and w3-width-800).
 
-5- Drupal8 W3CSS Theme comes with horizontal main menu or vertical side nav.
+5- W3CSS Theme comes with horizontal main menu or vertical side nav.
 Simply add the main menu to the horizontal region or the vertical region.
 
-6- Drupal8 W3CSS Theme comes with 22 predefined w3css theme.  Simply insert the
+6- W3CSS Theme comes with 22 predefined w3css theme.  Simply insert the
 name of any of the predefined theme.
 
-7- Drupal8 W3CSS Theme comes with 6 color libraries. (US Highway Colors, US
+7- W3CSS Theme comes with 6 color libraries. (US Highway Colors, US
 Safety Colors, Camouflage Colors, Vivid Colors, European Signal Colors and Food
 Colors). You can create unlimited color themes.
 
-8- Drupal8 W3CSS Theme comes with ability to create your own private w3.css
+8- W3CSS Theme comes with ability to create your own private w3.css
 theme and apply it to your site.
 
-9- Drupal8 W3CSS Theme comes with 8 social media links easy to configure.
+9- W3CSS Theme comes with 8 social media links easy to configure.
 
-10- Drupal8 W3CSS Theme has a top region that includes three flexible regions.
+10- W3CSS Theme has a top region that includes three flexible regions.
 (The total space in the top region will be divided by the number of regions you
 filled.)
 
-11- Drupal8 W3CSS Theme has a bottom region that includes four flexible regions.
+11- W3CSS Theme has a bottom region that includes four flexible regions.
 (The total space in the bottom region will be divided by the number of regions
 you filled.)
 
-12- Drupal8 W3CSS Theme has a footer region that includes three flexible
+12- W3CSS Theme has a footer region that includes three flexible
 regions. (The total space in the footer region will be divided by the number of
 regions you filled.)
 
-13- Drupal8 W3CSS Theme comes with font awesome added to the css library.
+13- W3CSS Theme comes with font awesome added to the css library.
 
-14- Drupal8 W3CSS Theme comes with jQuery match height. Example, if you have
+14- W3CSS Theme comes with jQuery match height. Example, if you have
 three blocks in the top area, they will always have the height in any width.
 
-15- Drupal8 W3CSS Theme comes responsive main menu and a drop-down menu.
+15- W3CSS Theme comes responsive main menu and a drop-down menu.
 The drop-down works on hover for big screen and on click for small screen.
 
-16- Drupal8 W3CSS Theme will hide completely (divs, wrappers, classes) any
+16- W3CSS Theme will hide completely (divs, wrappers, classes) any
 region you don't use.  Nothing will be printed in the back.
 
-17- Drupal8 W3CSS Theme uses the minimum HTML structure to show the content.
+17- W3CSS Theme uses the minimum HTML structure to show the content.
 Example, You will not see div > div > div > div > div.
 
-18- Drupal8 W3CSS Theme comes with the ability to create a custom page template
+18- W3CSS Theme comes with the ability to create a custom page template
 according to content type's name.  If you have two content types article and
 video you can have page--article.html.twig and page--video.html.twig
 
-19- Drupal8 W3CSS Theme comes with the ability to create a custom page template
+19- W3CSS Theme comes with the ability to create a custom page template
 for any view.  Example if you have a view name "recent_video", then you can
 create a page template name page--recent-video.html.twig.
 
@@ -107,7 +107,7 @@ You can view live demo by going to:
 <a href="http://drupal8-w3css-theme.flashwebcenter.com" title="Drupal8 W3CSS
 Theme Demo">http://drupal8-w3css-theme.flashwebcenter.com/</a>
 
-20- Drupal8 W3CSS Theme comes with the ability to change the Main Container's
+20- W3CSS Theme comes with the ability to change the Main Container's
 Columns layout.  The main container has three columns. The three columns are
 stacked (25% 50% 25%). To change the three columns to be stacked equal width
 (33% 33% 33%), just insert in the text box 33-33-33 If you want to go back to
@@ -208,7 +208,7 @@ the old code then paste the new code for your private theme.
 
 3) Go to www.your-drupal-site-name/admin/appearance/settings/drupal8_w3css_theme
 and click on W3css Predefined Theme and enter w3-theme-custom. How to install
-drupal8 w3css subtheme >>  Install Drupal8 W3CSS Theme First, then install
+drupal8 w3css subtheme >>  Install W3CSS Theme First, then install
 drupal8 w3css subtheme.
 
   * How to use the drupal8_w3css_subtheme
@@ -218,31 +218,36 @@ Inside your-drupal-site-directory/themes/drupal8_w3css_theme/
 drupal8_w3css_subtheme you will have all the necessary files for start up theme.
 Steps for creating a new sub theme.
 
-1) Copy the sub-theme from the Drupal8 W3CSS Theme and paste it in your custom
+1) Copy the sub-theme from the W3CSS Theme and paste it in your custom
 theme directory.
 
 2) Re-name the copied folder to have the new sub-theme name. Example: my new
-sub-theme is Titto.  I will rename the folder from "drupal8_w3css_subtheme" to
- "titto".
+sub-theme is w3css_subtheme.  I will rename the folder from
+"drupal8_w3css_subtheme" to "w3css_subtheme".
 
-3) Open the new named sub-theme folder "titto" and change the following
-files' names from:
+3) Open the new named sub-theme folder "w3css_subtheme" and change the following
+ files' names from:
+drupal8_w3css_subtheme.theme >> To >> w3css_subtheme.theme
 
-drupal8_w3css_subtheme.theme >> To >> titto.theme
+drupal8_w3css_subtheme.info.yml >> To >> w3css_subtheme.info.yml
 
-drupal8_w3css_subtheme.info.yml >> To >> titto.info.yml
+drupal8_w3css_subtheme.libraries.yml >> To >> w3css_subtheme.libraries.yml
 
-drupal8_w3css_subtheme.libraries.yml >> To >> titto.libraries.yml
+4) Open the file w3css_subtheme.info.yml in your text editor and edit the
+following:
+line 1 from "Drupal8 W3CSS Subtheme" >> To "W3css Subtheme",
+This is human readable name.
+line 8 from "drupal8_w3css_subtheme/d8w3css-subtheme-global" >> To >>
+"w3css_subtheme/d8w3css-subtheme-global".
 
-4) Open the file titto.info.yml in your text editor and edit,
+We are only changing the drupal8_w3css_subtheme to the new sub theme name.
+The name "d8w3css-subtheme-global" is the library name and MUST match the
+name in w3css_subtheme.libraries.yml.
 
-line 1 from "Drupal8 W3CSS Subtheme" >> To "Titto"
+If you would like to change the library name you MUST change it in the
+both files.
 
-line 7 from "drupal8_w3css_subtheme/global-components" >>
-
-To >> "titto/global-components".
-
-Make sure the spaces in this file are not changed.
+Make sure the spaces in any of the files are not changed
 
 The sub-theme now is ready to be enabled.
 
@@ -307,9 +312,9 @@ you are done.
 
 1- Create a sub-theme.
 2- copy page .../d8w3css/templates/layout/page.html.twig to the sub-theme.
-3- Open page.html.twig in the sub-theme and find the words "main-navigation-v". 
+3- Open page.html.twig in the sub-theme and find the words "main-navigation-v".
 On the same line, change "w3-animate-left" to "w3-animate-right".
-4- Find the word "open-nav-inner". On the same line, change "w3-left" 
+4- Find the word "open-nav-inner". On the same line, change "w3-left"
 to "w3-right".
 5- Copy and paste the following css in the sub-theme css style file:
 #main-navigation-v.w3-sidebar{right:0;}
@@ -319,11 +324,11 @@ to "w3-right".
   ....................................................
 
 Create a sub-theme.
-Go to d8w3css/css/w3-css-theme-custom and copy w3-theme-00029.css 
+Go to d8w3css/css/w3-css-theme-custom and copy w3-theme-00029.css
 file inside your-sub-theme/css folder.
-Open your-sub-theme.libraries.yml and  paste css/w3-theme-00029.css: {} 
+Open your-sub-theme.libraries.yml and  paste css/w3-theme-00029.css: {}
 under css/styles.css: {}.
 Note: Spacing must be aligned exactly underneath.
-Create a folder inside the sub-theme and name it images. Add the image you 
+Create a folder inside the sub-theme and name it images. Add the image you
 want to use as a background inside images folder.
 The image name must be page-wrapper.jpg.

@@ -9,50 +9,43 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * This class has been auto-generated
  * by the Symfony Dependency Injection Component.
  *
- * @final since Symfony 3.3
+ * @final
  */
 class ProjectServiceContainer extends \Symfony\Component\DependencyInjection\Tests\Fixtures\Container\ConstructorWithOptionalArgumentsContainer
 {
     private $parameters = [];
-    private $targetDirs = [];
 
     public function __construct()
     {
         parent::__construct();
         $this->parameterBag = null;
 
-        $this->services = [];
+        $this->services = $this->privates = [];
 
         $this->aliases = [];
     }
 
-    public function getRemovedIds()
+    public function compile(): void
+    {
+        throw new LogicException('You cannot compile a dumped container that was already compiled.');
+    }
+
+    public function isCompiled(): bool
+    {
+        return true;
+    }
+
+    public function getRemovedIds(): array
     {
         return [
             'Psr\\Container\\ContainerInterface' => true,
             'Symfony\\Component\\DependencyInjection\\ContainerInterface' => true,
         ];
-    }
-
-    public function compile()
-    {
-        throw new LogicException('You cannot compile a dumped container that was already compiled.');
-    }
-
-    public function isCompiled()
-    {
-        return true;
-    }
-
-    public function isFrozen()
-    {
-        @trigger_error(sprintf('The %s() method is deprecated since Symfony 3.3 and will be removed in 4.0. Use the isCompiled() method instead.', __METHOD__), E_USER_DEPRECATED);
-
-        return true;
     }
 }

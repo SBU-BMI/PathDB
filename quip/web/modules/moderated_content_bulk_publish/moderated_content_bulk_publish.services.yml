@@ -1,6 +1,0 @@
-services:
-  moderated_content_bulk_publish.exception403.subscriber:
-    class: Drupal\moderated_content_bulk_publish\EventSubscriber\HandlerFor403AccessDenied
-    tags:
-      - { name: event_subscriber }
-    arguments: ['@current_user']

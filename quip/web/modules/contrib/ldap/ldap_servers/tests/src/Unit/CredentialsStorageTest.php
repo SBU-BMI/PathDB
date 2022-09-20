@@ -8,7 +8,8 @@ use Drupal\ldap_servers\Helper\CredentialsStorage;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * @coversDefaultClass \Drupal\ldap_servers\Helper\CredentialsStorage
+ * Credential storage tests.
+ *
  * @group ldap
  */
 class CredentialsStorageTest extends UnitTestCase {
@@ -16,7 +17,7 @@ class CredentialsStorageTest extends UnitTestCase {
   /**
    * Test the temporary storage of passwords.
    */
-  public function testCredentialsStorage() {
+  public function testCredentialsStorage(): void {
     $user = 'my-user';
     $password = 'my-pass';
 

@@ -35,7 +35,7 @@ class GenerateKeyInput extends KeyInputBase {
     // If the key value has already been generated.
     if ($config['generated']) {
       $form['key_value_message'] = [
-        '#markup' => t('The key value has already been generated and will not be changed.'),
+        '#markup' => $this->t('The key value has already been generated and will not be changed.'),
       ];
       $form['display_once'] = [
         '#type' => 'value',
@@ -44,14 +44,14 @@ class GenerateKeyInput extends KeyInputBase {
     }
     else {
       $form['key_value_message'] = [
-        '#markup' => t('The key value will be automatically generated using the selected key type settings.'),
+        '#markup' => $this->t('The key value will be automatically generated using the selected key type settings.'),
       ];
 
       // Allow the user to choose to display the key value once.
       $form['display_once'] = [
         '#type' => 'checkbox',
-        '#title' => t('Display value'),
-        '#description' => t('Check this to display the generated value once.'),
+        '#title' => $this->t('Display value'),
+        '#description' => $this->t('Check this to display the generated value once.'),
         '#default_value' => $config['display_once'],
       ];
     }
@@ -96,7 +96,7 @@ class GenerateKeyInput extends KeyInputBase {
 
       // If the user requested to display the generated password.
       if ($key_input_settings['display_once']) {
-        $this->messenger()->addMessage(t('A key value of the requested type has been generated and is displayed below as a Base64-encoded string. You will need to decode it to get the actual key value, which may or may not be human-readable. The key value will not be displayed again, so take note of it now, if necessary.<br>%key_value', ['%key_value' => base64_encode($key_value)]));
+        $this->messenger()->addMessage($this->t('A key value of the requested type has been generated and is displayed below as a Base64-encoded string. You will need to decode it to get the actual key value, which may or may not be human-readable. The key value will not be displayed again, so take note of it now, if necessary.<br>%key_value', ['%key_value' => base64_encode($key_value)]));
       }
     }
 

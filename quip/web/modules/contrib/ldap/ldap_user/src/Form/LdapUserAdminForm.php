@@ -4,32 +4,121 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_user\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the form to configure user configuration and field mapping.
  */
-class LdapUserAdminForm extends LdapUserBaseForm {
+class LdapUserAdminForm extends ConfigFormBase implements LdapUserAttributesInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_user_admin_form';
+  }
+
+  /**
+   * Module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandler
+   */
+  protected $moduleHandler;
+
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Drupal account provisioning server options.
+   *
+   * @var array
+   */
+  protected $drupalAcctProvisionServerOptions = [];
+
+  /**
+   * LDAP Entry Provisioning server options.
+   *
+   * @var array
+   */
+  protected $ldapEntryProvisionServerOptions = [];
+
+  /**
+   * Current config.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $currentConfig;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    ModuleHandler $module_handler,
+    EntityTypeManagerInterface $entity_type_manager
+  ) {
+    parent::__construct($config_factory);
+    $this->moduleHandler = $module_handler;
+    $this->entityTypeManager = $entity_type_manager;
+
+    $storage = $this->entityTypeManager->getStorage('ldap_server');
+    $ids = $storage
+      ->getQuery()
+      ->condition('status', 1)
+      ->execute();
+    foreach ($storage->loadMultiple($ids) as $sid => $server) {
+      /** @var \Drupal\ldap_servers\Entity\Server $server */
+      $enabled = ($server->get('status')) ? 'Enabled' : 'Disabled';
+      $this->drupalAcctProvisionServerOptions[$sid] = $server->label() . ' (' . $server->get('address') . ') Status: ' . $enabled;
+      $this->ldapEntryProvisionServerOptions[$sid] = $server->label() . ' (' . $server->get('address') . ') Status: ' . $enabled;
+    }
+
+    $this->drupalAcctProvisionServerOptions['none'] = $this->t('None');
+    $this->ldapEntryProvisionServerOptions['none'] = $this->t('None');
+    $this->currentConfig = $this->config('ldap_user.settings');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public static function create(ContainerInterface $container): LdapUserAdminForm {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('module_handler'),
+      $container->get('entity_type.manager')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEditableConfigNames(): array {
+    return ['ldap_user.settings'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config('ldap_user.settings');
 
-    if (count($this->drupalAcctProvisionServerOptions) === 0) {
+    // If nothing except "None" is present, skip the rest of the form.
+    if (count($this->drupalAcctProvisionServerOptions) === 1) {
       $url = Url::fromRoute('entity.ldap_server.collection');
       $edit_server_link = Link::fromTextAndUrl($this->t('@path', ['@path' => 'LDAP Servers']), $url)->toString();
-      $message = $this->t('At least one LDAP server must configured and <em>enabled</em> before configuring LDAP user. Please go to @link to configure an LDAP server.',
+      $message = $this->t('At least one LDAP server must be configured and <em>enabled</em> before you can configure user settings. Please go to @link, to configure an LDAP server.',
         ['@link' => $edit_server_link]
       );
       $form['intro'] = [
@@ -285,7 +374,7 @@ class LdapUserAdminForm extends LdapUserBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
 
     $drupalAcctProvisionServer = ($form_state->getValue('drupalAcctProvisionServer') === 'none') ? NULL : $form_state->getValue('drupalAcctProvisionServer');
     $ldapEntryProvisionServer = ($form_state->getValue('ldapEntryProvisionServer') === 'none') ? NULL : $form_state->getValue('ldapEntryProvisionServer');

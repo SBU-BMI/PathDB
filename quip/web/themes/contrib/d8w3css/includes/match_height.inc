@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Drupal8 W3CSS Theme.theme.
+ * W3CSS Theme.theme.
  *
  * Filename:     drupal8_w3css_theme.theme
  * Website:      http://www.flashwebcenter.com
@@ -16,10 +16,10 @@
 
 $form['drupal8_w3css_theme_settings']['w3_match_height'] = [
   '#type' => 'details',
-  '#title' => t('Enable Match Height'),
+  '#title' => t('[Deprecated] Enable/Disable Match Height'),
   '#collapsible' => TRUE,
   '#collapsed' => FALSE,
-  '#description'   => t('<p>Disable or enable match height for Top Containers, Main Containers, Bottom Containers and Footer Containers.</p>'),
+  '#description'   => t('<p>The column height used to be controlled by javascript. Now they are controlled by CSS flexbox. Feel free to disable the checkboxes, since the default is now that the all columns will have matching height.</p>'),
 ];
 $form['drupal8_w3css_theme_settings']['w3_match_height']['top_region'] = [
   '#type' => 'checkbox',

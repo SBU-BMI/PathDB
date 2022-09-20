@@ -45,24 +45,18 @@ abstract class KeyTestBase extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Mock the Config object, but methods will be mocked in the test class.
-    $this->config = $this->getMockBuilder('\Drupal\Core\Config\ImmutableConfig')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->config = $this->createMock('\Drupal\Core\Config\ImmutableConfig');
 
     // Mock ConfigEntityStorage object, but methods will be mocked in the test
     // class.
-    $this->configStorage = $this->getMockBuilder('\Drupal\Core\Config\Entity\ConfigEntityStorage')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->configStorage = $this->createMock('\Drupal\Core\Config\Entity\ConfigEntityStorage');
 
     // Mock EntityTypeManager service.
-    $this->entityTypeManager = $this->getMockBuilder('\Drupal\Core\Entity\EntityTypeManager')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $this->entityTypeManager = $this->createMock('\Drupal\Core\Entity\EntityTypeManager');
     $this->entityTypeManager->expects($this->any())
       ->method('getStorage')
       ->with('key')

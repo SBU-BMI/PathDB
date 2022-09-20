@@ -5,20 +5,12 @@ namespace Drupal\user_current_paths\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Session\AccountProxy;
 use Drupal\Core\Path\PathValidator;
 
 /**
  * Defines the User Current Paths controller.
  */
 class UserCurrentPathsController extends ControllerBase {
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxy
-   */
-  protected $currentUser;
 
   /**
    * The path validator.
@@ -30,13 +22,10 @@ class UserCurrentPathsController extends ControllerBase {
   /**
    * Constructs a UserCurrentPathsController object.
    *
-   * @param \Drupal\Core\Session\AccountProxy $current_user
-   *   The current user.
    * @param \Drupal\Core\Path\PathValidator $path_validator
    *   The path validator.
    */
-  public function __construct(AccountProxy $current_user, PathValidator $path_validator) {
-    $this->currentUser = $current_user;
+  public function __construct(PathValidator $path_validator) {
     $this->pathValidator = $path_validator;
   }
 
@@ -45,7 +34,6 @@ class UserCurrentPathsController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('current_user'),
       $container->get('path.validator')
     );
   }
@@ -63,7 +51,7 @@ class UserCurrentPathsController extends ControllerBase {
    *   The wildcart action.
    */
   public function wildcardActionRedirect(string $wildcardaction) {
-    $path = '/user/' . $this->currentUser->id();
+    $path = '/user/' . $this->currentUser()->id();
     if ($wildcardaction != 'view') {
       // /view doesn't exist for user entities
       $path .= '/' . $wildcardaction;
@@ -84,7 +72,7 @@ class UserCurrentPathsController extends ControllerBase {
   public function editRedirect() {
     $route_name = 'entity.user.edit_form';
     $route_parameters = [
-      'user' => $this->currentUser->id(),
+      'user' => $this->currentUser()->id(),
     ];
 
     return $this->redirect($route_name, $route_parameters);

@@ -14,8 +14,8 @@ namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
-use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 
 class ResolveChildDefinitionsPassTest extends TestCase
 {
@@ -116,6 +116,31 @@ class ResolveChildDefinitionsPassTest extends TestCase
 
         $def = $container->getDefinition('child');
         $this->assertEquals([], $def->getTags());
+    }
+
+    public function testProcessCopiesTagsProxy()
+    {
+        $container = new ContainerBuilder();
+
+        $container
+            ->register('parent')
+            ->addTag('proxy', ['a' => 'b'])
+        ;
+
+        $container
+            ->setDefinition('child1', new ChildDefinition('parent'))
+        ;
+        $container
+            ->setDefinition('child2', (new ChildDefinition('parent'))->addTag('proxy', ['c' => 'd']))
+        ;
+
+        $this->process($container);
+
+        $def = $container->getDefinition('child1');
+        $this->assertSame(['proxy' => [['a' => 'b']]], $def->getTags());
+
+        $def = $container->getDefinition('child2');
+        $this->assertSame(['proxy' => [['c' => 'd']]], $def->getTags());
     }
 
     public function testProcessDoesNotCopyDecoratedService()
@@ -250,7 +275,7 @@ class ResolveChildDefinitionsPassTest extends TestCase
 
         $container->register('parent', 'parentClass');
         $container->register('sibling', 'siblingClass')
-            ->setConfigurator(new ChildDefinition('parent'), 'foo')
+            ->setConfigurator([new ChildDefinition('parent'), 'foo'])
             ->setFactory([new ChildDefinition('parent'), 'foo'])
             ->addArgument(new ChildDefinition('parent'))
             ->setProperty('prop', new ChildDefinition('parent'))
@@ -260,8 +285,8 @@ class ResolveChildDefinitionsPassTest extends TestCase
         $this->process($container);
 
         $configurator = $container->getDefinition('sibling')->getConfigurator();
-        $this->assertSame('Symfony\Component\DependencyInjection\Definition', \get_class($configurator));
-        $this->assertSame('parentClass', $configurator->getClass());
+        $this->assertSame('Symfony\Component\DependencyInjection\Definition', \get_class($configurator[0]));
+        $this->assertSame('parentClass', $configurator[0]->getClass());
 
         $factory = $container->getDefinition('sibling')->getFactory();
         $this->assertSame('Symfony\Component\DependencyInjection\Definition', \get_class($factory[0]));
@@ -323,32 +348,6 @@ class ResolveChildDefinitionsPassTest extends TestCase
         $this->process($container);
 
         $this->assertFalse($container->getDefinition('decorated_deprecated_parent')->isDeprecated());
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testProcessMergeAutowiringTypes()
-    {
-        $container = new ContainerBuilder();
-
-        $container
-            ->register('parent')
-            ->addAutowiringType('Foo')
-        ;
-
-        $container
-            ->setDefinition('child', new ChildDefinition('parent'))
-            ->addAutowiringType('Bar')
-        ;
-
-        $this->process($container);
-
-        $childDef = $container->getDefinition('child');
-        $this->assertEquals(['Foo', 'Bar'], $childDef->getAutowiringTypes());
-
-        $parentDef = $container->getDefinition('parent');
-        $this->assertSame(['Foo'], $parentDef->getAutowiringTypes());
     }
 
     public function testProcessResolvesAliases()
@@ -418,14 +417,6 @@ class ResolveChildDefinitionsPassTest extends TestCase
         $this->assertFalse($container->getDefinition('child1')->isAutoconfigured());
     }
 
-    /**
-     * @group legacy
-     */
-    public function testAliasExistsForBackwardsCompatibility()
-    {
-        $this->assertInstanceOf(ResolveChildDefinitionsPass::class, new ResolveDefinitionTemplatesPass());
-    }
-
     protected function process(ContainerBuilder $container)
     {
         $pass = new ResolveChildDefinitionsPass();
@@ -434,7 +425,7 @@ class ResolveChildDefinitionsPassTest extends TestCase
 
     public function testProcessDetectsChildDefinitionIndirectCircularReference()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException');
+        $this->expectException(ServiceCircularReferenceException::class);
         $this->expectExceptionMessageMatches('/^Circular reference detected for service "c", path: "c -> b -> a -> c"./');
         $container = new ContainerBuilder();
 
@@ -445,5 +436,22 @@ class ResolveChildDefinitionsPassTest extends TestCase
         $container->setDefinition('a', new ChildDefinition('c'));
 
         $this->process($container);
+    }
+
+    public function testProcessCopiesSyntheticStatus()
+    {
+        $container = new ContainerBuilder();
+
+        $container->register('parent');
+
+        $container
+            ->setDefinition('child', new ChildDefinition('parent'))
+            ->setSynthetic(true)
+        ;
+
+        $this->process($container);
+
+        $def = $container->getDefinition('child');
+        $this->assertTrue($def->isSynthetic());
     }
 }

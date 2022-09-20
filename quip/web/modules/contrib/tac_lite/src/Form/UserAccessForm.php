@@ -6,6 +6,8 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\tac_lite\Form\SchemeForm;
+use Drupal\user\UserInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Builds the form for User Access.
@@ -27,8 +29,12 @@ class UserAccessForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $user = 0) {
-    $this->uid = $user;
+  public function buildForm(array $form, FormStateInterface $form_state, UserInterface $user = NULL) {
+    if (!$user) {
+      throw new NotFoundHttpException();
+    }
+
+    $this->uid = $user->id();
     $vocabularies = Vocabulary::loadMultiple();
     $config = \Drupal::config('tac_lite.settings');
     $vids = $config->get('tac_lite_categories');
@@ -52,7 +58,7 @@ class UserAccessForm extends ConfigFormBase {
           foreach ($vids as $vid) {
             $v = $vocabularies[$vid];
             $default_values = [];
-            $data = \Drupal::service('user.data')->get('tac_lite', $user, 'tac_lite_scheme_' . $i) ?: [];
+            $data = \Drupal::service('user.data')->get('tac_lite', $user->id(), 'tac_lite_scheme_' . $i) ?: [];
             if (!empty($data) && $data[$vid]) {
               $default_values = $data[$vid];
             }
@@ -77,8 +83,10 @@ class UserAccessForm extends ConfigFormBase {
         '#markup' => $this->t('First, select one or more vocabularies on the <a href=:url>settings page</a>. Then, return to this page to complete configuration.', [':url' => Url::fromRoute('tac_lite.administration')->toString()]),
       ];
     }
+
     return parent::buildForm($form, $form_state);
   }
+
   /**
    * {@inheritdoc}
    */

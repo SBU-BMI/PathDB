@@ -63,7 +63,7 @@ function ldap_user_update_8301(&$sandbox) {
     $authmap->save($account, 'ldap_user', $identity->identifier);
 
     // Delete the row if successful.
-    $connection->query("DELETE FROM {ldap_user_identities} WHERE aid = :aid", [':aid' => $identity->aid]);
+    $connection->query('DELETE FROM {ldap_user_identities} WHERE aid = :aid', [':aid' => $identity->aid]);
 
     $sandbox['results'][] = $identity->aid . ' : ' . Html::escape($identity->identifier);
     $sandbox['progress']++;
@@ -88,7 +88,7 @@ function ldap_user_update_8302(&$sandbox) {
   }
   // Drop the table if it exists.
   try {
-    Database::getConnection()->query("DROP TABLE {ldap_user_identities}");
+    Database::getConnection()->query('DROP TABLE {ldap_user_identities}');
   }
   catch (Exception $e) {
     \Drupal::messenger()->addWarning(t("Couldn't drop the table 'ldap_user_identities'. Maybe it's been dropped already?"));
@@ -292,5 +292,27 @@ function ldap_user_update_8307() {
 function ldap_user_update_8401() {
   if (!\Drupal::service('module_handler')->moduleExists('ldap_query')) {
     \Drupal::service('module_installer')->install(['ldap_query']);
+  }
+}
+
+/**
+ * Update base fields.
+ */
+function ldap_user_update_8402() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+
+  $fields = [
+    'ldap_user_puid_sid',
+    'ldap_user_puid',
+    'ldap_user_puid_property',
+    'ldap_user_current_dn',
+    'ldap_user_prov_entries',
+    'ldap_user_last_checked',
+    'ldap_user_ldap_exclude',
+  ];
+
+  foreach ($fields as $field) {
+    $field_storage_definition = $manager->getFieldStorageDefinition($field, 'user');
+    $manager->updateFieldStorageDefinition($field_storage_definition);
   }
 }

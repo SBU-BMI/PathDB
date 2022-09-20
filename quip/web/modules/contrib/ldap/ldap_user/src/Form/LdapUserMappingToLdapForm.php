@@ -48,20 +48,20 @@ class LdapUserMappingToLdapForm extends LdapUserMappingBaseForm {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'ldap_user_admin_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
 
     $form['header'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Mappings synced from Drupal to LDAP'),
       '#description' => $this->t('See also the <a href="@wiki_link">Drupal.org wiki page</a> for further information on using LDAP tokens.',
-        ['@wiki_link' => 'http://drupal.org/node/1245736']),
+        ['@wiki_link' => 'https://drupal.org/node/1245736']),
     ];
 
     $form['mappings'] = [

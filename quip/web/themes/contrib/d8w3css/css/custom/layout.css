@@ -1,4 +1,5 @@
 /* The default website size. */
+.search-slide-inner,
 .header-inner,
 .main-navigation-inner-h,
 .welcome-text-inner,
@@ -28,6 +29,7 @@
 .footer-container-inner .third-footer {
   float: left;
 }
+
 .top-container-inner .first-top > div,
 .top-container-inner .second-top > div,
 .top-container-inner .third-top > div,
@@ -88,4 +90,40 @@
 }
 .w3-width-800 {
   max-width: 800px!important;
+}
+.w3-f-display {
+  display: flex;
+}
+/* node edit layout */
+.layout-region-node-footer__content .description {
+  margin: 0;
+}
+
+.node-from .layout-node-form {
+  height: 100%;
+}
+
+.layout-region-node-secondary,
+.layout-region-node-footer,
+.layout-region-node-main {
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  background-color: #fff;
+  width: 100%;
+  margin: 20px 0;
+  padding: 0;
+  -webkit-box-shadow: 0px 0px 19px 19px rgba(180, 180, 180, 0.1);
+  box-shadow: 0px 0px 19px 19px rgba(180, 180, 180, 0.1);
+}
+
+.layout-region-node-footer {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: #fff;
+}
+
+.layout-region-node-footer__content {
+  padding: 15px;
+  margin: 15px 0;
+  background-color: #f8f9fa;
 }

@@ -43,6 +43,7 @@ class XliffFileDumperTest extends TestCase
             'foo' => 'bar',
             'key' => '',
             'key.with.cdata' => '<source> & <target>',
+            'translation.key.that.is.longer.than.eighty.characters.should.not.have.name.attribute' => 'value',
         ]);
         $catalogue->setMetadata('key', ['target-attributes' => ['order' => 1]]);
 
@@ -51,6 +52,21 @@ class XliffFileDumperTest extends TestCase
         $this->assertStringEqualsFile(
             __DIR__.'/../fixtures/resources-2.0-clean.xlf',
             $dumper->formatCatalogue($catalogue, 'messages', ['default_locale' => 'fr_FR', 'xliff_version' => '2.0'])
+        );
+    }
+
+    public function testFormatIcuCatalogueXliff2()
+    {
+        $catalogue = new MessageCatalogue('en_US');
+        $catalogue->add([
+            'foo' => 'bar',
+        ], 'messages'.MessageCatalogue::INTL_DOMAIN_SUFFIX);
+
+        $dumper = new XliffFileDumper();
+
+        $this->assertStringEqualsFile(
+            __DIR__.'/../fixtures/resources-2.0+intl-icu.xlf',
+            $dumper->formatCatalogue($catalogue, 'messages'.MessageCatalogue::INTL_DOMAIN_SUFFIX, ['default_locale' => 'fr_FR', 'xliff_version' => '2.0'])
         );
     }
 

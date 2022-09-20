@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Compiler\RegisterEnvVarProcessorsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\EnvVarProcessorInterface;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 class RegisterEnvVarProcessorsPassTest extends TestCase
 {
@@ -33,12 +34,19 @@ class RegisterEnvVarProcessorsPassTest extends TestCase
             'base64' => ['string'],
             'bool' => ['bool'],
             'const' => ['bool', 'int', 'float', 'string', 'array'],
+            'csv' => ['array'],
             'file' => ['string'],
             'float' => ['float'],
             'int' => ['int'],
             'json' => ['array'],
+            'key' => ['bool', 'int', 'float', 'string', 'array'],
+            'url' => ['array'],
+            'query_string' => ['array'],
             'resolve' => ['string'],
+            'default' => ['bool', 'int', 'float', 'string', 'array'],
             'string' => ['string'],
+            'trim' => ['string'],
+            'require' => ['bool', 'int', 'float', 'string', 'array'],
         ];
 
         $this->assertSame($expected, $container->getParameterBag()->getProvidedTypes());
@@ -55,7 +63,7 @@ class RegisterEnvVarProcessorsPassTest extends TestCase
 
     public function testBadProcessor()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid type "foo" returned by "Symfony\Component\DependencyInjection\Tests\Compiler\BadProcessor::getProvidedTypes()", expected one of "array", "bool", "float", "int", "string".');
         $container = new ContainerBuilder();
         $container->register('foo', BadProcessor::class)->addTag('container.env_var_processor');
@@ -71,7 +79,7 @@ class SimpleProcessor implements EnvVarProcessorInterface
         return $getEnv($name);
     }
 
-    public static function getProvidedTypes()
+    public static function getProvidedTypes(): array
     {
         return ['foo' => 'string'];
     }
@@ -79,7 +87,7 @@ class SimpleProcessor implements EnvVarProcessorInterface
 
 class BadProcessor extends SimpleProcessor
 {
-    public static function getProvidedTypes()
+    public static function getProvidedTypes(): array
     {
         return ['foo' => 'string|foo'];
     }

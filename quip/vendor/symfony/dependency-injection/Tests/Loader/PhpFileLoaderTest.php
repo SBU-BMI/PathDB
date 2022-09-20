@@ -16,6 +16,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Dumper\YamlDumper;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 class PhpFileLoaderTest extends TestCase
@@ -43,6 +44,7 @@ class PhpFileLoaderTest extends TestCase
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $loader = new PhpFileLoader($container = new ContainerBuilder(), new FileLocator());
         $loader->load($fixtures.'/config/services9.php');
+        $container->getDefinition('errored_definition')->addError('Service "errored_definition" is broken.');
 
         $container->compile();
         $dumper = new PhpDumper($container);
@@ -61,25 +63,31 @@ class PhpFileLoaderTest extends TestCase
         $container->compile();
 
         $dumper = new YamlDumper($container);
-        $this->assertStringEqualsFile($fixtures.'/config/'.$file.'.expected.yml', $dumper->dump());
+        $this->assertStringMatchesFormatFile($fixtures.'/config/'.$file.'.expected.yml', $dumper->dump());
     }
 
     public function provideConfig()
     {
         yield ['basic'];
+        yield ['object'];
         yield ['defaults'];
         yield ['instanceof'];
         yield ['prototype'];
+        yield ['prototype_array'];
         yield ['child'];
+        yield ['php7'];
+        yield ['anonymous'];
+        yield ['lazy_fqcn'];
 
-        if (\PHP_VERSION_ID >= 70000) {
-            yield ['php7'];
+        // fixture uses PHP 7.2+ object typehint
+        if (70200 <= \PHP_VERSION_ID) {
+            yield ['inline_binding'];
         }
     }
 
     public function testAutoConfigureAndChildDefinitionNotAllowed()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The service "child_service" cannot have a "parent" and also have "autoconfigure". Try disabling autoconfiguration for the service.');
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $container = new ContainerBuilder();
@@ -90,8 +98,8 @@ class PhpFileLoaderTest extends TestCase
 
     public function testFactoryShortNotationNotAllowed()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
-        $this->expectExceptionMessage('Invalid factory "factory:method": the `service:method` notation is not available when using PHP-based DI configuration. Use "[ref(\'factory\'), \'method\']" instead.');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid factory "factory:method": the "service:method" notation is not available when using PHP-based DI configuration. Use "[ref(\'factory\'), \'method\']" instead.');
         $fixtures = realpath(__DIR__.'/../Fixtures');
         $container = new ContainerBuilder();
         $loader = new PhpFileLoader($container, new FileLocator());

@@ -35,9 +35,7 @@ class ConversionHelper {
     $value = str_replace('\=', '=', $value);
 
     // Translate hex code into ascii.
-    $value = self::hex2string($value);
-
-    return $value;
+    return self::hex2string($value);
   }
 
   /**
@@ -69,17 +67,15 @@ class ConversionHelper {
    * @return string
    *   Converted value.
    */
-  public static function convertMsguidToString($value) {
+  public static function convertMsguidToString(string $value): string {
     $hex_string = bin2hex($value);
     // (MS?) GUID are displayed with first three GUID parts as "big endian"
     // Doing this so String value matches what other LDAP tool displays for AD.
-    $value = strtoupper(substr($hex_string, 6, 2) . substr($hex_string, 4, 2) .
+    return strtoupper(substr($hex_string, 6, 2) . substr($hex_string, 4, 2) .
       substr($hex_string, 2, 2) . substr($hex_string, 0, 2) . '-' .
       substr($hex_string, 10, 2) . substr($hex_string, 8, 2) . '-' .
       substr($hex_string, 14, 2) . substr($hex_string, 12, 2) . '-' .
       substr($hex_string, 16, 4) . '-' . substr($hex_string, 20, 12));
-
-    return $value;
   }
 
   /**
@@ -87,29 +83,26 @@ class ConversionHelper {
    *
    * @param string $value
    *   Value to be converted.
-   * @param string $conversion
+   * @param string|null $conversion
    *   Conversion type such as base64_encode, bin2hex, msguid, md5.
    *
    * @return string
    *   Converted string.
    */
-  public static function convertAttribute($value, $conversion = NULL): string {
+  public static function convertAttribute(string $value, string $conversion = NULL): string {
 
     switch ($conversion) {
       case 'base64_encode':
         $value = base64_encode($value);
         break;
 
+      case 'binary':
       case 'bin2hex':
         $value = bin2hex($value);
         break;
 
       case 'msguid':
         $value = self::convertMsguidToString($value);
-        break;
-
-      case 'binary':
-        $value = bin2hex($value);
         break;
 
       case 'md5':

@@ -15,6 +15,9 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class DecoratorServicePassTest extends TestCase
 {
@@ -125,6 +128,61 @@ class DecoratorServicePassTest extends TestCase
         $this->assertNull($quxDefinition->getDecoratedService());
     }
 
+    public function testProcessWithInvalidDecorated()
+    {
+        $container = new ContainerBuilder();
+        $decoratorDefinition = $container
+            ->register('decorator')
+            ->setDecoratedService('unknown_decorated', null, 0, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
+        ;
+
+        $this->process($container);
+        $this->assertFalse($container->has('decorator'));
+
+        $container = new ContainerBuilder();
+        $decoratorDefinition = $container
+            ->register('decorator')
+            ->setDecoratedService('unknown_decorated', null, 0, ContainerInterface::NULL_ON_INVALID_REFERENCE)
+        ;
+
+        $this->process($container);
+        $this->assertTrue($container->has('decorator'));
+        $this->assertSame(ContainerInterface::NULL_ON_INVALID_REFERENCE, $decoratorDefinition->decorationOnInvalid);
+
+        $container = new ContainerBuilder();
+        $decoratorDefinition = $container
+            ->register('decorator')
+            ->setDecoratedService('unknown_service')
+        ;
+
+        $this->expectException(ServiceNotFoundException::class);
+        $this->process($container);
+    }
+
+    public function testProcessNoInnerAliasWithInvalidDecorated()
+    {
+        $container = new ContainerBuilder();
+        $decoratorDefinition = $container
+            ->register('decorator')
+            ->setDecoratedService('unknown_decorated', null, 0, ContainerInterface::NULL_ON_INVALID_REFERENCE)
+        ;
+
+        $this->process($container);
+        $this->assertFalse($container->hasAlias('decorator.inner'));
+    }
+
+    public function testProcessWithInvalidDecoratedAndWrongBehavior()
+    {
+        $container = new ContainerBuilder();
+        $decoratorDefinition = $container
+            ->register('decorator')
+            ->setDecoratedService('unknown_decorated', null, 0, 12)
+        ;
+
+        $this->expectException(ServiceNotFoundException::class);
+        $this->process($container);
+    }
+
     public function testProcessMovesTagsFromDecoratedDefinitionToDecoratingDefinition()
     {
         $container = new ContainerBuilder();
@@ -142,30 +200,6 @@ class DecoratorServicePassTest extends TestCase
 
         $this->assertEmpty($container->getDefinition('baz.inner')->getTags());
         $this->assertEquals(['bar' => ['attr' => 'baz'], 'foobar' => ['attr' => 'bar']], $container->getDefinition('baz')->getTags());
-    }
-
-    /**
-     * @group legacy
-     */
-    public function testProcessMergesAutowiringTypesInDecoratingDefinitionAndRemoveThemFromDecoratedDefinition()
-    {
-        $container = new ContainerBuilder();
-
-        $container
-            ->register('parent')
-            ->addAutowiringType('Bar')
-        ;
-
-        $container
-            ->register('child')
-            ->setDecoratedService('parent')
-            ->addAutowiringType('Foo')
-        ;
-
-        $this->process($container);
-
-        $this->assertEquals(['Bar', 'Foo'], $container->getDefinition('child')->getAutowiringTypes());
-        $this->assertEmpty($container->getDefinition('child.inner')->getAutowiringTypes());
     }
 
     public function testProcessMovesTagsFromDecoratedDefinitionToDecoratingDefinitionMultipleTimes()
@@ -189,6 +223,61 @@ class DecoratorServicePassTest extends TestCase
 
         $this->assertEmpty($container->getDefinition('deco1')->getTags());
         $this->assertEquals(['bar' => ['attr' => 'baz']], $container->getDefinition('deco2')->getTags());
+    }
+
+    public function testProcessLeavesServiceLocatorTagOnOriginalDefinition()
+    {
+        $container = new ContainerBuilder();
+        $container
+            ->register('foo')
+            ->setTags(['container.service_locator' => [0 => []], 'bar' => ['attr' => 'baz']])
+        ;
+        $container
+            ->register('baz')
+            ->setTags(['foobar' => ['attr' => 'bar']])
+            ->setDecoratedService('foo')
+        ;
+
+        $this->process($container);
+
+        $this->assertEquals(['container.service_locator' => [0 => []]], $container->getDefinition('baz.inner')->getTags());
+        $this->assertEquals(['bar' => ['attr' => 'baz'], 'foobar' => ['attr' => 'bar']], $container->getDefinition('baz')->getTags());
+    }
+
+    public function testProcessLeavesServiceSubscriberTagOnOriginalDefinition()
+    {
+        $container = new ContainerBuilder();
+        $container
+            ->register('foo')
+            ->setTags(['container.service_subscriber' => [], 'bar' => ['attr' => 'baz']])
+        ;
+        $container
+            ->register('baz')
+            ->setTags(['foobar' => ['attr' => 'bar']])
+            ->setDecoratedService('foo')
+        ;
+
+        $this->process($container);
+
+        $this->assertEquals(['container.service_subscriber' => []], $container->getDefinition('baz.inner')->getTags());
+        $this->assertEquals(['bar' => ['attr' => 'baz'], 'foobar' => ['attr' => 'bar']], $container->getDefinition('baz')->getTags());
+    }
+
+    public function testCannotDecorateSyntheticService()
+    {
+        $container = new ContainerBuilder();
+        $container
+            ->register('foo')
+            ->setSynthetic(true)
+        ;
+        $container
+            ->register('baz')
+            ->setDecoratedService('foo')
+        ;
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('A synthetic service cannot be decorated: service "baz" cannot decorate "foo".');
+        $this->process($container);
     }
 
     protected function process(ContainerBuilder $container)

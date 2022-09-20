@@ -28,7 +28,7 @@ class Mapping {
    *
    * @var bool
    */
-  private $configurable = FALSE;
+  private $configurable;
 
   /**
    * Binary.
@@ -49,14 +49,14 @@ class Mapping {
    *
    * @var bool
    */
-  private $enabled = FALSE;
+  private $enabled;
 
   /**
    * Provisioning events.
    *
    * @var array
    */
-  private $provisioningEvents = [];
+  private $provisioningEvents;
 
   /**
    * Configuration module.
@@ -153,7 +153,7 @@ class Mapping {
    * @return null|string
    *   Label.
    */
-  public function getLabel() {
+  public function getLabel(): ?string {
     return $this->label;
   }
 
@@ -163,7 +163,7 @@ class Mapping {
    * @param string $label
    *   Label.
    */
-  public function setLabel($label) {
+  public function setLabel(string $label): void {
     $this->label = $label;
   }
 
@@ -173,7 +173,7 @@ class Mapping {
    * @return bool
    *   Configurable.
    */
-  public function isConfigurable() {
+  public function isConfigurable(): bool {
     return $this->configurable;
   }
 
@@ -183,7 +183,7 @@ class Mapping {
    * @return null|string
    *   Notes.
    */
-  public function getNotes() {
+  public function getNotes(): ?string {
     return $this->notes;
   }
 
@@ -193,7 +193,7 @@ class Mapping {
    * @param string $notes
    *   Notes.
    */
-  public function setNotes($notes) {
+  public function setNotes(string $notes): void {
     $this->notes = $notes;
   }
 
@@ -203,7 +203,7 @@ class Mapping {
    * @return bool
    *   Enabled.
    */
-  public function isEnabled() {
+  public function isEnabled(): bool {
     return $this->enabled;
   }
 
@@ -213,7 +213,7 @@ class Mapping {
    * @param bool $enabled
    *   Enabled.
    */
-  public function setEnabled(bool $enabled) {
+  public function setEnabled(bool $enabled): void {
     $this->enabled = $enabled;
   }
 
@@ -236,7 +236,7 @@ class Mapping {
    * @return bool
    *   Available.
    */
-  public function hasProvisioningEvent($event): bool {
+  public function hasProvisioningEvent(string $event): bool {
     return in_array($event, $this->provisioningEvents, TRUE);
   }
 
@@ -266,7 +266,7 @@ class Mapping {
    * @param string $configurationModule
    *   Module.
    */
-  public function setConfigurationModule($configurationModule): void {
+  public function setConfigurationModule(string $configurationModule): void {
     $this->configurationModule = $configurationModule;
   }
 
@@ -286,7 +286,7 @@ class Mapping {
    * @param string $provisioningModule
    *   Module.
    */
-  public function setProvisioningModule($provisioningModule): void {
+  public function setProvisioningModule(string $provisioningModule): void {
     $this->provisioningModule = $provisioningModule;
   }
 

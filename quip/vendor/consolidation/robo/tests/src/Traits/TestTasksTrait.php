@@ -15,20 +15,13 @@ trait TestTasksTrait
     protected $capturedOutput;
     protected $logger;
 
-    public function initTestTasksTrait($commandClass = null, $container = null, $input = null)
+    public function initTestTasksTrait($commandClass = null)
     {
-        if (!$container) {
-            $container = Robo::createDefaultContainer();
-        }
         $this->capturedOutput = '';
         $this->testPrinter = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
 
-        $app = Robo::createDefaultApplication();
-        $config = new \Robo\Config();
-        \Robo\Robo::configureContainer($container, $app, $config, $input, $this->testPrinter);
-
-        // Set the application dispatcher
-        $app->setDispatcher($container->get('eventDispatcher'));
+        Robo::unsetContainer();
+        $container = Robo::createDefaultContainer(null, $this->testPrinter);
         $this->logger = $container->get('logger');
 
         // Use test class as command class if a specific one is not provided
@@ -46,6 +39,13 @@ trait TestTasksTrait
         $this->setBuilder($builder);
 
         return $container;
+    }
+
+    public function collectionBuilderForTest()
+    {
+        $builder = $this->collectionBuilder();
+        $builder->setOutput($this->testPrinter);
+        return $builder;
     }
 
     public function capturedOutputStream()
@@ -71,20 +71,23 @@ trait TestTasksTrait
     {
         $output = $this->accumulate();
         $output = $this->simplify($output);
-        $this->assertContains($value, $output);
+        $value = $this->simplify($value);
+        $this->assertStringContainsString($value, $output);
     }
 
     public function assertOutputNotContains($value)
     {
         $output = $this->accumulate();
         $output = $this->simplify($output);
-        $this->assertNotContains($value, $output);
+        $value = $this->simplify($value);
+        $this->assertStringNotContainsString($value, $output);
     }
 
     public function assertOutputEquals($value)
     {
         $output = $this->accumulate();
         $output = $this->simplify($output);
+        $value = $this->simplify($value);
         $this->assertEquals($value, $output);
     }
 
@@ -94,9 +97,9 @@ trait TestTasksTrait
      */
     protected function simplify($output)
     {
-        $output = str_replace("\r\n", "\n", $output);
-        $output = str_replace("\r", "\n", $output);
+        $output = str_replace("\r", "", $output);
+        $output = preg_replace("#\n+#", "\n", $output);
 
-        return $output;
+        return trim($output);
     }
 }

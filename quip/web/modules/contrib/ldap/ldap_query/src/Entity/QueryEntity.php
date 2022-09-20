@@ -78,13 +78,6 @@ class QueryEntity extends ConfigEntityBase implements QueryEntityInterface {
   protected $server_id;
 
   /**
-   * Status.
-   *
-   * @var bool
-   */
-  protected $status;
-
-  /**
    * Base DN.
    *
    * @var string

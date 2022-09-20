@@ -26,6 +26,8 @@ $this->taskExtract($archivePath)
 
 * `to($to)`  Location to store extracted files.
 * `preserveTopDirectory($preserve = null)`   * `param bool` $preserve
+* `setOutput($output)`  Sets the Console Output.
+* `getBuiltTask($fn, $args)`  Provides the collection builder with access to all of the
 
 ## Pack
 
@@ -39,6 +41,7 @@ $this->taskPack(
 ->add('README')                         // Puts file 'README' in archive at the root
 ->add('project')                        // Puts entire contents of directory 'project' in archinve inside 'project'
 ->addFile('dir/file.txt', 'file.txt')   // Takes 'file.txt' from cwd and puts it in archive inside 'dir'.
+->exclude(['dir\/.*.zip', '.*.md'])      // Add regex (or array of regex) to the excluded patterns list.
 ->run();
 ?>
 ```
@@ -47,4 +50,7 @@ $this->taskPack(
 * `addFile($placementLocation, $filesystemLocation)`  Add an item to the archive. Like file_exists(), the parameter
 * `addDir($placementLocation, $filesystemLocation)`  Alias for addFile, in case anyone has angst about using
 * `add($item)`  Add a file or directory, or list of same to the archive.
+* `exclude($ignoreList)`  Allow files or folder to be excluded from the archive. Use regex, without enclosing slashes.
+* `setOutput($output)`  Sets the Console Output.
+
 

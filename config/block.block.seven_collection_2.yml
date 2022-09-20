@@ -18,12 +18,12 @@ plugin: 'facet_block:collection'
 settings:
   id: 'facet_block:collection'
   label: Collection
-  provider: facets
   label_display: visible
+  provider: facets
   block_id: collection_2
 visibility:
   request_path:
     id: request_path
-    pages: "/imagesearch\r\n/imagesearch/*"
     negate: false
     context_mapping: {  }
+    pages: "/imagesearch\r\n/imagesearch/*"

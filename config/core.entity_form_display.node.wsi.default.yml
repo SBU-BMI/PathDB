@@ -36,28 +36,28 @@ third_party_settings:
         - group_image
         - group_subject
         - group_specimen
+      label: Tabbers
+      region: content
       parent_name: ''
       weight: 7
       format_type: tabs
       format_settings:
-        direction: horizontal
-        id: khan
         classes: ''
-      label: Tabbers
-      region: content
+        id: khan
+        direction: horizontal
     group_specimen:
       children: {  }
+      label: Specimen
+      region: content
       parent_name: group_tabbers
       weight: 10
       format_type: tab
       format_settings:
+        classes: ''
+        id: ''
         formatter: closed
         description: ''
         required_fields: true
-        id: ''
-        classes: ''
-      label: Specimen
-      region: content
     group_image:
       children:
         - acquisitiondatetime
@@ -67,103 +67,103 @@ third_party_settings:
         - lossyimagecompressionratio
         - lossyimagecompressionmethod
         - manufacturer
+      label: Image
+      region: content
       parent_name: group_tabbers
       weight: 8
       format_type: tab
       format_settings:
-        id: ''
         classes: ''
+        id: ''
         formatter: open
         description: ''
         required_fields: true
-      label: Image
-      region: content
     group_subject:
       children:
         - patientid
+      label: Subject
+      region: content
       parent_name: group_tabbers
       weight: 9
       format_type: tab
       format_settings:
-        id: ''
         classes: ''
+        id: ''
         formatter: closed
         description: ''
         required_fields: true
-      label: Subject
-      region: content
 id: node.wsi.default
 targetEntityType: node
 bundle: wsi
 mode: default
 content:
   acquisitiondatetime:
+    type: datetime_default
     weight: 15
+    region: content
     settings: {  }
     third_party_settings: {  }
-    type: datetime_default
-    region: content
   clinicaltrialsubjectid:
+    type: string_textfield
     weight: 4
+    region: content
     settings:
       size: 64
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   field_collection:
+    type: options_select
     weight: 1
+    region: content
     settings: {  }
     third_party_settings: {  }
-    type: options_select
-    region: content
   field_wsiimage:
+    type: file_generic
     weight: 2
+    region: content
     settings:
       progress_indicator: throbber
     third_party_settings: {  }
-    type: file_generic
-    region: content
   imageid:
+    type: string_textfield
     weight: 6
+    region: content
     settings:
       size: 16
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   lossyimagecompression:
+    type: string_textfield
     weight: 18
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   lossyimagecompressionmethod:
+    type: string_textfield
     weight: 20
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   lossyimagecompressionratio:
+    type: string_textfield
     weight: 19
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   manufacturer:
+    type: string_textfield
     weight: 21
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   moderation_state:
     type: moderation_state_default
     weight: 0
@@ -171,35 +171,35 @@ content:
     settings: {  }
     third_party_settings: {  }
   patientid:
+    type: string_textfield
     weight: 6
+    region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   referencepixelphysicalvaluex:
+    type: number
     weight: 16
+    region: content
     settings:
       placeholder: ''
     third_party_settings: {  }
-    type: number
-    region: content
   referencepixelphysicalvaluey:
+    type: number
     weight: 17
+    region: content
     settings:
       placeholder: ''
     third_party_settings: {  }
-    type: number
-    region: content
   studyid:
+    type: string_textfield
     weight: 3
+    region: content
     settings:
       size: 16
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
-    region: content
   title:
     type: string_textfield
     weight: 0

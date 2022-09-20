@@ -36,7 +36,19 @@ However, we recommend in any case that you contact your organization's directory
 maintainer, since their help can often save you a significant amount of time in
 debugging.
 
-### General LDAP resources
+## Extending this module and custom development
+
+If your use-case isn't quite covered by this module, you might require some
+custom development. Most of these customizations should be able to be done by
+hooks, see for example ldap_user.api.php or ldap_servers.api.php for ways
+to integrate with provisioning users, or adjusting mappings on more complex
+data structures.
+
+If your site uses a custom login form, the LDAP module will likely always return
+that credentials are incorrect, have a look at ldap_user.module for what you
+need or help us in making that integration independent of the specific form.
+
+## General LDAP resources
 
 * Documentation from the PHP project on its
 [LDAP implemtation](https://secure.php.net/manual/en/book.ldap.php)

@@ -13,25 +13,24 @@ namespace Symfony\Component\Serializer\Tests\Encoder;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Encoder\ChainEncoder;
+use Symfony\Component\Serializer\Encoder\ContextAwareEncoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\NormalizationAwareInterface;
+use Symfony\Component\Serializer\Exception\RuntimeException;
 
 class ChainEncoderTest extends TestCase
 {
-    const FORMAT_1 = 'format1';
-    const FORMAT_2 = 'format2';
-    const FORMAT_3 = 'format3';
+    private const FORMAT_1 = 'format1';
+    private const FORMAT_2 = 'format2';
+    private const FORMAT_3 = 'format3';
 
     private $chainEncoder;
     private $encoder1;
     private $encoder2;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->encoder1 = $this
-            ->getMockBuilder('Symfony\Component\Serializer\Encoder\EncoderInterface')
-            ->getMock();
-
+        $this->encoder1 = $this->createMock(ContextAwareEncoderInterface::class);
         $this->encoder1
             ->method('supportsEncoding')
             ->willReturnMap([
@@ -39,18 +38,18 @@ class ChainEncoderTest extends TestCase
                 [self::FORMAT_2, [], false],
                 [self::FORMAT_3, [], false],
                 [self::FORMAT_3, ['foo' => 'bar'], true],
+                [self::FORMAT_3, ['foo' => 'bar2'], false],
             ]);
 
-        $this->encoder2 = $this
-            ->getMockBuilder('Symfony\Component\Serializer\Encoder\EncoderInterface')
-            ->getMock();
-
+        $this->encoder2 = $this->createMock(EncoderInterface::class);
         $this->encoder2
             ->method('supportsEncoding')
             ->willReturnMap([
                 [self::FORMAT_1, [], false],
                 [self::FORMAT_2, [], true],
                 [self::FORMAT_3, [], false],
+                [self::FORMAT_3, ['foo' => 'bar'], false],
+                [self::FORMAT_3, ['foo' => 'bar2'], true],
             ]);
 
         $this->chainEncoder = new ChainEncoder([$this->encoder1, $this->encoder2]);
@@ -58,23 +57,39 @@ class ChainEncoderTest extends TestCase
 
     public function testSupportsEncoding()
     {
+        $this->encoder1
+            ->method('encode')
+            ->willReturn('result1');
+        $this->encoder2
+            ->method('encode')
+            ->willReturn('result2');
+
         $this->assertTrue($this->chainEncoder->supportsEncoding(self::FORMAT_1));
+        $this->assertEquals('result1', $this->chainEncoder->encode('', self::FORMAT_1, []));
+
         $this->assertTrue($this->chainEncoder->supportsEncoding(self::FORMAT_2));
+        $this->assertEquals('result2', $this->chainEncoder->encode('', self::FORMAT_2, []));
+
         $this->assertFalse($this->chainEncoder->supportsEncoding(self::FORMAT_3));
+
         $this->assertTrue($this->chainEncoder->supportsEncoding(self::FORMAT_3, ['foo' => 'bar']));
+        $this->assertEquals('result1', $this->chainEncoder->encode('', self::FORMAT_3, ['foo' => 'bar']));
+
+        $this->assertTrue($this->chainEncoder->supportsEncoding(self::FORMAT_3, ['foo' => 'bar2']));
+        $this->assertEquals('result2', $this->chainEncoder->encode('', self::FORMAT_3, ['foo' => 'bar2']));
     }
 
     public function testEncode()
     {
         $this->encoder1->expects($this->never())->method('encode');
-        $this->encoder2->expects($this->once())->method('encode');
+        $this->encoder2->expects($this->once())->method('encode')->willReturn('foo:123');
 
-        $this->chainEncoder->encode(['foo' => 123], self::FORMAT_2);
+        $this->assertSame('foo:123', $this->chainEncoder->encode(['foo' => 123], self::FORMAT_2));
     }
 
     public function testEncodeUnsupportedFormat()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\RuntimeException');
+        $this->expectException(RuntimeException::class);
         $this->chainEncoder->encode(['foo' => 123], self::FORMAT_3);
     }
 
@@ -95,7 +110,7 @@ class ChainEncoderTest extends TestCase
 
 class NormalizationAwareEncoder implements EncoderInterface, NormalizationAwareInterface
 {
-    public function supportsEncoding($format)
+    public function supportsEncoding($format): bool
     {
         return true;
     }

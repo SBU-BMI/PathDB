@@ -12,7 +12,7 @@
    */
   Drupal.behaviors.views_bulk_operations = {
     attach: function (context, settings) {
-      $('.vbo-view-form').once('vbo-init').each(Drupal.viewsBulkOperationsFrontUi);
+      once('vbo-init', '.vbo-view-form', context).forEach(Drupal.viewsBulkOperationsFrontUi);
     }
   };
 
@@ -23,7 +23,9 @@
     view_id: '',
     display_id: '',
     list: {},
-    $placeholder: null,
+    $summary: null,
+    $actionSelect: null,
+    vbo_form: null,
 
     /**
      * Bind event handlers to an element.
@@ -54,6 +56,38 @@
       }
     },
 
+    bindCheckboxes: function () {
+      var selectionObject = this;
+      var checkboxes = $('.form-checkbox', this.vbo_form);
+      checkboxes.on('change', function (event) {
+        selectionObject.toggleButtonsState();
+      });
+    },
+
+    toggleButtonsState: function() {
+      // If no rows are checked, disable any form submit actions.
+      var checkedCheckboxes = $('.form-checkbox:checked', this.vbo_form);
+      var buttons = $('[id^="edit-actions"] input[type="submit"], [id^="edit-actions"] button[type="submit"]', this.vbo_form);
+      var selectedAjaxItems = $('.vbo-info-list-wrapper li', this.vbo_form);
+      var anyItemsSelected = selectedAjaxItems.length || checkedCheckboxes.length;
+      if (this.$actionSelect.length) {
+        var has_selection = anyItemsSelected && this.$actionSelect.val() !== '';
+        buttons.prop('disabled', !has_selection);
+      }
+      else {
+        buttons.prop('disabled', !anyItemsSelected);
+      }
+    },
+
+    bindActionSelect: function () {
+      if (this.$actionSelect.length) {
+        var selectionObject = this;
+        this.$actionSelect.on('change', function (event) {
+          selectionObject.toggleButtonsState();
+        });
+      }
+    },
+
     /**
      * Perform an AJAX request to update selection.
      *
@@ -68,6 +102,7 @@
       if (this.view_id.length && this.display_id.length) {
         // TODO: prevent form submission when ajaxing.
 
+        var selectionObject = this;
         var list = {}, op = '';
         if (index === 'selection_method_change') {
           var op = state ? 'method_exclude' : 'method_include';
@@ -85,7 +120,7 @@
           op = state ? 'add' : 'remove';
         }
 
-        var $placeholder = this.$placeholder;
+        var $summary = this.$summary;
         var $selectionInfo = this.$selectionInfo;
         var target_uri = drupalSettings.path.baseUrl + drupalSettings.path.pathPrefix + 'views-bulk-operations/ajax/' + this.view_id + '/' + this.display_id;
 
@@ -96,8 +131,9 @@
             op: op
           },
           success: function (data) {
-            $selectionInfo.html($(data.selection_info).html());
-            $placeholder.text(data.count);
+            $selectionInfo.html(data.selection_info);
+            $summary.text(Drupal.formatPlural(data.count, 'Selected 1 item', 'Selected @count items'));
+            selectionObject.toggleButtonsState();
           }
         });
       }
@@ -107,16 +143,18 @@
   /**
    * Callback used in {@link Drupal.behaviors.views_bulk_operations}.
    */
-  Drupal.viewsBulkOperationsFrontUi = function () {
-    var $vboForm = $(this);
+  Drupal.viewsBulkOperationsFrontUi = function (element) {
+    var $vboForm = $(element);
     var $viewsTables = $('.vbo-table', $vboForm);
     var $primarySelectAll = $('.vbo-select-all', $vboForm);
     var tableSelectAll = [];
+    Drupal.viewsBulkOperationsSelection.vbo_form = $vboForm;
+    Drupal.viewsBulkOperationsSelection.$actionSelect = $('select[name="action"]', $vboForm);
 
     // When grouping is enabled, there can be multiple tables.
     if ($viewsTables.length) {
       $viewsTables.each(function (index) {
-        tableSelectAll[index] = $(this).find('.select-all input').first();
+        tableSelectAll[index] = $vboForm.find('.select-all input').first();
       });
       var $tableSelectAll = $(tableSelectAll);
     }
@@ -126,10 +164,9 @@
     if ($multiSelectElement.length) {
 
       Drupal.viewsBulkOperationsSelection.$selectionInfo = $multiSelectElement.find('.vbo-info-list-wrapper').first();
-      Drupal.viewsBulkOperationsSelection.$placeholder = $multiSelectElement.find('.placeholder').first();
+      Drupal.viewsBulkOperationsSelection.$summary = $multiSelectElement.find('summary').first();
       Drupal.viewsBulkOperationsSelection.view_id = $multiSelectElement.attr('data-view-id');
       Drupal.viewsBulkOperationsSelection.display_id = $multiSelectElement.attr('data-display-id');
-      Drupal.viewsBulkOperationsSelection.vbo_form = $vboForm;
 
       // Get the list of all checkbox values and add AJAX callback.
       Drupal.viewsBulkOperationsSelection.list = [];
@@ -194,6 +231,9 @@
         Drupal.viewsBulkOperationsSelection.bindEventHandlers($primarySelectAll, 'selection_method_change');
       }
     }
+    Drupal.viewsBulkOperationsSelection.bindCheckboxes();
+    Drupal.viewsBulkOperationsSelection.bindActionSelect();
+    Drupal.viewsBulkOperationsSelection.toggleButtonsState();
   };
 
 })(jQuery, Drupal);

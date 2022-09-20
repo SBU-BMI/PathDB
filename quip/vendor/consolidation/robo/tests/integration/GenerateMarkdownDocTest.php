@@ -1,26 +1,26 @@
 <?php
 namespace Robo;
 
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Robo\Traits\TestTasksTrait;
 
 class GenerateMarkdownDocTest extends TestCase
 {
     use TestTasksTrait;
-    use Collection\loadTasks;
-    use Task\Development\loadTasks;
-    use Task\File\loadTasks;
+    use Collection\Tasks;
+    use Task\Development\Tasks;
+    use Task\File\Tasks;
 
     protected $fixtures;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->fixtures = new Fixtures();
         $this->initTestTasksTrait();
         $this->fixtures->createAndCdToSandbox();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->fixtures->cleanup();
     }
@@ -32,7 +32,7 @@ class GenerateMarkdownDocTest extends TestCase
         include $sourceFile;
         $this->assertTrue(class_exists('TestedRoboTask'));
 
-        $collection = $this->collectionBuilder();
+        $collection = $this->collectionBuilderForTest();
         $taskGenerator = $collection->taskGenDoc("TestedRoboTask.md");
         $taskGenerator->filterClasses(function (\ReflectionClass $r) {
             return !($r->isAbstract() || $r->isTrait()) && $r->implementsInterface('Robo\Contract\TaskInterface');
@@ -92,9 +92,9 @@ class GenerateMarkdownDocTest extends TestCase
         $this->assertFileExists('TestedRoboTask.md');
 
         $contents = file_get_contents('TestedRoboTask.md');
-        $this->assertContains('A test task file. Used for testig documentation generation.', $contents);
-        $this->assertContains('taskTestedRoboTask', $contents);
-        $this->assertContains('Set the destination file', $contents);
+        $this->assertStringContainsString('A test task file. Used for testig documentation generation.', $contents);
+        $this->assertStringContainsString('taskTestedRoboTask', $contents);
+        $this->assertStringContainsString('Set the destination file', $contents);
     }
 
 }

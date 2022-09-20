@@ -22,11 +22,11 @@ class QueryEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
     $entity_type_id = $entity_type->id();
 
     if ($collection_route = $this->getCollectionRoute($entity_type)) {
-      $collection->add("entity.{$entity_type_id}.collection", $collection_route);
+      $collection->add("entity.$entity_type_id.collection", $collection_route);
     }
 
     if ($add_form_route = $this->getAddFormRoute($entity_type)) {
-      $collection->add("entity.{$entity_type_id}.add_form", $add_form_route);
+      $collection->add("entity.$entity_type_id.add_form", $add_form_route);
     }
 
     return $collection;
@@ -80,7 +80,7 @@ class QueryEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
       }
       $route
         ->setDefaults([
-          '_entity_form' => "{$entity_type_id}.{$operation}",
+          '_entity_form' => "$entity_type_id.$operation",
           '_title' => "Add {$entity_type->getLabel()}",
         ])
         ->setRequirement('_entity_create_access', $entity_type_id)

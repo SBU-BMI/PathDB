@@ -1,8 +1,0 @@
-moderated-content-bulk-publish:
-  js:
-    js/moderated_content_bulk_publish.js: {}
-  dependencies:
-    - core/jquery
-    - core/drupal
-    - core/drupalSettings
-    

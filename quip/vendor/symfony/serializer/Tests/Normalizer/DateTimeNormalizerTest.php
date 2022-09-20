@@ -12,6 +12,8 @@
 namespace Symfony\Component\Serializer\Tests\Normalizer;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 /**
@@ -24,7 +26,7 @@ class DateTimeNormalizerTest extends TestCase
      */
     private $normalizer;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->normalizer = new DateTimeNormalizer();
     }
@@ -49,12 +51,37 @@ class DateTimeNormalizerTest extends TestCase
 
     public function testNormalizeUsingFormatPassedInConstructor()
     {
-        $this->assertEquals('16', (new DateTimeNormalizer('y'))->normalize(new \DateTime('2016/01/01', new \DateTimeZone('UTC'))));
+        $this->doTestNormalizeUsingFormatPassedInConstructor();
+    }
+
+    public function testLegacyNormalizeUsingFormatPassedInConstructor()
+    {
+        $this->doTestNormalizeUsingFormatPassedInConstructor(true);
+    }
+
+    private function doTestNormalizeUsingFormatPassedInConstructor(bool $legacy = false)
+    {
+        $normalizer = $legacy ? new DateTimeNormalizer('y') : new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => 'y']);
+        $this->assertEquals('16', $normalizer->normalize(new \DateTime('2016/01/01', new \DateTimeZone('UTC'))));
     }
 
     public function testNormalizeUsingTimeZonePassedInConstructor()
     {
-        $normalizer = new DateTimeNormalizer(\DateTime::RFC3339, new \DateTimeZone('Japan'));
+        $this->doTestNormalizeUsingTimeZonePassedInConstructor();
+    }
+
+    public function testLegacyNormalizeUsingTimeZonePassedInConstructor()
+    {
+        $this->doTestNormalizeUsingTimeZonePassedInConstructor(true);
+    }
+
+    private function doTestNormalizeUsingTimeZonePassedInConstructor(bool $legacy = false)
+    {
+        if ($legacy) {
+            $normalizer = new DateTimeNormalizer(\DateTime::RFC3339, new \DateTimeZone('Japan'));
+        } else {
+            $normalizer = new DateTimeNormalizer([DateTimeNormalizer::TIMEZONE_KEY => new \DateTimeZone('Japan')]);
+        }
 
         $this->assertSame('2016-12-01T00:00:00+09:00', $normalizer->normalize(new \DateTime('2016/12/01', new \DateTimeZone('Japan'))));
         $this->assertSame('2016-12-01T09:00:00+09:00', $normalizer->normalize(new \DateTime('2016/12/01', new \DateTimeZone('UTC'))));
@@ -156,7 +183,7 @@ class DateTimeNormalizerTest extends TestCase
 
     public function testNormalizeInvalidObjectThrowsException()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The object must implement the "\DateTimeInterface".');
         $this->normalizer->normalize(new \stdClass());
     }
@@ -174,13 +201,24 @@ class DateTimeNormalizerTest extends TestCase
         $this->assertEquals(new \DateTimeImmutable('2016/01/01', new \DateTimeZone('UTC')), $this->normalizer->denormalize('2016-01-01T00:00:00+00:00', \DateTimeInterface::class));
         $this->assertEquals(new \DateTimeImmutable('2016/01/01', new \DateTimeZone('UTC')), $this->normalizer->denormalize('2016-01-01T00:00:00+00:00', \DateTimeImmutable::class));
         $this->assertEquals(new \DateTime('2016/01/01', new \DateTimeZone('UTC')), $this->normalizer->denormalize('2016-01-01T00:00:00+00:00', \DateTime::class));
+        $this->assertEquals(new \DateTime('2016/01/01', new \DateTimeZone('UTC')), $this->normalizer->denormalize('  2016-01-01T00:00:00+00:00  ', \DateTime::class));
     }
 
     public function testDenormalizeUsingTimezonePassedInConstructor()
     {
+        $this->doTestDenormalizeUsingTimezonePassedInConstructor();
+    }
+
+    public function testLegacyDenormalizeUsingTimezonePassedInConstructor()
+    {
+        $this->doTestDenormalizeUsingTimezonePassedInConstructor(true);
+    }
+
+    private function doTestDenormalizeUsingTimezonePassedInConstructor(bool $legacy = false)
+    {
         $timezone = new \DateTimeZone('Japan');
         $expected = new \DateTime('2016/12/01 17:35:00', $timezone);
-        $normalizer = new DateTimeNormalizer(null, $timezone);
+        $normalizer = $legacy ? new DateTimeNormalizer(null, $timezone) : new DateTimeNormalizer([DateTimeNormalizer::TIMEZONE_KEY => $timezone]);
 
         $this->assertEquals($expected, $normalizer->denormalize('2016.12.01 17:35:00', \DateTime::class, null, [
             DateTimeNormalizer::FORMAT_KEY => 'Y.m.d H:i:s',
@@ -235,27 +273,63 @@ class DateTimeNormalizerTest extends TestCase
 
     public function testDenormalizeInvalidDataThrowsException()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
+        $this->expectException(UnexpectedValueException::class);
         $this->normalizer->denormalize('invalid date', \DateTimeInterface::class);
     }
 
     public function testDenormalizeNullThrowsException()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
+        $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('The data is either an empty string or null, you should pass a string that can be parsed with the passed format or a valid DateTime string.');
         $this->normalizer->denormalize(null, \DateTimeInterface::class);
     }
 
     public function testDenormalizeEmptyStringThrowsException()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
+        $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('The data is either an empty string or null, you should pass a string that can be parsed with the passed format or a valid DateTime string.');
         $this->normalizer->denormalize('', \DateTimeInterface::class);
     }
 
+    public function testDenormalizeStringWithSpacesOnlyThrowsAnException()
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('The data is either an empty string or null, you should pass a string that can be parsed with the passed format or a valid DateTime string.');
+        $this->normalizer->denormalize('  ', \DateTimeInterface::class);
+    }
+
+    public function testDenormalizeDateTimeStringWithSpacesUsingFormatPassedInContextThrowsAnException()
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage("Parsing datetime string \"  2016.01.01  \" using format \"Y.m.d|\" resulted in 2 errors: \nat position 0: Unexpected data found.\nat position 12: Trailing data");
+        $this->normalizer->denormalize('  2016.01.01  ', \DateTime::class, null, [DateTimeNormalizer::FORMAT_KEY => 'Y.m.d|']);
+    }
+
+    public function testDenormalizeDateTimeStringWithDefaultContextFormat()
+    {
+        $format = 'd/m/Y';
+        $string = '01/10/2018';
+
+        $normalizer = new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => $format]);
+        $denormalizedDate = $normalizer->denormalize($string, \DateTimeInterface::class);
+
+        $this->assertSame('01/10/2018', $denormalizedDate->format($format));
+    }
+
+    public function testDenormalizeDateTimeStringWithDefaultContextAllowsErrorFormat()
+    {
+        $format = 'd/m/Y'; // the default format
+        $string = '2020-01-01'; // the value which is in the wrong format, but is accepted because of `new \DateTime` in DateTimeNormalizer::denormalize
+
+        $normalizer = new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => $format]);
+        $denormalizedDate = $normalizer->denormalize($string, \DateTimeInterface::class);
+
+        $this->assertSame('2020-01-01', $denormalizedDate->format('Y-m-d'));
+    }
+
     public function testDenormalizeFormatMismatchThrowsException()
     {
-        $this->expectException('Symfony\Component\Serializer\Exception\UnexpectedValueException');
+        $this->expectException(UnexpectedValueException::class);
         $this->normalizer->denormalize('2016-01-01T00:00:00+00:00', \DateTimeInterface::class, null, [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d|']);
     }
 }

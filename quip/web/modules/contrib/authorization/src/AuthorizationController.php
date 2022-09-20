@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization;
 
 use Drupal\authorization\Entity\AuthorizationProfile;
@@ -8,7 +10,7 @@ use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class AuthorizationController.
+ * Authorization controller.
  */
 class AuthorizationController {
 
@@ -46,7 +48,10 @@ class AuthorizationController {
   /**
    * Constructs a new AuthorizationController object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger_channel_authorization) {
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    LoggerInterface $logger_channel_authorization
+  ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger_channel_authorization;
   }
@@ -69,10 +74,10 @@ class AuthorizationController {
    *
    * Saves the user account.
    *
-   * @param string $profile_id
+   * @param string|int $profile_id
    *   Authorization profile to act upon.
    */
-  public function setIndividualProfile($profile_id) {
+  public function setIndividualProfile($profile_id): void {
     /** @var \Drupal\authorization\Entity\AuthorizationProfile $profile */
     $profile = $this->entityTypeManager->getStorage('authorization_profile')->load($profile_id);
     if ($profile) {
@@ -88,8 +93,11 @@ class AuthorizationController {
    *
    * Saves the user account.
    */
-  public function setAllProfiles() {
-    $queryResults = $this->entityTypeManager->getStorage('authorization_profile')->getQuery()->execute();
+  public function setAllProfiles(): void {
+    $queryResults = $this->entityTypeManager
+      ->getStorage('authorization_profile')
+      ->getQuery()
+      ->execute();
     foreach ($queryResults as $key => $value) {
       $this->setIndividualProfile($key);
     }
@@ -105,7 +113,7 @@ class AuthorizationController {
    * @param string $profile_id
    *   Authorization profile to act upon.
    */
-  public function queryIndividualProfile($profile_id) {
+  public function queryIndividualProfile(string $profile_id): void {
     /** @var \Drupal\authorization\Entity\AuthorizationProfile $profile */
     $profile = $this->entityTypeManager->getStorage('authorization_profile')->load($profile_id);
     if ($profile) {
@@ -124,7 +132,7 @@ class AuthorizationController {
    *
    * @see queryIndividualProfile()
    */
-  public function queryAllProfiles() {
+  public function queryAllProfiles(): void {
     $queryResults = $this->entityTypeManager->getStorage('authorization_profile')->getQuery()->execute();
     foreach ($queryResults as $key => $value) {
       $this->queryIndividualProfile($key);
@@ -139,7 +147,7 @@ class AuthorizationController {
    * @param bool $save_user
    *   Save the user in the end.
    */
-  private function processAuthorizations(AuthorizationProfile $profile, $save_user) {
+  private function processAuthorizations(AuthorizationProfile $profile, $save_user): void {
     if ($profile->checkConditions()) {
       $this->processedAuthorizations[] = $profile->grantsAndRevokes($this->user, $save_user);
     }
@@ -151,7 +159,7 @@ class AuthorizationController {
    * @return AuthorizationResponse[]
    *   Authorizations by human-readable label.
    */
-  public function getProcessedAuthorizations() {
+  public function getProcessedAuthorizations(): array {
     return $this->processedAuthorizations;
   }
 
@@ -162,7 +170,7 @@ class AuthorizationController {
    * instead of set()) this allows one to clear the list of processed
    * authorizations.
    */
-  public function clearAuthorizations() {
+  public function clearAuthorizations(): void {
     $this->processedAuthorizations = [];
   }
 

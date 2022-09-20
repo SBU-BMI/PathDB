@@ -61,7 +61,8 @@
 {%
   set description_classes = [
     'w3-small',
-    'w3-section',
+    'w3-row',
+    'description',
     description_display == 'invisible' ? 'visually-hidden',
   ]
 %}
@@ -85,8 +86,8 @@
     {{ label }}
   {% endif %}
   {% if errors %}
-    <div class="w3-section w3-pale-red w3-leftbar w3-border w3-border-red form-item--error-message">
-      {{ errors }}
+    <div class="w3-panel w3-pale-red w3-leftbar w3-border w3-border-red form-item--error-message">
+      <strong>{{ errors }}</strong>
     </div>
   {% endif %}
   {% if description_display in ['after', 'invisible'] and description.content %}

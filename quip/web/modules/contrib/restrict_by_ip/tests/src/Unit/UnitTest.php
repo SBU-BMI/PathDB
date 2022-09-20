@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\Tests\restrict_by_ip\Unit;
 
 use Drupal\Tests\UnitTestCase;
@@ -12,10 +13,12 @@ use Drupal\restrict_by_ip\Exception\InvalidIPException;
  */
 class UnitTest extends UnitTestCase {
 
-  public function setUp() {
-    parent::setUp();
-  }
-
+  /**
+   * Invalid IPs.
+   *
+   * @return array
+   *   Invalid IPs and reason.
+   */
   public function invalidIpProvider() {
     return [
       ['string', 'Not an IP address'],
@@ -33,6 +36,12 @@ class UnitTest extends UnitTestCase {
     ];
   }
 
+  /**
+   * Valid IPs.
+   *
+   * @return array
+   *   Valid IPs and reason.
+   */
   public function validIpProvider() {
     return [
       ['127.0.0.0/8', 'Valid /8'],
@@ -43,17 +52,28 @@ class UnitTest extends UnitTestCase {
   }
 
   /**
+   * Tests IP fail validation.
+   *
+   * @param string $ip
+   *   IP address to be tested.
+   *
    * @dataProvider invalidIpProvider
-   * @expectedException \Drupal\restrict_by_ip\Exception\InvalidIPException
    */
   public function testIpFailValidation($ip) {
+    $this->expectException(InvalidIPException::class);
     IPTools::validateIP($ip);
   }
 
   /**
+   * Tests IP valid validation.
+   *
+   * @param string $ip
+   *   IP address to be tested.
+   *
    * @dataProvider validIpProvider
    */
   public function testIpPassValidation($ip) {
     $this->assertNull(IPTools::validateIP($ip));
   }
+
 }

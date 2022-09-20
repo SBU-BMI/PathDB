@@ -25,82 +25,12 @@ base_table: node_field_data
 base_field: nid
 display:
   default:
-    display_plugin: default
     id: default
     display_title: Master
+    display_plugin: default
     position: 0
     display_options:
-      access:
-        type: role
-        options:
-          role:
-            authenticated: authenticated
-      cache:
-        type: tag
-        options: {  }
-      query:
-        type: views_query
-        options:
-          disable_sql_rewrite: false
-          distinct: false
-          replica: false
-          query_comment: ''
-          query_tags: {  }
-      exposed_form:
-        type: basic
-        options:
-          submit_button: Apply
-          reset_button: false
-          reset_button_label: Reset
-          exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
-          sort_asc_label: Asc
-          sort_desc_label: Desc
-      pager:
-        type: mini
-        options:
-          items_per_page: 10
-          offset: 0
-          id: 0
-          total_pages: null
-          expose:
-            items_per_page: false
-            items_per_page_label: 'Items per page'
-            items_per_page_options: '5, 10, 25, 50'
-            items_per_page_options_all: false
-            items_per_page_options_all_label: '- All -'
-            offset: false
-            offset_label: Offset
-          tags:
-            previous: ‹‹
-            next: ››
-      style:
-        type: table
-        options:
-          grouping: {  }
-          row_class: ''
-          default_row_class: true
-          override: true
-          sticky: false
-          caption: ''
-          summary: ''
-          description: ''
-          columns:
-            title: title
-          info:
-            title:
-              sortable: false
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-          default: '-1'
-          empty_table: false
-      row:
-        type: 'entity:node'
-        options:
-          view_mode: teaser
+      title: idlookup
       fields:
         field_collection:
           id: field_collection
@@ -109,6 +39,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: field
           label: Collection
           exclude: false
           alter:
@@ -164,7 +95,6 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          plugin_id: field
         studyid:
           id: studyid
           table: node__studyid
@@ -172,6 +102,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: field
           label: 'Study ID'
           exclude: false
           alter:
@@ -227,7 +158,6 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          plugin_id: field
         clinicaltrialsubjectid:
           id: clinicaltrialsubjectid
           table: node__clinicaltrialsubjectid
@@ -235,6 +165,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: field
           label: 'Subject ID'
           exclude: false
           alter:
@@ -290,7 +221,6 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          plugin_id: field
         imageid:
           id: imageid
           table: node__imageid
@@ -298,6 +228,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: field
           label: 'Image ID'
           exclude: false
           alter:
@@ -353,33 +284,43 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-          plugin_id: field
-      filters:
-        status:
-          value: '1'
-          table: node_field_data
-          field: status
-          plugin_id: boolean
-          entity_type: node
-          entity_field: status
-          id: status
+      pager:
+        type: mini
+        options:
+          offset: 0
+          items_per_page: 10
+          total_pages: null
+          id: 0
+          tags:
+            next: ››
+            previous: ‹‹
           expose:
-            operator: ''
-            operator_limit_selection: false
-            operator_list: {  }
-          group: 1
-        type:
-          id: type
-          table: node_field_data
-          field: type
-          value:
-            wsi: wsi
-          entity_type: node
-          entity_field: type
-          plugin_id: bundle
-          expose:
-            operator_limit_selection: false
-            operator_list: {  }
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+      exposed_form:
+        type: basic
+        options:
+          submit_button: Apply
+          reset_button: false
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: true
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      access:
+        type: role
+        options:
+          role:
+            authenticated: authenticated
+      cache:
+        type: tag
+        options: {  }
+      empty: {  }
       sorts:
         field_collection_target_id:
           id: field_collection_target_id
@@ -388,11 +329,12 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: standard
           order: ASC
-          exposed: false
           expose:
             label: ''
-          plugin_id: standard
+            field_identifier: field_collection_target_id
+          exposed: false
         clinicaltrialsubjectid_value:
           id: clinicaltrialsubjectid_value
           table: node__clinicaltrialsubjectid
@@ -400,11 +342,12 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: standard
           order: ASC
-          exposed: false
           expose:
             label: ''
-          plugin_id: standard
+            field_identifier: clinicaltrialsubjectid_value
+          exposed: false
         studyid_value:
           id: studyid_value
           table: node__studyid
@@ -412,11 +355,12 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: standard
           order: ASC
-          exposed: false
           expose:
             label: ''
-          plugin_id: standard
+            field_identifier: studyid_value
+          exposed: false
         imageid_value:
           id: imageid_value
           table: node__imageid
@@ -424,16 +368,12 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: standard
           order: ASC
-          exposed: false
           expose:
             label: ''
-          plugin_id: standard
-      title: idlookup
-      header: {  }
-      footer: {  }
-      empty: {  }
-      relationships: {  }
+            field_identifier: imageid_value
+          exposed: false
       arguments:
         term_node_taxonomy_name_depth:
           id: term_node_taxonomy_name_depth
@@ -442,6 +382,8 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          entity_type: node
+          plugin_id: taxonomy_index_name_depth
           default_action: ignore
           exception:
             value: all
@@ -456,8 +398,8 @@ display:
           summary_options:
             base_path: ''
             count: true
-            items_per_page: 25
             override: false
+            items_per_page: 25
           summary:
             sort_order: asc
             number_of_records: 0
@@ -467,13 +409,11 @@ display:
             type: none
             fail: 'not found'
           validate_options: {  }
+          break_phrase: false
           depth: '0'
+          use_taxonomy_term_path: false
           vocabularies:
             collections: collections
-          break_phrase: false
-          use_taxonomy_term_path: false
-          entity_type: node
-          plugin_id: taxonomy_index_name_depth
         studyid_value:
           id: studyid_value
           table: node__studyid
@@ -486,6 +426,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: string
           default_action: ignore
           exception:
             value: all
@@ -500,8 +441,8 @@ display:
           summary_options:
             base_path: ''
             count: true
-            items_per_page: 25
             override: false
+            items_per_page: 25
           summary:
             sort_order: asc
             number_of_records: 0
@@ -517,7 +458,6 @@ display:
           path_case: none
           transform_dash: false
           break_phrase: false
-          plugin_id: string
         imageid_value:
           id: imageid_value
           table: node__imageid
@@ -525,6 +465,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
+          plugin_id: string
           default_action: ignore
           exception:
             value: all
@@ -539,8 +480,8 @@ display:
           summary_options:
             base_path: ''
             count: true
-            items_per_page: 25
             override: false
+            items_per_page: 25
           summary:
             sort_order: asc
             number_of_records: 0
@@ -556,7 +497,70 @@ display:
           path_case: none
           transform_dash: false
           break_phrase: false
-          plugin_id: string
+      filters:
+        status:
+          id: status
+          table: node_field_data
+          field: status
+          entity_type: node
+          entity_field: status
+          plugin_id: boolean
+          value: '1'
+          group: 1
+          expose:
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+          value:
+            wsi: wsi
+          expose:
+            operator_limit_selection: false
+            operator_list: {  }
+      style:
+        type: table
+        options:
+          grouping: {  }
+          row_class: ''
+          default_row_class: true
+          columns:
+            title: title
+          default: '-1'
+          info:
+            title:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+          override: true
+          sticky: false
+          summary: ''
+          empty_table: false
+          caption: ''
+          description: ''
+      row:
+        type: 'entity:node'
+        options:
+          view_mode: teaser
+      query:
+        type: views_query
+        options:
+          query_comment: ''
+          disable_sql_rewrite: false
+          distinct: false
+          replica: false
+          query_tags: {  }
+      relationships: {  }
+      header: {  }
+      footer: {  }
       display_extenders: {  }
     cache_metadata:
       max-age: -1
@@ -574,9 +578,9 @@ display:
         - 'config:field.storage.node.studyid'
         - extensions
   page_1:
-    display_plugin: page
     id: page_1
     display_title: Page
+    display_plugin: page
     position: 1
     display_options:
       display_extenders: {  }
@@ -597,19 +601,19 @@ display:
         - 'config:field.storage.node.studyid'
         - extensions
   rest_export_1:
-    display_plugin: rest_export
     id: rest_export_1
     display_title: 'REST export'
+    display_plugin: rest_export
     position: 2
     display_options:
-      display_extenders: {  }
-      path: idlookup
       style:
         type: serializer
         options:
           uses_fields: false
           formats:
             json: json
+      display_extenders: {  }
+      path: idlookup
       auth:
         - basic_auth
         - jwt_auth

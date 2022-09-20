@@ -37,6 +37,8 @@ $this->taskGitStack()
 * `exec($command)`   * `param string|string[]|CommandInterface` $command
 * `stopOnFail($stopOnFail = null)`   * `param bool` $stopOnFail
 * `result($result)` 
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
 
 ## HgStack
@@ -69,7 +71,10 @@ $this->hgStack
 * `exec($command)`   * `param string|string[]|CommandInterface` $command
 * `stopOnFail($stopOnFail = null)`   * `param bool` $stopOnFail
 * `result($result)` 
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
+
 
 ## SvnStack
 
@@ -102,5 +107,8 @@ $this->taskSvnStack('username', 'password')
 * `exec($command)`   * `param string|string[]|CommandInterface` $command
 * `stopOnFail($stopOnFail = null)`   * `param bool` $stopOnFail
 * `result($result)` 
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
+
 

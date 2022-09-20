@@ -1,7 +1,6 @@
 <?php
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
 class ProjectExtension implements ExtensionInterface
@@ -12,16 +11,16 @@ class ProjectExtension implements ExtensionInterface
         $configs = array_filter($configs);
 
         if ($configs) {
-            $config = call_user_func_array('array_merge', $configs);
+            $config = array_merge(...$configs);
         } else {
             $config = [];
         }
 
-        $configuration->setDefinition('project.service.bar', new Definition('FooClass'));
-        $configuration->setParameter('project.parameter.bar', isset($config['foo']) ? $config['foo'] : 'foobar');
+        $configuration->register('project.service.bar', 'FooClass')->setPublic(true);
+        $configuration->setParameter('project.parameter.bar', $config['foo'] ?? 'foobar');
 
-        $configuration->setDefinition('project.service.foo', new Definition('FooClass'));
-        $configuration->setParameter('project.parameter.foo', isset($config['foo']) ? $config['foo'] : 'foobar');
+        $configuration->register('project.service.foo', 'FooClass')->setPublic(true);
+        $configuration->setParameter('project.parameter.foo', $config['foo'] ?? 'foobar');
 
         return $configuration;
     }
@@ -31,12 +30,12 @@ class ProjectExtension implements ExtensionInterface
         return false;
     }
 
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return 'http://www.example.com/schema/project';
     }
 
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'project';
     }

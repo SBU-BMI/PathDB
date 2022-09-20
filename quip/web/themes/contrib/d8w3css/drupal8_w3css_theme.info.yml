@@ -1,19 +1,20 @@
-name: Drupal 8 W3CSS Theme
+name: W3CSS Theme V1
 core: 8.x
-description: 'W3.CSS is a modern CSS framework with built-in responsiveness. It is Smaller, faster, easier to learn and easier to use than other CSS frameworks.<br/>Developed & Designed by <strong><a target=_blank href=https://www.alaahaddad.com>Alaa Haddad</a></strong><br/>For theme <a target=_blank href=https://www.drupal.org/node/2866181>documentation</a><br/>To view a <a target=_blank href=http://www.drupal8-w3css-theme.flashwebcenter.com>live demo</a><br/>To view the <a target=_blank href=https://drupal8-w3css-theme.flashwebcenter.com/w3css-predefined-color-themes>color themes</a><br/>For theme issues please <a href=https://www.drupal.org/project/issues/d8w3css>create issue on drupal</a><br/><a target=_blank href=https://www.flashwebcenter.com>Drupal Development</a> and <a target=_blank href=https://www.drupalcare.com>Drupal Maintenance</a>'
+description: 'W3.CSS is a modern CSS framework with built-in responsiveness. It is Smaller, faster, easier to learn and easier to use than other CSS frameworks. <strong>V2 is available and it has more features.</strong><br/><strong>You can create unlimited UI design by using the <a target=_blank href=https://www.drupal.org/project/w3css_paragraphs>W3CSS Paragraphs.</strong></a><br/>Developed & Designed by <strong><a target=_blank href=https://www.alaahaddad.com>Alaa Haddad</a></strong><br/>For theme <a target=_blank href=https://www.drupal.org/node/2866181>documentation</a><br/>To view a <a target=_blank href=http://www.drupal8-w3css-theme.flashwebcenter.com>live demo</a><br/>To view the <a target=_blank href=https://drupal8-w3css-theme.flashwebcenter.com/w3css-predefined-color-themes>color themes</a><br/>For theme issues please <a href=https://www.drupal.org/project/issues/d8w3css>create issue on drupal</a><br/><a target=_blank href=https://www.flashwebcenter.com>Drupal Development</a> and <a target=_blank href=https://www.drupalcare.com>Drupal Maintenance</a>'
 package: W3CSS
 type: theme
 base theme: false
-core_version_requirement: ^8 || ^9
-# core: 8.x
+core_version_requirement: ^8 || ^9 || ^10
+
 #Libraries
 libraries:
   - drupal8_w3css_theme/w3-css
   - drupal8_w3css_theme/font-awesome
   - drupal8_w3css_theme/d8w3css-google-font-external
   - drupal8_w3css_theme/d8w3css-global-components
-  - drupal8_w3css_theme/d8w3css-match-height
   - drupal8_w3css_theme/d8w3css-full-opacity
+ckeditor_stylesheets:
+  - css/custom/w3-ckeditor-iframe.css
 
 #Regions
 regions:
@@ -40,7 +41,7 @@ regions:
   footer_menu: 'Footer Menu Container'
   auto_hidden_block: 'Auto Hidden Blocks'
 
-# Information added by Drupal.org packaging script on 2021-03-31
-version: '8.x-1.21'
+# Information added by Drupal.org packaging script on 2022-01-01
+version: '8.x-1.23'
 project: 'd8w3css'
-datestamp: 1617193770
+datestamp: 1641060173

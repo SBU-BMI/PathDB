@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\authorization\Form;
 
 use Drupal\Component\Utility\NestedArray;
@@ -103,17 +105,17 @@ class SubFormState implements FormStateInterface {
    * @param array $original
    *   The original array, belonging to the main form.
    *
-   * @return array
+   * @return array|null
    *   The corresponding array for the sub form, as a reference.
    */
-  protected function &applySubKeys(array &$original) {
+  protected function &applySubKeys(array &$original): ?array {
     return NestedArray::getValue($original, $this->subKeys);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function &getCompleteForm() {
+  public function &getCompleteForm(): array {
     return $this->applySubKeys($this->mainFormState->getCompleteForm());
   }
 
@@ -136,7 +138,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCacheableArray() {
+  public function getCacheableArray(): array {
     return [];
   }
 
@@ -161,7 +163,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function getResponse() {
+  public function getResponse(): ?Response {
     return $this->mainFormState->getResponse();
   }
 
@@ -289,7 +291,6 @@ class SubFormState implements FormStateInterface {
     if ($this->hasValue($key)) {
       return $this->values[$key];
     }
-    return FALSE;
   }
 
   /**
@@ -593,7 +594,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function isMethodType($method_type) {
+  public function isMethodType($method_type): bool {
     return $this->mainFormState->isMethodType($method_type);
   }
 
@@ -608,7 +609,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function isValidationEnforced() {
+  public function isValidationEnforced(): bool {
     return $this->mainFormState->isValidationEnforced();
   }
 
@@ -623,7 +624,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function isRedirectDisabled() {
+  public function isRedirectDisabled(): bool {
     return $this->mainFormState->isRedirectDisabled();
   }
 
@@ -683,7 +684,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRebuildInfo() {
+  public function getRebuildInfo(): array {
     return $this->mainFormState->getRebuildInfo();
   }
 
@@ -706,7 +707,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function getSubmitHandlers() {
+  public function getSubmitHandlers(): array {
     return $this->mainFormState->getSubmitHandlers();
   }
 
@@ -721,7 +722,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function isSubmitted() {
+  public function isSubmitted(): bool {
     return $this->mainFormState->isSubmitted();
   }
 
@@ -736,7 +737,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function getTemporary() {
+  public function getTemporary(): array {
     return $this->mainFormState->getTemporary();
   }
 
@@ -788,7 +789,7 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function getValidateHandlers() {
+  public function getValidateHandlers(): array {
     return $this->mainFormState->getValidateHandlers();
   }
 
@@ -803,14 +804,14 @@ class SubFormState implements FormStateInterface {
   /**
    * {@inheritdoc}
    */
-  public function isValidationComplete() {
+  public function isValidationComplete(): bool {
     return $this->mainFormState->isValidationComplete();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCleanValueKeys() {
+  public function getCleanValueKeys(): array {
     return $this->mainFormState->getCleanValueKeys();
   }
 

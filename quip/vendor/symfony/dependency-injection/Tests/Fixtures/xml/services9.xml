@@ -10,6 +10,7 @@
     <service id="foo" class="Bar\FooClass" public="true">
       <tag name="foo" foo="foo"/>
       <tag name="foo" bar="bar" baz="baz"/>
+      <tag name="nullable" bar="bar" baz=""/>
       <argument>foo</argument>
       <argument type="service" id="foo.baz"/>
       <argument type="collection">
@@ -97,7 +98,7 @@
     <service id="decorator_service" class="stdClass" public="true" decorates="decorated"/>
     <service id="decorator_service_with_name" class="stdClass" public="true" decorates="decorated" decoration-inner-name="decorated.pif-pouf"/>
     <service id="deprecated_service" class="stdClass" public="true">
-      <deprecated>The "%service_id%" service is deprecated. You should stop using it, as it will soon be removed.</deprecated>
+      <deprecated>The "%service_id%" service is deprecated. You should stop using it, as it will be removed in the future.</deprecated>
     </service>
     <service id="new_factory" class="FactoryClass" public="false">
       <property name="foo">bar</property>
@@ -114,7 +115,7 @@
     </service>
     <service id="factory_simple" class="SimpleFactoryClass" public="false">
       <argument>foo</argument>
-      <deprecated>The "%service_id%" service is deprecated. You should stop using it, as it will soon be removed.</deprecated>
+      <deprecated>The "%service_id%" service is deprecated. You should stop using it, as it will be removed in the future.</deprecated>
     </service>
     <service id="factory_service_simple" class="Bar" public="true">
       <factory service="factory_simple" method="getInstance"/>
@@ -133,12 +134,21 @@
       </argument>
       <argument type="iterator"/>
     </service>
+    <service id="BAR" class="stdClass" public="true">
+      <property name="bar" type="service" id="bar"/>
+    </service>
+    <service id="bar2" class="stdClass" public="true"/>
+    <service id="BAR2" class="stdClass" public="true"/>
     <service id="tagged_iterator_foo" class="Bar" public="false">
       <tag name="foo"/>
     </service>
     <service id="tagged_iterator" class="Bar" public="true">
-      <argument type="tagged" tag="foo"/>
+      <argument type="tagged_iterator" tag="foo"/>
     </service>
+    <service id="runtime_error" class="stdClass" public="true">
+      <argument type="service" id="errored_definition"/>
+    </service>
+    <service id="errored_definition" class="stdClass"/>
     <service id="Psr\Container\ContainerInterface" alias="service_container" public="false"/>
     <service id="Symfony\Component\DependencyInjection\ContainerInterface" alias="service_container" public="false"/>
     <service id="alias_for_foo" alias="foo" public="true"/>

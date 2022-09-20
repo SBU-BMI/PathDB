@@ -19,7 +19,7 @@ class CrossCheckTest extends TestCase
 {
     protected static $fixturesPath;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$fixturesPath = __DIR__.'/Fixtures/';
 
@@ -55,12 +55,6 @@ class CrossCheckTest extends TestCase
         $this->assertEquals($container2->getAliases(), $container1->getAliases(), 'loading a dump from a previously loaded container returns the same container');
         $this->assertEquals($container2->getDefinitions(), $container1->getDefinitions(), 'loading a dump from a previously loaded container returns the same container');
         $this->assertEquals($container2->getParameterBag()->all(), $container1->getParameterBag()->all(), '->getParameterBag() returns the same value for both containers');
-
-        $r = new \ReflectionProperty(ContainerBuilder::class, 'normalizedIds');
-        $r->setAccessible(true);
-        $r->setValue($container2, []);
-        $r->setValue($container1, []);
-
         $this->assertEquals(serialize($container2), serialize($container1), 'loading a dump from a previously loaded container returns the same container');
 
         $services1 = [];

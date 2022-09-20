@@ -1,39 +1,31 @@
 language: php
-
-php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  # - 7.3
+os: linux
+dist: xenial
 
 env:
   global:
     # Make the script re-usable for other modules.
     - MODULE=typed_data
-    # Allow this many deprecation warnings (total on core 8.9 at 21 Feb 2020)
+    # Initialise the real SYMFONY_DEPRECATIONS_HELPER variable.
     - SYMFONY_DEPRECATIONS_HELPER=0
-  jobs:
-    - DRUPAL_CORE=8.7.x
-    - DRUPAL_CORE=8.8.x
-    - DRUPAL_CORE=8.9.x
+    # Create a default for the allowed deprecations per branch.
+    - DEPRECATIONS=0
 
 jobs:
   fast_finish: true
-  # PHP7.0 on Core 8.7 has error "class TestDiscovery not found" so remove that.
-  # PHP7.3+ is not supported on Core 8.7 and earlier.
-  # PHP5 is not supported on Core 8.8 and later.
-  exclude:
-    - php: 7.0
-      env: DRUPAL_CORE=8.7.x
+  include:
     - php: 7.1
-      env: DRUPAL_CORE=8.7.x
-    - php: 7.2
-      env: DRUPAL_CORE=8.7.x
-    - php: 5.6
       env: DRUPAL_CORE=8.8.x
-    - php: 5.6
+    - php: 7.2
       env: DRUPAL_CORE=8.9.x
+    - php: 7.3
+      env: DRUPAL_CORE=9.0.x
+    - php: 7.4
+      env:
+        - DRUPAL_CORE=9.1.x
+        # --- Remaining self deprecation notices (0)
+        # --- Remaining direct deprecation notices (0)
+        - DEPRECATIONS=0
 
 services:
   - mysql
@@ -51,48 +43,47 @@ before_script:
   # We also don't care if that file exists or not on PHP 7.
   - phpenv config-rm xdebug.ini || true
 
-  # Remember the current $MODULE test directory for later use in the Drupal
-  # installation.
+  # Save the starting directory, which is where the module code is located.
   - TESTDIR=$(pwd)
-  # Navigate out of module directory to prevent blown stack by recursive module
-  # lookup.
+  - echo $TESTDIR
+  # Navigate up to prevent blown stack by recursive module lookup.
   - cd ..
 
   # Create database.
   - mysql -e "create database $MODULE"
   # Export database variable for kernel tests.
   - export SIMPLETEST_DB=mysql://root:@127.0.0.1/$MODULE
-  # Download Drupal 8 core from the Github mirror because it is faster.
+  # Download Drupal core from the Github mirror because it is faster.
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://github.com/drupal/drupal.git
   - cd drupal
   # Store the path to Drupal root.
   - DRUPAL_ROOT=$(pwd)
   - echo $DRUPAL_ROOT
 
-  # Reference $MODULE in build site.
+  # Create a link in /modules to the actual module source.
   - ln -s $TESTDIR modules/$MODULE
 
-  # Run composer install for Drupal 8.1 and up.
-  - travis_retry composer self-update && travis_retry composer install
-  # Run composer install in the module directory in order to fetch dev
-  # dependencies there.
-  - travis_retry composer install -d $TESTDIR
+  # At job start-up Composer is installed at 1.8.4 then self-update is run. From
+  # 24 October 2020 this bumped the version to Composer 2. Drupal Core 8.8 has
+  # plugins that only run with composer-plugin-api ^1.0 so revert to Composer 1.
+  - if [ "$DRUPAL_CORE" == "8.8.x" ]; then
+      travis_retry composer self-update --1;
+    fi
+  - travis_retry composer install
 
   # Coder is already installed as part of composer install. We just need to set
   # the installed_paths to pick up the Drupal standards.
   - $DRUPAL_ROOT/vendor/bin/phpcs --config-set installed_paths $DRUPAL_ROOT/vendor/drupal/coder/coder_sniffer
-
-  # If running Core 8.6 or 8.7 the following script will upgrade to phpunit 6
-  # which is required in PHP7. The script has now been deleted from Core 8.8.
-  - if [[ $DRUPAL_CORE == "8.6.x" || $DRUPAL_CORE == "8.7.x" ]]; then
-      travis_retry composer run-script drupal-phpunit-upgrade;
-    fi
 
   # Start a web server on port 8888, run in the background.
   - php -S localhost:8888 &
 
   # Export web server URL for browser tests.
   - export SIMPLETEST_BASE_URL=http://localhost:8888
+
+  # Get the allowed number of deprecation warnings.
+  - SYMFONY_DEPRECATIONS_HELPER=$DEPRECATIONS || $SYMFONY_DEPRECATIONS_HELPER
+  - echo $SYMFONY_DEPRECATIONS_HELPER
 
 script:
   # Run the PHPUnit tests which also include the kernel tests.

@@ -24,19 +24,25 @@
         "drupal/bootstrap": "^3.21",
         "drupal/bulk_update_fields": "^2.0@alpha",
         "drupal/console": "^1.0.2",
-        "drupal/core": "^8.9.12",
-        "drupal/css_editor": "^1.2",
-        "drupal/csv_serialization": "^1.4",
+        "drupal/core-composer-scaffold": "^9.4.5",
+        "drupal/core-project-message": "^9",
+        "drupal/core-recommended": "^9.4.5",
+        "drupal/css_editor": "^2.0",
+        "drupal/csv_serialization": "^2.1",
         "drupal/d8w3css": "^1.15",
         "drupal/ds": "^3.4",
-        "drupal/easy_breadcrumb": "^1.12",
-        "drupal/facets": "^1.4",
+        "drupal/easy_breadcrumb": "^2.0",
+        "drupal/externalauth": "^1.4",
+        "drupal/facets": "^2.0",
         "drupal/field_group": "^3.0",
         "drupal/field_permissions": "^1.0@RC",
+        "drupal/flag": "^4.0@beta",
         "drupal/hide_revision_field": "^2.1",
         "drupal/http_response_headers": "^2.0",
         "drupal/jwt": "^1.0@alpha",
         "drupal/ldap": "^4.0@beta",
+        "drupal/moderated_content_bulk_publish": "^2.0",
+        "drupal/pathauto": "^1.11",
         "drupal/prepopulate": "^2.2",
         "drupal/redirect_after_login": "^2.5",
         "drupal/restrict_by_ip": "4.x-dev",
@@ -49,19 +55,20 @@
         "drupal/user_current_paths": "^2.0",
         "drupal/views_base_url": "^2.0@beta",
         "drupal/views_bulk_edit": "^2.6",
-        "drupal/views_bulk_operations": "^3.6",
-        "drupal/views_data_export": "^1.0@beta",
+        "drupal/views_bulk_operations": "^4.1",
+        "drupal/views_data_export": "^1.1",
         "drupal/views_entity_form_field": "^1.0@beta",
-        "drupal/views_field_view": "^1.0",
-        "drupal/views_taxonomy_term_name_depth": "6.x-dev",
-        "drush/drush": "^9.0.0",
+        "drupal/views_field_view": "^1.0@beta",
+        "drupal/views_taxonomy_term_name_depth": "^7.1",
+        "drush/drush": "^10",
+        "symfony/yaml": "^4.4.45",
         "vlucas/phpdotenv": "^2.4",
         "webflo/drupal-finder": "^1.0.0",
         "webmozart/path-util": "^2.3",
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "require-dev": {
-        "webflo/drupal-core-require-dev": "^8.7.0"
+        "drupal/core-dev": "^9.4.5"
     },
     "conflict": {
         "drupal/drupal": "*"
@@ -69,7 +76,16 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/installers": true,
+            "drupal/console-extend-plugin": true,
+            "cweagans/composer-patches": true,
+            "zaporylie/composer-drupal-optimizations": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true
+        }
     },
     "autoload": {
         "classmap": [

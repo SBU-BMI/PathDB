@@ -3,6 +3,7 @@
 namespace Drupal\typed_data\Widget;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
@@ -71,6 +72,34 @@ abstract class FormWidgetBase extends PluginBase implements FormWidgetInterface,
       $this->defaultConfiguration(),
       $configuration
     );
+  }
+
+  /**
+   * Create a default DrupalDateTime object.
+   *
+   * This is used in the DateTimeWidget and DateTimeRangeWidget forms.
+   *
+   * @param string $date
+   *   (optional) A formatted date string as stored by the widgets. If no value
+   *   is given an empty date with time 12:00 noon is created.
+   *
+   * @return object
+   *   A DrupalDateTime object with the required date and time values.
+   */
+  public function createDefaultDateTime($date) {
+    if (!empty($date)) {
+      $default = new DrupalDateTime($date);
+    }
+    else {
+      // The DrupalDateTime object is created first with no parameters so that
+      // it has the current users timezone. Then setDate with year 0 has the
+      // effect that the widget date remains empty but allows a default time to
+      // be set using setTime(). This is done in setDefaultDateTime().
+      $default = new DrupalDateTime();
+      $default->setDate(0, 1, 1);
+      $default->setDefaultDateTime();
+    }
+    return $default;
   }
 
 }

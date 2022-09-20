@@ -15,9 +15,9 @@ API. This enables the CSV format to be used for data input and output in various
 circumstances.
 
  * For a full description of the module visit:
-   https://www.drupal.org/project/csv_serialization
+   <https://www.drupal.org/project/csv_serialization>
  * To submit bug reports and feature suggestions, or to track changes visit:
-   https://www.drupal.org/project/issues/csv_serialization
+   <https://www.drupal.org/project/issues/csv_serialization>
 
 Notes about the CSV encoder:
 
@@ -60,4 +60,4 @@ A CSV file should be automatically downloaded when you visit the URL
 Maintainers
 -----------
 
- * Matthew Grasmick (grasmash) - https://www.drupal.org/u/grasmash
+ * Matthew Grasmick (grasmash) - <https://www.drupal.org/u/grasmash>

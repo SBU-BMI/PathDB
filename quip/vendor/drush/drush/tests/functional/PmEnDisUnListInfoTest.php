@@ -23,13 +23,26 @@ class EnDisUnListInfoCase extends CommandUnishTestCase
         // Test that pm-list lists uninstalled modules.
         $this->drush('pm-list', [], ['no-core' => null, 'status' => 'disabled']);
         $out = $this->getOutput();
-        $this->assertContains('devel', $out);
+        $this->assertStringContainsString('drush_empty_module', $out);
+
+        // Test that pm-enable does not install a module if the install
+        // requirements are not met.
+        $this->drush('pm-enable', ['drush_empty_module'], ['no' => null], null, null, self::EXIT_ERROR, null, [
+          'UNISH_FAIL_INSTALL_REQUIREMENTS' => 'drush_empty_module',
+        ]);
+        $err = $this->getErrorOutput();
+        $this->assertStringContainsString("Unable to install module 'drush_empty_module' due to unmet requirement(s)", $err);
+        $this->assertStringContainsString('Primary install requirements not met.', $err);
+        $this->assertStringContainsString('Secondary install requirements not met.', $err);
+        $this->drush('pm-list', [], ['no-core' => null, 'status' => 'disabled']);
+        $out = $this->getOutput();
+        $this->assertStringContainsString('drush_empty_module', $out);
 
         // Test pm-enable enables a module, and pm-list verifies that.
-        $this->drush('pm-enable', ['devel']);
+        $this->drush('pm-enable', ['drush_empty_module']);
         $this->drush('pm-list', [], ['status' => 'enabled']);
         $out = $this->getOutput();
-        $this->assertContains('devel', $out);
+        $this->assertStringContainsString('drush_empty_module', $out);
 
         $this->drush('core:status', [], ['field' => 'drupal-version']);
         $drupal_version = $this->getOutputRaw();
@@ -42,11 +55,11 @@ class EnDisUnListInfoCase extends CommandUnishTestCase
         if (Comparator::lessThan($drupal_version, '8.8')) {
             $active_theme = 'classy';
         }
-        $this->assertContains($active_theme, $out, 'Themes are in the pm-list');
+        $this->assertStringContainsString($active_theme, $out, 'Themes are in the pm-list');
 
         // Test cache was cleared after enabling a module.
         $table = 'router';
-        $path = '/admin/config/development/devel';
+        $path = '/admin/config/development/drush_empty_module';
         $this->drush('sql-query', ["SELECT path FROM $table WHERE path = '$path';"]);
         $list = $this->getOutputAsList();
         $this->assertTrue(in_array($path, $list), 'Cache was cleared after modules were enabled');
@@ -54,20 +67,21 @@ class EnDisUnListInfoCase extends CommandUnishTestCase
         // Test pm-list filtering.
         $this->drush('pm-list', [], ['package' => 'Core']);
         $out = $this->getOutput();
-        $this->assertNotContains('devel', $out, 'Devel is not part of core package');
+        $this->assertStringNotContainsString('drush_empty_module', $out, 'Drush Empty Module is not part of core package');
 
         // Check output fields in pm-list
         $this->drush('pm-list', [], ['fields' => '*', 'format' => 'json']);
         $extensionProperties = $this->getOutputFromJSON();
-        $this->assertTrue(isset($extensionProperties['devel']));
-        $this->assertEquals('devel', $extensionProperties['devel']['project']);
-        $this->assertEquals('Enabled', $extensionProperties['devel']['status']);
-        $this->assertEquals('module', $extensionProperties['devel']['type']);
+        $this->assertTrue(isset($extensionProperties['drush_empty_module']));
+        $this->assertEquals($extensionProperties['drush_empty_module']['project'], 'drush_empty_module');
+        $this->assertEquals($extensionProperties['drush_empty_module']['package'], 'Other');
+        $this->assertEquals($extensionProperties['drush_empty_module']['status'], 'Enabled');
+        $this->assertEquals($extensionProperties['drush_empty_module']['type'], 'module');
 
         // Test module uninstall.
-        $this->drush('pm-uninstall', ['devel']);
+        $this->drush('pm-uninstall', ['drush_empty_module']);
         $this->drush('pm-list', [], ['status' => 'disabled', 'type' => 'module']);
         $out = $this->getOutput();
-        $this->assertContains('devel', $out);
+        $this->assertStringContainsString('drush_empty_module', $out);
     }
 }

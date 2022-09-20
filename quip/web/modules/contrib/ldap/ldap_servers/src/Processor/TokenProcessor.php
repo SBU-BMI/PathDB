@@ -79,7 +79,7 @@ class TokenProcessor {
    *   "Drupal Provisioned".
    *
    * @return string|null
-   *   Relaced string.
+   *   Replaced string.
    *
    * @see \Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber::fetchDrupalAttributeValue()
    */
@@ -102,9 +102,7 @@ class TokenProcessor {
     }
 
     // Strip out any un-replaced tokens.
-    $text = preg_replace('/\[.*\]/', '', $text);
-
-    return $text;
+    return preg_replace('/\[.*\]/', '', $text);
   }
 
   /**
@@ -230,9 +228,10 @@ class TokenProcessor {
       $value = $values[(int) $i];
     }
     else {
-      $value = $values[$requested_index] ?? NULL;
+      $value = $values[$requested_index] ?? '';
     }
 
+    $value = (string) $value;
     $value = ConversionHelper::convertAttribute($value, $conversion);
     $this->tokens[sprintf('[%s]', $required_token)] = $value;
   }

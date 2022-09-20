@@ -14,20 +14,21 @@ namespace Symfony\Component\Validator\Tests\Constraints;
 use Symfony\Component\Intl\Util\IntlTestHelper;
 use Symfony\Component\Validator\Constraints\Language;
 use Symfony\Component\Validator\Constraints\LanguageValidator;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
 class LanguageValidatorTest extends ConstraintValidatorTestCase
 {
     private $defaultLocale;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->defaultLocale = \Locale::getDefault();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
 
@@ -55,7 +56,7 @@ class LanguageValidatorTest extends ConstraintValidatorTestCase
 
     public function testExpectsStringCompatibleType()
     {
-        $this->expectException('Symfony\Component\Validator\Exception\UnexpectedTypeException');
+        $this->expectException(UnexpectedValueException::class);
         $this->validator->validate(new \stdClass(), new Language());
     }
 

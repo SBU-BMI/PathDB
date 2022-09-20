@@ -2,15 +2,15 @@
 
 namespace Drupal\typed_data\Context;
 
-use Drupal\Core\Plugin\Context\ContextDefinitionInterface as CoreContextDefinitionInterfaceCore;
+use Drupal\Core\Plugin\Context\ContextDefinitionInterface as ContextDefinitionInterfaceCore;
 
 /**
- * Context definition information required by Typed data.
+ * Context definition information required by Typed Data.
  *
  * The core interface is extended to add properties that are necessary for
- * Typed data.
+ * Typed Data.
  */
-interface ContextDefinitionInterface extends CoreContextDefinitionInterfaceCore {
+interface ContextDefinitionInterface extends ContextDefinitionInterfaceCore {
 
   /**
    * Constants for the context assignment restriction mode.
@@ -57,6 +57,8 @@ interface ContextDefinitionInterface extends CoreContextDefinitionInterfaceCore 
    *   be provided as input values, ASSIGNMENT_RESTRICTION_SELECTOR for contexts
    *   that must be provided as data selectors or NULL if there is no
    *   restriction for this context.
+   *
+   * @return $this
    */
   public function setAssignmentRestriction($restriction);
 

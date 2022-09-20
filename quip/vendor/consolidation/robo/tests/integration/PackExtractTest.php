@@ -1,23 +1,23 @@
 <?php
 namespace Robo;
 
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Robo\Traits\TestTasksTrait;
 
 class PackExtractTest extends TestCase
 {
     use TestTasksTrait;
-    use Task\Archive\loadTasks;
+    use Task\Archive\Tasks;
 
     protected $fixtures;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->fixtures = new Fixtures();
         $this->initTestTasksTrait();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->fixtures->cleanup();
     }
@@ -48,7 +48,7 @@ class PackExtractTest extends TestCase
         $this->fixtures->createAndCdToSandbox();
 
         // Assert fixture was created correctly
-        $this->assertFileExists('some/deeply/nested');
+        $this->assertDirectoryExists('some/deeply/nested');
         $this->assertFileExists('some/deeply/nested/structu.re');
         $this->assertFileExists('some/deeply/existing_file');
 
@@ -56,6 +56,8 @@ class PackExtractTest extends TestCase
         // an archive for it located in 'deep'
         $result = $this->taskPack("deeply.$archiveType")
             ->add(['deep' => 'some/deeply'])
+            ->exclude(['structu3[0-9].re'])
+            ->exclude('nested4')
             ->run();
         $this->assertTrue($result->wasSuccessful(), $result->getMessage());
         $this->assertFileExists("deeply.$archiveType");
@@ -69,22 +71,30 @@ class PackExtractTest extends TestCase
             ->preserveTopDirectory(false) // this is the default
             ->run();
         $this->assertTrue($result->wasSuccessful(), $result->getMessage());
-        $this->assertFileExists("extracted-$archiveType");
-        $this->assertFileExists("extracted-$archiveType/nested");
+        $this->assertDirectoryExists("extracted-$archiveType");
+        $this->assertDirectoryExists("extracted-$archiveType/nested");
         $this->assertFileExists("extracted-$archiveType/nested/structu.re");
+        $this->assertFileDoesNotExist("extracted-$archiveType/nested3/structu31.re");
+        $this->assertFileDoesNotExist("extracted-$archiveType/nested3/structu32.re");
+        $this->assertDirectoryDoesNotExist("extracted-$archiveType/nested4");
         // Next, we'll extract the same archive again, this time preserving
         // the top-level folder.
         $this->taskExtract("deeply.$archiveType")
             ->to("preserved-$archiveType")
             ->preserveTopDirectory()
             ->run();
-        $this->assertFileExists("preserved-$archiveType");
-        $this->assertFileExists("preserved-$archiveType/deep/nested");
+        $this->assertDirectoryExists("preserved-$archiveType");
+        $this->assertDirectoryExists("preserved-$archiveType/deep/nested");
         $this->assertFileExists("preserved-$archiveType/deep/nested/structu.re");
+        $this->assertFileDoesNotExist("preserved-$archiveType/deep/nested3/structu31.re");
+        $this->assertFileDoesNotExist("preserved-$archiveType/deep/nested3/structu32.re");
+        $this->assertDirectoryDoesNotExist("preserved-$archiveType/deep/nested4");
         // Make another archive, this time composed of fanciful locations
         $result = $this->taskPack("composed.$archiveType")
             ->add(['a/b/existing_file' => 'some/deeply/existing_file'])
             ->add(['x/y/z/structu.re' => 'some/deeply/nested/structu.re'])
+            ->add(['missing_files' => 'some/deeply/nested3'])
+            ->exclude(['structu3[0-9].re'])
             ->run();
         $this->assertTrue($result->wasSuccessful(), $result->getMessage());
         $this->assertFileExists("composed.$archiveType");
@@ -95,10 +105,12 @@ class PackExtractTest extends TestCase
             ->preserveTopDirectory()
             ->run();
         $this->assertTrue($result->wasSuccessful(), $result->getMessage());
-        $this->assertFileExists("decomposed-$archiveType");
-        $this->assertFileExists("decomposed-$archiveType/x/y/z");
+        $this->assertDirectoryExists("decomposed-$archiveType");
+        $this->assertDirectoryExists("decomposed-$archiveType/x/y/z");
         $this->assertFileExists("decomposed-$archiveType/x/y/z/structu.re");
-        $this->assertFileExists("decomposed-$archiveType/a/b");
+        $this->assertFileDoesNotExist("decomposed-$archiveType/missing_files/structu31.re");
+        $this->assertFileDoesNotExist("decomposed-$archiveType/missing_files/structu32.re");
+        $this->assertDirectoryExists("decomposed-$archiveType/a/b");
         $this->assertFileExists("decomposed-$archiveType/a/b/existing_file");
 
     }

@@ -13,6 +13,8 @@ namespace Symfony\Component\Translation\Tests\Loader;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Translation\Exception\InvalidResourceException;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
 
 class XliffFileLoaderTest extends TestCase
@@ -86,9 +88,19 @@ class XliffFileLoaderTest extends TestCase
         $loader = new XliffFileLoader();
         $catalogue = $loader->load(__DIR__.'/../fixtures/encoding.xlf', 'en', 'domain1');
 
-        $this->assertEquals(utf8_decode('föö'), $catalogue->get('bar', 'domain1'));
-        $this->assertEquals(utf8_decode('bär'), $catalogue->get('foo', 'domain1'));
-        $this->assertEquals(['notes' => [['content' => utf8_decode('bäz')]], 'id' => '1'], $catalogue->getMetadata('foo', 'domain1'));
+        $this->assertEquals(mb_convert_encoding('föö', 'ISO-8859-1', 'UTF-8'), $catalogue->get('bar', 'domain1'));
+        $this->assertEquals(mb_convert_encoding('bär', 'ISO-8859-1', 'UTF-8'), $catalogue->get('foo', 'domain1'));
+        $this->assertEquals(
+            [
+                'source' => 'foo',
+                'notes' => [['content' => mb_convert_encoding('bäz', 'ISO-8859-1', 'UTF-8')]],
+                'id' => '1',
+                'file' => [
+                    'original' => 'file.ext',
+                ],
+            ],
+            $catalogue->getMetadata('foo', 'domain1')
+        );
     }
 
     public function testTargetAttributesAreStoredCorrectly()
@@ -102,21 +114,21 @@ class XliffFileLoaderTest extends TestCase
 
     public function testLoadInvalidResource()
     {
-        $this->expectException('Symfony\Component\Translation\Exception\InvalidResourceException');
+        $this->expectException(InvalidResourceException::class);
         $loader = new XliffFileLoader();
         $loader->load(__DIR__.'/../fixtures/resources.php', 'en', 'domain1');
     }
 
     public function testLoadResourceDoesNotValidate()
     {
-        $this->expectException('Symfony\Component\Translation\Exception\InvalidResourceException');
+        $this->expectException(InvalidResourceException::class);
         $loader = new XliffFileLoader();
         $loader->load(__DIR__.'/../fixtures/non-valid.xlf', 'en', 'domain1');
     }
 
     public function testLoadNonExistingResource()
     {
-        $this->expectException('Symfony\Component\Translation\Exception\NotFoundResourceException');
+        $this->expectException(NotFoundResourceException::class);
         $loader = new XliffFileLoader();
         $resource = __DIR__.'/../fixtures/non-existing.xlf';
         $loader->load($resource, 'en', 'domain1');
@@ -124,7 +136,7 @@ class XliffFileLoaderTest extends TestCase
 
     public function testLoadThrowsAnExceptionIfFileNotLocal()
     {
-        $this->expectException('Symfony\Component\Translation\Exception\InvalidResourceException');
+        $this->expectException(InvalidResourceException::class);
         $loader = new XliffFileLoader();
         $resource = 'http://example.com/resources.xlf';
         $loader->load($resource, 'en', 'domain1');
@@ -132,7 +144,7 @@ class XliffFileLoaderTest extends TestCase
 
     public function testDocTypeIsNotAllowed()
     {
-        $this->expectException('Symfony\Component\Translation\Exception\InvalidResourceException');
+        $this->expectException(InvalidResourceException::class);
         $this->expectExceptionMessage('Document types are not allowed.');
         $loader = new XliffFileLoader();
         $loader->load(__DIR__.'/../fixtures/withdoctype.xlf', 'en', 'domain1');
@@ -143,7 +155,7 @@ class XliffFileLoaderTest extends TestCase
         $loader = new XliffFileLoader();
         $resource = __DIR__.'/../fixtures/empty.xlf';
 
-        $this->expectException('Symfony\Component\Translation\Exception\InvalidResourceException');
+        $this->expectException(InvalidResourceException::class);
         $this->expectExceptionMessage(sprintf('Unable to load "%s":', $resource));
 
         $loader->load($resource, 'en', 'domain1');
@@ -154,11 +166,44 @@ class XliffFileLoaderTest extends TestCase
         $loader = new XliffFileLoader();
         $catalogue = $loader->load(__DIR__.'/../fixtures/withnote.xlf', 'en', 'domain1');
 
-        $this->assertEquals(['notes' => [['priority' => 1, 'content' => 'foo']], 'id' => '1'], $catalogue->getMetadata('foo', 'domain1'));
+        $this->assertEquals(
+            [
+                'source' => 'foo',
+                'notes' => [['priority' => 1, 'content' => 'foo']],
+                'id' => '1',
+                'file' => [
+                    'original' => 'file.ext',
+                ],
+            ],
+            $catalogue->getMetadata('foo', 'domain1')
+        );
         // message without target
-        $this->assertEquals(['notes' => [['content' => 'bar', 'from' => 'foo']], 'id' => '2'], $catalogue->getMetadata('extra', 'domain1'));
+        $this->assertEquals(
+            [
+                'source' => 'extrasource',
+                'notes' => [['content' => 'bar', 'from' => 'foo']],
+                'id' => '2',
+                'file' => [
+                    'original' => 'file.ext',
+                ],
+            ],
+            $catalogue->getMetadata('extra', 'domain1')
+        );
         // message with empty target
-        $this->assertEquals(['notes' => [['content' => 'baz'], ['priority' => 2, 'from' => 'bar', 'content' => 'qux']], 'id' => '123'], $catalogue->getMetadata('key', 'domain1'));
+        $this->assertEquals(
+            [
+                'source' => 'key',
+                'notes' => [
+                    ['content' => 'baz'],
+                    ['priority' => 2, 'from' => 'bar', 'content' => 'qux'],
+                ],
+                'id' => '123',
+                'file' => [
+                    'original' => 'file.ext',
+                ],
+            ],
+            $catalogue->getMetadata('key', 'domain1')
+        );
     }
 
     public function testLoadVersion2()
@@ -246,5 +291,33 @@ class XliffFileLoaderTest extends TestCase
 
         $this->assertSame('processed', $metadata['notes'][0]['category']);
         $this->assertSame('true', $metadata['notes'][0]['content']);
+    }
+
+    public function testLoadWithMultipleFileNodes()
+    {
+        $loader = new XliffFileLoader();
+        $catalogue = $loader->load(__DIR__.'/../fixtures/resources-multi-files.xlf', 'en', 'domain1');
+
+        $this->assertEquals(
+            [
+                'source' => 'foo',
+                'id' => '1',
+                'file' => [
+                    'original' => 'file.ext',
+                ],
+            ],
+            $catalogue->getMetadata('foo', 'domain1')
+        );
+        $this->assertEquals(
+            [
+                'source' => 'test',
+                'notes' => [['content' => 'note']],
+                'id' => '4',
+                'file' => [
+                    'original' => 'otherfile.ext',
+                ],
+            ],
+            $catalogue->getMetadata('test', 'domain1')
+        );
     }
 }

@@ -13,6 +13,8 @@ namespace Symfony\Component\Validator\Tests\Constraints;
 
 use Symfony\Component\Validator\Constraints\Ip;
 use Symfony\Component\Validator\Constraints\IpValidator;
+use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
+use Symfony\Component\Validator\Exception\UnexpectedValueException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
 class IpValidatorTest extends ConstraintValidatorTestCase
@@ -38,13 +40,13 @@ class IpValidatorTest extends ConstraintValidatorTestCase
 
     public function testExpectsStringCompatibleType()
     {
-        $this->expectException('Symfony\Component\Validator\Exception\UnexpectedTypeException');
+        $this->expectException(UnexpectedValueException::class);
         $this->validator->validate(new \stdClass(), new Ip());
     }
 
     public function testInvalidValidatorVersion()
     {
-        $this->expectException('Symfony\Component\Validator\Exception\ConstraintDefinitionException');
+        $this->expectException(ConstraintDefinitionException::class);
         new Ip([
             'version' => 666,
         ]);
@@ -73,6 +75,31 @@ class IpValidatorTest extends ConstraintValidatorTestCase
             ['224.0.0.1'],
             ['255.255.255.255'],
             ['127.0.0.0'],
+        ];
+    }
+
+    /**
+     * @dataProvider getValidIpsV4WithWhitespaces
+     */
+    public function testValidIpsV4WithWhitespaces($ip)
+    {
+        $this->validator->validate($ip, new Ip([
+            'version' => Ip::V4,
+            'normalizer' => 'trim',
+        ]));
+
+        $this->assertNoViolation();
+    }
+
+    public function getValidIpsV4WithWhitespaces()
+    {
+        return [
+            ["\x200.0.0.0"],
+            ["\x09\x0910.0.0.0"],
+            ["123.45.67.178\x0A"],
+            ["172.16.0.0\x0D\x0D"],
+            ["\x00192.168.1.0\x00"],
+            ["\x0B\x0B224.0.0.1\x0B\x0B"],
         ];
     }
 

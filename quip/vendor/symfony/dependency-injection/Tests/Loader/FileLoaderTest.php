@@ -37,7 +37,7 @@ class FileLoaderTest extends TestCase
 {
     protected static $fixturesPath;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$fixturesPath = realpath(__DIR__.'/../');
     }
@@ -90,8 +90,11 @@ class FileLoaderTest extends TestCase
         $container = new ContainerBuilder();
         $container->setParameter('sub_dir', 'Sub');
         $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
+        $loader->autoRegisterAliasesForSinglyImplementedInterfaces = false;
 
         $loader->registerClasses(new Definition(), 'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Sub\\', 'Prototype/%sub_dir%/*');
+        $loader->registerClasses(new Definition(), 'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\Sub\\', 'Prototype/%sub_dir%/*'); // loading twice should not be an issue
+        $loader->registerAliasesForSinglyImplementedInterfaces();
 
         $this->assertEquals(
             ['service_container', Bar::class],
@@ -141,6 +144,26 @@ class FileLoaderTest extends TestCase
             'Prototype/*',
             'Prototype/NotExistingDir'
         );
+    }
+
+    public function testRegisterClassesWithExcludeAsArray()
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('sub_dir', 'Sub');
+        $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
+        $loader->registerClasses(
+            new Definition(),
+            'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\\',
+            'Prototype/*', [
+                'Prototype/%sub_dir%',
+                'Prototype/OtherDir/AnotherSub/DeeperBaz.php',
+            ]
+        );
+
+        $this->assertTrue($container->has(Foo::class));
+        $this->assertTrue($container->has(Baz::class));
+        $this->assertFalse($container->has(Bar::class));
+        $this->assertFalse($container->has(DeeperBaz::class));
     }
 
     public function testNestedRegisterClasses()
@@ -193,7 +216,7 @@ class FileLoaderTest extends TestCase
 
     public function testRegisterClassesWithBadPrefix()
     {
-        $this->expectException('Symfony\Component\DependencyInjection\Exception\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Expected to find class "Symfony\\\Component\\\DependencyInjection\\\Tests\\\Fixtures\\\Prototype\\\Bar" in file ".+" while importing services from resource "Prototype\/Sub\/\*", but it was not found\! Check the namespace prefix used with the resource/');
         $container = new ContainerBuilder();
         $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
@@ -202,44 +225,61 @@ class FileLoaderTest extends TestCase
         $loader->registerClasses(new Definition(), 'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\\', 'Prototype/Sub/*');
     }
 
-    /**
-     * @dataProvider getIncompatibleExcludeTests
-     */
-    public function testRegisterClassesWithIncompatibleExclude($resourcePattern, $excludePattern)
+    public function testRegisterClassesWithIncompatibleExclude()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid "exclude" pattern when importing classes for "Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\": make sure your "exclude" pattern (yaml/*) is a subset of the "resource" pattern (Prototype/*)');
         $container = new ContainerBuilder();
         $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
 
-        try {
-            $loader->registerClasses(
-                new Definition(),
-                'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\\',
-                $resourcePattern,
-                $excludePattern
-            );
-        } catch (InvalidArgumentException $e) {
-            $this->assertEquals(
-                sprintf('Invalid "exclude" pattern when importing classes for "Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\": make sure your "exclude" pattern (%s) is a subset of the "resource" pattern (%s).', $excludePattern, $resourcePattern),
-                $e->getMessage()
-            );
-        }
+        $loader->registerClasses(
+            new Definition(),
+            'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\\',
+            'Prototype/*',
+            'yaml/*'
+        );
     }
 
-    public function getIncompatibleExcludeTests()
+    /**
+     * @dataProvider excludeTrailingSlashConsistencyProvider
+     */
+    public function testExcludeTrailingSlashConsistency(string $exclude)
     {
-        yield ['Prototype/*', 'yaml/*', false];
-        yield ['Prototype/OtherDir/*', 'Prototype/*', false];
+        $container = new ContainerBuilder();
+        $loader = new TestFileLoader($container, new FileLocator(self::$fixturesPath.'/Fixtures'));
+        $loader->registerClasses(
+            new Definition(),
+            'Symfony\Component\DependencyInjection\Tests\Fixtures\Prototype\\',
+            'Prototype/*',
+            $exclude
+        );
+
+        $this->assertTrue($container->has(Foo::class));
+        $this->assertFalse($container->has(DeeperBaz::class));
+    }
+
+    public function excludeTrailingSlashConsistencyProvider(): iterable
+    {
+        yield ['Prototype/OtherDir/AnotherSub/'];
+        yield ['Prototype/OtherDir/AnotherSub'];
+        yield ['Prototype/OtherDir/AnotherSub/*'];
+        yield ['Prototype/*/AnotherSub'];
+        yield ['Prototype/*/AnotherSub/'];
+        yield ['Prototype/*/AnotherSub/*'];
+        yield ['Prototype/OtherDir/AnotherSub/DeeperBaz.php'];
     }
 }
 
 class TestFileLoader extends FileLoader
 {
+    public $autoRegisterAliasesForSinglyImplementedInterfaces = true;
+
     public function load($resource, $type = null)
     {
         return $resource;
     }
 
-    public function supports($resource, $type = null)
+    public function supports($resource, $type = null): bool
     {
         return false;
     }

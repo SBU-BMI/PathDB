@@ -22,6 +22,8 @@ $this->taskAtoum()
 * `debug()`  Use atoum's debug mode.
 * `files($files)`  Test file or test files to run.
 * `directories($directories)`  Test directory or directories to run.
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
 * `arg($arg)`  Pass argument to executable. Its value will be automatically escaped.
 * `args($args)`  Pass methods parameters as arguments to executable. Argument values
@@ -53,6 +55,8 @@ $this->taskBehat()
 * `suite($suite)`   * `param string` $suite
 * `verbose($level = null)`   * `param string` $level
 * `format($formater)`   * `param string` $formater
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
 * `arg($arg)`  Pass argument to executable. Its value will be automatically escaped.
 * `args($args)`  Pass methods parameters as arguments to executable. Argument values
@@ -95,7 +99,10 @@ $this->taskCodecept()
 * `coverageHtml($html = null)`  collect code coverage and generate html report. You may pass
 * `debug()`   * `return` $this
 * `noRebuild()`   * `return` $this
+* `noExit()`   * `return` $this
 * `failGroup($failGroup)`   * `param string` $failGroup
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
 * `arg($arg)`  Pass argument to executable. Its value will be automatically escaped.
 * `args($args)`  Pass methods parameters as arguments to executable. Argument values
@@ -130,6 +137,8 @@ $this->taskPHPUnit()
 * `debug()`   * `return` $this
 * `files($files)`  Directory of test files or single test file to run.
 * `file($file)`  Test the provided file.
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
 * `arg($arg)`  Pass argument to executable. Its value will be automatically escaped.
 * `args($args)`  Pass methods parameters as arguments to executable. Argument values
@@ -161,6 +170,8 @@ $this->taskPhpspec()
 * `noInteraction()`   * `return` $this
 * `config($config_file)`   * `param string` $config_file
 * `format($formater)`   * `param string` $formater
+* `setOutput($output)`  Sets the Console Output.
+* `setProcessInput($input)`  Pass an input to the process. Can be resource created with fopen() or string
 * `dir($dir)`  Changes working directory of command
 * `arg($arg)`  Pass argument to executable. Its value will be automatically escaped.
 * `args($args)`  Pass methods parameters as arguments to executable. Argument values
@@ -168,4 +179,5 @@ $this->taskPhpspec()
 * `option($option, $value = null, $separator = null)`  Pass option to executable. Options are prefixed with `--` , value can be provided in second parameter.
 * `options(array $options, $separator = null)`  Pass multiple options to executable. The associative array contains
 * `optionList($option, $value = null, $separator = null)`  Pass an option with multiple values to executable. Value can be a string or array.
+
 

@@ -7,7 +7,11 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class SubformState.
+ * Stores information about the state of a subform.
+ *
+ * Extends the core SubformState class to provide two new methods.
+ *
+ * @see \Drupal\Core\Form\SubformState
  */
 class SubformState extends CoreSubformState {
 

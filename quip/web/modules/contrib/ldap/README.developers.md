@@ -56,6 +56,24 @@ Note that attributes returned from LDAP via the LdapBaseManager are lowercased
 through `::sanitizeUserDataResponse` so we need to
 `get('businesscategory')` not `get('businessCategory')`.
 
+## Manual retesting
+
+When changing behavior of this module it's not always easy to anticipate the
+impact due to the multiple possible configurations and setups. The tests
+are often only able to look at functionality in isolation, not the interaction
+of different (mis-)configurations. When in doubt, try to manually retest the
+core cases, such as:
+
+- User login with existing user (user already synced from LDAP)
+- User creation upon login (user present in LDAP)
+- Denial of registration in exclusive mode when user does not in LDAP
+- Drupal user sync data from LDAP upon login
+- Drupal user sync data from LDAP upon Drupal user save
+- LDAP user creation on user registration
+- LDAP user update on Drupal user update
+- Combined configuration of sync from LDAP when used in conjunction with
+  sync to LDAP.
+
 ## Misc
 
 ### User binding

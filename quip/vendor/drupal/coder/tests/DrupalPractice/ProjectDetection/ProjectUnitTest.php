@@ -24,9 +24,8 @@ class ProjectUnitTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
-        parent::setUp();
         $this->phpcsFile = $this->getMockBuilder('\PHP_CodeSniffer\Files\File')
             ->disableOriginalConstructor()
             ->getMock();
