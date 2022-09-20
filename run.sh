@@ -87,6 +87,8 @@ fi
 	/quip/vendor/bin/drush -y pm:enable pathauto
 	/quip/vendor/bin/drush -y pm:enable user_current_paths
         /quip/vendor/bin/drush -y pm:uninstall restrict_by_ip
+	/quip/vendor/bin/drush -y pm:uninstall color
+	/quip/vendor/bin/drush -y pm:uninstall redirect_after_login
 	/quip/vendor/bin/drush -y config-set system.theme admin bootstrap
 	/quip/vendor/bin/drush -y config-set system.theme default bootstrap
 	/quip/vendor/bin/drush config-delete block.block.bartik_branding
