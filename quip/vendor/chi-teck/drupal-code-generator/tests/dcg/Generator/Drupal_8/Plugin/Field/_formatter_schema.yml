@@ -1,7 +1,0 @@
-field.formatter.settings.foo_zoo:
-  type: mapping
-  label: Zoo formatter settings
-  mapping:
-    foo:
-      type: string
-      label: Foo

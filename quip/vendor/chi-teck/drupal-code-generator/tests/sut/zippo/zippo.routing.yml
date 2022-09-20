@@ -1,8 +1,0 @@
-zippo.example:
-  path: '/example'
-  defaults:
-    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
-    _title: 'Example'
-  requirements:
-    # No need to check access here.
-    _access: 'TRUE'

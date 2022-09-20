@@ -5,13 +5,11 @@ dependencies:
   config:
     - field.field.node.map.execution_id
     - field.field.node.map.field_map
-    - field.field.node.map.field_map_type
     - field.field.node.map.field_target_collection
     - field.field.node.map.field_wsi
     - node.type.map
   module:
     - file
-    - options
     - user
 id: node.map.default
 targetEntityType: node
@@ -33,13 +31,6 @@ content:
       use_description_as_link_text: true
     third_party_settings: {  }
     weight: 1
-    region: content
-  field_map_type:
-    type: list_default
-    label: inline
-    settings: {  }
-    third_party_settings: {  }
-    weight: 0
     region: content
   field_target_collection:
     type: entity_reference_label

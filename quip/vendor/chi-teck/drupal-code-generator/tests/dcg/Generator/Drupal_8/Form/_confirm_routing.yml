@@ -1,7 +1,0 @@
-foo.example:
-  path: '/foo/example'
-  defaults:
-    _title: 'Wow'
-    _form: 'Drupal\foo\Form\ExampleConfirmForm'
-  requirements:
-    _permission: 'administer site configuration'

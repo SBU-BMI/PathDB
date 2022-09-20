@@ -1,7 +1,0 @@
-field.widget.settings.foo_example:
-  type: mapping
-  label: Example widget settings
-  mapping:
-    foo:
-      type: string
-      label: Foo
