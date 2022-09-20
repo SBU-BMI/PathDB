@@ -126,6 +126,7 @@ fi
 	/quip/vendor/bin/drush -y updatedb
 	/quip/vendor/bin/drush -y cache-rebuild	
 	/quip/vendor/bin/drush -y user:cancel archon
-
+	mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '';"
+	mysql -e "flush privileges;"
 while true; do sleep 1000; done
 
