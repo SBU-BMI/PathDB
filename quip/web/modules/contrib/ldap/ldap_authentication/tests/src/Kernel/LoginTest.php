@@ -6,11 +6,11 @@ namespace Drupal\Tests\ldap_authentication\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
-use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Symfony\Component\Ldap\Entry;
 
 /**

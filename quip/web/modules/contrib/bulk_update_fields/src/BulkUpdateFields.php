@@ -15,13 +15,13 @@ class BulkUpdateFields {
    */
   public static function processDate($date, $date_type) {
     $date->setTimezone(new \DateTimezone(DateTimeItemInterface::STORAGE_TIMEZONE));
-    //date or datetime (cannot believe this isnt handled!)
+    // Date or datetime (cannot believe this isnt handled!)
     if ($date_type == 'date') {
       $date = $date->format(DateTimeItemInterface::DATE_STORAGE_FORMAT);
     }
-    // its datetime. (others?)
+    // Its datetime. (others?)
     else {
-     $date = $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+      $date = $date->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
     }
 
     return $date;
@@ -31,8 +31,8 @@ class BulkUpdateFields {
    * {@inheritdoc}
    */
   public static function processField($value, $field_definition) {
-    // see if datetime, daterange
-    if (strpos($field_definition->getType(), 'date') !== false) {
+    // See if datetime, daterange.
+    if (strpos($field_definition->getType(), 'date') !== FALSE && !empty($value['value'])) {
       $datetime_type = $field_definition->getFieldStorageDefinition()->getSettings()['datetime_type'];
       $value['value'] = self::processDate($value['value'], $datetime_type);
       if ($field_definition->getType() == 'daterange') {
@@ -47,15 +47,16 @@ class BulkUpdateFields {
    * {@inheritdoc}
    */
   public static function preprocessField($field_value) {
-    // not sure if this is still valid but leaving in case
+    // Not sure if this is still valid but leaving in case.
     if (isset($field_value['target_id'][0])) {
       $field_value = $field_value['target_id'];
     }
-    // this caused a failure in core/entity/plugin/datatype/entityreference. removing.
+    // This caused a failure in core/entity/plugin/datatype/entityreference.
+    // removing.
     if (isset($field_value['add_more'])) {
       unset($field_value['add_more']);
     }
-    // this occurs in fields like office hours.
+    // This occurs in fields like office hours.
     if (isset($field_value['value'])) {
       $field_value = $field_value['value'];
     }
@@ -68,7 +69,9 @@ class BulkUpdateFields {
    */
   public static function updateFields($entity, $fields, &$context) {
     $message = 'Updating Fields on ';
-    $results_entities = [];
+    $langcode = $entity->language()->getId();
+    $entity = \Drupal::entityTypeManager()->getStorage($entity->getEntityTypeId())->load($entity->id());
+    $entity = $entity->getTranslation($langcode);
     $results_fields = [];
     $update = FALSE;
     foreach ($fields as $field_name => $field_value) {
@@ -76,8 +79,12 @@ class BulkUpdateFields {
         $field_value = self::preprocessField($field_value);
         $field_definition = $entity->get($field_name)->getFieldDefinition();
         foreach ($field_value as $key => $value) {
-          if ($value == $field_name ) { continue; } // this is the case for field images for some reason
-          if (!is_array($value)) { continue; } // some objects returned
+          if ($value == $field_name) {
+            continue;
+          } // this is the case for field images for some reason
+          if (!is_array($value)) {
+            continue;
+          } // some objects returned
           $value = self::processField($value, $field_definition);
           if (is_array($value) && isset($value['subform']) && isset($value['paragraph_type'])) {
             $paragraph = Paragraph::create(['type' => $value['paragraph_type']]);
@@ -86,8 +93,12 @@ class BulkUpdateFields {
                 $p_field_value = self::preprocessField($p_field_value);
                 $p_field_definition = $paragraph->get($p_field_name)->getFieldDefinition();
                 foreach ($p_field_value as $p_key => $p_value) {
-                  if ($p_value == $p_field_name ) { continue; } // this is the case for field images for some reason
-                  if (!is_array($p_value)) { continue; } // some objects returned
+                  if ($p_value == $p_field_name) {
+                    continue;
+                  } // this is the case for field images for some reason
+                  if (!is_array($p_value)) {
+                    continue;
+                  } // some objects returned
                   $p_field_value[$p_key] = self::processField($p_value, $p_field_definition);
                 }
               }
@@ -110,6 +121,11 @@ class BulkUpdateFields {
       // TODO?: Do other entity types need revisions set?
       if ($entity->getEntityTypeId() == 'node' && method_exists($entity, 'setNewRevision')) {
         $entity->setNewRevision();
+        $entity->setRevisionUserId(\Drupal::currentUser()->id());
+        $entity->setRevisionCreationTime(\Drupal::time()->getRequestTime());
+        $entity->set('revision_log', t('Bulk updated fields: @fields', [
+          '@fields' => implode(', ', $results_fields),
+        ]));
       }
       $entity->save();
     }
@@ -134,7 +150,7 @@ class BulkUpdateFields {
         count($results['results_entities']),
         'One entity', '@count entities'
       );
-      $message = $message_field.' on '.$message_entity;
+      $message = $message_field . ' on ' . $message_entity;
     }
     else {
       $message = t('Finished with an error.');

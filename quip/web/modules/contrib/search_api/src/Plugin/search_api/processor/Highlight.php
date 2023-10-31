@@ -265,7 +265,7 @@ class Highlight extends ProcessorPluginBase implements PluginFormInterface {
     if ($this->configuration['excerpt']) {
       $this->addExcerpts($result_items, $excerpt_fulltext_fields, $keys);
     }
-    if ($this->configuration['highlight'] != 'never') {
+    if ($this->configuration['highlight'] !== 'never' && !empty($keys)) {
       $highlighted_fields = $this->highlightFields($result_items, $keys);
       foreach ($highlighted_fields as $item_id => $item_fields) {
         $item = $result_items[$item_id];
@@ -655,8 +655,27 @@ class Highlight extends ProcessorPluginBase implements PluginFormInterface {
    *   The given text with all occurrences of search keywords highlighted.
    */
   protected function highlightField($text, array $keys, $html = TRUE) {
+    $text = "$text";
     if ($html) {
-      $texts = preg_split('#((?:</?[[:alpha:]](?:[^>"\']*|"[^"]*"|\'[^\']\')*>)+)#i', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+      $regex = <<<'REGEX'
+%
+  (                # Capturing group around the whole expression, so
+                   # PREG_SPLIT_DELIM_CAPTURE works correctly
+    \s*+           # Optional leading whitespace (possessive since backtracking
+                   # would make no sense here)
+    (?:            # One or more HTML tags
+      <            # Start of HTML tag
+      /?           # Could be a closing tag
+      [[:alpha:]]  # Tag names always start with a letter
+      [^>]*        # Anything except the angle bracket closing the tag
+      >            # End of HTML tag
+    )+             # End: One or more HTML tags
+    \s*            # Optional trailing whitespace
+  )                # End: Capturing group
+%ix
+REGEX;
+
+      $texts = preg_split($regex, $text, -1, PREG_SPLIT_DELIM_CAPTURE);
       if ($texts === FALSE) {
         $args = [
           '%error_num' => preg_last_error(),

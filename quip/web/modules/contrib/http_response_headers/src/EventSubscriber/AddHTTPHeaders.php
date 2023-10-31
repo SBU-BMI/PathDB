@@ -8,7 +8,7 @@
 namespace Drupal\http_response_headers\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -37,8 +37,8 @@ class AddHTTPHeaders implements EventSubscriberInterface {
   /**
    * Sets extra HTTP headers.
    */
-  public function onRespond(FilterResponseEvent $event) {
-    if (!$event->isMasterRequest()) {
+  public function onRespond(ResponseEvent $event) {
+    if (!$event->isMainRequest()) {
       return;
     }
     $response = $event->getResponse();

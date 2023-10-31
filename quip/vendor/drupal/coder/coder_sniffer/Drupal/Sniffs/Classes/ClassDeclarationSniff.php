@@ -25,6 +25,13 @@ use PHP_CodeSniffer\Util\Tokens;
 class ClassDeclarationSniff extends PSR2ClassDeclarationSniff
 {
 
+    /**
+     * {@inheritdoc}
+     *
+     * @var integer
+     */
+    public $indent = 2;
+
 
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -37,6 +44,7 @@ class ClassDeclarationSniff extends PSR2ClassDeclarationSniff
             T_CLASS,
             T_INTERFACE,
             T_TRAIT,
+            T_ENUM,
         ];
 
     }//end register()
@@ -150,6 +158,8 @@ class ClassDeclarationSniff extends PSR2ClassDeclarationSniff
             && $tokens[$prevContent]['line'] !== ($tokens[$closeBrace]['line'] - 2)
             // If the class only contains a comment no extra line is needed.
             && isset(Tokens::$commentTokens[$tokens[$prevContent]['code']]) === false
+            // Enums are allowed to enclose the cases without an extra line.
+            && $tokens[$stackPtr]['code'] !== T_ENUM
         ) {
             $error = 'The closing brace for the %s must have an empty line before it';
             $data  = [$tokens[$stackPtr]['content']];

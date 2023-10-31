@@ -172,7 +172,7 @@ function test14(stdClass $user) {
 }
 
 /**
- * Array parameter type mismatch.
+ * Array parameter type mismatch is allowed, use PHPStan to validate types.
  *
  * @param array $foo
  *   Comment here.
@@ -245,7 +245,7 @@ function test21($arg1, $arg2, $arg3) {
  *
  * @param array|bool|float|int|mixed|object|string|resource|callable $arg1
  *   All of the above types are valid.
- * @param Array|boolean|integer|str|stdClass|NULL $arg2
+ * @param Array|boolean|integer|str|NULL $arg2
  *   All of the above types are invalid.
  * @param array()|Boolean|number|String $arg3
  *   All of the above types are invalid.
@@ -305,8 +305,8 @@ function test25() {
 /**
  * Type declarations should not have any illegal characters.
  *
- * @param \Ille*al $var
- *   This asterisk does not belong here.
+ * @param \Ille§al $var
+ *   This character does not belong here.
  *
  * @return \Some/Namespace
  *   This should not have a forward slash.
@@ -443,7 +443,7 @@ function test34($a, $b) {
 }
 
 /**
- * Using \stdClass as type hint is ok, but not in the documentation.
+ * Using \stdClass as type hint and doc type is ok.
  *
  * @param object $name
  *   Some description.
@@ -542,5 +542,409 @@ class Test40 {
     public function test41(string $errorMessage) {
 
     }
+
+}
+
+/**
+ * Test PHP attributes.
+ */
+class Test41 {
+
+  /**
+   * Method docblock.
+   */
+  #[Some\Attribute(foo: 'bar')]
+  #[Other\Attribute(baz: 'qux')]
+  public function method() {
+  }
+
+}
+
+/**
+ * Support for PHPStan basic types.
+ *
+ * @param int $param1
+ *   Integer.
+ * @param string $param2
+ *   String.
+ * @param array-key $param3
+ *   Array key.
+ * @param bool $param4
+ *   Boolean.
+ * @param true $param5
+ *   Boolean TRUE.
+ * @param false $param6
+ *   Boolean FALSE.
+ * @param null $param7
+ *   NULL.
+ * @param float $param8
+ *   Float.
+ * @param double $param9
+ *   Double.
+ * @param scalar $param10
+ *   Scalar.
+ * @param array $param11
+ *   Array.
+ * @param iterable $param12
+ *   Iterable.
+ * @param callable $param13
+ *   Callable.
+ * @param resource $param14
+ *   Resource.
+ * @param void $param15
+ *   Void.
+ * @param object $param16
+ *   Object.
+ *
+ * @see https://phpstan.org/writing-php-code/phpdoc-types#basic-types
+ */
+function test_basic_types(int $param1, string $param2, mixed $param3, bool $param4, bool $param5, bool $param6, $param7, float $param8, $param9, $param10, array $param11, $param12, $param13, $param14, $param15, $param16) {
+
+}
+
+/**
+ * @return int
+ *   Int.
+ */
+function test_return_int(): int {
+  return 0;
+}
+
+/**
+ * @return int
+ *   Int
+ */
+function test_return_int2() {
+  return 0;
+}
+
+/**
+ * @return string
+ *   String.
+ */
+function test_return_string(): string {
+  return '';
+}
+
+/**
+ * @return string
+ *   String.
+ */
+function test_return_string2() {
+  return '';
+}
+
+/**
+ * @return array-key
+ *   Array key.
+ */
+function test_return_array_key() {
+  return '';
+}
+
+/**
+ * @return void
+ *   Void.
+ */
+function test_return_void() {
+}
+
+/**
+ * @return void
+ *   Void.
+ */
+function test_return_void2(): void {
+}
+
+/**
+ * PHPStan: General arrays.
+ *
+ * @param Type[] $param1
+ *   Parameter.
+ * @param array<Type> $param2
+ *   Parameter.
+ * @param array<int, Type> $param3
+ *   Parameter.
+ * @param non-empty-array<Type> $param4
+ *   Parameter.
+ * @param non-empty-array<int, Type> $param5
+ *   Parameter.
+ *
+ * @see https://phpstan.org/writing-php-code/phpdoc-types#general-arrays
+ */
+function test_arrays(array $param1, array $param2, array $param3, array $param4, array $param5) {
+}
+
+/**
+ * @return Type[]
+ *   Square brackets.
+ */
+function test_return_type_array(): array {
+  return [];
+}
+
+/**
+ * @return array<Type>
+ *   Arrow brackets.
+ */
+function test_return_arrow_array(): array {
+  return [];
+}
+
+/**
+ * @return array<int, Type>
+ *   Keyed array.
+ */
+function test_return_keyed_array(): array {
+  return [];
+}
+
+/**
+ * @return non-empty-array<Type>
+ *   Non empty array with type.
+ */
+function test_return_non_empty_array(): array {
+  return [new Type()];
+}
+
+/**
+ * @return non-empty-array<int, Type>
+ *   Non empty keyed array with type.
+ */
+function test_return_non_empty_keyed_array(): array {
+  return [0 => new Type()];
+}
+
+/**
+ * PHPStan: Array shapes.
+ *
+ * @param array{'foo': int, "bar": string} $param1
+ *   Parameter.
+ * @param array{0: int, 1?: int} $param2
+ *   Parameter.
+ * @param array{int, int} $param3
+ *   Parameter.
+ * @param array{foo: int, bar: string} $param4
+ *   Parameter.
+ *
+ * @see https://phpstan.org/writing-php-code/phpdoc-types#array-shapes
+ */
+function test_advanced_array_shapes(array $param1, array $param2, array $param3, array $param4) {
+}
+
+/**
+ * @return array{'foo': int, "bar": string}
+ *   Array.
+ */
+function test_return_array_shape(): array {
+  return [];
+}
+
+/**
+ * @return array{0: int, 1?: int}
+ *   Array.
+ */
+function test_return_array_shape_int(): array {
+  return [];
+}
+
+/**
+ * @return array{int, int}
+ *   Array.
+ */
+function test_return_array_shape_nokey(): array {
+  return [];
+}
+
+/**
+ * @return array{foo: int, bar: string}
+ *   Array.
+ */
+function test_return_array_shape_noquote(): array {
+  return [];
+}
+
+/**
+ * PHPStan: Integer ranges.
+ *
+ * @param positive-int $param1
+ *   Parameter.
+ * @param negative-int $param2
+ *   Parameter.
+ * @param int<0, 100> $param3
+ *   Parameter.
+ * @param int<min, 100> $param4
+ *   Parameter.
+ * @param int<50, max> $param5
+ *   Parameter.
+ *
+ * @see https://phpstan.org/writing-php-code/phpdoc-types#integer-ranges
+ */
+function test_integer_ranges(int $param1, int $param2, int $param3, int $param4, int $param5) {
+}
+
+/**
+ * @return positive-int
+ *   Integer.
+ */
+function test_return_positive_integer(): int {
+  return 1;
+}
+
+/**
+ * @return negative-int
+ *   Integer.
+ */
+function test_return_negative_integer(): int {
+  return -1;
+}
+
+/**
+ * @return int<0, 100>
+ *   Integer.
+ */
+function test_return_integer_range(): int {
+  return 0;
+}
+
+/**
+ * @return int<min, 100>
+ *   Integer.
+ */
+function test_return_integer_min(): int {
+  return 0;
+}
+
+/**
+ * @return int<50, max>
+ *   Integer.
+ */
+function test_return_integer_max(): int {
+  return 50;
+}
+
+/**
+ * PHPStan: Advanced string types.
+ *
+ * @param class-string $param1
+ *   Parameter.
+ * @param class-string<Foo> $param2
+ *   Parameter.
+ * @param callable-string $param3
+ *   Parameter.
+ * @param numeric-string $param4
+ *   Parameter.
+ * @param non-empty-string $param5
+ *   Parameter.
+ * @param non-falsy-string $param6
+ *   Parameter.
+ * @param literal-string $param7
+ *   Parameter.
+ * @param numeric-string|null $param8
+ *   Parameter.
+ *
+ * @see https://phpstan.org/writing-php-code/phpdoc-types#other-advanced-string-types
+ */
+function test_string_types(string $param1, string $param2, string $param3, string $param4, string $param5, string $param6, string $param7, $param8) {
+}
+
+/**
+ * @return class-string
+ *   Class string.
+ */
+function test_return_class_string(): string {
+  return '';
+}
+
+/**
+ * @return class-string<Foo>
+ *   Class string.
+ */
+function test_return_class_string_foo(): string {
+  return '';
+}
+
+/**
+ * @return callable-string
+ *   Callable string.
+ */
+function test_return_callable_string(): string {
+  return '';
+}
+
+/**
+ * @return numeric-string
+ *   Numeric string.
+ */
+function test_return_numeric_string(): string {
+  return '';
+}
+
+/**
+ * @return non-empty-string
+ *   Non empty string.
+ */
+function test_return_non_empty_string(): string {
+  return 'foo';
+}
+
+/**
+ * @return non-falsy-string
+ *   Non falsy string.
+ */
+function test_return_non_falsy_string(): string {
+  return '';
+}
+
+/**
+ * @return literal-string
+ *   Literal string.
+ */
+function test_return_literal_string(): string {
+  return '';
+}
+
+/**
+ * PHP 8 intersection types are ok.
+ *
+ * @param Foo&Bar $a
+ *   Intersection type parameter.
+ *
+ * @return Foo&Bar
+ *   Intersection type return declaration.
+ */
+function test_intersection_types(Foo&Bar $a): Foo&Bar {
+  return new Xyz();
+}
+
+/**
+ * Class comment.
+ */
+class Test3 {
+
+  /**
+   * Variadic parameters are ok.
+   *
+   * @param string[]|string ...$classes
+   *   A variadic parameter.
+   *
+   * @return array
+   *   The return array.
+   */
+  public function testVariadicParameter(...$classes): array {
+    return [];
+  }
+
+  /**
+   * Variadic parameters without description are not ok.
+   *
+   * @param string[]|string ...$classes
+   *
+   * @return array
+   *   The return array.
+   */
+  public function testVariadicParameterNoDescription(...$classes): array {
+    return [];
+  }
 
 }

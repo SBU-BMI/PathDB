@@ -6,9 +6,9 @@ namespace Drupal\ldap_authentication\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
-use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,7 +21,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   /**
    * Module handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -58,7 +58,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager
   ) {
     parent::__construct($config_factory);
@@ -84,9 +84,8 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config('ldap_authentication.settings');
 
-    $query_result = $this->storage->getQuery()->execute();
     /** @var \Drupal\ldap_servers\Entity\Server[] $servers */
-    $servers = $this->storage->loadMultiple($query_result);
+    $servers = $this->storage->loadMultiple();
     $authenticationServers = [];
     foreach ($servers as $sid => $ldap_server) {
       $authenticationServers[$sid] = sprintf(
@@ -140,6 +139,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
     $admin_roles = $this->entityTypeManager
       ->getStorage('user_role')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition('is_admin', TRUE)
       ->execute();
 

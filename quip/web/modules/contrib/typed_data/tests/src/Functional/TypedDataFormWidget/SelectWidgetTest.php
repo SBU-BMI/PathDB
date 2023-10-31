@@ -17,13 +17,6 @@ use Drupal\Core\TypedData\MapDataDefinition;
 class SelectWidgetTest extends FormWidgetBrowserTestBase {
 
   /**
-   * The tested form widget.
-   *
-   * @var \Drupal\typed_data\Widget\FormWidgetInterface
-   */
-  protected $widget;
-
-  /**
    * {@inheritdoc}
    */
   protected static $modules = ['text'];
@@ -33,13 +26,13 @@ class SelectWidgetTest extends FormWidgetBrowserTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->widget = $this->getFormWidgetManager()->createInstance('select');
+    $this->createWidget('select');
   }
 
   /**
    * @covers ::isApplicable
    */
-  public function testIsApplicable() {
+  public function testIsApplicable(): void {
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('any')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('binary')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('boolean')));
@@ -61,13 +54,12 @@ class SelectWidgetTest extends FormWidgetBrowserTestBase {
    * @covers ::form
    * @covers ::extractFormValues
    */
-  public function testFormEditing() {
+  public function testFormEditing(): void {
     $context_definition = ContextDefinition::create('filter_format')
       ->setLabel('Filter format')
       ->setDescription('Some example selection.');
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
-    $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();
     $this->drupalGet($path);
 
@@ -88,14 +80,13 @@ class SelectWidgetTest extends FormWidgetBrowserTestBase {
    * @covers ::form
    * @covers ::flagViolations
    */
-  public function testValidation() {
+  public function testValidation(): void {
     $context_definition = ContextDefinition::create('filter_format')
       ->setLabel('Filter format')
       ->setDescription('Some example selection.')
       ->setRequired(TRUE);
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
-    $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();
     $this->drupalGet($path);
 

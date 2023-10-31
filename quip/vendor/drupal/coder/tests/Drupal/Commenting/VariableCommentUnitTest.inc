@@ -27,7 +27,7 @@ class Test {
   /**
    * Test for some common misspellings.
    *
-   * @var Boolean|stdClass|NULL|FALSE|TRUE|[]
+   * @var Boolean|NULL|FALSE|TRUE|[]
    */
   protected $someVar;
 
@@ -62,5 +62,38 @@ class Test {
    * Readonly property.
    */
   protected readonly string $readOnly;
+
+  /**
+   * PHPStan array annotation.
+   *
+   * @var array<int,array<int,int>>
+   */
+  protected array $arrayStructure;
+
+  /**
+   * PHPStan array shapes.
+   *
+   * @var array{'foo': int, "bar"?: string}
+   */
+  protected array $arrayShape;
+
+  /**
+   * PHPStan constant wildcard.
+   *
+   * @var Foo::*
+   */
+  protected string $constant;
+
+  /**
+   * Intersection type support, it is allowed to repeat it in the var type.
+   *
+   * @var \Drupal\user\UserStorageInterface&\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected UserStorageInterface&MockObject $userStorageMock;
+
+  /**
+   * It is also allowed to leave the var comment out since there is a type.
+   */
+  protected UserStorageInterface&MockObject $userStorageMock2;
 
 }

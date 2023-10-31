@@ -58,9 +58,9 @@ function ldap_servers_requirements($phase): array {
 function ldap_servers_update_8301() {
   /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
   $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
-  $servers = $storage->getQuery()->execute();
+
   /** @var \Drupal\ldap_servers\Entity\Server $server */
-  foreach ($storage->loadMultiple($servers) as $server) {
+  foreach ($storage->loadMultiple() as $server) {
     $currentMethod = $server->get('bind_method');
     if ($currentMethod == 1) {
       $server->set('bind_method', 'service_account');
@@ -95,9 +95,8 @@ function ldap_servers_update_8302(): TranslatableMarkup {
 function ldap_servers_update_8303(): TranslatableMarkup {
   /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
   $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
-  $servers = $storage->getQuery()->execute();
   /** @var \Drupal\ldap_servers\Entity\Server $server */
-  foreach ($storage->loadMultiple($servers) as $server) {
+  foreach ($storage->loadMultiple() as $server) {
     $server->set('timeout', 10);
     $server->save();
   }
@@ -144,10 +143,9 @@ function ldap_servers_update_8402() {
  */
 function ldap_servers_update_8403() {
   $storage = \Drupal::service('entity_type.manager')->getStorage('ldap_server');
-  $servers = $storage->getQuery()->execute();
   /** @var \Drupal\ldap_servers\Entity\Server $server */
-  foreach ($storage->loadMultiple($servers) as $server) {
-    if (is_string($server->get('basedn')))  {
+  foreach ($storage->loadMultiple() as $server) {
+    if (is_string($server->get('basedn'))) {
       $split = preg_split('/\r\n|\r|\n/', $server->get('basedn'));
       $server->set('basedn', $split);
       $server->save();

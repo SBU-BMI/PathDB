@@ -1,13 +1,13 @@
 name: Bulk Update Fields
 type: module
 description: Bulk update fields from one value to another
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 configure: bulk_update_fields.bulk_update_exclude_form
 dependencies:
   - drupal:action
+  - drupal:node
 
-# Information added by Drupal.org packaging script on 2020-08-27
-version: '8.x-2.0-alpha4'
+# Information added by Drupal.org packaging script on 2023-09-21
+version: '8.x-2.0-alpha7'
 project: 'bulk_update_fields'
-datestamp: 1598541765
+datestamp: 1695293386

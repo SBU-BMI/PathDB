@@ -16,7 +16,7 @@ interface ServerInterface extends ConfigEntityInterface {
   /**
    * Returns the formatted label of the bind method.
    *
-   * @return string
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The formatted text for the current bind.
    */
   public function getFormattedBind(): TranslatableMarkup;

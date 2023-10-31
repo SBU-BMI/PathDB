@@ -79,7 +79,6 @@ trait LdapTransformationTraits {
    *   Escaped string.
    *
    * @see http://stackoverflow.com/a/8561604
-   * @author Chris Wright <ldapi@daverandom.com>
    */
   public static function php56PolyfillLdapEscape(string $subject, $ignore = '', $flags = 0): string {
 

@@ -29,8 +29,8 @@ use Drupal\Core\Access\AccessResult;
 //only need to add "implements" keywords below if we are goign to add configuration forms to the confirmation step.... not the case here!
 class PublishLatestRevisionAction extends ActionBase/*extends ViewsBulkOperationsActionBase implements ViewsBulkOperationsPreconfigurationInterface, PluginFormInterface*/
 {
-    
-    
+
+
 
   /**
    * {@inheritdoc}
@@ -49,7 +49,7 @@ class PublishLatestRevisionAction extends ActionBase/*extends ViewsBulkOperation
 
     // Do some processing..
     // ...
-    //\Drupal::Messenger()->addStatus(utf8_encode('Publish bulk operation by moderated_content_bulk_publish module'));
+    //\Drupal::Messenger()->addStatus(mb_convert_encoding('Publish bulk operation by moderated_content_bulk_publish module', 'UTF-8'));
     $user = \Drupal::currentUser();
 
     if ($user->hasPermission('moderated content bulk publish')) {
@@ -59,7 +59,7 @@ class PublishLatestRevisionAction extends ActionBase/*extends ViewsBulkOperation
       $entity = $adminModeration->publish($error_message, $msgdetail_isToken, $msgdetail_isPublished, $msgdetail_isAbsoluteURL);
       if (!isset($entity) && !empty($error_message)) {
         // When publish () return NULL, we output messages and to stop the process.
-        $msgError = Markup::create(utf8_encode($error_message));
+        $msgError = Markup::create(mb_convert_encoding($error_message, 'UTF-8'));
         \Drupal::Messenger()->addWarning($msgError);
         if (!empty($msgdetail_isToken)) {
           $msgToken = Markup::create($msgdetail_isToken);
@@ -79,12 +79,12 @@ class PublishLatestRevisionAction extends ActionBase/*extends ViewsBulkOperation
       // Check if published
       if (!$entity->isPublished()){
         $msg = "Something went wrong, the entity must be published by this point.  Review your content moderation configuration make sure you have archive state which sets current revision and a published state and try again.";
-        \Drupal::Messenger()->addError(utf8_encode($msg));
+        \Drupal::Messenger()->addError(mb_convert_encoding($msg, 'UTF-8'));
         \Drupal::logger('moderated_content_bulk_publish')->warning($msg);
         return $msg;
       }
       return sprintf('Example action (configuration: %s)', print_r($this->configuration, TRUE));
-    
+
     }
     else {
       \Drupal::messenger()->addWarning(t("You don't have access to execute this operation!"));
@@ -156,7 +156,7 @@ class PublishLatestRevisionAction extends ActionBase/*extends ViewsBulkOperation
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    if ($object->getEntityTypeId() === 'node') {
+    if ($object->getEntityTypeId() === 'node' || $object->getEntityTypeId() === 'media') {
       $moderation_info = \Drupal::service('content_moderation.moderation_information');
       // Moderated Entities will return AccessResult::forbidden for attemps
       // to edit $object->status.

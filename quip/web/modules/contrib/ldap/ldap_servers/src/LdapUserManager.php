@@ -6,7 +6,7 @@ namespace Drupal\ldap_servers;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\externalauth\Authmap;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
@@ -43,7 +43,7 @@ class LdapUserManager extends LdapBaseManager {
    *   Entity Type Manager.
    * @param \Drupal\ldap_servers\LdapBridgeInterface $ldap_bridge
    *   LDAP bridge.
-   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Module handler.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   Cache.
@@ -54,7 +54,7 @@ class LdapUserManager extends LdapBaseManager {
     LoggerInterface $logger,
     EntityTypeManagerInterface $entity_type_manager,
     LdapBridgeInterface $ldap_bridge,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     CacheBackendInterface $cache,
     Authmap $external_auth) {
     parent::__construct($logger, $entity_type_manager, $ldap_bridge, $module_handler);
@@ -159,9 +159,8 @@ class LdapUserManager extends LdapBaseManager {
       $query = $storage->getQuery();
       $query->condition('ldap_user_puid_sid', $this->server->id(), '=')
         ->condition('ldap_user_puid', $puid, '=')
-        ->condition('ldap_user_puid_property', $this->server->getUniquePersistentAttribute(), '=')
-        ->accessCheck(FALSE);
-      $queryResult = $query->execute();
+        ->condition('ldap_user_puid_property', $this->server->getUniquePersistentAttribute(), '=');
+      $queryResult = $query->accessCheck(FALSE)->execute();
 
       if (count($queryResult) === 1) {
         /** @var \Drupal\user\UserInterface $result */
@@ -235,7 +234,7 @@ class LdapUserManager extends LdapBaseManager {
       return FALSE;
     }
 
-    $identifier = $this->externalAuth->get($account->id(), 'ldap_user');
+    $identifier = $this->externalAuth->get((int) $account->id(), 'ldap_user');
     if ($identifier) {
       return $this->getUserDataByIdentifier($identifier);
     }

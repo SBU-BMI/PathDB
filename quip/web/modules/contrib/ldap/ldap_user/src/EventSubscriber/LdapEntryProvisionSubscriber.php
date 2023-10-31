@@ -4,24 +4,26 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_user\EventSubscriber;
 
-use Drupal\ldap_servers\LdapTransformationTraits;
-use Drupal\ldap_user\Event\LdapNewUserCreatedEvent;
-use Drupal\ldap_user\Event\LdapUserLoginEvent;
-use Drupal\ldap_user\Event\LdapUserUpdatedEvent;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Ldap\Entry;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Password\DefaultPasswordGenerator;
+use Drupal\externalauth\AuthmapInterface;
 use Drupal\ldap_servers\Helper\ConversionHelper;
 use Drupal\ldap_servers\Helper\CredentialsStorage;
+use Drupal\ldap_servers\LdapTransformationTraits;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_servers\Logger\LdapDetailLog;
+use Drupal\ldap_user\Event\LdapNewUserCreatedEvent;
+use Drupal\ldap_user\Event\LdapUserLoginEvent;
+use Drupal\ldap_user\Event\LdapUserUpdatedEvent;
 use Drupal\ldap_user\Exception\LdapBadParamsException;
 use Drupal\ldap_user\FieldProvider;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Ldap\Entry;
 
 /**
  * Event subscribers for creating and updating LDAP entries.
@@ -114,6 +116,20 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
   private $account;
 
   /**
+   * Password generator.
+   *
+   * @var \Drupal\Core\Password\DefaultPasswordGenerator
+   */
+  private $passwordGenerator;
+
+  /**
+   * External auth map.
+   *
+   * @var \Drupal\externalauth\AuthmapInterface
+   */
+  private $externalAuth;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
@@ -132,6 +148,10 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    *   Field Provider.
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   File system.
+   * @param \Drupal\Core\Password\DefaultPasswordGenerator $passwordGenerator
+   *   Password Generator.
+   * @param \Drupal\externalauth\AuthmapInterface $external_auth
+   *   External auth map.
    */
   public function __construct(
     ConfigFactory $config_factory,
@@ -141,7 +161,9 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     ModuleHandlerInterface $module_handler,
     LdapUserManager $ldap_user_manager,
     FieldProvider $field_provider,
-    FileSystemInterface $file_system) {
+    FileSystemInterface $file_system,
+    DefaultPasswordGenerator $passwordGenerator,
+    AuthmapInterface $external_auth) {
     $this->config = $config_factory->get('ldap_user.settings');
     $this->logger = $logger;
     $this->detailLog = $detail_log;
@@ -150,6 +172,8 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     $this->ldapUserManager = $ldap_user_manager;
     $this->fieldProvider = $field_provider;
     $this->fileSystem = $file_system;
+    $this->passwordGenerator = $passwordGenerator;
+    $this->externalAuth = $external_auth;
   }
 
   /**
@@ -384,22 +408,13 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
 
       case 'user-random':
         $pwd = CredentialsStorage::getPassword();
-        if (version_compare(\Drupal::VERSION, '9.1', '>=')) {
-          $generated = \Drupal::service('password_generator')->generate();
-        }
-        else {
-          $generated = user_password();
-        }
+        $generated = $this->passwordGenerator->generate();
+
         $value = $pwd ?: $generated;
         break;
 
       case 'random':
-        if (version_compare(\Drupal::VERSION, '9.1', '>=')) {
-          $value = \Drupal::service('password_generator')->generate();
-        }
-        else {
-          $value = user_password();
-        }
+        $value = $this->passwordGenerator->generate();
         break;
 
     }
@@ -495,8 +510,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     }
     catch (\Exception $e) {
       $this->logger->error('User or server is missing during LDAP provisioning: %message', [
-        '%message',
-        $e->getMessage(),
+        '%message' => $e->getMessage(),
       ]);
       return FALSE;
     }
@@ -595,8 +609,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     }
     catch (\Exception $e) {
       $this->logger->error('Unable to prepare LDAP entry: %message', [
-        '%message',
-        $e->getMessage(),
+        '%message' => $e->getMessage(),
       ]);
       return;
     }
@@ -629,11 +642,9 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    *   Entry, false or null.
    */
   private function checkExistingLdapEntry() {
-    // @todo Inject.
-    $authmap = \Drupal::service('externalauth.authmap')
-      ->get($this->account->id(), 'ldap_user');
-    if ($authmap) {
-      return $this->ldapUserManager->queryAllBaseDnLdapForUsername($authmap);
+    $auth_map = $this->externalAuth->get((int) $this->account->id(), 'ldap_user');
+    if ($auth_map) {
+      return $this->ldapUserManager->queryAllBaseDnLdapForUsername($auth_map);
     }
     return FALSE;
   }

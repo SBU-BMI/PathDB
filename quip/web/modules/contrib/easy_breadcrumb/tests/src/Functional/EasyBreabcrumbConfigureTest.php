@@ -66,7 +66,7 @@ class EasyBreabcrumbConfigureTest extends BrowserTestBase {
    */
   protected function doUpdateTest($fixture) {
     $assert = $this->assertSession();
-    module_load_install('easy_breadcrumb');
+    \Drupal::moduleHandler()->loadInclude('easy_breadcrumb', 'install');
 
     // Reset the configuration to pre 8006 values. Directly write to the
     // database to avoid schema checking.

@@ -48,7 +48,7 @@ class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperat
 
     // Do some processing..
     // ...
-    //\Drupal::Messenger()->addStatus(utf8_encode('Begin unpublish bulk operation by moderated_content_bulk_publish module plugin'));
+    //\Drupal::Messenger()->addStatus(mb_convert_encoding('Begin unpublish bulk operation by moderated_content_bulk_publish module plugin', 'UTF-8'));
 
     $user = \Drupal::currentUser();
 
@@ -61,7 +61,7 @@ class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperat
       //check if published
       if ($entity->isPublished()){
         $msg = "Something went wrong, the entity must be unpublished by this point.  Review your content moderation configuration make sure you have archive state which sets current revision and a draft state and try again.";
-        \Drupal::Messenger()->addError(utf8_encode($msg));
+        \Drupal::Messenger()->addError(mb_convert_encoding($msg, 'UTF-8'));
         \Drupal::logger('moderated_content_bulk_publish')->warning($msg);
         return $msg;
       }
@@ -139,7 +139,7 @@ class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperat
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    if ($object->getEntityTypeId() === 'node') {
+    if ($object->getEntityTypeId() === 'node' || $object->getEntityTypeId() === 'media') {
       $moderation_info = \Drupal::service('content_moderation.moderation_information');
       // Moderated Entities will return AccessResult::forbidden for attemps
       // to edit $object->status.

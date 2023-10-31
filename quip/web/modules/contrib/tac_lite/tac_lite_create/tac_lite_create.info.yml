@@ -3,13 +3,12 @@ description: Hide taxonomy terms on node add/edit forms.
 package: Access control
 
 type: module
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 
 dependencies:
   - tac_lite:tac_lite
 
-# Information added by Drupal.org packaging script on 2022-03-01
-version: '8.x-1.6'
+# Information added by Drupal.org packaging script on 2023-08-15
+version: '8.x-1.7'
 project: 'tac_lite'
-datestamp: 1646138327
+datestamp: 1692120911

@@ -8,16 +8,16 @@
 declare(strict_types = 1);
 
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\ldap_servers\Helper\CredentialsStorage;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_user\Event\LdapNewUserCreatedEvent;
 use Drupal\ldap_user\Event\LdapUserDeletedEvent;
 use Drupal\ldap_user\Event\LdapUserUpdatedEvent;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Form\FormState;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Implements hook_cron().
@@ -51,10 +51,11 @@ function ldap_user_mail($key, &$message, $params) {
   switch ($key) {
     case 'orphaned_accounts':
       $message['subject'] = \Drupal::config('system.site')->get('name') . ' ' . t('Orphaned LDAP Users');
-      $message['body'][] = t('The following %count Drupal users no longer have corresponding LDAP entries. They probably have been removed from the directory and might need to be removed from your site.',
+      $body = t('The following %count Drupal users no longer have corresponding LDAP entries. They probably have been removed from the directory and might need to be removed from your site.',
           ['%count' => count($params['accounts'])]
         );
-      $message['body'][] .= "\n" . t('Username,Mail,Link') . "\n" . implode("\n", $params['accounts']);
+      $body .= "\n" . t('Username,Mail,Link') . "\n" . implode("\n", $params['accounts']);
+      $message['body'][] = $body;
       break;
   }
 }
@@ -283,12 +284,7 @@ function ldap_user_form_user_register_form_alter(&$form, $form_state) {
 
   if ($user_settings->get('disableAdminPasswordField') == TRUE) {
     $form['account']['pass']['#type'] = 'value';
-    if (version_compare(\Drupal::VERSION, '9.1', '>=')) {
-      $form['account']['pass']['#value'] = \Drupal::service('password_generator')->generate(40);
-    }
-    else {
-      $form['account']['pass']['#value'] = user_password(40);
-    }
+    $form['account']['pass']['#value'] = \Drupal::service('password_generator')->generate(40);
     $form['account']['pass_disabled']['#type'] = 'fieldset';
     $form['account']['pass_disabled']['#title'] = t('Password');
     $form['account']['pass_disabled'][]['#markup'] = t('LDAP has disabled the password field and generated a random password.');

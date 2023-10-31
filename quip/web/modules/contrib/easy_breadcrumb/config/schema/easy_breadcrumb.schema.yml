@@ -49,6 +49,9 @@ easy_breadcrumb.settings:
     use_page_title_as_menu_title_fallback:
       type: boolean
       label: 'Use the page title as a fallback if the menu title is not set'
+    menu_title_preferred_menu:
+      type: string
+      label: 'Preferred menu to use as menu title source'
     remove_repeated_segments:
       type: boolean
       label: 'Remove repeated identical segments'

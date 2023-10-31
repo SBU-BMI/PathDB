@@ -2,11 +2,17 @@
 
 namespace Drupal\typed_data\Context;
 
-use Drupal\Core\Plugin\Context\ContextDefinition as ContextDefinitionCore;
 use Drupal\Component\Plugin\Exception\ContextException;
+use Drupal\Core\Plugin\Context\ContextDefinition as ContextDefinitionCore;
+
+@trigger_error('\Drupal\typed_data\Context\ContextDefinition is deprecated in typed_data:8.x-1.0 and is removed from typed_data:2.0.0. Use \Drupal\Core\Plugin\Context\ContextDefinition instead. See https://www.drupal.org/project/typed_data/issues/3169307', E_USER_DEPRECATED);
 
 /**
  * Extends the core context definition class with useful methods.
+ *
+ * @deprecated in typed_data:8.x-1.0 and is removed from typed_data:2.0.0. Use \Drupal\Core\Plugin\Context\ContextDefinition instead.
+ *
+ * @see https://www.drupal.org/project/typed_data/issues/3169307
  */
 class ContextDefinition extends ContextDefinitionCore implements ContextDefinitionInterface {
 

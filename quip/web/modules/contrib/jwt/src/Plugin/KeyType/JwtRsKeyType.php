@@ -127,7 +127,6 @@ class JwtRsKeyType extends KeyTypeBase implements KeyPluginFormInterface {
     if ($key_details['type'] != OPENSSL_KEYTYPE_RSA) {
       $form_state->setErrorByName('key_type', $this->t('Key must be RSA.'));
     }
-
     openssl_pkey_free($key_resource);
   }
 

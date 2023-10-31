@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_servers;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\ldap_servers\Entity\Server;
 
 /**
@@ -38,9 +38,9 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity): array {
-    /** @var \Drupal\ldap_servers\Entity\Server $entity */
-    $entityWithoutOverrides = $entity;
     /** @var \Drupal\ldap_servers\Entity\Server $entity_with_overrides */
+    $entity_with_overrides = $entity;
+    /** @var \Drupal\ldap_servers\Entity\Server $entity */
     $entity = $this->storage->load($entity->id());
 
     $row = [];
@@ -66,7 +66,7 @@ class ServerListBuilder extends ConfigEntityListBuilder {
     ];
 
     foreach ($fields as $field) {
-      if ($entity->get($field) !== $entityWithoutOverrides->get($field)) {
+      if ($entity->get($field) !== $entity_with_overrides->get($field)) {
         $row[$field] .= ' ' . $this->t('(overridden)');
       }
     }
@@ -113,6 +113,7 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    *   Available operations in dropdown.
    */
   public function getOperations(EntityInterface $entity): array {
+    /** @var \Drupal\ldap_servers\ServerInterface $entity */
     $operations = $this->getDefaultOperations($entity);
     if (!isset($operations['test'])) {
       $operations['test'] = [

@@ -2,16 +2,13 @@
 
 namespace Drupal\csv_serialization\Encoder;
 
-use Exception;
+use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
+use Drupal\Component\Utility\Html;
+use League\Csv\ByteSequence;
+use League\Csv\Reader;
+use League\Csv\Writer;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
-use League\Csv\Writer;
-use League\Csv\Reader;
-use SplTempFileObject;
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
-use League\Csv\ByteSequence;
-use League\Csv\CharsetConverter;
 
 /**
  * Adds CSV encoder support for the Serialization API.
@@ -143,7 +140,7 @@ class CsvEncoder implements EncoderInterface, DecoderInterface {
 
     try {
       // Instantiate CSV writer with options.
-      $csv = Writer::createFromFileObject(new SplTempFileObject());
+      $csv = Writer::createFromFileObject(new \SplTempFileObject());
       $csv->setDelimiter($this->delimiter);
       $csv->setEnclosure($this->enclosure);
       $csv->setEscape($this->escapeChar);
@@ -167,11 +164,11 @@ class CsvEncoder implements EncoderInterface, DecoderInterface {
           $csv->insertOne($row);
         }
       }
-      $output = $csv->getContent();
+      $output = $csv->toString();
 
       return trim($output);
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
       throw new InvalidDataTypeException($e->getMessage(), $e->getCode(), $e);
     }
   }
@@ -255,12 +252,12 @@ class CsvEncoder implements EncoderInterface, DecoderInterface {
       return implode('|', $data);
     }
 
-      $cell_value = "";
-      foreach ($data as $item) {
-        $cell_value .= '|' . (is_array($item) ? $this->flattenCell($item) : $item);
-      }
+    $cell_value = "";
+    foreach ($data as $item) {
+      $cell_value .= '|' . (is_array($item) ? $this->flattenCell($item) : $item);
+    }
 
-      return trim($cell_value, '|');
+    return trim($cell_value, '|');
   }
 
   /**
@@ -284,12 +281,13 @@ class CsvEncoder implements EncoderInterface, DecoderInterface {
     return $value;
   }
 
-    /**
-     * {@inheritdoc}
-     * @throws \League\Csv\Exception
-     * @throws \League\Csv\Exception
-     * @throws \League\Csv\Exception
-     */
+  /**
+   * {@inheritdoc}
+   *
+   * @throws \League\Csv\Exception
+   * @throws \League\Csv\Exception
+   * @throws \League\Csv\Exception
+   */
   public function decode($data, $format, array $context = []) {
     $csv = Reader::createFromString($data);
     $csv->setDelimiter($this->delimiter);
@@ -383,7 +381,7 @@ class CsvEncoder implements EncoderInterface, DecoderInterface {
     $this->enclosure = $settings['enclosure'];
     $this->escapeChar = $settings['escape_char'];
     $this->useUtf8Bom = ($settings['encoding'] === 'utf8' && !empty($settings['utf8_bom']));
-    $this->newline = isset($settings['new_line']) ? $settings['new_line'] : NULL;
+    $this->newline = $settings['new_line'] ?? NULL;
     $this->stripTags = $settings['strip_tags'];
     $this->trimValues = $settings['trim'];
     if (array_key_exists('output_header', $settings)) {

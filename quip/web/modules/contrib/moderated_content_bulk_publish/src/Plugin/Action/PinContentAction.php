@@ -47,7 +47,7 @@ class PinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase
 
     // Do some processing..
     // ...
-    //\Drupal::Messenger()->addStatus(utf8_encode('Pin bulk operation by moderated_content_bulk_publish module'));
+    //\Drupal::Messenger()->addStatus(mb_convert_encoding('Pin bulk operation by moderated_content_bulk_publish module', 'UTF-8'));
 
     $user = \Drupal::currentUser();
 
@@ -60,7 +60,7 @@ class PinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase
       // Check if pinned
       if (!$entity->isSticky()){
         $msg = "Something went wrong, the entity must be pinned by this point.";
-        \Drupal::Messenger()->addError(utf8_encode($msg));
+        \Drupal::Messenger()->addError(mb_convert_encoding($msg, 'UTF-8'));
         \Drupal::logger('moderated_content_bulk_publish')->warning($msg);
         return $msg;
       }

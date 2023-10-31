@@ -121,7 +121,9 @@ class LdapAttribute extends FieldPluginBase {
    */
   public function clickSort($order): void {
     $params = $this->options['group_type'] !== 'group' ? ['function' => $this->options['group_type']] : [];
-    $this->query->addOrderBy(NULL, $this->realField, $order, $this->field_alias, $params);
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addOrderBy(NULL, $this->realField, $order, $this->field_alias, $params);
   }
 
 }

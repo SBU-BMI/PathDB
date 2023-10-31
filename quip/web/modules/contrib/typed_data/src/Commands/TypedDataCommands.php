@@ -15,16 +15,15 @@ class TypedDataCommands extends DrushCommands {
    * @command typed-data:entities
    * @aliases el,entity-list
    */
-  public function listEntities() {
+  public function listEntities(): void {
     // Dependency injection deliberately not used. So ignore the phpcs message.
     // @see https://www.drupal.org/project/typed_data/issues/3164489
     // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
     $entities = array_keys(\Drupal::entityTypeManager()->getDefinitions());
-    $unique = array_unique($entities);
-    sort($unique);
+    sort($entities);
 
     $this->output()->writeln(dt('Entity machine names:'));
-    $this->output()->writeln('  ' . implode(PHP_EOL . '  ', $unique) . PHP_EOL);
+    $this->output()->writeln('  ' . implode(PHP_EOL . '  ', $entities) . PHP_EOL);
   }
 
   /**
@@ -33,14 +32,13 @@ class TypedDataCommands extends DrushCommands {
    * @command typed-data:contexts
    * @aliases cl,context-list
    */
-  public function listContexts() {
+  public function listContexts(): void {
     // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
     $contexts = array_keys(\Drupal::service('context.repository')->getAvailableContexts());
-    $unique = array_unique($contexts);
-    sort($unique);
+    sort($contexts);
 
     $this->output()->writeln(dt('Global context variables:'));
-    $this->output()->writeln('  ' . implode(PHP_EOL . '  ', $unique) . PHP_EOL);
+    $this->output()->writeln('  ' . implode(PHP_EOL . '  ', $contexts) . PHP_EOL);
   }
 
   /**
@@ -49,19 +47,13 @@ class TypedDataCommands extends DrushCommands {
    * @command typed-data:datatypes
    * @aliases tl,datatype-list
    */
-  public function listDataTypes() {
+  public function listDataTypes(): void {
     // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
-    $definitions = \Drupal::service('typed_data_manager')->getDefinitions();
-    $datatypes = [];
-    foreach ($definitions as $plugin) {
-      // $datatypes[] = $plugin['class'];
-      $datatypes[] = $plugin['id'];
-    }
-    $unique = array_unique($datatypes);
-    sort($unique);
+    $datatypes = array_keys(\Drupal::service('typed_data_manager')->getDefinitions());
+    sort($datatypes);
 
     $this->output()->writeln(dt('Available TypedData data types:'));
-    $this->output()->writeln('  ' . implode(PHP_EOL . '  ', $unique) . PHP_EOL);
+    $this->output()->writeln('  ' . implode(PHP_EOL . '  ', $datatypes) . PHP_EOL);
   }
 
   /**
@@ -70,7 +62,7 @@ class TypedDataCommands extends DrushCommands {
    * @command typed-data:datafilters
    * @aliases fl,datafilter-list
    */
-  public function listDataFilters() {
+  public function listDataFilters(): void {
     $this->formatOutput('plugin.manager.typed_data_filter', 'Available TypedDataFilter plugins:', FALSE);
   }
 
@@ -80,14 +72,14 @@ class TypedDataCommands extends DrushCommands {
    * @command typed-data:formwidgets
    * @aliases wl,formwidget-list
    */
-  public function listFormWidgets() {
+  public function listFormWidgets(): void {
     $this->formatOutput('plugin.manager.typed_data_form_widget', 'Available TypedDataFormWidget plugins:', FALSE);
   }
 
   /**
    * Helper function to format command output.
    */
-  protected function formatOutput($plugin_manager_service, $title, $categories = TRUE, $short = FALSE) {
+  protected function formatOutput(string $plugin_manager_service, string $title, bool $categories = TRUE, bool $short = FALSE): void {
     // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
     $definitions = \Drupal::service($plugin_manager_service)->getDefinitions();
     $plugins = [];

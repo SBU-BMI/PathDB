@@ -22,6 +22,7 @@ class HandlerFor403AccessDenied extends HttpExceptionSubscriberBase {
   }
 
   public function on403(ExceptionEvent $event) {
+    $base_path = \Drupal::request()->getBasePath();
     $request = $event->getRequest();
     $is_anonymous = $this->currentUser->isAnonymous();
     $route_name = $request->attributes->get('_route');
@@ -33,10 +34,20 @@ class HandlerFor403AccessDenied extends HttpExceptionSubscriberBase {
       $new_path = $current_path;
       // Fait de la magique ici.
       // Latest revision doesn't exist in this language, redirect to node page.
-      $new_path = str_replace('/latest', '', $current_path);
+      $new_path = $base_path . str_replace('/latest', '', $current_path);
       \Drupal::logger('moderated_content_bulk_publish')->notice(utf8_encode('HandlerFor403AccessDenied: Redirecting from ' . $current_path . ' to ' . $new_path));
       $base_url = \Drupal::request()->getSchemeAndHttpHost();
-      $returnResponse = new TrustedRedirectResponse($base_url . '/' . $langId . $new_path); // TODO: figure out how to do this the Drupal 8 way for internal path but didn't because of language afterthought in Drupal 8.
+      $parts = array_filter(explode('/', \Drupal::request()->getRequestUri()));
+      $has_prefix = count($parts) && $parts[1] == $langId;
+
+      // Check if the language prefix exist in url.
+      if ($has_prefix) {
+        // TODO: figure out how to do this the Drupal 8 way for internal path but didn't because of language afterthought in Drupal 8.
+        $returnResponse = new TrustedRedirectResponse($base_url . '/' . $langId . $new_path);
+      }
+      else {
+        $returnResponse = new TrustedRedirectResponse($base_url . '/' . $new_path);
+      }
       $event->setResponse($returnResponse);
 
       return;

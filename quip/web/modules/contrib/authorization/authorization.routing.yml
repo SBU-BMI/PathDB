@@ -1,4 +1,3 @@
-
 # AuthorizationProfile routing definition
 entity.authorization_profile.collection:
   path: '/admin/config/people/authorization/profile'

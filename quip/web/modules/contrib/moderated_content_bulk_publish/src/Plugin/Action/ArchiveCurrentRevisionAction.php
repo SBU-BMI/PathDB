@@ -49,7 +49,7 @@ class ArchiveCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperatio
 
     // Do some processing..
     // ...
-    //\Drupal::Messenger()->addStatus(utf8_encode('Begin archive bulk operation by moderated_content_bulk_publish module plugin'));
+    //\Drupal::Messenger()->addStatus(mb_convert_encoding('Begin archive bulk operation by moderated_content_bulk_publish module plugin', 'UTF-8'));
 
     $user = \Drupal::currentUser();
 
@@ -59,7 +59,7 @@ class ArchiveCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperatio
       $adminModeration = new AdminModeration($entity, NodeInterface::NOT_PUBLISHED);
       $entity = $adminModeration->archive($error_message, $markup);
       if (!isset($entity) && !empty($error_message)) {
-        \Drupal::Messenger()->addWarning(utf8_encode($error_message));
+        \Drupal::Messenger()->addWarning(mb_convert_encoding($error_message, 'UTF-8'));
         $htmlelement = Markup::create($markup);
         \Drupal::Messenger()->addWarning($htmlelement);
         return $error_message;
@@ -68,7 +68,7 @@ class ArchiveCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperatio
       //check if published
       if ($entity->isPublished()){
         $msg = "Something went wrong, the entity must be archived by this point.  Review your content moderation configuration make sure you have archive state which sets current revision ??? and try again.";
-        \Drupal::Messenger()->addError(utf8_encode($msg));
+        \Drupal::Messenger()->addError(mb_convert_encoding($msg, 'UTF-8'));
         \Drupal::logger('moderated_content_bulk_publish')->warning($msg);
         return $msg;
       }

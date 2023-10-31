@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\authorization\Entity;
 
-use Drupal\authorization\consumer\ConsumerInterface;
-use Drupal\authorization\provider\ProviderInterface;
 use Drupal\authorization\AuthorizationResponse;
 use Drupal\authorization\AuthorizationSkipAuthorization;
+use Drupal\authorization\Consumer\ConsumerInterface;
+use Drupal\authorization\Provider\ProviderInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\user\UserInterface;
@@ -112,7 +112,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * The provider plugin instance.
    *
-   * @var \Drupal\authorization\provider\ProviderInterface
+   * @var \Drupal\authorization\Provider\ProviderInterface
    */
   protected $provider_plugin;
 
@@ -133,7 +133,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * The consumer plugin instance.
    *
-   * @var \Drupal\authorization\consumer\ConsumerInterface
+   * @var \Drupal\authorization\Consumer\ConsumerInterface
    */
   protected $consumer_plugin;
 
@@ -145,7 +145,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   protected $provider_plugin_manager;
 
   /**
-   * The consumer plugin maanger.
+   * The consumer plugin manager.
    *
    * @var \Drupal\authorization\Consumer\ConsumerPluginManager
    */
@@ -222,7 +222,7 @@ class AuthorizationProfile extends ConfigEntityBase {
    *   Consumer valid.
    */
   public function hasValidConsumer(): bool {
-    if ($this->consumer_plugin_manager->getDefinition($this->getconsumerId(), FALSE)) {
+    if ($this->consumer_plugin_manager->getDefinition($this->getConsumerId(), FALSE)) {
       return TRUE;
     }
 
@@ -232,7 +232,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * Get the active provider.
    *
-   * @return \Drupal\authorization\provider\ProviderInterface|null
+   * @return \Drupal\authorization\Provider\ProviderInterface|null
    *   The active provider.
    */
   public function getProvider(): ?ProviderInterface {
@@ -245,7 +245,7 @@ class AuthorizationProfile extends ConfigEntityBase {
   /**
    * Get the active consumer.
    *
-   * @return \Drupal\authorization\consumer\ConsumerInterface|null
+   * @return \Drupal\authorization\Consumer\ConsumerInterface|null
    *   The active consumer.
    */
   public function getConsumer(): ?ConsumerInterface {

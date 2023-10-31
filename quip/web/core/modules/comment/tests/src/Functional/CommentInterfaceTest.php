@@ -87,12 +87,7 @@ class CommentInterfaceTest extends CommentTestBase {
     $this->drupalGet('node/' . $this->node->id());
     $this->assertSession()->pageTextContains($subject_text);
     $this->assertSession()->pageTextContains($comment_text);
-    $arguments = [
-      ':link' => base_path() . 'comment/' . $comment->id() . '#comment-' . $comment->id(),
-    ];
-    $pattern_permalink = '//footer/a[contains(@href,:link) and text()="Permalink"]';
-    $permalink = $this->xpath($pattern_permalink, $arguments);
-    $this->assertNotEmpty($permalink, 'Permalink link found.');
+    $this->assertSession()->elementExists('xpath', '//footer/a[contains(@href,"' . base_path() . 'comment/' . $comment->id() . '#comment-' . $comment->id() . '") and text()="Permalink"]');
 
     // Set comments to have subject and preview to optional.
     $this->drupalLogout();
@@ -126,7 +121,7 @@ class CommentInterfaceTest extends CommentTestBase {
     // Reply to comment #2 creating comment #3 with optional preview and no
     // subject though field enabled.
     $this->drupalLogin($this->webUser);
-    // Deliberately use the wrong url to test
+    // Deliberately use the wrong URL to test
     // \Drupal\comment\Controller\CommentController::redirectNode().
     $this->drupalGet('comment/' . $this->node->id() . '/reply');
     // Verify we were correctly redirected.

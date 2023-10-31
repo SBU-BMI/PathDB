@@ -172,7 +172,7 @@ $a = array(
 );
 
 // Single line array declaration is too long.
-$page_options = array('home' => t('Front Page'), 'all' => t('All Pages'), 'list' => t('List Pages'));
+$page_options = array('home' => t('Front Page'), 'all' => t('All Pages'), 'list' => t('List Pages'), 'delete' => t('Delete'));
 
 // Item assignment operators must be prefixed and followed by a space
 $a = array('one'=>'1');
@@ -770,7 +770,7 @@ function test25() {
 }
 
 /**
- * Void returns are not allowed.
+ * Void returns are allowed.
  *
  * @return void
  *   Description.
@@ -834,6 +834,9 @@ function test28() {
 
 // Multiple statements on one line are not allowed.
 echo 'Hi!';;
+
+enum aBad_NameForAnEnum {
+}
 
 /**
  * A test class.

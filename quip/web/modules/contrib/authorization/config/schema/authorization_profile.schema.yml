@@ -43,12 +43,12 @@ authorization.authorization_profile.*:
       label: 'Enabled'
     # TODO: Restructure as booleans.
     synchronization_modes:
-      type: sequence
+      type: mapping
       label: 'When should roles be granted/revoked from user?'
-      sequence:
+      mapping:
         user_logon:
-        type: string
-        label: 'When a user logs in via the configured provider.'
+          type: string
+          label: 'When a user logs in via the configured provider.'
     synchronization_actions:
       type: mapping
       label: 'What actions would you like performed when roles are granted/revoked from user?'

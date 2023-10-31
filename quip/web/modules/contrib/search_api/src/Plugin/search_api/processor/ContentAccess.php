@@ -174,7 +174,7 @@ class ContentAccess extends ProcessorPluginBase {
     foreach ($fields as $field) {
       // Collect grant records for the node. If there are none, use the pseudo
       // grant "node_access__all".
-      $sql = 'SELECT gid, realm FROM {node_access} WHERE (nid = 0 OR nid = :nid) AND grant_view = 1';
+      $sql = 'SELECT [gid], [realm] FROM {node_access} WHERE ([nid] = 0 OR [nid] = :nid) AND [grant_view] = 1';
       $args = [':nid' => $node->id()];
       $grant_records = $this->getDatabase()->query($sql, $args)->fetchAll();
       if ($grant_records) {
@@ -243,10 +243,7 @@ class ContentAccess extends ProcessorPluginBase {
         $this->addNodeAccess($query, $account);
       }
       else {
-        $account = $query->getOption('search_api_access_account', $this->getCurrentUser());
-        if ($account instanceof AccountInterface) {
-          $account = $account->id();
-        }
+        $account = $query->getOption('search_api_access_account');
         if (!is_scalar($account)) {
           $account = var_export($account, TRUE);
         }
@@ -294,12 +291,11 @@ class ContentAccess extends ProcessorPluginBase {
     // If there are no "other" datasources, we don't need the nested OR,
     // however, and can add the inner conditions directly to the query.
     if ($unaffected_datasources) {
-      $outer_conditions = $query->createConditionGroup('OR', ['content_access']);
-      $query->addConditionGroup($outer_conditions);
+      $outer_conditions = $query->createAndAddConditionGroup('OR', ['content_access']);
       foreach ($unaffected_datasources as $datasource_id) {
         $outer_conditions->addCondition('search_api_datasource', $datasource_id);
       }
-      $access_conditions = $query->createConditionGroup('AND');
+      $access_conditions = $query->createConditionGroup();
       $outer_conditions->addConditionGroup($access_conditions);
     }
     else {
@@ -325,28 +321,30 @@ class ContentAccess extends ProcessorPluginBase {
       return;
     }
 
-    // Collect all the required fields that need to be part of the index.
-    $unpublished_own = $account->hasPermission('view own unpublished content');
+    if (!$account->hasPermission('view any unpublished content')) {
+      // Collect all the required fields that need to be part of the index.
+      $unpublished_own = $account->hasPermission('view own unpublished content');
 
-    $enabled_conditions = $query->createConditionGroup('OR', ['content_access_enabled']);
-    foreach ($affected_datasources as $entity_type => $datasources) {
-      foreach ($datasources as $datasource_id) {
-        // If this is a comment datasource, or users cannot view their own
-        // unpublished nodes, a simple filter on "status" is enough. Otherwise,
-        // it's a bit more complicated.
-        $status_field = $this->findField($datasource_id, 'status', 'boolean');
-        if ($status_field) {
-          $enabled_conditions->addCondition($status_field->getFieldIdentifier(), TRUE);
-        }
-        if ($entity_type == 'node' && $unpublished_own) {
-          $author_field = $this->findField($datasource_id, 'uid', 'integer');
-          if ($author_field) {
-            $enabled_conditions->addCondition($author_field->getFieldIdentifier(), $account->id());
+      $enabled_conditions = $query->createConditionGroup('OR', ['content_access_enabled']);
+      foreach ($affected_datasources as $entity_type => $datasources) {
+        foreach ($datasources as $datasource_id) {
+          // If this is a comment datasource, or users cannot view their own
+          // unpublished nodes, a simple filter on "status" is enough. Otherwise,
+          // it's a bit more complicated.
+          $status_field = $this->findField($datasource_id, 'status', 'boolean');
+          if ($status_field) {
+            $enabled_conditions->addCondition($status_field->getFieldIdentifier(), TRUE);
+          }
+          if ($entity_type == 'node' && $unpublished_own) {
+            $author_field = $this->findField($datasource_id, 'uid', 'integer');
+            if ($author_field) {
+              $enabled_conditions->addCondition($author_field->getFieldIdentifier(), $account->id());
+            }
           }
         }
       }
+      $access_conditions->addConditionGroup($enabled_conditions);
     }
-    $access_conditions->addConditionGroup($enabled_conditions);
 
     // Filter by the user's node access grants.
     $node_grants_field = $this->findField(NULL, 'search_api_node_grants', 'string');

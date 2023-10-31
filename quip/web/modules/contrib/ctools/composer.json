@@ -30,11 +30,6 @@
       "name": "Daniel Wehner (dawehner)",
       "homepage": "https://www.drupal.org/u/dawehner",
       "role": "Maintainer"
-    },
-    {
-      "name": "Joël (joelpittet)",
-      "homepage": "https://www.drupal.org/u/joelpittet",
-      "role": "Maintainer"
     }
   ],
   "support": {
@@ -43,7 +38,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-4.x": "4.x-dev"
+      "dev-8.x-3.x": "3.x-dev"
     }
   }
 }

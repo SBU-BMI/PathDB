@@ -9,9 +9,9 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
-use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\user\Entity\User;
 use Symfony\Component\Ldap\Entry;
 
@@ -141,6 +141,7 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
     $admin_roles = $this->entityTypeManager
       ->getStorage('user_role')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition('is_admin', TRUE)
       ->execute();
     self::assertNotEmpty($admin_roles);

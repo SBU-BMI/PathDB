@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\authorization\Plugin;
 
@@ -98,7 +98,9 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   /**
    * Unused, configuration is saved in the profile, required by base class.
    */
-  public function getConfiguration() {}
+  public function getConfiguration() {
+    return [];
+  }
 
   /**
    * Unused, configuration is saved in the profile, required by base class.

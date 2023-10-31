@@ -25,6 +25,14 @@ use Drupal\http_response_headers\ResponseHeaderInterface;
  *     "id" = "id",
  *     "label" = "label",
  *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "description",
+ *     "group",
+ *     "name",
+ *     "value",
+ *   },
  *   links = {
  *     "edit-form" = "/admin/config/system/response-headers/{header}",
  *     "delete-form" = "/admin/config/system/response-headers/{header}/delete",

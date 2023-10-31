@@ -64,13 +64,13 @@ class UserHelpTabAccess implements AccessInterface {
   public function accessLdapHelpTab(): bool {
     $mode = $this->config->get('authenticationMode');
     if ($mode === 'mixed') {
-      if ($this->externalAuth->get($this->currentUser->id(), 'ldap_user')) {
+      if ($this->externalAuth->get((int) $this->currentUser->id(), 'ldap_user')) {
         return TRUE;
       }
     }
     else {
       if ($this->currentUser->isAnonymous() ||
-        $this->externalAuth->get($this->currentUser->id(), 'ldap_user')) {
+        $this->externalAuth->get((int) $this->currentUser->id(), 'ldap_user')) {
         return TRUE;
       }
     }

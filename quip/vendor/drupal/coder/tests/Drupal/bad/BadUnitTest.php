@@ -27,6 +27,11 @@ class BadUnitTest extends CoderSniffUnitTest
     protected function getErrorList(string $testFile): array
     {
         switch ($testFile) {
+        case 'bad_crlf.inc':
+            return [
+                1 => 2,
+                8 => 1,
+            ];
         case 'bad.css':
             return [
                 1  => 1,
@@ -307,7 +312,6 @@ class BadUnitTest extends CoderSniffUnitTest
                 566 => 3,
                 575 => 1,
                 578 => 2,
-                581 => 1,
                 588 => 1,
                 590 => 1,
                 592 => 1,
@@ -358,7 +362,6 @@ class BadUnitTest extends CoderSniffUnitTest
                 750 => 1,
                 756 => 1,
                 765 => 1,
-                775 => 1,
                 791 => 1,
                 795 => 4,
                 796 => 1,
@@ -376,8 +379,9 @@ class BadUnitTest extends CoderSniffUnitTest
                 827 => 1,
                 829 => 1,
                 836 => 1,
-                846 => 2,
-                852 => 2,
+                838 => 1,
+                849 => 2,
+                855 => 2,
             ];
         }//end switch
 

@@ -36,6 +36,10 @@ class RevisionLogWidgetTest extends BrowserTestBase {
    */
   protected $webUser;
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * The Entity Form Display for the article node type.

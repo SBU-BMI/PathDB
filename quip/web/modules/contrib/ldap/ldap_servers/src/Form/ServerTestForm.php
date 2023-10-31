@@ -6,9 +6,9 @@ namespace Drupal\ldap_servers\Form;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Extension\ModuleHandler;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Renderer;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ldap_servers\Entity\Server;
@@ -93,7 +93,7 @@ class ServerTestForm extends EntityForm {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Config Factory.
-   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Module handler.
    * @param \Drupal\ldap_servers\Processor\TokenProcessor $token_processor
    *   Token Processor.
@@ -106,7 +106,7 @@ class ServerTestForm extends EntityForm {
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     TokenProcessor $token_processor,
     Renderer $renderer,
     LdapBridgeInterface $ldap_bridge,

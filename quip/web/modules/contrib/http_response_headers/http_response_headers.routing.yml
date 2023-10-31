@@ -2,7 +2,7 @@ entity.response_header.collection:
   path: '/admin/config/system/response-headers'
   defaults:
     _entity_list: 'response_header'
-    _title: 'Response header configuration'
+    _title: 'Response Header Configuration'
   requirements:
     _permission: 'administer site configuration'
 
@@ -10,7 +10,7 @@ entity.response_header.add_form:
   path: '/admin/config/system/response-headers/add'
   defaults:
     _entity_form: 'response_header.add'
-    _title: 'Add response header'
+    _title: 'Add Response Header'
   requirements:
     _permission: 'administer site configuration'
 
@@ -18,7 +18,7 @@ entity.response_header.edit_form:
   path: '/admin/config/system/response-headers/{response_header}'
   defaults:
     _entity_form: 'response_header.edit'
-    _title: 'Edit response header'
+    _title: 'Edit Response Header'
   requirements:
     _permission: 'administer site configuration'
 
@@ -26,6 +26,6 @@ entity.response_header.delete_form:
   path: '/admin/config/system/response-headers/{response_header}/delete'
   defaults:
     _entity_form: 'response_header.delete'
-    _title: 'Delete response header'
+    _title: 'Delete Response Header'
   requirements:
     _permission: 'administer site configuration'

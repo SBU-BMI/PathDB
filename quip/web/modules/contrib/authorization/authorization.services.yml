@@ -21,8 +21,8 @@ services:
     tags:
       - { name: event_subscriber }
   authorization.manager:
-    class: Drupal\authorization\AuthorizationController
+    class: Drupal\authorization\Service\AuthorizationService
     arguments: ['@entity_type.manager', '@logger.channel.authorization']
   logger.channel.authorization:
-      parent: logger.channel_base
-      arguments: ['authorization']
+    parent: logger.channel_base
+    arguments: ['authorization']

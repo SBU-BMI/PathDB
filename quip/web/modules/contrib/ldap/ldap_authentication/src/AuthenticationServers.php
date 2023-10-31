@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_authentication;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Authentication serves.
@@ -63,6 +63,7 @@ class AuthenticationServers {
     /** @var array $available_servers */
     $available_servers = $this->storage
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition('status', 1)
       ->execute();
 

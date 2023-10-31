@@ -6,7 +6,7 @@ namespace Drupal\ldap_user\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
@@ -22,7 +22,7 @@ abstract class LdapUserMappingBaseForm extends ConfigFormBase implements LdapUse
   /**
    * Module handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -73,7 +73,7 @@ abstract class LdapUserMappingBaseForm extends ConfigFormBase implements LdapUse
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager,
     FieldProvider $field_provider
   ) {

@@ -4,10 +4,10 @@ namespace Drupal\typed_data_widget_test;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\typed_data\Form\SubformState;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\TypedData\TypedDataTrait;
+use Drupal\typed_data\Form\SubformState;
 use Drupal\typed_data\Widget\FormWidgetManagerTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -15,7 +15,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Provides a form to demonstrate all TypedDataFormWidgets.
  */
 class FormWidgetExampleForm extends FormBase {
-
   use FormWidgetManagerTrait;
   use TypedDataTrait;
 

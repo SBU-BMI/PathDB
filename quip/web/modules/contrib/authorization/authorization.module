@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * @file
  * Contains authorization.module.
  */
+
+declare(strict_types=1);
 
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -25,11 +25,11 @@ function authorization_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_user_login().
  */
 function authorization_user_login($account) {
-  /** @var \Drupal\authorization\AuthorizationController $controller */
-  $controller = \Drupal::service('authorization.manager');
-  $controller->setUser($account);
-  $controller->setAllProfiles();
-  $processed_authorizations = $controller->getProcessedAuthorizations();
+  /** @var \Drupal\authorization\AuthorizationServiceInterface $service */
+  $service = \Drupal::service('authorization.manager');
+  $service->setUser($account);
+  $service->setAllProfiles();
+  $processed_authorizations = $service->getProcessedAuthorizations();
 
   if (\Drupal::config('authorization.settings')->get('authorization_message')) {
     foreach ($processed_authorizations as $authorization) {

@@ -124,7 +124,7 @@ class UsersGenerateKeyForm extends FormBase {
     /** @var \Drupal\user\UserInterface $user */
     $user = $form_state->getValue('user');
     $filename = $user->getAccountName() . '__private-key__' . $key->id . '.key';
-    $response = Response::create($out);
+    $response = new Response($out);
     $response->setPrivate();
     // Clear the cookie from the browser that is set in JavaScript.
     $response->headers->clearCookie('users_jwt_download', '/', NULL, FALSE, FALSE);

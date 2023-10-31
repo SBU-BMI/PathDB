@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace Drupal\ldap_authentication\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\ldap_authentication\Routing\EmailTemplateService;
 use Symfony\Component\DependencyInjection\ContainerInterface;

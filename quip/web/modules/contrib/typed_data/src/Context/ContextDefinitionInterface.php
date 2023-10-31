@@ -4,11 +4,17 @@ namespace Drupal\typed_data\Context;
 
 use Drupal\Core\Plugin\Context\ContextDefinitionInterface as ContextDefinitionInterfaceCore;
 
+@trigger_error('\Drupal\typed_data\Context\ContextDefinitionInterface is deprecated in typed_data:8.x-1.0 and is removed from typed_data:2.0.0. Use \Drupal\Core\Plugin\Context\ContextDefinitionInterface instead. See https://www.drupal.org/project/typed_data/issues/3169307', E_USER_DEPRECATED);
+
 /**
  * Context definition information required by Typed Data.
  *
  * The core interface is extended to add properties that are necessary for
  * Typed Data.
+ *
+ * @deprecated in typed_data:8.x-1.0 and is removed from typed_data:2.0.0. Use \Drupal\Core\Plugin\Context\ContextDefinitionInterface instead.
+ *
+ * @see https://www.drupal.org/project/typed_data/issues/3169307
  */
 interface ContextDefinitionInterface extends ContextDefinitionInterfaceCore {
 

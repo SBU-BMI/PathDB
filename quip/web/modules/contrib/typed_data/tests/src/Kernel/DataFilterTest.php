@@ -90,7 +90,7 @@ class DataFilterTest extends KernelTestBase {
    *
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\CountFilter
    */
-  public function testCountFilter() {
+  public function testCountFilter(): void {
     $filter = $this->dataFilterManager->createInstance('count');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), 'No one shall speak to the Man at the Helm.');
 
@@ -105,7 +105,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\LowerFilter
    */
-  public function testLowerFilter() {
+  public function testLowerFilter(): void {
     $filter = $this->dataFilterManager->createInstance('lower');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), 'tEsT');
 
@@ -122,7 +122,7 @@ class DataFilterTest extends KernelTestBase {
    *
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\ReplaceFilter
    */
-  public function testReplaceFilter() {
+  public function testReplaceFilter(): void {
     $filter = $this->dataFilterManager->createInstance('replace');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), 'Text with mispeling to correct');
 
@@ -149,7 +149,7 @@ class DataFilterTest extends KernelTestBase {
    *
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\TrimFilter
    */
-  public function testTrimFilter() {
+  public function testTrimFilter(): void {
     $filter = $this->dataFilterManager->createInstance('trim');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), ' Text with whitespace ');
 
@@ -166,7 +166,7 @@ class DataFilterTest extends KernelTestBase {
    *
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\UpperFilter
    */
-  public function testUpperFilter() {
+  public function testUpperFilter(): void {
     $filter = $this->dataFilterManager->createInstance('upper');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), 'tEsT');
 
@@ -181,7 +181,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\DefaultFilter
    */
-  public function testDefaultFilter() {
+  public function testDefaultFilter(): void {
     $filter = $this->dataFilterManager->createInstance('default');
     $data = $this->typedDataManager->create(DataDefinition::create('string'));
 
@@ -205,7 +205,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\FormatDateFilter
    */
-  public function testFormatDateFilter() {
+  public function testFormatDateFilter(): void {
     $filter = $this->dataFilterManager->createInstance('format_date');
     $data = $this->typedDataManager->create(DataDefinition::create('timestamp'), 3700);
 
@@ -249,7 +249,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\FormatTextFilter
    */
-  public function testFormatTextFilter() {
+  public function testFormatTextFilter(): void {
     $filter = $this->dataFilterManager->createInstance('format_text');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), '<b>Test <em>format_text</em> filter with <code>full_html</code> plugin</b>');
 
@@ -287,7 +287,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\StripTagsFilter
    */
-  public function testStripTagsFilter() {
+  public function testStripTagsFilter(): void {
     $filter = $this->dataFilterManager->createInstance('striptags');
     $data = $this->typedDataManager->create(DataDefinition::create('string'), '<b>Test <em>striptags</em> filter</b>');
 
@@ -302,7 +302,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\EntityUrlFilter
    */
-  public function testEntityUrlFilter() {
+  public function testEntityUrlFilter(): void {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
 
@@ -330,7 +330,7 @@ class DataFilterTest extends KernelTestBase {
   /**
    * @covers \Drupal\typed_data\Plugin\TypedDataFilter\EntityUrlFilter
    */
-  public function testFileEntityUrlFilter() {
+  public function testFileEntityUrlFilter(): void {
     file_put_contents('public://example.txt', $this->randomMachineName());
     /** @var \Drupal\file\FileInterface $file */
     $file = File::create([

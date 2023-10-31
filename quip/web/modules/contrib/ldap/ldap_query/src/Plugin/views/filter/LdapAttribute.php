@@ -26,49 +26,63 @@ class LdapAttribute extends StringFilter {
    * {@inheritdoc}
    */
   public function opEqual($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, $this->value, $this->operator());
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, $this->value, $this->operator());
   }
 
   /**
    * {@inheritdoc}
    */
   protected function opContains($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, "*$this->value*", '=');
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, "*$this->value*", '=');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function opStartsWith($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, "$this->value*", '=');
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, "$this->value*", '=');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function opNotStartsWith($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, "$this->value*", '!=');
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, "$this->value*", '!=');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function opEndsWith($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, "*$this->value", '=');
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, "*$this->value", '=');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function opNotEndsWith($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, "*$this->value", '!=');
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, "*$this->value", '!=');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function opNotLike($field): void {
-    $this->query->addWhere($this->options['group'], $this->realField, "*$this->value*", '!=');
+    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $query = $this->query;
+    $query->addWhere($this->options['group'], $this->realField, "*$this->value*", '!=');
   }
 
   /**
@@ -76,10 +90,14 @@ class LdapAttribute extends StringFilter {
    */
   protected function opEmpty($field): void {
     if ($this->operator === 'empty') {
-      $this->query->addWhere($this->options['group'], $this->realField, '*', '!=');
+      /** @var \Drupal\views\Plugin\views\query\Sql $query */
+      $query = $this->query;
+      $query->addWhere($this->options['group'], $this->realField, '*', '!=');
     }
     else {
-      $this->query->addWhere($this->options['group'], $this->realField, '*', '=');
+      /** @var \Drupal\views\Plugin\views\query\Sql $query */
+      $query = $this->query;
+      $query->addWhere($this->options['group'], $this->realField, '*', '=');
     }
   }
 

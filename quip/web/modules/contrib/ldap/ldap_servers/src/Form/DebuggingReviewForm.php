@@ -6,7 +6,7 @@ namespace Drupal\ldap_servers\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Serialization\Yaml;
@@ -28,7 +28,7 @@ class DebuggingReviewForm extends FormBase {
   /**
    * Module Handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -51,14 +51,14 @@ class DebuggingReviewForm extends FormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Config factory.
-   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Module handler.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity type manager.
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager
   ) {
     $this->config = $config_factory;
@@ -147,8 +147,7 @@ class DebuggingReviewForm extends FormBase {
     ];
 
     $storage = $this->entityTypeManager->getStorage('ldap_server');
-    $servers = $storage->getQuery()->execute();
-    foreach ($storage->loadMultiple($servers) as $sid => $server) {
+    foreach ($storage->loadMultiple() as $sid => $server) {
       /** @var \Drupal\ldap_servers\Entity\Server $server */
       $form['config_server_' . $sid] = [
         '#markup' =>
@@ -162,7 +161,11 @@ class DebuggingReviewForm extends FormBase {
       $form['heading_profiles'] = [
         '#markup' => '<h2>' . $this->t('Configured authorization profiles') . '</h2>',
       ];
-      $profiles = $this->entityTypeManager->getStorage('authorization_profile')->getQuery()->execute();
+      $profiles = $this->entityTypeManager
+        ->getStorage('authorization_profile')
+        ->getQuery()
+        ->accessCheck(FALSE)
+        ->execute();
       foreach ($profiles as $profile) {
         $form['authorization_profile_' . $profile] = [
           '#markup' =>
@@ -177,8 +180,7 @@ class DebuggingReviewForm extends FormBase {
         '#markup' => '<h2>' . $this->t('Configured LDAP queries') . '</h2>',
       ];
 
-      $queries_found = $this->entityTypeManager->getStorage('ldap_query_entity')->getQuery()->execute();
-      foreach ($this->entityTypeManager->getStorage('ldap_query_entity')->loadMultiple($queries_found) as $query) {
+      foreach ($this->entityTypeManager->getStorage('ldap_query_entity')->loadMultiple() as $query) {
         /** @var \Drupal\ldap_query\Entity\QueryEntity $query */
         $form['query_' . $query->id()] = [
           '#markup' =>

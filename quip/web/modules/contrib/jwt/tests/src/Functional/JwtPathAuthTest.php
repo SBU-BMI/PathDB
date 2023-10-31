@@ -48,7 +48,7 @@ class JwtPathAuthTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->adminUser = $this->drupalCreateUser(['administer jwt', 'access content']);
@@ -87,12 +87,12 @@ class JwtPathAuthTest extends BrowserTestBase {
     $edit = [
       'allowed_path_prefixes' => "/system/files/\nzzz",
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save configuration');
-    $this->assertText('Paths must start with a slash.');
+    $this->submitForm($edit, 'Save configuration');
+    $this->assertSession()->pageTextContains('Paths must start with a slash.');
     $edit = [
       'allowed_path_prefixes' => "/system/files/\r\n/foo/zzz/ \r\n/entity/file/",
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save configuration');
+    $this->submitForm($edit, 'Save configuration');
     $config = $this->config('jwt_path_auth.config');
     $expected = ['/system/files/', '/foo/zzz/', '/entity/file/'];
     $this->assertSame($expected, $config->get('allowed_path_prefixes'));
@@ -105,8 +105,8 @@ class JwtPathAuthTest extends BrowserTestBase {
     $file_real_path = $file_system->realpath($file->getFileUri());
     $this->assertFileExists($file_real_path);
     $this->drupalGet($file->createFileUrl());
-    $this->assertResponse(200);
-    $this->assertText($this->getFileContent($file));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains($this->getFileContent($file));
     // Make sure the logged-in user can access the REST resource. The path
     // should be '/entity/file/' . $file->id().
     $options = [
@@ -116,11 +116,11 @@ class JwtPathAuthTest extends BrowserTestBase {
     ];
     $file_rest_url = Url::fromRoute('rest.entity.file.GET', ['file' => $file->id()], $options);
     $this->drupalGet($file_rest_url);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->drupalLogout();
     // Expect a 403 when not authenticated.
     $this->drupalGet($file->createFileUrl());
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     // When Drupal is in a subdirectory (such as drupal.org testbot) any
     // path in the JWT other than a "/" must bre prefixed with the base
     // path - the system does not expect the client to know where Drupal
@@ -140,8 +140,8 @@ class JwtPathAuthTest extends BrowserTestBase {
     ];
     // Make a real request with the token in the query string.
     $this->drupalGet($file->createFileUrl(), $options);
-    $this->assertResponse(200);
-    $this->assertText($this->getFileContent($file));
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains($this->getFileContent($file));
     // If the path claim on the JWT doesn't match, access should be denied.
     $jwt = new JsonWebToken();
     $jwt->setClaim(['drupal', 'path_auth', 'uid'], $this->adminUser->id());
@@ -153,7 +153,7 @@ class JwtPathAuthTest extends BrowserTestBase {
       ],
     ];
     $this->drupalGet($file->createFileUrl(), $options);
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     // Making a REST api request with no JWT should be denied.
     $options = [
       'query' => [
@@ -162,7 +162,7 @@ class JwtPathAuthTest extends BrowserTestBase {
     ];
     $file_rest_url = Url::fromRoute('rest.entity.file.GET', ['file' => $file->id()], $options);
     $this->drupalGet($file_rest_url);
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     // Token path does not match, should still be 403.
     $options = [
       'query' => [
@@ -172,7 +172,7 @@ class JwtPathAuthTest extends BrowserTestBase {
     ];
     $file_rest_url = Url::fromRoute('rest.entity.file.GET', ['file' => $file->id()], $options);
     $this->drupalGet($file_rest_url);
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
     // Create a new token matching the request path prefix.
     $jwt = new JsonWebToken();
     $jwt->setClaim(['drupal', 'path_auth', 'uid'], $this->adminUser->id());
@@ -186,7 +186,7 @@ class JwtPathAuthTest extends BrowserTestBase {
     ];
     $file_rest_url = Url::fromRoute('rest.entity.file.GET', ['file' => $file->id()], $options);
     $this->drupalGet($file_rest_url);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $json = $this->getSession()->getPage()->getContent();
     $data = json_decode($json, TRUE);
     $this->assertEquals($file->uuid(), $data['uuid'][0]['value']);
@@ -194,7 +194,7 @@ class JwtPathAuthTest extends BrowserTestBase {
     $this->adminUser->block();
     $this->adminUser->save();
     $this->drupalGet($file_rest_url);
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
   }
 
   /**
@@ -212,7 +212,7 @@ class JwtPathAuthTest extends BrowserTestBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function createPrivateFile($file_name, $uid = 1, $status = FILE_STATUS_PERMANENT) {
+  protected function createPrivateFile($file_name, $uid = 1, $status = Drupal\file\FileInterface::STATUS_PERMANENT) {
     // Create a new file entity.
     $file = File::create([
       'uid' => $uid,

@@ -9,8 +9,8 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\Core\TypedData\Type\DateTimeInterface;
-use Drupal\typed_data\Exception\InvalidArgumentException;
 use Drupal\typed_data\DataFilterBase;
+use Drupal\typed_data\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

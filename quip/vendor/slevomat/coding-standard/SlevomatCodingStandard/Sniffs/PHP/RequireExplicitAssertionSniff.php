@@ -4,13 +4,18 @@ namespace SlevomatCodingStandard\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprIntegerNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
+use PHPStan\PhpDocParser\Ast\Type\ConstTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IntersectionTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ThisTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use SlevomatCodingStandard\Helpers\Annotation\VariableAnnotation;
+use SlevomatCodingStandard\Helpers\Annotation;
 use SlevomatCodingStandard\Helpers\AnnotationHelper;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\IndentationHelper;
 use SlevomatCodingStandard\Helpers\ScopeHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
@@ -23,6 +28,7 @@ use function count;
 use function implode;
 use function in_array;
 use function sprintf;
+use function strpos;
 use function trim;
 use const T_AS;
 use const T_DOC_COMMENT_OPEN_TAG;
@@ -39,6 +45,12 @@ class RequireExplicitAssertionSniff implements Sniff
 {
 
 	public const CODE_REQUIRED_EXPLICIT_ASSERTION = 'RequiredExplicitAssertion';
+
+	/** @var bool */
+	public $enableIntegerRanges = false;
+
+	/** @var bool */
+	public $enableAdvancedStringTypes = false;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -75,22 +87,24 @@ class RequireExplicitAssertionSniff implements Sniff
 			$codePointer = $firstPointerOnPreviousLine;
 		}
 
-		$variableAnnotations = AnnotationHelper::getAnnotationsByName($phpcsFile, $docCommentOpenPointer, '@var');
+		/** @var list<Annotation<VarTagValueNode>> $variableAnnotations */
+		$variableAnnotations = AnnotationHelper::getAnnotations($phpcsFile, $docCommentOpenPointer, '@var');
 		if (count($variableAnnotations) === 0) {
 			return;
 		}
 
-		/** @var VariableAnnotation $variableAnnotation */
 		foreach (array_reverse($variableAnnotations) as $variableAnnotation) {
 			if ($variableAnnotation->isInvalid()) {
 				continue;
 			}
 
-			if ($variableAnnotation->getVariableName() === null) {
+			$variableName = $variableAnnotation->getValue()->variableName;
+
+			if ($variableName === '') {
 				continue;
 			}
 
-			$variableAnnotationType = $variableAnnotation->getType();
+			$variableAnnotationType = $variableAnnotation->getValue()->type;
 
 			if (
 				$variableAnnotationType instanceof UnionTypeNode
@@ -105,10 +119,10 @@ class RequireExplicitAssertionSniff implements Sniff
 				continue;
 			}
 
-			/** @var IdentifierTypeNode|ThisTypeNode|UnionTypeNode $variableAnnotationType */
+			/** @var IdentifierTypeNode|ThisTypeNode|UnionTypeNode|GenericTypeNode $variableAnnotationType */
 			$variableAnnotationType = $variableAnnotationType;
 
-			$assertion = $this->createAssert($variableAnnotation->getVariableName(), $variableAnnotationType);
+			$assertion = $this->createAssert($variableName, $variableAnnotationType);
 
 			if ($assertion === null) {
 				continue;
@@ -120,7 +134,7 @@ class RequireExplicitAssertionSniff implements Sniff
 					continue;
 				}
 
-				if ($variableAnnotation->getVariableName() !== $tokens[$codePointer]['content']) {
+				if ($variableName !== $tokens[$codePointer]['content']) {
 					continue;
 				}
 
@@ -133,7 +147,7 @@ class RequireExplicitAssertionSniff implements Sniff
 				$variablePointerInList = TokenHelper::findNextContent(
 					$phpcsFile,
 					T_VARIABLE,
-					$variableAnnotation->getVariableName(),
+					$variableName,
 					$listParenthesisOpener + 1,
 					$tokens[$listParenthesisOpener]['parenthesis_closer']
 				);
@@ -153,7 +167,7 @@ class RequireExplicitAssertionSniff implements Sniff
 				$variablePointerInList = TokenHelper::findNextContent(
 					$phpcsFile,
 					T_VARIABLE,
-					$variableAnnotation->getVariableName(),
+					$variableName,
 					$codePointer + 1,
 					$tokens[$codePointer]['bracket_closer']
 				);
@@ -173,7 +187,7 @@ class RequireExplicitAssertionSniff implements Sniff
 					$variablePointerInWhile = TokenHelper::findNextContent(
 						$phpcsFile,
 						T_VARIABLE,
-						$variableAnnotation->getVariableName(),
+						$variableName,
 						$tokens[$codePointer]['parenthesis_opener'] + 1,
 						$tokens[$codePointer]['parenthesis_closer']
 					);
@@ -195,7 +209,7 @@ class RequireExplicitAssertionSniff implements Sniff
 					$variablePointerInForeach = TokenHelper::findNextContent(
 						$phpcsFile,
 						T_VARIABLE,
-						$variableAnnotation->getVariableName(),
+						$variableName,
 						$asPointer + 1,
 						$tokens[$codePointer]['parenthesis_closer']
 					);
@@ -219,9 +233,7 @@ class RequireExplicitAssertionSniff implements Sniff
 
 			$phpcsFile->fixer->beginChangeset();
 
-			for ($i = $variableAnnotation->getStartPointer(); $i <= $variableAnnotation->getEndPointer(); $i++) {
-				$phpcsFile->fixer->replaceToken($i, '');
-			}
+			FixerHelper::removeBetweenIncluding($phpcsFile, $variableAnnotation->getStartPointer(), $variableAnnotation->getEndPointer());
 
 			$docCommentUseful = false;
 			$docCommentClosePointer = $tokens[$docCommentOpenPointer]['comment_closer'];
@@ -249,9 +261,7 @@ class RequireExplicitAssertionSniff implements Sniff
 			);
 
 			if (!$docCommentUseful) {
-				for ($i = $pointerBeforeDocComment + 1; $i <= $pointerAfterDocComment; $i++) {
-					$phpcsFile->fixer->replaceToken($i, '');
-				}
+				FixerHelper::removeBetweenIncluding($phpcsFile, $pointerBeforeDocComment + 1, $pointerAfterDocComment);
 			}
 
 			if (
@@ -269,7 +279,33 @@ class RequireExplicitAssertionSniff implements Sniff
 
 	private function isValidTypeNode(TypeNode $typeNode): bool
 	{
-		return $typeNode instanceof ThisTypeNode || $typeNode instanceof IdentifierTypeNode;
+		if ($typeNode instanceof ThisTypeNode) {
+			return true;
+		}
+
+		if ($typeNode instanceof IdentifierTypeNode) {
+			return true;
+		}
+
+		if (
+			$this->enableIntegerRanges
+			&& $typeNode instanceof GenericTypeNode
+			&& $typeNode->type->name === 'int'
+			&& count($typeNode->genericTypes) === 2
+		) {
+			foreach ($typeNode->genericTypes as $genericType) {
+				$isValid = ($genericType instanceof IdentifierTypeNode && in_array($genericType->name, ['min', 'max'], true))
+					|| ($genericType instanceof ConstTypeNode && $genericType->constExpr instanceof ConstExprIntegerNode);
+
+				if (!$isValid) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private function getNextSemicolonInSameScope(File $phpcsFile, int $scopePointer, int $searchAt): int
@@ -291,36 +327,64 @@ class RequireExplicitAssertionSniff implements Sniff
 	}
 
 	/**
-	 * @param IdentifierTypeNode|ThisTypeNode|UnionTypeNode|IntersectionTypeNode $typeNode
+	 * @param IdentifierTypeNode|ThisTypeNode|UnionTypeNode|IntersectionTypeNode|GenericTypeNode $typeNode
 	 */
 	private function createAssert(string $variableName, TypeNode $typeNode): ?string
 	{
 		$conditions = [];
 
-		if ($typeNode instanceof IdentifierTypeNode || $typeNode instanceof ThisTypeNode) {
+		if (
+			$typeNode instanceof IdentifierTypeNode
+			|| $typeNode instanceof ThisTypeNode
+			|| $typeNode instanceof GenericTypeNode
+		) {
 			$conditions = $this->createConditions($variableName, $typeNode);
-		} else {
-			/** @var IdentifierTypeNode|ThisTypeNode $innerTypeNode */
-			foreach ($typeNode->types as $innerTypeNode) {
-				$conditions = array_merge($conditions, $this->createConditions($variableName, $innerTypeNode));
-			}
+
+			return $conditions !== [] ? sprintf('\assert(%s);', implode(' || ', $conditions)) : null;
 		}
 
-		if ($conditions === []) {
-			return null;
+		/** @var IdentifierTypeNode|ThisTypeNode|GenericTypeNode $innerTypeNode */
+		foreach ($typeNode->types as $innerTypeNode) {
+			$innerTypeConditions = $this->createConditions($variableName, $innerTypeNode);
+
+			if ($innerTypeConditions === []) {
+				return null;
+			}
+
+			$conditions = array_merge($conditions, $innerTypeConditions);
 		}
 
 		$operator = $typeNode instanceof IntersectionTypeNode ? '&&' : '||';
 
-		return sprintf('\assert(%s);', implode(sprintf(' %s ', $operator), array_unique($conditions)));
+		$formattedConditions = [];
+
+		foreach (array_unique($conditions) as $condition) {
+			$formattedConditions[] = $operator === '||' && strpos($condition, '&&') !== false ? sprintf('(%s)', $condition) : $condition;
+		}
+
+		return sprintf('\assert(%s);', implode(sprintf(' %s ', $operator), $formattedConditions));
 	}
 
 	/**
-	 * @param IdentifierTypeNode|ThisTypeNode $typeNode
-	 * @return string[]
+	 * @param IdentifierTypeNode|ThisTypeNode|GenericTypeNode $typeNode
+	 * @return list<string>
 	 */
 	private function createConditions(string $variableName, TypeNode $typeNode): array
 	{
+		if ($typeNode instanceof GenericTypeNode) {
+			$conditions = [sprintf('\is_int(%s)', $variableName)];
+
+			if ($typeNode->genericTypes[0] instanceof ConstTypeNode) {
+				$conditions[] = sprintf('%s >= %s', $variableName, (string) $typeNode->genericTypes[0]);
+			}
+
+			if ($typeNode->genericTypes[1] instanceof ConstTypeNode) {
+				$conditions[] = sprintf('%s <= %s', $variableName, (string) $typeNode->genericTypes[1]);
+			}
+
+			return [implode(' && ', $conditions)];
+		}
+
 		if ($typeNode instanceof ThisTypeNode) {
 			return [sprintf('%s instanceof $this', $variableName)];
 		}
@@ -337,8 +401,16 @@ class RequireExplicitAssertionSniff implements Sniff
 			return [sprintf('%s === %s', $variableName, $typeNode->name)];
 		}
 
+		if (
+			$typeNode->name === 'mixed'
+			|| TypeHintHelper::isVoidTypeHint($typeNode->name)
+			|| TypeHintHelper::isNeverTypeHint($typeNode->name)
+		) {
+			return [];
+		}
+
 		if (TypeHintHelper::isSimpleTypeHint($typeNode->name)) {
-			return [sprintf('\is_%s(%s)', $typeNode->name, $variableName)];
+			return [sprintf('\is_%s(%s)', TypeHintHelper::convertLongSimpleTypeHintToShort($typeNode->name), $variableName)];
 		}
 
 		if (in_array($typeNode->name, ['resource', 'object'], true)) {
@@ -359,6 +431,35 @@ class RequireExplicitAssertionSniff implements Sniff
 				sprintf('\is_bool(%s)', $variableName),
 				sprintf('\is_string(%s)', $variableName),
 			];
+		}
+
+		if ($this->enableIntegerRanges) {
+			if ($typeNode->name === 'positive-int') {
+				return [sprintf('\is_int(%1$s) && %1$s > 0', $variableName)];
+			}
+
+			if ($typeNode->name === 'negative-int') {
+				return [sprintf('\is_int(%1$s) && %1$s < 0', $variableName)];
+			}
+		}
+
+		if (
+			$this->enableAdvancedStringTypes
+			&& in_array($typeNode->name, ['non-empty-string', 'non-falsy-string', 'callable-string', 'numeric-string'], true)
+		) {
+			$conditions = [sprintf('\is_string(%s)', $variableName)];
+
+			if ($typeNode->name === 'non-empty-string') {
+				$conditions[] = sprintf("%s !== ''", $variableName);
+			} elseif ($typeNode->name === 'non-falsy-string') {
+				$conditions[] = sprintf('(bool) %s === true', $variableName);
+			} elseif ($typeNode->name === 'callable-string') {
+				$conditions[] = sprintf('\is_callable(%s)', $variableName);
+			} else {
+				$conditions[] = sprintf('\is_numeric(%s)', $variableName);
+			}
+
+			return [implode(' && ', $conditions)];
 		}
 
 		if (TypeHintHelper::isSimpleUnofficialTypeHints($typeNode->name)) {

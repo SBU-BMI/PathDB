@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * @file
  * Contains installation and update hooks.
  */
+
+declare(strict_types=1);
 
 use Drupal\authorization\Entity\AuthorizationProfile;
 

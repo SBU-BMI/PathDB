@@ -20,7 +20,7 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['easy_breadcrumb', 'system', 'easy_breadcrumb_test'];
+  protected static $modules = ['easy_breadcrumb', 'system', 'easy_breadcrumb_test'];
 
   /**
    * Tests the front page with an invalid path.
@@ -42,7 +42,7 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
       \Drupal::service('request_stack'),
       \Drupal::service('path_processor_manager'),
       \Drupal::service('config.factory'),
-      \Drupal::service('title_resolver'),
+      \Drupal::service('easy_breadcrumb.title_resolver'),
       \Drupal::service('current_user'),
       \Drupal::service('path.current'),
       \Drupal::service('plugin.manager.menu.link'),
@@ -51,7 +51,8 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
       \Drupal::service('entity.repository'),
       \Drupal::service('logger.factory'),
       \Drupal::service('messenger'),
-      \Drupal::service('module_handler')
+      \Drupal::service('module_handler'),
+      \Drupal::service('path.matcher')
     );
 
     $route_match = new RouteMatch('test_front', new Route('/front'));
@@ -90,7 +91,7 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
       \Drupal::service('request_stack'),
       \Drupal::service('path_processor_manager'),
       \Drupal::service('config.factory'),
-      \Drupal::service('title_resolver'),
+      \Drupal::service('easy_breadcrumb.title_resolver'),
       \Drupal::service('current_user'),
       \Drupal::service('path.current'),
       \Drupal::service('plugin.manager.menu.link'),
@@ -99,10 +100,11 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
       \Drupal::service('entity.repository'),
       \Drupal::service('logger.factory'),
       \Drupal::service('messenger'),
-      \Drupal::service('module_handler')
+      \Drupal::service('module_handler'),
+      \Drupal::service('path.matcher')
     );
 
-    $request = Request::create($url->getInternalPath());
+    $request = Request::create('/' . $url->getInternalPath());
     $router = \Drupal::service('router.no_access_checks');
     $route_match = new RouteMatch($route_name, $router->match($url->getInternalPath())['_route_object']);
     $result = $breadcrumb_builder->getTitleString($request, $route_match, []);

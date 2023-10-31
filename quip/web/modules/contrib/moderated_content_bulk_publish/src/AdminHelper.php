@@ -2,6 +2,8 @@
 
 namespace Drupal\moderated_content_bulk_publish;
 
+use Drupal\Core\Language\LanguageInterface;
+
 class AdminHelper {
 
   static public function addMessage($message) {
@@ -21,7 +23,7 @@ class AdminHelper {
   static public function getOtherEnabledLanguages() {
     // Get the list of all languages
     $language = \Drupal::languageManager()->getCurrentLanguage();
-    $languages = \Drupal::languageManager()->getLanguages();
+    $languages = \Drupal::languageManager()->getLanguages(LanguageInterface::STATE_ALL);
     $other_languages = array();
 
     // Add each enabled language, aside from the current language to an array.
@@ -61,9 +63,10 @@ class AdminHelper {
    * Make sure the moderation state is processed correctly.
    */
   static public function bulkPublishShutdown($entity, $langcode, $moderation_state) {
+    $pathauto_enabled = \Drupal::service('module_handler')->moduleExists('pathauto');
     if (!empty($moderation_state)) {
       $vid = 0;
-      $latest_revision = self::bulkLatestRevision($entity->id(), $vid, $langcode, $entity->getEntityTypeId());
+      $latest_revision = self::bulkLatestRevision($entity, $entity->id(), $vid, $langcode);
       $latest_state = $moderation_state;
       $latest_is_valid = TRUE;
       if ($latest_revision == FALSE) {
@@ -78,53 +81,45 @@ class AdminHelper {
         $latest_revision->set('moderation_state', $moderation_state);
         $latest_revision->save();
         // Ensure the alias gets updated.
-        \Drupal::service('pathauto.generator')->updateEntityAlias($latest_revision, 'insert', array('language' => $langcode));
-        \Drupal::service('pathauto.generator')->updateEntityAlias($latest_revision, 'update', array('language' => $langcode));
+        if ($pathauto_enabled) {
+          \Drupal::service('pathauto.generator')->updateEntityAlias($latest_revision, 'insert', array('language' => $langcode));
+          \Drupal::service('pathauto.generator')->updateEntityAlias($latest_revision, 'update', array('language' => $langcode));
+        }
       }
-      else {
+      elseif ($pathauto_enabled) {
         // Ensure the alias gets updated.
         \Drupal::service('pathauto.generator')->updateEntityAlias($entity, 'insert', array('language' => $langcode));
         \Drupal::service('pathauto.generator')->updateEntityAlias($entity, 'update', array('language' => $langcode));
       }
     }
-    else {
+    elseif ($pathauto_enabled) {
       // Ensure the alias gets updated.
       \Drupal::service('pathauto.generator')->updateEntityAlias($entity, 'insert', array('language' => $langcode));
       \Drupal::service('pathauto.generator')->updateEntityAlias($entity, 'update', array('language' => $langcode));
     }
-  }    
-
-/**
- * Retrieve the latest node revision of $lang.
- */
-static public function bulkLatestRevision($id, &$vid, $lang, $entity_type = 'node') {
-  $query = \Drupal::entityTypeManager()->getStorage($entity_type)->getQuery();
-  $query->latestRevision();
-  if ($entity_type == 'node') {
-    $query->condition('nid', $id, '=');
-  }
-  if ($entity_type == 'taxonomy_term') {
-    $query->condition('tid', $id, '=');
-  }
-  if ($entity_type == 'paragraph') {
-    $query->condition('id', $id, '=');
-  }
-  if ($entity_type == 'user') {
-    // Likely no moderation states for user entities anyway but just in case.
-    $query->condition('uid', $id, '=');
   }
 
-  $latestRevisionResult = $query->execute();
-  if (count($latestRevisionResult)) {
-    $node_revision_id = key($latestRevisionResult);
-    $vid = $node_revision_id;
-    $latestRevision = \Drupal::entityTypeManager()->getStorage($entity_type)->loadRevision($node_revision_id);
-    if ($latestRevision->hasTranslation($lang) && $latestRevision->language()->getId() != $lang) {
-      $latestRevision = $latestRevision->getTranslation($lang);
+  /**
+   * Retrieve the latest node revision of $lang.
+   */
+  static public function bulkLatestRevision($entity, $id, &$vid, $lang) {
+    $entity_type = $entity->getEntityTypeId();
+    $query = \Drupal::entityTypeManager()->getStorage($entity_type)->getQuery();
+    $query->latestRevision();
+    $query->condition($entity->getEntityType()->getKey('id'), $id, '=');
+
+    $query->accessCheck(TRUE);
+    $latestRevisionResult = $query->execute();
+    if (count($latestRevisionResult)) {
+      $node_revision_id = key($latestRevisionResult);
+      $vid = $node_revision_id;
+      $latestRevision = \Drupal::entityTypeManager()->getStorage($entity_type)->loadRevision($node_revision_id);
+      if ($latestRevision->hasTranslation($lang) && $latestRevision->language()->getId() != $lang) {
+        $latestRevision = $latestRevision->getTranslation($lang);
+      }
+      return $latestRevision;
     }
-    return $latestRevision;
+    return FALSE;
   }
-  return FALSE;
-}
 }
 
