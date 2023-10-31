@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * File replace functionality.
+ */
+
+use Drupal\file\FileInterface;
+
+/**
+ * Implements hook_entity_type_build().
+ */
+function file_replace_entity_type_build(array &$entity_types) {
+  $entity_types['file']->setFormClass('replace', 'Drupal\file_replace\Form\FileReplaceForm');
+  $entity_types['file']->setLinkTemplate('replace-form', '/admin/content/files/replace/{file}');
+}
+
+/**
+ * Implements hook_views_data().
+ *
+ * Views integration of file_replace.
+ */
+function file_replace_views_data() {
+  $data['file_managed']['file_replace_link'] = [
+    'field' => [
+      'title' => t('Link to replace file'),
+      'help' => t('Provide a link to replace the file.'),
+      'id' => 'file_replace_link',
+    ],
+  ];
+
+  return $data;
+}
+
+/**
+ * Implements hook_file_replace().
+ */
+function file_replace_file_replace(FileInterface $file) {
+  // Flush image cache.
+  if (\Drupal::moduleHandler()->moduleExists('image')) {
+    if (explode('/', $file->getMimeType())[0] == 'image') {
+      /** @var \Drupal\image\Entity\ImageStyle[] $image_styles */
+      $image_styles = \Drupal::entityTypeManager()->getStorage('image_style')->loadMultiple();
+      foreach ($image_styles as $image_style) {
+        $image_style->flush($file->getFileUri());
+      }
+    }
+  }
+}

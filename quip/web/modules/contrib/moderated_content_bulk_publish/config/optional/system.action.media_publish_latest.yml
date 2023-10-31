@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - moderated_content_bulk_publish
+id: media_publish_latest
+label: 'Publish latest revision'
+type: media
+confirm: true
+plugin: publish_latest_revision_action
+configuration: {  }

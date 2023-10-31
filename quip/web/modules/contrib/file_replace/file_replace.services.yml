@@ -1,0 +1,6 @@
+services:
+  access_check.file_replace.editable_usages:
+    class: Drupal\file_replace\Access\FileReplaceAccessCheck
+    arguments: ['@file.usage']
+    tags:
+      - { name: access_check, applies_to: _file_replace_access }

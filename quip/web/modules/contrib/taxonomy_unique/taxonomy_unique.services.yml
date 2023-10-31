@@ -1,0 +1,5 @@
+services:
+  taxonomy_unique.manager:
+    class: Drupal\taxonomy_unique\TaxonomyUniqueManager
+    arguments:
+      - '@entity_type.manager'

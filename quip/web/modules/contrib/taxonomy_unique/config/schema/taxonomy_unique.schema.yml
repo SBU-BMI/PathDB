@@ -1,0 +1,3 @@
+entity_reference_selection.taxonomy_unique:
+  type: entity_reference_selection.default
+  label: 'Unique taxonomy term selection handler settings'
