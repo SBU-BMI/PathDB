@@ -38,9 +38,6 @@ class AggregatedFields extends ProcessorPluginBase {
         'description' => $this->t('An aggregation of multiple other fields.'),
         'type' => 'string',
         'processor_id' => $this->getPluginId(),
-        // Most aggregation types are single-valued, but "Union" isn't, and we
-        // can't know which will be picked, so err on the side of caution here.
-        'is_list' => TRUE,
       ];
       $properties['aggregated_field'] = new AggregatedFieldProperty($definition);
     }
@@ -82,7 +79,8 @@ class AggregatedFields extends ProcessorPluginBase {
 
       switch ($configuration['type']) {
         case 'concat':
-          $values = [implode("\n\n", $values)];
+          $separator = $configuration['separator'] ?? "\n\n";
+          $values = [implode($separator, $values)];
           break;
 
         case 'sum':

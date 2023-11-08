@@ -17,24 +17,17 @@ use Drupal\Core\TypedData\MapDataDefinition;
 class TextareaWidgetTest extends FormWidgetBrowserTestBase {
 
   /**
-   * The tested form widget.
-   *
-   * @var \Drupal\typed_data\Widget\FormWidgetInterface
-   */
-  protected $widget;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->widget = $this->getFormWidgetManager()->createInstance('textarea');
+    $this->createWidget('textarea');
   }
 
   /**
    * @covers ::isApplicable
    */
-  public function testIsApplicable() {
+  public function testIsApplicable(): void {
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('any')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('binary')));
     $this->assertFalse($this->widget->isApplicable(DataDefinition::create('boolean')));
@@ -55,14 +48,13 @@ class TextareaWidgetTest extends FormWidgetBrowserTestBase {
    * @covers ::form
    * @covers ::extractFormValues
    */
-  public function testFormEditing() {
+  public function testFormEditing(): void {
     $context_definition = ContextDefinition::create('string')
       ->setLabel('Example textarea')
       ->setDescription('Some example textarea')
       ->setDefaultValue('A string longer than eight characters');
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
-    $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();
     $this->drupalGet($path);
 
@@ -83,23 +75,26 @@ class TextareaWidgetTest extends FormWidgetBrowserTestBase {
    * @covers ::form
    * @covers ::flagViolations
    */
-  public function testValidation() {
+  public function testValidation(): void {
     $context_definition = ContextDefinition::create('text')
       ->setLabel('Test text area')
       ->setDescription('Enter text, minimum 40 characters.');
     // Omitting the 'allowEmptyString' argument in Symfony 4+ (which is used in
     // Drupal 9.0+) gives a deprecation warning, but this option does not exist
-    // in Symfony 3.4 (which is used in Drupal 8.8 and 8.9).
-    // @see https://www.drupal.org/project/typed_data/issues/3161000
-    if (version_compare(\Drupal::VERSION, '9.0', '>=')) {
-      $context_definition->addConstraint('Length', ['min' => 40, 'allowEmptyString' => FALSE]);
-    }
-    else {
+    // in Symfony 6 (which is used in Drupal 10).
+    // @see https://www.drupal.org/project/typed_data/issues/3266222
+    if (version_compare(\Drupal::VERSION, '10.0', '>=')) {
       $context_definition->addConstraint('Length', ['min' => 40]);
     }
+    else {
+      $context_definition->addConstraint('Length', [
+        'min' => 40,
+        'allowEmptyString' => FALSE,
+      ]);
+    }
+
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
-    $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();
     $this->drupalGet($path);
 

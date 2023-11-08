@@ -195,8 +195,12 @@ class RevisionLogWidget extends StringTextareaWidget implements ContainerFactory
         if (empty($form_state->get('langcode'))) {
           $form_state->set('langcode', $entity->language()->getId());
         }
-        $user_settings = unserialize(User::load($this->user->id())
-          ->get('revision_log_settings')->value);
+        $user = User::load($this->user->id());
+        $user_settings = [];
+        $user_settings_raw = $user->get('revision_log_settings')->value;
+        if ($user_settings_raw) {
+          $user_settings = unserialize($user_settings_raw, ['allowed_classes' => FALSE]);
+        }
         if (isset($user_settings[$entity->getEntityType()
           ->id()][$entity->bundle()])) {
           $show = $user_settings[$entity->getEntityType()

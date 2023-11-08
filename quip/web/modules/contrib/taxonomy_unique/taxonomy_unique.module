@@ -1,7 +1,12 @@
 <?php
 
+/**
+ * @file
+ */
+
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+
 define('TAXONOMY_UNIQUE_DEFAULT_MESSAGE', 'Term %term already exists in vocabulary %vocabulary.');
 
 /**
@@ -44,7 +49,9 @@ function taxonomy_unique_form_taxonomy_vocabulary_form_alter(&$form, FormStateIn
   $form['actions']['submit']['#submit'][] = 'taxonomy_unique_taxonomy_form_vocabulary_submit';
 }
 
-// Handler function on submit the form.
+/**
+ * Handler function on submit the form.
+ */
 function taxonomy_unique_taxonomy_form_vocabulary_submit($form, FormStateInterface $form_state) {
   // Save custom fields to variables.
   \Drupal::configFactory()->getEditable('taxonomy_unique.settings')

@@ -2,9 +2,9 @@
 
 namespace Drupal\typed_data\Form;
 
-use Drupal\Core\Form\SubformState as CoreSubformState;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState as CoreSubformState;
 
 /**
  * Stores information about the state of a subform.

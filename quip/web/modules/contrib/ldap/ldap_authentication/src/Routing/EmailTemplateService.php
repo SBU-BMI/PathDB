@@ -9,7 +9,7 @@ use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -36,10 +36,10 @@ class EmailTemplateService implements EventSubscriberInterface {
   /**
    * Check for template if enabled.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   Response event.
    */
-  public function checkTemplate(GetResponseEvent $event): void {
+  public function checkTemplate(RequestEvent $event): void {
     if ($this->config->get('emailTemplateUsagePromptUser') === TRUE) {
       $this->checkForEmailTemplate();
     }

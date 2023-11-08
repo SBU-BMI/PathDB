@@ -59,3 +59,6 @@ moderated_content_bulk_publish.settings:
     enable_dialog_admin_content:
       type: boolean
       label: 'Enable dialog on admin content listing'
+    disable_toolbar_language_switcher:
+      type: boolean
+      label: 'Hide the language switcher in the toolbar'

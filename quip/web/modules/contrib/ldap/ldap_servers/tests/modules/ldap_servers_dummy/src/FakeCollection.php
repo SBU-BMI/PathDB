@@ -32,6 +32,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function toArray(): array {
     return (array) $this->result;
   }
@@ -39,6 +40,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function getIterator() {
     return $this->result->getIterator();
   }
@@ -46,6 +48,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset): bool {
     return $this->result->offsetExists($offset);
   }
@@ -53,6 +56,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset) {
     return $this->result->offsetGet($offset);
   }
@@ -60,6 +64,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function offsetSet($offset, $value): void {
     $this->result->offsetSet($offset, $value);
   }
@@ -67,6 +72,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function offsetUnset($offset): void {
     $this->result->offsetUnset($offset);
   }
@@ -74,6 +80,7 @@ class FakeCollection implements CollectionInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function count(): int {
     return $this->result->count();
   }

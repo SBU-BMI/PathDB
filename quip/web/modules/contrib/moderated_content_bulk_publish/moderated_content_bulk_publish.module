@@ -5,9 +5,12 @@
  * moderated_content_bulk_publish module.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
+use Drupal\node\Plugin\views\field\NodeBulkForm;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_help().
@@ -35,21 +38,49 @@ function moderated_content_bulk_publish_help($route_name, RouteMatchInterface $r
 }
 
 /**
- * Implements hook_page_attachments().
+ * Attaches library responsible for showing a confirmation dialog.
  *
- * Adds the moderated-content-bulk-publish libraries to each page.
+ * Can be attached on a node edit form, or on a views with a bulk form.
+ *
+ * @param array $render_array
+ *   Render array to attach the library to. Passed by reference.
+ * @param bool $on_view_field
+ *   Flag determining if the attachment is for the node edit form or a view.
+ *
+ * @return void
  */
-function moderated_content_bulk_publish_page_attachments(array &$page) {
+function _moderated_content_bulk_publish_attach_dialog_library(array &$render_array, bool $on_view_field) {
   if (\Drupal::currentUser()->isAnonymous()) {
     return;
   }
+  $config_name = $on_view_field ? 'enable_dialog_admin_content' : 'enable_dialog_node_edit_form';
   $config = Drupal::config('moderated_content_bulk_publish.settings');
-  $enable_dialog_node_edit_form = $config->get('enable_dialog_node_edit_form');
-  $enable_dialog_admin_content = $config->get('enable_dialog_admin_content');
-  if ($enable_dialog_node_edit_form || $enable_dialog_admin_content) {
-    $page['#attached']['library'][] = 'moderated_content_bulk_publish/moderated-content-bulk-publish';
-    $page['#attached']['drupalSettings']['moderated_content_bulk_publish']['enable_dialog_node_edit_form'] = $enable_dialog_node_edit_form;
-    $page['#attached']['drupalSettings']['moderated_content_bulk_publish']['enable_dialog_admin_content'] = $enable_dialog_admin_content;
+  if ($config->get($config_name)) {
+    $render_array['#attached']['library'][] = 'moderated_content_bulk_publish/moderated-content-bulk-publish';
+    $render_array['#attached']['drupalSettings']['moderated_content_bulk_publish'][$config_name] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ */
+function moderated_content_bulk_publish_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  // Attaches the dialog library to node forms.
+  _moderated_content_bulk_publish_attach_dialog_library($form, FALSE);
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * @see \Drupal\node\Plugin\views\field\NodeBulkForm
+ */
+function moderated_content_bulk_publish_views_pre_render(ViewExecutable $view) {
+  // Attaches the dialog library to views that have a NodeBulkForm field.
+  foreach ($view->field as $field) {
+    if ($field instanceof NodeBulkForm) {
+      _moderated_content_bulk_publish_attach_dialog_library($view->element, TRUE);
+      break;
+    }
   }
 }
 
@@ -69,6 +100,21 @@ function moderated_content_bulk_publish_theme($existing, $type, $theme, $path) {
  * Implements hook_toolbar() (Display a language switcher for available languages on admin toolbar if site has more than one language).
  */
 function moderated_content_bulk_publish_toolbar() {
+  $config = Drupal::config('moderated_content_bulk_publish.settings');
+  // Set cache dependencies.
+  $items['admin_toolbar_langswitch'] = [
+    '#cache' => [
+      'contexts' => [
+        'languages:language_interface',
+        'url',
+      ],
+      'tags' => $config->getCacheTags(),
+    ],
+  ];
+
+  if ($config->get('disable_toolbar_language_switcher')) {
+    return $items;
+  }
 
   // Get languages
   $current_language = \Drupal::languageManager()->getCurrentLanguage()->getId();
@@ -91,16 +137,6 @@ function moderated_content_bulk_publish_toolbar() {
           ->toString(),
       ];
     }
-
-    // Set cache.
-    $items['admin_toolbar_langswitch'] = [
-      '#cache' => [
-        'contexts' => [
-          'languages:language_interface',
-          'url',
-        ],
-      ],
-    ];
 
     // Build toolbar item and tray.
     $items['admin_toolbar_langswitch'] += [
@@ -126,12 +162,7 @@ function moderated_content_bulk_publish_toolbar() {
         ],
       ],
     ];
-
-    return $items;
-
   }
 
+  return $items;
 }
-
-
-

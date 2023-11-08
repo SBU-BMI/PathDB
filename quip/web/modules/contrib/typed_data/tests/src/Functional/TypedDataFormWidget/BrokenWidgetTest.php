@@ -17,24 +17,17 @@ use Drupal\Core\TypedData\MapDataDefinition;
 class BrokenWidgetTest extends FormWidgetBrowserTestBase {
 
   /**
-   * The tested form widget.
-   *
-   * @var \Drupal\typed_data\Widget\FormWidgetInterface
-   */
-  protected $widget;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->widget = $this->getFormWidgetManager()->createInstance('broken');
+    $this->createWidget('broken');
   }
 
   /**
    * @covers ::isApplicable
    */
-  public function testIsApplicable() {
+  public function testIsApplicable(): void {
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('any')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('binary')));
     $this->assertTrue($this->widget->isApplicable(DataDefinition::create('boolean')));
@@ -55,13 +48,12 @@ class BrokenWidgetTest extends FormWidgetBrowserTestBase {
    * @covers ::form
    * @covers ::extractFormValues
    */
-  public function testFormEditing() {
+  public function testFormEditing(): void {
     $data_type = 'string';
     $context_definition = ContextDefinition::create($data_type)
       ->setLabel('Broken example');
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 
-    $this->drupalLogin($this->createUser([], NULL, TRUE));
     $path = 'admin/config/user-interface/typed-data-widgets/' . $this->widget->getPluginId();
     $this->drupalGet($path);
 
@@ -79,7 +71,7 @@ class BrokenWidgetTest extends FormWidgetBrowserTestBase {
    * @covers ::form
    * @covers ::flagViolations
    */
-  public function testValidation() {
+  public function testValidation(): void {
     // No validation as there is no input widget.
   }
 

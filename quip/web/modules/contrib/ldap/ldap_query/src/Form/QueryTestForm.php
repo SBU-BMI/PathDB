@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_query\Form;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_query\Controller\QueryController;
 use Drupal\ldap_servers\Form\ServerTestForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;

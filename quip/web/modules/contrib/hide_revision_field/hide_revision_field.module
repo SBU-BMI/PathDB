@@ -25,7 +25,12 @@ function hide_revision_field_form_user_form_alter(&$form, FormStateInterface $fo
   if (!$user->hasPermission('administer revision field personalization')) {
     return;
   }
-  $settings = unserialize($user->get('revision_log_settings')->value);
+
+  $settings = [];
+  $user_settings = $user->get('revision_log_settings')->value;
+  if ($user_settings) {
+    $settings = unserialize($user_settings, ['allowed_classes' => FALSE]);
+  }
 
   $entity_type_manager = \Drupal::entityTypeManager();
   /* @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entity_display_repository */

@@ -65,7 +65,7 @@
             });
 
             // Fix a bug about button (id = edit-submit) was not handled in the previous version
-            $('.view-content form[id*="views-form-content-page"] input#edit-submit').bind('click.moderated_content_bulk_publish',function(e) {
+            $('.view-content form[id*="views-form-content-page"] input#edit-submit').unbind('click.moderated_content_bulk_publish').bind('click.moderated_content_bulk_publish',function(e) {
               var titles = [];
               $('.views-table tbody .form-checkbox:checked').each(function() {
                 titles.push($(this).closest('tr').find('.views-field-title a').text());
@@ -82,7 +82,7 @@
               // build a Drupal modal dialog window
               var content  = '<div><p id="version-confirm-form-text">' + prompt + '</p></div>';
               var modalwindowtitle = action + "?";
-              confirmationDialog = Drupal.dialog(content, {
+              var options = {
                 dialogClass: 'confirm-dialog',
                 resizable: false,
                 closeOnEscape: false,
@@ -110,10 +110,11 @@
                 },
                 beforeClose: false,
                 close: function (event) {
+                  $(event.target).parent().parent().find('.ui-widget-overlay').remove();
                   $(event.target).remove();
                 }
-              });
-
+              };
+              confirmationDialog = Drupal.dialog(content, options);
               e.preventDefault();
               confirmationDialog.showModal();
               return false;
@@ -123,7 +124,7 @@
             // When editing any type of node, display a confirmation dialog any time the state is changing from
             // non-published to published.
             if ($('body').hasClass('path-node')) {
-              $('#edit-submit').bind('click.moderated_content_bulk_publish', function(e) {
+              $('#edit-submit').unbind('click.moderated_content_bulk_publish').bind('click.moderated_content_bulk_publish', function(e) {
                 // For automated testing purposes you can unbind this click event as follows:
                 // jQuery('*').unbind('click.moderated_content_bulk_publish'); // Disables confirm dialog.
                 // Get the current state. Need to clone this object and remove the label so that we can get just the state.
@@ -169,6 +170,7 @@
                   },
                   beforeClose: false,
                   close: function (event) {
+                    $(event.target).parent().parent().find('.ui-widget-overlay').remove();
                     $(event.target).remove();
                   }
                 });

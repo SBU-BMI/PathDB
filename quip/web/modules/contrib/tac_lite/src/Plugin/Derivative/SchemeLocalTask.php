@@ -8,6 +8,7 @@ use Drupal\Component\Plugin\Derivative\DeriverBase;
  * Provides local tasks for each search page.
  */
 class SchemeLocalTask extends DeriverBase {
+
   /**
    * {@inheritdoc}
    */
@@ -17,7 +18,7 @@ class SchemeLocalTask extends DeriverBase {
     $schemes = $config->get('tac_lite_schemes');
     for ($i = 1; $i <= $schemes; $i++) {
       $scheme = $config->get('tac_lite_config_scheme_' . $i);
-      $title = $scheme['name'] ? $scheme['name'] : 'Scheme ' . $i;
+      $title = is_array($scheme) && isset($scheme['name']) ? $scheme['name'] : 'Scheme ' . $i;
       $this->derivatives[] = [
         'title' => $title,
         'route_name' => 'tac_lite.scheme_' . $i,

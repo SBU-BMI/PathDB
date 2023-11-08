@@ -24,7 +24,7 @@ class TextDataTypeTest extends KernelTestBase {
    *
    * Based on core/tests/Drupal/KernelTests/Core/TypedData/TypedDataTest.php.
    */
-  public function testTextDatatype() {
+  public function testTextDatatype(): void {
     // Create the Text datatype object. Use a multi-line value.
     $value = $this->randomString() . "\r\n" . $this->randomString();
     $definition = DataDefinition::create('text');
@@ -37,11 +37,11 @@ class TextDataTypeTest extends KernelTestBase {
 
     // Check basic get and set functionality.
     $this->assertSame($value, $typed_data->getValue(), 'Text value was fetched.');
-    $this->assertEquals(0, $typed_data->validate()->count());
+    $this->assertCount(0, $typed_data->validate());
     $new_value = $this->randomString() . "\r\n" . $this->randomString();
     $typed_data->setValue($new_value);
     $this->assertSame($new_value, $typed_data->getValue(), 'Text value was changed.');
-    $this->assertEquals(0, $typed_data->validate()->count());
+    $this->assertCount(0, $typed_data->validate());
   }
 
 }

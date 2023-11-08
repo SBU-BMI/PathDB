@@ -23,7 +23,7 @@ class LdapVariableImageAttribute extends LdapVariableAttribute {
    * @param \Drupal\views\ResultRow $values
    *   Result row.
    *
-   * @return array|null
+   * @return array
    *   Markup with image if available.
    */
   public function render(ResultRow $values): array {

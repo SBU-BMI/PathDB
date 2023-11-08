@@ -5,6 +5,7 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_servers_dummy;
 
+use Symfony\Component\Ldap\Adapter\CollectionInterface;
 use Symfony\Component\Ldap\Adapter\QueryInterface;
 
 /**
@@ -23,12 +24,12 @@ class FakeQuery implements QueryInterface {
    * Executes a query and returns the list of Ldap entries.
    *
    * @return \Symfony\Component\Ldap\Adapter\CollectionInterface|\Symfony\Component\Ldap\Entry[]
-   *   Record.
+   *   The Record.
    *
    * @throws \Symfony\Component\Ldap\Exception\NotBoundException
    * @throws \Symfony\Component\Ldap\Exception\LdapException
    */
-  public function execute() {
+  public function execute():CollectionInterface {
     return $this->result;
   }
 

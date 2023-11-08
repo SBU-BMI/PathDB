@@ -2,12 +2,13 @@
 
 namespace Drupal\views_bulk_operations\Form;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\Url;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionManager;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Default action execution confirmation form.
@@ -18,24 +19,18 @@ class ConfirmAction extends FormBase {
 
   /**
    * The tempstore service.
-   *
-   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
    */
-  protected $tempStoreFactory;
+  protected PrivateTempStoreFactory $tempStoreFactory;
 
   /**
    * Views Bulk Operations action manager.
-   *
-   * @var \Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionManager
    */
-  protected $actionManager;
+  protected ViewsBulkOperationsActionManager $actionManager;
 
   /**
    * Views Bulk Operations action processor.
-   *
-   * @var \Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface
    */
-  protected $actionProcessor;
+  protected ViewsBulkOperationsActionProcessorInterface $actionProcessor;
 
   /**
    * Constructor.
@@ -99,8 +94,10 @@ class ConfirmAction extends FormBase {
       ]
     );
 
+    $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',
+      '#button_type' => 'primary',
       '#value' => $this->t('Execute action'),
       '#submit' => [
         [$this, 'submitForm'],
@@ -119,8 +116,9 @@ class ConfirmAction extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_data = $form_state->get('views_bulk_operations');
     $this->deleteTempstoreData($form_data['view_id'], $form_data['display_id']);
-    $this->actionProcessor->executeProcessing($form_data);
-    $form_state->setRedirectUrl($form_data['redirect_url']);
+    $response = $this->actionProcessor->executeProcessing($form_data);
+    $url = Url::fromUri($response->getTargetUrl());
+    $form_state->setRedirectUrl($url);
   }
 
 }

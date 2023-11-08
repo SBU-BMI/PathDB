@@ -31,7 +31,7 @@ class AdminPin
      */
     public function unpin() {
       $user = \Drupal::currentUser();
-      \Drupal::logger('PIN_UNPIN')->notice(utf8_encode('Unpin action in moderated_content_bulk_publish'));
+      \Drupal::logger('PIN_UNPIN')->notice(mb_convert_encoding('Unpin action in moderated_content_bulk_publish', 'UTF-8'));
       $allLanguages = AdminHelper::getAllEnabledLanguages();
       foreach ($allLanguages as $langcode => $languageName) {
         if ($this->entity->hasTranslation($langcode)) {
@@ -49,7 +49,7 @@ class AdminPin
           }
           else {
             \Drupal::logger('moderated_content_bulk_publish')->notice(
-              utf8_encode("Bulk unpin not permitted, check permissions.")
+              mb_convert_encoding("Bulk unpin not permitted, check permissions.", 'UTF-8')
             );
           }
           if ($this->entity->isSticky()) {
@@ -68,7 +68,7 @@ class AdminPin
             }
             else {
               \Drupal::logger('moderated_content_bulk_publish')->notice(
-                utf8_encode("Bulk unpin not permitted, check permissions.")
+                mb_convert_encoding("Bulk unpin not permitted, check permissions.", 'UTF-8')
               );
             }
           }
@@ -82,7 +82,7 @@ class AdminPin
      */
     public function pin() {
       $user = \Drupal::currentUser();
-      \Drupal::logger('PIN_UNPIN')->notice(utf8_encode('Pin action in moderated_content_bulk_publish'));
+      \Drupal::logger('PIN_UNPIN')->notice(mb_convert_encoding('Pin action in moderated_content_bulk_publish', 'UTF-8'));
       $allLanguages = AdminHelper::getAllEnabledLanguages();
       foreach ($allLanguages as $langcode => $languageName) {
         if ($this->entity->hasTranslation($langcode)) {
@@ -100,7 +100,7 @@ class AdminPin
           }
           else {
             \Drupal::logger('moderated_content_bulk_publish')->notice(
-              utf8_encode("Bulk pin not permitted, check permissions.")
+              mb_convert_encoding("Bulk pin not permitted, check permissions.", 'UTF-8')
             );
           }
           if (!$this->entity->isSticky()) {
@@ -119,7 +119,7 @@ class AdminPin
             }
             else {
               \Drupal::logger('moderated_content_bulk_publish')->notice(
-                utf8_encode("Bulk pin not permitted, check permissions.")
+                mb_convert_encoding("Bulk pin not permitted, check permissions.", 'UTF-8')
               );
             }
             $this->entity = $entity_manager->getStorage($this->entity->getEntityTypeId())->load($this->nid);

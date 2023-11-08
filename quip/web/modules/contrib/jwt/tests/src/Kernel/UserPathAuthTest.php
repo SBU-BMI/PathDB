@@ -18,7 +18,7 @@ class UserPathAuthTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',
@@ -31,7 +31,7 @@ class UserPathAuthTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->installSchema('system', 'sequences');
 

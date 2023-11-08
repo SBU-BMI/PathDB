@@ -4,5 +4,7 @@
     "description": "An abstraction layer for providers and consumers of authorizations.",
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
-    "require": {}
+    "require": {
+        "drupal/externalauth": ">=1.4"
+    }
 }

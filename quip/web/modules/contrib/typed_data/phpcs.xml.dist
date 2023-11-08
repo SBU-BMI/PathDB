@@ -19,6 +19,13 @@
   <rule ref="Drupal"/>
   <rule ref="DrupalPractice"/>
 
+  <!-- Ignore specific sniffs in all files. The following are either not
+       relevant for Typed Data or we have decided not to adhere to them. -->
+  <!-- Do not force the use of Null Coalesce Operator ?? -->
+  <rule ref="SlevomatCodingStandard.ControlStructures.RequireNullCoalesceOperator.NullCoalesceOperatorNotUsed"><severity>0</severity></rule>
+  <!-- Do not force the use of short list syntax [a,b] -->
+  <rule ref="SlevomatCodingStandard.PHP.ShortList.LongListUsed"><severity>0</severity></rule>
+
   <rule ref="DrupalPractice">
     <!-- Allow empty lines after comments, we don't care. -->
     <exclude name="DrupalPractice.Commenting.CommentEmptyLine"/>
@@ -27,4 +34,12 @@
   <rule ref="Drupal.Files.TxtFileLineLength.TooLong">
     <exclude-pattern>README.*</exclude-pattern>
   </rule>
+
+  <!-- Increase the allowed line length for inline array declarations. -->
+  <rule ref="Drupal.Arrays.Array">
+    <properties>
+      <property name="lineLimit" value="160"/>
+    </properties>
+  </rule>
+
 </ruleset>

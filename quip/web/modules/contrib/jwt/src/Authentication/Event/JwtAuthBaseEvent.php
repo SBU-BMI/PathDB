@@ -2,7 +2,7 @@
 
 namespace Drupal\jwt\Authentication\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
 
 /**

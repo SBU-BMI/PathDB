@@ -48,11 +48,9 @@ class QueryEntityForm extends EntityForm {
 
     $storage = $this->entityTypeManager
       ->getStorage('ldap_server');
-    $servers = $storage->getQuery()->execute();
-
     $options = [];
     /** @var \Drupal\ldap_servers\Entity\Server $server */
-    foreach ($storage->loadMultiple($servers) as $server) {
+    foreach ($storage->loadMultiple() as $server) {
       $options[$server->id()] = $server->label();
     }
 
@@ -182,6 +180,8 @@ class QueryEntityForm extends EntityForm {
         ]));
     }
     $form_state->setRedirectUrl($ldap_query_entity->toUrl('collection'));
+
+    return $status;
   }
 
 }

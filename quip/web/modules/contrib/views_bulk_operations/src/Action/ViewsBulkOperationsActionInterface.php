@@ -22,7 +22,7 @@ interface ViewsBulkOperationsActionInterface extends ActionInterface {
    *
    * @see ViewsBulkOperationsActionBase::setContext
    */
-  public function setContext(array &$context);
+  public function setContext(array &$context): void;
 
   /**
    * Set view object.
@@ -30,7 +30,7 @@ interface ViewsBulkOperationsActionInterface extends ActionInterface {
    * @param \Drupal\views\ViewExecutable $view
    *   The processed view.
    */
-  public function setView(ViewExecutable $view);
+  public function setView(ViewExecutable $view): void;
 
   /**
    * Execute action on multiple entities.
@@ -41,8 +41,9 @@ interface ViewsBulkOperationsActionInterface extends ActionInterface {
    * @param array $objects
    *   An array of entities.
    *
-   * @return \Drupal\Component\Render\MarkupInterface[]
-   *   An array of MarkupInterface objects or an empty array.
+   * @return mixed[]
+   *   An array of MarkupInterface objects or an empty array or an array
+   *   of arrays with 'message' (MarkupInterface) and 'type' (string) keys.
    */
   public function executeMultiple(array $objects);
 
@@ -59,7 +60,7 @@ interface ViewsBulkOperationsActionInterface extends ActionInterface {
    *   Performed operations array.
    *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse|null
-   *   Bach redirect response or NULL.
+   *   Batch redirect response or NULL.
    */
   public static function finished($success, array $results, array $operations): ?RedirectResponse;
 

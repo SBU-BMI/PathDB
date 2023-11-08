@@ -1,0 +1,11 @@
+name: File replace shell exec
+description: 'Execute a shell command when a file is replaced'
+type: module
+core_version_requirement: ^8 || ^9 || ^10
+dependencies:
+  - file_replace
+
+# Information added by Drupal.org packaging script on 2022-07-29
+version: '8.x-1.3'
+project: 'file_replace'
+datestamp: 1659099670

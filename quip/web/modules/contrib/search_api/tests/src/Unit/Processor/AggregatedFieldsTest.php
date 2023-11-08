@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\search_api\Unit\Processor;
 
+use Drupal\Core\Form\FormState;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\TypedData\ComplexDataInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\TypedDataInterface;
@@ -9,6 +11,8 @@ use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\DataType\DataTypeInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\IndexInterface;
+use Drupal\search_api\Item\Field;
+use Drupal\search_api\Item\FieldInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Plugin\search_api\processor\AggregatedFields;
 use Drupal\search_api\Plugin\search_api\processor\Property\AggregatedFieldProperty;
@@ -60,7 +64,7 @@ class AggregatedFieldsTest extends UnitTestCase {
   /**
    * Creates a new processor object for use in the tests.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $datasource = $this->createMock(DatasourceInterface::class);
@@ -141,10 +145,12 @@ class AggregatedFieldsTest extends UnitTestCase {
    * @param bool $integer
    *   (optional) TRUE if the items' normal fields should contain integers,
    *   FALSE otherwise.
+   * @param array $additional_config
+   *   (optional) Additional configuration to set on the field.
    *
    * @dataProvider aggregationTestsDataProvider
    */
-  public function testAggregation($type, array $expected, $integer = FALSE) {
+  public function testAggregation(string $type, array $expected, bool $integer = FALSE, array $additional_config = []): void {
     // Add the field configuration.
     $configuration = [
       'type' => $type,
@@ -155,6 +161,7 @@ class AggregatedFieldsTest extends UnitTestCase {
         'entity:test3/always_empty',
       ],
     ];
+    $configuration += $additional_config;
     $this->index->getField($this->fieldId)->setConfiguration($configuration);
 
     if ($integer) {
@@ -226,6 +233,18 @@ class AggregatedFieldsTest extends UnitTestCase {
           ["foo\n\nbar\n\nbaz"],
           ['foobar'],
           [''],
+        ],
+      ],
+      '"Concatenation" aggregation with different separator' => [
+        'concat',
+        [
+          ['foo bar baz'],
+          ['foobar'],
+          [''],
+        ],
+        FALSE,
+        [
+          'separator' => ' ',
         ],
       ],
       '"Sum" aggregation' => [
@@ -305,16 +324,78 @@ class AggregatedFieldsTest extends UnitTestCase {
     $properties = $this->processor->getPropertyDefinitions(NULL);
 
     $this->assertArrayHasKey('aggregated_field', $properties, 'The "aggregated_field" property was added to the properties.');
-    $this->assertInstanceOf(AggregatedFieldProperty::class, $properties['aggregated_field'], 'The "aggregated_field" property has the correct class.');
-    $this->assertEquals('string', $properties['aggregated_field']->getDataType(), 'Correct data type set in the data definition.');
-    $this->assertEquals($translation->translate('Aggregated field'), $properties['aggregated_field']->getLabel(), 'Correct label set in the data definition.');
+    $property = $properties['aggregated_field'];
+    $this->assertInstanceOf(AggregatedFieldProperty::class, $property, 'The "aggregated_field" property has the correct class.');
+    $this->assertEquals('string', $property->getDataType(), 'Correct data type set in the data definition.');
+    $this->assertEquals($translation->translate('Aggregated field'), $property->getLabel(), 'Correct label set in the data definition.');
     $expected_description = $translation->translate('An aggregation of multiple other fields.');
-    $this->assertEquals($expected_description, $properties['aggregated_field']->getDescription(), 'Correct description set in the data definition.');
+    $this->assertEquals($expected_description, $property->getDescription(), 'Correct description set in the data definition.');
+    $this->assertTrue($properties['aggregated_field']->isList());
+
+    // Verify that the property configuration form works correctly.
+    $property->setStringTranslation($this->createMock(TranslationInterface::class));
+    $field = $this->createMock(FieldInterface::class);
+    $field->method('getIndex')->willReturn($this->processor->getIndex());
+    $field->method('getConfiguration')->willReturn([
+      'type' => 'concat',
+      'separator' => "\n\t \\XX",
+      'fields' => [],
+    ]);
+    $form = $property->buildConfigurationForm($field, [], new FormState());
+    $this->assertEquals("\\n\\t \\\\XX", $form['separator']['#default_value']);
 
     // Verify that there are no properties if a datasource is given.
     $datasource = $this->createMock(DatasourceInterface::class);
     $properties = $this->processor->getPropertyDefinitions($datasource);
     $this->assertEmpty($properties, 'Datasource-specific properties did not get changed.');
+  }
+
+  /**
+   * Makes sure that the property's isList() method works correctly.
+   *
+   * The property should report itself as a list only if its type is either set
+   * to "union" or is unknown.
+   *
+   * @param string $type
+   *   The aggregation type configured for the field.
+   * @param bool $expect_list
+   *   The expected return value of isList().
+   *
+   * @covers \Drupal\search_api\Plugin\search_api\processor\Property\AggregatedFieldProperty::isList
+   * @dataProvider propertyIsListTestDataProvider
+   */
+  public function testPropertyIsList(string $type, bool $expect_list): void {
+    $this->processor->setStringTranslation($this->getStringTranslationStub());
+
+    $index = $this->createMock(IndexInterface::class);
+    $index->method('getPropertyDefinitions')->willReturnMap([
+      [NULL, $this->processor->getPropertyDefinitions(NULL)],
+    ]);
+
+    $field = (new Field($index, 'aggregated'))
+      ->setDatasourceId(NULL)
+      ->setPropertyPath('aggregated_field')
+      ->setConfiguration([
+        'type' => $type,
+      ]);
+    $this->assertEquals($expect_list, $field->getDataDefinition()->isList());
+  }
+
+  /**
+   * Provides test data for testPropertyIsList().
+   *
+   * @return array
+   *   An array containing test data sets, with each being an array of arguments
+   *   to pass to the test method.
+   *
+   * @see static::testPropertyIsList()
+   */
+  public function propertyIsListTestDataProvider(): array {
+    return [
+      ['union', TRUE],
+      ['sum', FALSE],
+      ['concat', FALSE],
+    ];
   }
 
   /**

@@ -15,7 +15,6 @@
   },
   "license": "GPL-2.0+",
   "require": {
-    "drupal/pathauto": "^1.8",
     "drupal/views_bulk_operations": "^4.0"
   }
 }

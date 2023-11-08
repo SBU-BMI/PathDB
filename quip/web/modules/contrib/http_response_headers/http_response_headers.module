@@ -32,7 +32,7 @@ function http_response_headers_help($route_name, RouteMatchInterface $route_matc
     '#attributes' => ['class' => 'help-resources'],
     '#wrapper_attributes' => ['class' => 'container'],
   ];
-  $output .= render($help);
+  $output .= \Drupal::service('renderer')->render($help);
 
   return $output;
 }

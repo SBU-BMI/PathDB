@@ -11,7 +11,6 @@ use Drupal\Core\TypedData\TypedDataTrait;
  * Base class for data filters.
  */
 abstract class DataFilterBase extends PluginBase implements DataFilterInterface {
-
   use TypedDataTrait;
   use StringTranslationTrait;
 

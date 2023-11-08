@@ -67,6 +67,11 @@ class EasyBreadcrumbConstants {
   const HOME_SEGMENT_KEEP = 'home_segment_keep';
 
   /**
+   * Flag for skipping validation for links the same as home page one.
+   */
+  const HOME_SEGMENT_VALIDATION_SKIP = 'home_segment_validation_skip';
+
+  /**
    * Flag for including or not the page's title as a segment.
    */
   const INCLUDE_TITLE_SEGMENT = 'include_title_segment';
@@ -122,6 +127,11 @@ class EasyBreadcrumbConstants {
   const USE_PAGE_TITLE_AS_MENU_TITLE_FALLBACK = 'use_page_title_as_menu_title_fallback';
 
   /**
+   * Preferred menu to use as menu title source.
+   */
+  const MENU_TITLE_PREFERRED_MENU = 'menu_title_preferred_menu';
+
+  /**
    * Use site title as the front page segment.
    */
   const USE_SITE_TITLE = 'use_site_title';
@@ -130,6 +140,11 @@ class EasyBreadcrumbConstants {
    * Flag for removing repeated identical segments from the breadcrumb.
    */
   const REMOVE_REPEATED_SEGMENTS = 'remove_repeated_segments';
+
+  /**
+   * Flag for removing repeated identical segments from the breadcrumb ignoring url information.
+   */
+  const REMOVE_REPEATED_SEGMENTS_TEXT_ONLY = 'remove_repeated_segments_text_only';
 
   /**
    * Flag for storing absolute path settings.

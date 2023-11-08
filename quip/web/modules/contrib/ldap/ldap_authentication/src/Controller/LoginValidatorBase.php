@@ -7,8 +7,7 @@ namespace Drupal\ldap_authentication\Controller;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
-use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -16,11 +15,12 @@ use Drupal\externalauth\Authmap;
 use Drupal\ldap_authentication\AuthenticationServers;
 use Drupal\ldap_servers\Helper\CredentialsStorage;
 use Drupal\ldap_servers\LdapBridgeInterface;
+use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_servers\Logger\LdapDetailLog;
-use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
 use Drupal\user\UserInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Ldap\Entry;
 
 /**
@@ -161,7 +161,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
   /**
    * Logger.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
 
@@ -175,7 +175,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
   /**
    * Module handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -228,11 +228,11 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
    *   Config factory.
    * @param \Drupal\ldap_servers\Logger\LdapDetailLog $detailLog
    *   Detail log.
-   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   * @param \Psr\Log\LoggerInterface $logger
    *   Logger channel.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity type manager.
-   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Module handler.
    * @param \Drupal\ldap_servers\LdapBridgeInterface $ldap_bridge
    *   LDAP bridge.
@@ -250,9 +250,9 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
   public function __construct(
     ConfigFactoryInterface $configFactory,
     LdapDetailLog $detailLog,
-    LoggerChannelInterface $logger,
+    LoggerInterface $logger,
     EntityTypeManagerInterface $entity_type_manager,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     LdapBridgeInterface $ldap_bridge,
     Authmap $external_auth,
     AuthenticationServers $authentication_servers,
@@ -309,6 +309,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
       $admin_roles = $this->entityTypeManager
         ->getStorage('user_role')
         ->getQuery()
+        ->accessCheck(FALSE)
         ->condition('is_admin', TRUE)
         ->execute();
       if (!empty(array_intersect($this->drupalUser->getRoles(), $admin_roles))) {
@@ -540,7 +541,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
       // We are not injecting this service properly to avoid forcing this
       // dependency on authorization.
       /** @var \Drupal\user\Entity\User $user */
-      /** @var \Drupal\authorization\AuthorizationController $controller */
+      /** @var \Drupal\authorization\AuthorizationServiceInterface $controller */
       // @codingStandardsIgnoreLine
       $controller = \Drupal::service('authorization.manager');
       $controller->setUser($user);
@@ -548,6 +549,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
       $profiles = $this->entityTypeManager
         ->getStorage('authorization_profile')
         ->getQuery()
+        ->accessCheck(FALSE)
         ->condition('provider', 'ldap_provider')
         ->execute();
       foreach ($profiles as $profile) {
@@ -634,7 +636,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
     $puid = $this->serverDrupalUser->derivePuidFromLdapResponse($this->ldapEntry);
     if (!empty($puid)) {
       $this->drupalUser = $this->ldapUserManager->getUserAccountFromPuid($puid);
-      /** @var \Drupal\user\Entity\User $userMatchingPuid */
+
       if ($this->drupalUser) {
         $oldName = $this->drupalUser->getAccountName();
         $this->drupalUser->setUsername($this->drupalUserName);

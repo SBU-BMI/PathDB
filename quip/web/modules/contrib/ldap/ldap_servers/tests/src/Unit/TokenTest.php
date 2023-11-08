@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace Drupal\Tests\ldap_servers\Unit;
 
 use Drupal\ldap_servers\Helper\ConversionHelper;
+use Drupal\ldap_servers\Processor\TokenProcessor;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Ldap\Entry;
-use Drupal\ldap_servers\Processor\TokenProcessor;
 
 /**
  * Token tests.

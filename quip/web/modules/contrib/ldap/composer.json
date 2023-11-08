@@ -5,9 +5,12 @@
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
     "require": {
-        "grahl/ldap": "^5.2",
+        "symfony/ldap": "^5.4 || ^6.0",
         "drupal/authorization": "^1.0",
-        "drupal/externalauth": "^1.0",
+        "drupal/externalauth": "^2.0",
         "php": ">=7.2.0"
+    },
+    "provide": {
+        "ext-ldap": "*"
     }
 }

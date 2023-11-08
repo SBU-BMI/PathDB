@@ -11,14 +11,16 @@ ldap_user.settings:
       label: 'Provision triggers to Drupal'
       type: sequence
       sequence:
-        -  type: string
-           label: 'Enabled trigger'
+        -
+          type: string
+          label: 'Enabled trigger'
     ldapEntryProvisionTriggers:
       type: sequence
       label: 'Provision triggers to LDAP'
       sequence:
-        -  type: string
-           label: 'Enabled trigger'
+        -
+          type: string
+          label: 'Enabled trigger'
     orphanedDrupalAcctBehavior:
       label: 'orphanedDrupalAcctBehavior'
       type: string

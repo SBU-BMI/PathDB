@@ -82,7 +82,7 @@ class TextInputWidget extends FormWidgetBase {
    */
   public function flagViolations(TypedDataInterface $data, ConstraintViolationListInterface $violations, SubformStateInterface $formState) {
     foreach ($violations as $violation) {
-      /** @var ConstraintViolationInterface $violation */
+      /** @var \Symfony\Component\Validator\ConstraintViolationInterface $violation */
       $formState->setErrorByName('value', $violation->getMessage());
     }
   }

@@ -18,12 +18,12 @@ class RsaKeyTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'key', 'jwt', 'jwt_auth_issuer', 'jwt_auth_consumer', 'jwt_test'];
+  protected static $modules = ['system', 'user', 'field', 'key', 'jwt', 'jwt_auth_issuer', 'jwt_auth_consumer', 'jwt_test'];
 
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->installSchema('system', 'sequences');
 
@@ -48,13 +48,13 @@ class RsaKeyTest extends KernelTestBase {
     /** @var \Drupal\jwt\Transcoder\JwtTranscoderInterface $transcoder */
     $transcoder = $this->container->get('jwt.transcoder');
     $decoded_jwt = $transcoder->decode($token);
-    $this->assertEqual($account->id(), $decoded_jwt->getClaim(['drupal', 'uid']));
+    $this->assertEquals($account->id(), $decoded_jwt->getClaim(['drupal', 'uid']));
     // Test decoding with the matched and mis-matched public keys.
-    $path = drupal_get_path('module', 'jwt_test') . '/fixtures/jwt_test_rsa-public.pem';
+    $path = \Drupal::service('extension.list.module')->getPath('jwt_test') . '/fixtures/jwt_test_rsa-public.pem';
     $public_key = file_get_contents($path);
     $payload = JWT::decode($token, $public_key, ['RS256']);
-    $this->assertEqual($account->id(), $payload->drupal->uid);
-    $path = drupal_get_path('module', 'jwt_test') . '/fixtures/jwt_test_rsa2-public.pem';
+    $this->assertEquals($account->id(), $payload->drupal->uid);
+    $path = \Drupal::service('extension.list.module')->getPath('jwt_test') . '/fixtures/jwt_test_rsa2-public.pem';
     $public_key = file_get_contents($path);
     $this->expectException(SignatureInvalidException::class);
     $payload = JWT::decode($token, $public_key, ['RS256']);
@@ -68,7 +68,7 @@ class RsaKeyTest extends KernelTestBase {
     $config->set('algorithm', 'RS256');
     $config->set('key_id', 'jwt_test_rsa2');
     $config->save();
-    $path = drupal_get_path('module', 'jwt_test') . '/fixtures/jwt_test_rsa2-private.pem';
+    $path = \Drupal::service('extension.list.module')->getPath('jwt_test') . '/fixtures/jwt_test_rsa2-private.pem';
     $private_key = file_get_contents($path);
     $exp = \Drupal::time()->getRequestTime() + 1000;
     $payload = [
@@ -82,8 +82,8 @@ class RsaKeyTest extends KernelTestBase {
     /** @var \Drupal\jwt\Transcoder\JwtTranscoderInterface $transcoder */
     $transcoder = $this->container->get('jwt.transcoder');
     $decoded_jwt = $transcoder->decode($token);
-    $this->assertEqual(999, $decoded_jwt->getClaim(['test', 'uid']));
-    $this->assertEqual($exp, $decoded_jwt->getClaim('exp'));
+    $this->assertEquals(999, $decoded_jwt->getClaim(['test', 'uid']));
+    $this->assertEquals($exp, $decoded_jwt->getClaim('exp'));
   }
 
 }

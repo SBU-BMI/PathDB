@@ -397,8 +397,9 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
       $settings_form = $plugin->settingsForm($form, $form_state);
 
       // Adds the widget third party settings forms.
+      //https://www.drupal.org/node/3000490
       $third_party_settings_form = [];
-      foreach ($this->moduleHandler->getImplementations('field_widget_third_party_settings_form') as $module) {
+      $this->moduleHandler->invokeAllWith('field_widget_third_party_settings_form', function (callable $hook, string $module) use ($form_state, $form, $field_definition, $plugin, &$third_party_settings_form) {
         $third_party_settings_form[$module] = $this->moduleHandler->invoke($module, 'field_widget_third_party_settings_form', [
           $plugin,
           $field_definition,
@@ -406,7 +407,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
           $form,
           $form_state,
         ]);
-      }
+      });
 
       if ($settings_form || $third_party_settings_form) {
         $form['plugin']['#cell_attributes'] = ['colspan' => 3];

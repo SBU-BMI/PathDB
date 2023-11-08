@@ -7,10 +7,10 @@
 
 declare(strict_types = 1);
 
-use Drupal\Core\Database\Database;
-use Drupal\Core\Url;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Database\Database;
 use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\Core\Utility\UpdateException;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 

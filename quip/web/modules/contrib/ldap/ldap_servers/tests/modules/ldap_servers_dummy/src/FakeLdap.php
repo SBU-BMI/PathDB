@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\ldap_servers_dummy;
 
 use Symfony\Component\Ldap\Adapter\EntryManagerInterface;
+use Symfony\Component\Ldap\Adapter\QueryInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\LdapInterface;
 
@@ -55,7 +56,7 @@ class FakeLdap implements LdapInterface {
   /**
    * {@inheritdoc}
    */
-  public function query($dn, $query, array $options = []) {
+  public function query(string $dn, string $query, array $options = []): QueryInterface {
     $response = new FakeQuery();
     $response->setResult($this->queryResult[$query] ?? new FakeCollection([]));
     return $response;

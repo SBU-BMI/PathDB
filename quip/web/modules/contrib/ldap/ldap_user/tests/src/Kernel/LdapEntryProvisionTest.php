@@ -6,8 +6,8 @@ namespace Drupal\Tests\ldap_user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
-use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
+use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_user\Event\LdapUserLoginEvent;
 use Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -52,6 +52,8 @@ class LdapEntryProvisionTest extends KernelTestBase {
   private $subscriber;
 
   /**
+   * Drupal user entity object.
+   *
    * @var \Drupal\user\Entity\User|false
    */
   private $user;
@@ -123,7 +125,9 @@ class LdapEntryProvisionTest extends KernelTestBase {
       $this->container->get('module_handler'),
       $this->container->get('ldap.user_manager'),
       $this->container->get('ldap_user.field_provider'),
-      $this->container->get('file_system')
+      $this->container->get('file_system'),
+      $this->container->get('password_generator'),
+      $this->container->get('externalauth.authmap')
     );
   }
 

@@ -5,12 +5,12 @@ declare(strict_types = 1);
 namespace Drupal\ldap_user\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\externalauth\Authmap;
-use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
+use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -184,7 +184,7 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
     $results['username'] = $username;
     $results['related LDAP entry (before provisioning or syncing)'] = $user_ldap_entry;
 
-    /** @var \Drupal\user\Entity\User $account */
+    /** @var \Drupal\user\Entity\User $existingAccount */
     $existingAccount = $this->entityTypeManager->getStorage('user')
       ->loadByProperties(['name' => $username]);
     $existingAccount = $existingAccount ? reset($existingAccount) : FALSE;

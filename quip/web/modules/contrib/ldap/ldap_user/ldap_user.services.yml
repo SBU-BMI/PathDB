@@ -19,6 +19,8 @@ services:
       - '@event_dispatcher'
       - '@ldap_user.field_provider'
       - '@messenger'
+      - '@password_generator'
+
   ldap_user.field_provider:
     class: Drupal\ldap_user\FieldProvider
     arguments:
@@ -36,6 +38,8 @@ services:
       - '@state'
       - '@entity_type.manager'
       - '@ldap.user_manager'
+      - '@ldap.bridge'
+      - '@module_handler'
   ldap.group_user_update_processor:
     class: Drupal\ldap_user\Processor\GroupUserUpdateProcessor
     arguments:
@@ -59,6 +63,8 @@ services:
       - '@ldap.user_manager'
       - '@ldap_user.field_provider'
       - '@file_system'
+      - '@password_generator'
+      - '@externalauth.authmap'
     tags:
       - { name: event_subscriber }
   ldap_user.ldap_delete:

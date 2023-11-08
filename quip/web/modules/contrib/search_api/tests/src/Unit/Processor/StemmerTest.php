@@ -29,12 +29,21 @@ class StemmerTest extends UnitTestCase {
   /**
    * Creates a new processor object for use in the tests.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->setUpMockContainer();
 
     $this->processor = new Stemmer([], 'string', []);
+    $language_manager = $this->createMock(LanguageManagerInterface::class);
+    $language_manager->method('getLanguages')->willReturn([
+      'de' => 'de',
+      'en' => 'en',
+      'en-GB' => 'en-GB',
+      'fr' => 'fr',
+      'it' => 'it',
+    ]);
+    $this->processor->setLanguageManager($language_manager);
   }
 
   /**
@@ -99,6 +108,17 @@ class StemmerTest extends UnitTestCase {
     ]);
     $item_en->method('getFields')->willReturn(['foo' => $field_en]);
 
+    $item_en_gb = $this->getMockBuilder(ItemInterface::class)
+      ->disableOriginalConstructor()
+      ->getMock();
+    $item_en_gb->method('getLanguage')->willReturn('en-GB');
+    $field_en_gb = new Field($index, 'foo');
+    $field_en_gb->setType('text');
+    $field_en_gb->setValues([
+      new TextValue('ties'),
+    ]);
+    $item_en_gb->method('getFields')->willReturn(['foo' => $field_en_gb]);
+
     $item_de = $this->getMockBuilder(ItemInterface::class)
       ->disableOriginalConstructor()
       ->getMock();
@@ -110,11 +130,13 @@ class StemmerTest extends UnitTestCase {
     ]);
     $item_de->method('getFields')->willReturn(['foo' => $field_de]);
 
-    $items = [$item_en, $item_de];
+    $items = [$item_en, $item_en_gb, $item_de];
     $this->processor->preprocessIndexItems($items);
 
     /** @var \Drupal\search_api\Plugin\search_api\data_type\value\TextValueInterface $value */
     $value = $field_en->getValues()[0];
+    $this->assertEquals('tie', $value->toText());
+    $value = $field_en_gb->getValues()[0];
     $this->assertEquals('tie', $value->toText());
     $value = $field_de->getValues()[0];
     $this->assertEquals('ties', $value->toText());
@@ -132,7 +154,7 @@ class StemmerTest extends UnitTestCase {
    *
    * @dataProvider preprocessSearchQueryDataProvider
    */
-  public function testPreprocessSearchQuery(array $languages = NULL, $should_process) {
+  public function testPreprocessSearchQuery(?array $languages, bool $should_process): void {
     /** @var \Drupal\search_api\Query\QueryInterface|\PHPUnit\Framework\MockObject\MockObject $query */
     $query = $this->createMock(QueryInterface::class);
     $query->method('getLanguages')->willReturn($languages);
@@ -157,12 +179,14 @@ class StemmerTest extends UnitTestCase {
    * @return array[]
    *   Arrays of arguments for testPreprocessSearchQuery().
    */
-  public function preprocessSearchQueryDataProvider() {
+  public function preprocessSearchQueryDataProvider(): array {
     return [
       'language-less query' => [NULL, TRUE],
       'English query' => [['en'], TRUE],
+      'British English query' => [['en-GB'], TRUE],
       'Non-English query' => [['de'], FALSE],
       'Multilingual query (including English)' => [['en', 'fr', 'es'], TRUE],
+      'Multilingual query (including British English)' => [['en-GB', 'fr', 'es'], TRUE],
       'Multilingual query (not including English)' => [['de', 'it'], FALSE],
     ];
   }
@@ -179,7 +203,7 @@ class StemmerTest extends UnitTestCase {
    *
    * @dataProvider processDataProvider
    */
-  public function testProcess($passed_value, $expected_value) {
+  public function testProcess(string $passed_value, string $expected_value) {
     $this->invokeMethod('process', [&$passed_value]);
     $this->assertEquals($passed_value, $expected_value);
   }
@@ -190,7 +214,7 @@ class StemmerTest extends UnitTestCase {
    * @return array[]
    *   Arrays of arguments for testProcess().
    */
-  public function processDataProvider() {
+  public function processDataProvider(): array {
     return [
       ['Yo', 'yo'],
       ['ties', 'tie'],
@@ -297,7 +321,7 @@ class StemmerTest extends UnitTestCase {
 
     $passed_value = NULL;
     $this->invokeMethod('processConditionValue', [&$passed_value]);
-    $this->assertSame(NULL, $passed_value);
+    $this->assertNull($passed_value);
 
     $condition = new Condition('field', NULL);
     $conditions = [$condition];

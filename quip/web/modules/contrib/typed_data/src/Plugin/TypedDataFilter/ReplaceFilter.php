@@ -13,7 +13,7 @@ use Drupal\typed_data\DataFilterBase;
  *
  * @DataFilter(
  *   id = "replace",
- *   label = @Translation("The replace filter substitutes the text given in the first argument with the text given in the second argument."),
+ *   label = @Translation("The replace filter replaces all occurrences of the text given in the first argument with the text given in the second argument."),
  * )
  */
 class ReplaceFilter extends DataFilterBase {

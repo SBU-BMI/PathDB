@@ -15,7 +15,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 function ldap_authorization_help($route_name, RouteMatchInterface $route_match) {
   if ($route_name === 'help.page.ldap_authorization') {
     $output = '<h3>' . t('About') . '</h3>';
-    $output .= '<p>' . t("Provider to the Authorization API, also see authorization's README.md for further information.") . '</p>';
+    $output .= '<p>' . t("Provider to the Authorization API, also see the authorization project's README.md for further information.") . '</p>';
     return $output;
   }
 }

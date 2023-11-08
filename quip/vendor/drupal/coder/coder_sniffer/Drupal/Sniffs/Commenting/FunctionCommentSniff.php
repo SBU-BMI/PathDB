@@ -37,8 +37,6 @@ class FunctionCommentSniff implements Sniff
         'Boolean'   => 'bool',
         'integer'   => 'int',
         'str'       => 'string',
-        'stdClass'  => 'object',
-        '\stdClass' => 'object',
         'number'    => 'int',
         'String'    => 'string',
         'type'      => 'mixed',
@@ -49,19 +47,6 @@ class FunctionCommentSniff implements Sniff
         'Int'       => 'int',
         'Integer'   => 'int',
         'TRUEFALSE' => 'bool',
-    ];
-
-    /**
-     * An array of variable types for param/var we will check.
-     *
-     * @var array<string>
-     */
-    public $allowedTypes = [
-        'array',
-        'mixed',
-        'object',
-        'resource',
-        'callable',
     ];
 
 
@@ -89,19 +74,23 @@ class FunctionCommentSniff implements Sniff
     public function process(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
-        $find   = Tokens::$methodPrefixes;
-        $find[] = T_WHITESPACE;
+        $ignore = Tokens::$methodPrefixes;
+        $ignore[T_WHITESPACE] = T_WHITESPACE;
+        $functionCodeStart    = $stackPtr;
 
-        $beforeFunction = $phpcsFile->findPrevious($find, ($stackPtr - 1), null, true);
-        if ($tokens[$beforeFunction]['code'] === T_ATTRIBUTE_END
-            && $tokens[$tokens[$beforeFunction]['attribute_opener']]['code'] === T_ATTRIBUTE
-        ) {
-            // It's an attribute, such as #[\ReturnTypeWillChange].
-            $attributeLines = ($tokens[$beforeFunction]['line'] - $tokens[$tokens[$beforeFunction]['attribute_opener']]['line'] + 1);
-            $commentEnd     = $phpcsFile->findPrevious($find, ($tokens[$beforeFunction]['attribute_opener'] - 1), null, true);
-        } else {
-            $attributeLines = 0;
-            $commentEnd     = $phpcsFile->findPrevious($find, ($stackPtr - 1), null, true);
+        for ($commentEnd = ($stackPtr - 1); $commentEnd >= 0; $commentEnd--) {
+            if (isset($ignore[$tokens[$commentEnd]['code']]) === true) {
+                continue;
+            }
+
+            if ($tokens[$commentEnd]['code'] === T_ATTRIBUTE_END
+                && isset($tokens[$commentEnd]['attribute_opener']) === true
+            ) {
+                $commentEnd = $functionCodeStart = $tokens[$commentEnd]['attribute_opener'];
+                continue;
+            }
+
+            break;
         }
 
         $beforeCommentEnd = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($commentEnd - 1), null, true);
@@ -162,7 +151,7 @@ class FunctionCommentSniff implements Sniff
             }
         }//end foreach
 
-        if ($tokens[$commentEnd]['line'] !== ($tokens[$stackPtr]['line'] - $attributeLines - 1)) {
+        if ($tokens[$commentEnd]['line'] !== ($tokens[$functionCodeStart]['line'] - 1)) {
             $error = 'There must be no blank lines after the function comment';
             $fix   = $phpcsFile->addFixableError($error, $commentEnd, 'SpacingAfter');
             if ($fix === true) {
@@ -274,10 +263,7 @@ class FunctionCommentSniff implements Sniff
                         }
                     }//end if
 
-                    if ($type === 'void') {
-                        $error = 'If there is no return value for a function, there must not be a @return tag.';
-                        $phpcsFile->addError($error, $return, 'VoidReturn');
-                    } else if ($type !== 'mixed') {
+                    if ($type !== 'mixed' && $type !== 'void') {
                         // If return type is not void, there needs to be a return statement
                         // somewhere in the function that returns something.
                         if (isset($tokens[$stackPtr]['scope_closer']) === true) {
@@ -371,7 +357,10 @@ class FunctionCommentSniff implements Sniff
                         if ($fix === true) {
                             $phpcsFile->fixer->replaceToken(($return + 2), $matches[1]);
                         }
-                    } else {
+
+                        // Do not check PHPStan types that contain any kind of brackets.
+                        // See https://phpstan.org/writing-php-code/phpdoc-types#general-arrays .
+                    } else if (preg_match('/[<\[\{\(]/', $type) === 0) {
                         $error = 'Return type "%s" must not contain spaces';
                         $data  = [$type];
                         $phpcsFile->addError($error, $return, 'ReturnTypeSpaces', $data);
@@ -493,7 +482,7 @@ class FunctionCommentSniff implements Sniff
             $commentLines = [];
             if ($tokens[($tag + 2)]['code'] === T_DOC_COMMENT_STRING) {
                 $matches = [];
-                preg_match('/([^$&]*)(?:((?:\$|&)[^\s]+)(?:(\s+)(.*))?)?/', $tokens[($tag + 2)]['content'], $matches);
+                preg_match('/((?:(?![$.]|&(?=\$)).)*)(?:((?:\.\.\.)?(?:\$|&)[^\s]+)(?:(\s+)(.*))?)?/', $tokens[($tag + 2)]['content'], $matches);
 
                 $typeLen   = strlen($matches[1]);
                 $type      = trim($matches[1]);
@@ -629,7 +618,7 @@ class FunctionCommentSniff implements Sniff
                     $variableArguments = true;
                 }
 
-                if ($typeLen === 0) {
+                if ($typeLen === 0 && $variableArguments === false) {
                     $error = 'Missing parameter type';
                     // If there is just one word as comment at the end of the line
                     // then this is probably the data type. Move it before the
@@ -688,14 +677,23 @@ class FunctionCommentSniff implements Sniff
             while (isset($realParams[($checkPos)]) === true) {
                 $realName = $realParams[$checkPos]['name'];
 
-                if ($realName === $param['var'] || ($realParams[$checkPos]['pass_by_reference'] === true
+                if ($realName === $param['var']
+                    || ($realParams[$checkPos]['pass_by_reference'] === true
                     && ('&'.$realName) === $param['var'])
+                    || ($realParams[$checkPos]['variable_length'] === true
+                    && ('...'.$realName) === $param['var'])
                 ) {
                     $matched = true;
                     break;
                 }
 
                 $checkPos++;
+            }
+
+            // Support variadic arguments.
+            if (preg_match('/(\s+)\.{3}$/', $param['type'], $matches) === 1) {
+                $param['type_space'] = strlen($matches[1]);
+                $param['type']       = preg_replace('/\s+\.{3}$/', '', $param['type']);
             }
 
             // Check the param type value. This could also be multiple parameter
@@ -708,16 +706,14 @@ class FunctionCommentSniff implements Sniff
 
             $suggestedType = implode('|', $suggestedNames);
 
-            // Support variadic arguments.
-            if (preg_match('/(\s+)\.{3}$/', $param['type'], $matches) === 1) {
-                $param['type_space'] = strlen($matches[1]);
-                $param['type']       = preg_replace('/\s+\.{3}$/', '', $param['type']);
-            }
-
             if (preg_match('/\s/', $param['type']) === 1) {
-                $error = 'Parameter type "%s" must not contain spaces';
-                $data  = [$param['type']];
-                $phpcsFile->addError($error, $param['tag'], 'ParamTypeSpaces', $data);
+                // Do not check PHPStan types that contain any kind of brackets.
+                // See https://phpstan.org/writing-php-code/phpdoc-types#general-arrays .
+                if (preg_match('/[<\[\{\(]/', $param['type']) === 0) {
+                    $error = 'Parameter type "%s" must not contain spaces';
+                    $data  = [$param['type']];
+                    $phpcsFile->addError($error, $param['tag'], 'ParamTypeSpaces', $data);
+                }
             } else if ($param['type'] !== $suggestedType) {
                 $error = 'Expected "%s" but found "%s" for parameter type';
                 $data  = [
@@ -731,77 +727,6 @@ class FunctionCommentSniff implements Sniff
                     $content .= $param['var'];
                     $phpcsFile->fixer->replaceToken(($param['tag'] + 2), $content);
                 }
-            }
-
-            $suggestedName = '';
-            $typeName      = '';
-            if (count($typeNames) === 1) {
-                $typeName      = $param['type'];
-                $suggestedName = static::suggestType($typeName);
-            }
-
-            // This runs only if there is only one type name and the type name
-            // is not one of the disallowed type names.
-            if (count($typeNames) === 1 && $typeName === $suggestedName) {
-                // Check type hint for array and custom type.
-                $suggestedTypeHint = '';
-                if (strpos($suggestedName, 'array') !== false) {
-                    $suggestedTypeHint = 'array';
-                } else if (strpos($suggestedName, 'callable') !== false) {
-                    $suggestedTypeHint = 'callable';
-                } else if (substr($suggestedName, -2) === '[]') {
-                    $suggestedTypeHint = 'array';
-                } else if ($suggestedName === 'object') {
-                    $suggestedTypeHint = '';
-                } else if (in_array($typeName, $this->allowedTypes) === false) {
-                    $suggestedTypeHint = $suggestedName;
-                }
-
-                if ($suggestedTypeHint !== '' && isset($realParams[$checkPos]) === true) {
-                    $typeHint = $realParams[$checkPos]['type_hint'];
-                    // Primitive type hints are allowed to be omitted.
-                    if ($typeHint === '' && in_array($suggestedTypeHint, ['string', 'int', 'float', 'bool']) === false) {
-                        $error = 'Type hint "%s" missing for %s';
-                        $data  = [
-                            $suggestedTypeHint,
-                            $param['var'],
-                        ];
-                        $phpcsFile->addError($error, $stackPtr, 'TypeHintMissing', $data);
-                    } else if ($typeHint !== $suggestedTypeHint && $typeHint !== '') {
-                        // The type hint could be fully namespaced, so we check
-                        // for the part after the last "\".
-                        $nameParts = explode('\\', $suggestedTypeHint);
-                        $lastPart  = end($nameParts);
-                        if ($lastPart !== $typeHint && $this->isAliasedType($typeHint, $suggestedTypeHint, $phpcsFile) === false) {
-                            $error = 'Expected type hint "%s"; found "%s" for %s';
-                            $data  = [
-                                $lastPart,
-                                $typeHint,
-                                $param['var'],
-                            ];
-                            $phpcsFile->addError($error, $stackPtr, 'IncorrectTypeHint', $data);
-                        }
-                    }//end if
-                } else if ($suggestedTypeHint === ''
-                    && isset($realParams[$checkPos]) === true
-                ) {
-                    $typeHint = $realParams[$checkPos]['type_hint'];
-                    if ($typeHint !== ''
-                        && $typeHint !== 'stdClass'
-                        && $typeHint !== '\stdClass'
-                        // As of PHP 7.2, object is a valid type hint.
-                        && $typeHint !== 'object'
-                        // As of PHP 8.0, mixed is a valid type hint.
-                        && $typeHint !== 'mixed'
-                    ) {
-                        $error = 'Unknown type hint "%s" found for %s';
-                        $data  = [
-                            $typeHint,
-                            $param['var'],
-                        ];
-                        $phpcsFile->addError($error, $stackPtr, 'InvalidTypeHint', $data);
-                    }
-                }//end if
             }//end if
 
             // Check number of spaces after the type.
@@ -920,21 +845,23 @@ class FunctionCommentSniff implements Sniff
         // Missing parameters only apply to methods and not function because on
         // functions it is allowed to leave out param comments for form constructors
         // for example.
-        // It is also allowed to ommit pram tags completely, in which case we don't
+        // It is also allowed to omit param tags completely, in which case we don't
         // throw errors. Only throw errors if param comments exists but are
         // incomplete on class methods.
         if ($tokens[$stackPtr]['level'] > 0 && empty($foundParams) === false) {
             foreach ($realParams as $realParam) {
                 $realParamKeyName = $realParam['name'];
                 if (in_array($realParamKeyName, $foundParams) === false
-                    && ($realParam['pass_by_reference'] === true
-                    && in_array("&$realParamKeyName", $foundParams) === true) === false
+                    && (($realParam['pass_by_reference'] === true
+                    && in_array("&$realParamKeyName", $foundParams) === true)
+                    || ($realParam['variable_length'] === true
+                    && in_array("...$realParamKeyName", $foundParams) === true)) === false
                 ) {
                     $error = 'Parameter %s is not described in comment';
                     $phpcsFile->addError($error, $commentStart, 'ParamMissingDefinition', [$realParam['name']]);
                 }
             }
-        }
+        }//end if
 
     }//end processParams()
 
@@ -998,78 +925,14 @@ class FunctionCommentSniff implements Sniff
             return $type;
         }
 
-        $type = preg_replace('/[^a-zA-Z0-9_\\\[\]]/', '', $type);
+        // Also allow some more characters for special type hints supported by
+        // PHPStan:
+        // https://phpstan.org/writing-php-code/phpdoc-types#basic-types .
+        $type = preg_replace('/[^a-zA-Z0-9_\\\[\]\-<> ,"\{\}\?\':\*\|\&]/', '', $type);
 
         return $type;
 
     }//end suggestType()
-
-
-    /**
-     * Checks if a used type hint is an alias defined by a "use" statement.
-     *
-     * @param string                      $typeHint          The type hint used.
-     * @param string                      $suggestedTypeHint The fully qualified type to
-     *                                                       check against.
-     * @param \PHP_CodeSniffer\Files\File $phpcsFile         The file being checked.
-     *
-     * @return boolean
-     */
-    protected function isAliasedType($typeHint, $suggestedTypeHint, File $phpcsFile)
-    {
-        $tokens = $phpcsFile->getTokens();
-
-        // Iterate over all "use" statements in the file.
-        $usePtr = 0;
-        while ($usePtr !== false) {
-            $usePtr = $phpcsFile->findNext(T_USE, ($usePtr + 1));
-            if ($usePtr === false) {
-                return false;
-            }
-
-            // Only check use statements in the global scope.
-            if (empty($tokens[$usePtr]['conditions']) === false) {
-                continue;
-            }
-
-            // Now comes the original class name, possibly with namespace
-            // backslashes.
-            $originalClass = $phpcsFile->findNext(Tokens::$emptyTokens, ($usePtr + 1), null, true);
-            if ($originalClass === false || ($tokens[$originalClass]['code'] !== T_STRING
-                && $tokens[$originalClass]['code'] !== T_NS_SEPARATOR)
-            ) {
-                continue;
-            }
-
-            $originalClassName = '';
-            while (in_array($tokens[$originalClass]['code'], [T_STRING, T_NS_SEPARATOR]) === true) {
-                $originalClassName .= $tokens[$originalClass]['content'];
-                $originalClass++;
-            }
-
-            if (ltrim($originalClassName, '\\') !== ltrim($suggestedTypeHint, '\\')) {
-                continue;
-            }
-
-            // Now comes the "as" keyword signaling an alias name for the class.
-            $asPtr = $phpcsFile->findNext(Tokens::$emptyTokens, ($originalClass + 1), null, true);
-            if ($asPtr === false || $tokens[$asPtr]['code'] !== T_AS) {
-                continue;
-            }
-
-            // Now comes the name the class is aliased to.
-            $aliasPtr = $phpcsFile->findNext(Tokens::$emptyTokens, ($asPtr + 1), null, true);
-            if ($aliasPtr === false || $tokens[$aliasPtr]['code'] !== T_STRING
-                || $tokens[$aliasPtr]['content'] !== $typeHint
-            ) {
-                continue;
-            }
-
-            // We found a use statement that aliases the used type hint!
-            return true;
-        }//end while
-
-    }//end isAliasedType()
 
 
     /**

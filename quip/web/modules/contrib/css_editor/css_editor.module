@@ -65,18 +65,27 @@ function css_editor_form_system_theme_settings_alter(&$form, FormStateInterface 
       '#title' => t('Use plain text editor'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('plaintext_enabled'),
+      '#attributes' => [
+        'id' => 'edit-plaintext-enabled',
+      ],
     );
     // Switch to enable/disable autopreview.
     $form['css_editor']['autopreview_enabled'] = array(
       '#title' => t('Enable auto preview'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('autopreview_enabled'),
+      '#attributes' => [
+        'id' => 'edit-autopreview-enabled',
+      ],
     );
     // Preview path.
     $form['css_editor']['preview_path'] = array(
       '#title' => t('Preview path:'),
       '#type' => 'textfield',
       '#size' => 60,
+      '#attributes' => [
+        'id' => 'edit-preview-path',
+      ],
     );
     // Preview box.
     $preview_url = Url::fromRoute('<front>', array(), array('absolute' => TRUE, 'query' => array('theme' => $theme)))->toString();

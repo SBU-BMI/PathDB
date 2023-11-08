@@ -14,6 +14,11 @@ use Symfony\Component\Validator\Constraint;
  */
 class TaxonomyUnique extends Constraint {
 
+  /**
+   * The TAXONOMY_UNIQUE_DEFAULT_MESSAGE constant.
+   *
+   * @var string
+   */
   public $notUnique = TAXONOMY_UNIQUE_DEFAULT_MESSAGE;
 
   /**

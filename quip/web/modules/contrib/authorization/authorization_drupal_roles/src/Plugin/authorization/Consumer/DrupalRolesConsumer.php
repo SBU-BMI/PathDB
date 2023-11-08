@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\authorization_drupal_roles\Plugin\authorization\Consumer;
 
+use Drupal\authorization\Consumer\ConsumerPluginBase;
 use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\authorization\Consumer\ConsumerPluginBase;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use function in_array;

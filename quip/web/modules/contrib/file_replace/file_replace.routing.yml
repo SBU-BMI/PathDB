@@ -1,0 +1,8 @@
+entity.file.replace_form:
+  path: '/admin/content/files/replace/{file}'
+  defaults:
+    _entity_form: 'file.replace'
+    _title: 'Replace file'
+  requirements:
+    _permission: 'replace files'
+    _file_replace_access: '{file}'

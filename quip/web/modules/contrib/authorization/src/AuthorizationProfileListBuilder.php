@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\authorization;
 
@@ -27,6 +27,7 @@ class AuthorizationProfileListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity): array {
+    /** @var \Drupal\authorization\Entity\AuthorizationProfile $entity */
     $row['label'] = $entity->label();
     // @todo Abstract get[Provider|Consumer]Options() from the form into Entity
     // or as a trait so we can display the label of them here instead of the

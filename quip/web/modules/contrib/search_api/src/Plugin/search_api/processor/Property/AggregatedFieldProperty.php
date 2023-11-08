@@ -25,6 +25,7 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
   public function defaultConfiguration() {
     return [
       'type' => 'union',
+      'separator' => "\n\n",
       'fields' => [],
     ];
   }
@@ -34,7 +35,7 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
    */
   public function buildConfigurationForm(FieldInterface $field, array $form, FormStateInterface $form_state) {
     $index = $field->getIndex();
-    $configuration = $field->getConfiguration();
+    $configuration = $field->getConfiguration() + $this->defaultConfiguration();
 
     $form['#attached']['library'][] = 'search_api/drupal.search_api.admin_css';
     $form['#tree'] = TRUE;
@@ -52,6 +53,20 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
       $form['type'][$type]['#description'] = $description;
     }
 
+    $form['separator'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Value separator'),
+      '#description' => $this->t('The text to insert between multiple values when aggregating them with the "@type" aggregation type. Can contain escape sequences like "\n" for a newline or "\t" for a horizontal tab.', ['@type' => $this->t('Concatenation')]),
+      '#size' => 30,
+      '#maxlength' => 64,
+      '#default_value' => addcslashes($configuration['separator'], "\0..\37\\"),
+      '#states' => [
+        'visible' => [
+          'input[name="type"]' => ['value' => 'concat'],
+        ],
+      ],
+    ];
+
     $form['fields'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Contained fields'),
@@ -64,7 +79,7 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
     $properties = $this->getAvailableProperties($index);
     $field_options = [];
     foreach ($properties as $combined_id => $property) {
-      list($datasource_id, $name) = Utility::splitCombinedId($combined_id);
+      [$datasource_id, $name] = Utility::splitCombinedId($combined_id);
       // Do not include the "aggregated field" property.
       if (!$datasource_id && $name == 'aggregated_field') {
         continue;
@@ -95,7 +110,7 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
     $missing_properties = array_diff($configuration['fields'], array_keys($properties));
     if ($missing_properties) {
       foreach ($missing_properties as $combined_id) {
-        list(, $property_path) = Utility::splitCombinedId($combined_id);
+        [, $property_path] = Utility::splitCombinedId($combined_id);
         if (strpos($property_path, ':')) {
           $form['fields'][$combined_id] = [
             '#type' => 'value',
@@ -114,6 +129,7 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
   public function submitConfigurationForm(FieldInterface $field, array &$form, FormStateInterface $form_state) {
     $values = [
       'type' => $form_state->getValue('type'),
+      'separator' => stripcslashes($form_state->getValue('separator')),
       'fields' => array_keys(array_filter($form_state->getValue('fields'))),
     ];
     $field->setConfiguration($values);
@@ -130,7 +146,7 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
 
     $fields = [];
     foreach ($configuration['fields'] as $combined_id) {
-      list($datasource_id, $property_path) = Utility::splitCombinedId($combined_id);
+      [$datasource_id, $property_path] = Utility::splitCombinedId($combined_id);
       $label = $property_path;
       if (isset($available_properties[$combined_id])) {
         $label = $available_properties[$combined_id]->getLabel();
@@ -236,6 +252,13 @@ class AggregatedFieldProperty extends ConfigurablePropertyBase {
     }
 
     return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isList(): bool {
+    return ($this->configuration['type'] ?? 'union') === 'union';
   }
 
 }

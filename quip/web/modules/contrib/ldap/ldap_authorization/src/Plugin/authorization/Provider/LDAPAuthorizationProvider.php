@@ -5,10 +5,10 @@ declare(strict_types = 1);
 namespace Drupal\ldap_authorization\Plugin\authorization\Provider;
 
 use Drupal\authorization\AuthorizationSkipAuthorization;
+use Drupal\authorization\Provider\ProviderPluginBase;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\authorization\Provider\ProviderPluginBase;
 use Drupal\ldap_servers\Helper\ConversionHelper;
 use Drupal\ldap_servers\LdapTransformationTraits;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
@@ -114,9 +114,8 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
     }
 
     $storage = $this->entityTypeManager->getStorage('ldap_server');
-    $query_results = $storage->getQuery()->execute();
     /** @var \Drupal\ldap_servers\Entity\Server[] $servers */
-    $servers = $storage->loadMultiple($query_results);
+    $servers = $storage->loadMultiple();
 
     $form['status'] = [
       '#type' => 'fieldset',

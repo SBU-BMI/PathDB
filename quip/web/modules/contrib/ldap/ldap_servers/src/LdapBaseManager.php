@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\ldap_servers;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\ldap_servers\Entity\Server;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Ldap\Entry;
@@ -42,7 +42,7 @@ abstract class LdapBaseManager {
   /**
    * Module handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -69,14 +69,14 @@ abstract class LdapBaseManager {
    *   Entity type manager.
    * @param \Drupal\ldap_servers\LdapBridgeInterface $ldap_bridge
    *   LDAP Bridge.
-   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Module handler.
    */
   public function __construct(
     LoggerInterface $logger,
     EntityTypeManagerInterface $entity_type_manager,
     LdapBridgeInterface $ldap_bridge,
-    ModuleHandler $module_handler
+    ModuleHandlerInterface $module_handler
   ) {
     $this->logger = $logger;
     $this->entityTypeManager = $entity_type_manager;

@@ -13,10 +13,14 @@ use Drupal\typed_data\Widget\FormWidgetManagerTrait;
  * @group typed_data
  */
 abstract class FormWidgetBrowserTestBase extends BrowserTestBase {
-
   use BrowserTestHelpersTrait;
   use FormWidgetManagerTrait;
   use TypedDataTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -27,16 +31,33 @@ abstract class FormWidgetBrowserTestBase extends BrowserTestBase {
   ];
 
   /**
+   * The form widget object being tested.
+   *
+   * @var \Drupal\typed_data\Widget\FormWidgetInterface
+   */
+  protected $widget;
+
+  /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected function setUp(): void {
+    parent::setUp();
+    $this->drupalLogin($this->createUser([], NULL, TRUE));
+  }
+
+  /**
+   * Create and store a widget of the required type.
+   */
+  protected function createWidget($widgetId): void {
+    $this->widget = $this->getFormWidgetManager()->createInstance($widgetId);
+  }
 
   /**
    * @covers ::isApplicable
    */
-  public function testIsApplicable() {
+  public function testIsApplicable(): void {
     // Force any tests that extend this class to implement their own version
-    // of this function.
+    // of this function and give a helpful explanation if it is missed.
     $this->fail('There is no implementation of the mandatory test function: ' . $this->getName());
   }
 
@@ -44,7 +65,7 @@ abstract class FormWidgetBrowserTestBase extends BrowserTestBase {
    * @covers ::form
    * @covers ::extractFormValues
    */
-  public function testFormEditing() {
+  public function testFormEditing(): void {
     $this->fail('There is no implementation of the mandatory test function: ' . $this->getName());
   }
 
@@ -52,7 +73,7 @@ abstract class FormWidgetBrowserTestBase extends BrowserTestBase {
    * @covers ::form
    * @covers ::flagViolations
    */
-  public function testValidation() {
+  public function testValidation(): void {
     $this->fail('There is no implementation of the mandatory test function: ' . $this->getName());
   }
 

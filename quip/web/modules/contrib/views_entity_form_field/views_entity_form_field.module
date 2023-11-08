@@ -25,7 +25,7 @@ function views_entity_form_field_help($route_name, RouteMatchInterface $route_ma
 }
 
 /**
- * Implements hook_views_data_alter().
+ * Implements hook_views_data_alter(). 
  */
 function views_entity_form_field_views_data_alter(array &$data) {
   /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */

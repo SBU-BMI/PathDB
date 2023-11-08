@@ -238,7 +238,7 @@ class LdapAuthorizationProviderIntegrationTest extends EntityKernelTestBase {
     $formRow = [];
     $formRowState = new FormState();
 
-    $row = $provider->buildRowForm($formRow, $formRowState);
+    $row = $provider->buildRowForm($formRow, $formRowState, 0);
     self::assertEquals('cn=users,ou=groups,dc=hogwarts,dc=edu', $row['query']['#default_value']);
     self::assertEquals(0, $row['is_regex']['#default_value']);
 

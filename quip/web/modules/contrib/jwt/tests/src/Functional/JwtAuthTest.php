@@ -20,7 +20,7 @@ class JwtAuthTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'router_test',
@@ -53,7 +53,7 @@ class JwtAuthTest extends BrowserTestBase {
     $auth = $this->container->get('jwt.authentication.jwt');
     $token = $auth->generateToken();
     $decoded_jwt = $transcoder->decode($token);
-    $this->assertEqual($account->id(), $decoded_jwt->getClaim(['drupal', 'uid']));
+    $this->assertEquals($account->id(), $decoded_jwt->getClaim(['drupal', 'uid']));
     foreach (['jwt_test.11.1', 'jwt_test.11.2'] as $route_name) {
       $url = Url::fromRoute($route_name);
       foreach (['Authorization', 'JWT-Authorization'] as $header_name) {
@@ -63,8 +63,8 @@ class JwtAuthTest extends BrowserTestBase {
         $this->drupalGet($url, [], $headers);
         $this->assertSession()->statusCodeEquals(200);
         $this->assertSession()->pageTextContains($account->getAccountName());
-        self::assertNull($this->drupalGetHeader('X-Drupal-Cache'));
-        self::assertFalse(strpos($this->drupalGetHeader('Cache-Control'), 'public'), 'Cache-Control is not set to public');
+        self::assertNull($this->getSession()->getResponseHeader('X-Drupal-Cache'));
+        self::assertFalse(strpos($this->getSession()->getResponseHeader('Cache-Control'), 'public'), 'Cache-Control is not set to public');
         $account->block()->save();
         $this->drupalGet($url, [], $headers);
         $this->assertSession()->statusCodeEquals(403);
@@ -97,17 +97,17 @@ class JwtAuthTest extends BrowserTestBase {
     // cache if jwt credentials are provided.
     $url = Url::fromRoute('jwt_test.10');
     $this->drupalGet($url);
-    $this->assertEqual($this->drupalGetHeader('X-Drupal-Cache'), 'MISS');
+    $this->assertEquals($this->getSession()->getResponseHeader('X-Drupal-Cache'), 'MISS');
     $this->drupalGet($url);
-    $this->assertEqual($this->drupalGetHeader('X-Drupal-Cache'), 'HIT');
+    $this->assertEquals($this->getSession()->getResponseHeader('X-Drupal-Cache'), 'HIT');
     foreach (['Authorization', 'JWT-Authorization'] as $header_name) {
       $headers = [
         $header_name => 'Bearer ' . $token,
       ];
       $this->drupalGet($url, [], $headers);
       $this->assertSession()->statusCodeEquals(200);
-      $this->assertNull($this->drupalGetHeader('X-Drupal-Cache'));
-      $this->assertFalse(strpos($this->drupalGetHeader('Cache-Control'), 'public'), 'No page cache response when requesting a cached page with jwt credentials.');
+      $this->assertNull($this->getSession()->getResponseHeader('X-Drupal-Cache'));
+      $this->assertFalse(strpos($this->getSession()->getResponseHeader('Cache-Control'), 'public'), 'No page cache response when requesting a cached page with jwt credentials.');
       // This is needed to prevent the Authorization header from the last loop
       // being sent again by the mink session.
       $this->mink->resetSessions();

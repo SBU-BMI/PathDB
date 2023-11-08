@@ -51,7 +51,7 @@ function ldap_authentication_core_override_user_login_authenticate_validate(arra
   if (!empty($form_state->get('uid'))) {
     return;
   }
-
+  /** @var \Drupal\user\Form\UserLoginForm $original_form */
   $original_form = $form_state->getFormObject();
   $original_form->validateAuthentication($form, $form_state);
 }
@@ -93,7 +93,7 @@ function ldap_authentication_user_pass_validate(array &$form, FormStateInterface
 
   /** @var \Drupal\externalauth\Authmap $authmap */
   $authmap = \Drupal::service('externalauth.authmap');
-  $authname = $authmap->get($account->id(), 'ldap_user');
+  $authname = $authmap->get((int) $account->id(), 'ldap_user');
   if ($authname) {
     // It's an LDAP account and hide/disable is on, throw a validation error.
     if ($config->get('ldapUserHelpLinkUrl')) {
@@ -126,7 +126,7 @@ function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $fo
   $config = \Drupal::config('ldap_authentication.settings');
   /** @var \Drupal\externalauth\Authmap $authmap */
   $authmap = \Drupal::service('externalauth.authmap');
-  $authname = $authmap->get($user->id(), 'ldap_user');
+  $authname = $authmap->get((int) $user->id(), 'ldap_user');
   if ($authname) {
     if ($config->get('emailOption') === 'remove') {
       $form['account']['mail']['#access'] = FALSE;
@@ -179,7 +179,7 @@ function ldap_authentication_show_password_field($user = NULL): bool {
   // Hide only if LDAP authenticated and updating password is not allowed.
   /** @var \Drupal\externalauth\Authmap $authmap */
   $authmap = \Drupal::service('externalauth.authmap');
-  $authname = $authmap->get($user->id(), 'ldap_user');
+  $authname = $authmap->get((int) $user->id(), 'ldap_user');
   if ($authname) {
     $password_option = \Drupal::config('ldap_authentication.settings')
       ->get('passwordOption');

@@ -6,7 +6,7 @@ namespace Drupal\ldap_user\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
@@ -29,7 +29,7 @@ class LdapUserAdminForm extends ConfigFormBase implements LdapUserAttributesInte
   /**
    * Module handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -66,7 +66,7 @@ class LdapUserAdminForm extends ConfigFormBase implements LdapUserAttributesInte
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager
   ) {
     parent::__construct($config_factory);
@@ -76,6 +76,7 @@ class LdapUserAdminForm extends ConfigFormBase implements LdapUserAttributesInte
     $storage = $this->entityTypeManager->getStorage('ldap_server');
     $ids = $storage
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition('status', 1)
       ->execute();
     foreach ($storage->loadMultiple($ids) as $sid => $server) {
@@ -229,6 +230,7 @@ class LdapUserAdminForm extends ConfigFormBase implements LdapUserAttributesInte
       $storage = $this->entityTypeManager->getStorage('ldap_query_entity');
       $ids = $storage
         ->getQuery()
+        ->accessCheck(FALSE)
         ->condition('status', 1)
         ->execute();
       $queries = $storage->loadMultiple($ids);

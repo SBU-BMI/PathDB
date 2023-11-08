@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\authorization\Provider;
 
+use Drupal\authorization\Annotation\AuthorizationProvider;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\authorization\Annotation\AuthorizationProvider;
 
 /**
  * Manages search Provider plugins.

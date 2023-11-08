@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Contains file_replace_shell_exec functionality.
+ */
+
+use Drupal\file\FileInterface;
+
+/**
+ * Implements hook_file_replace().
+ */
+function file_replace_shell_exec_file_replace(FileInterface $file) {
+  $command = \Drupal::config('file_replace_shell_exec.settings')->get('command');
+  if (!$command) {
+    return;
+  }
+
+  $shell_exec = shell_exec($command);
+  if ($shell_exec) {
+    \Drupal::logger('file_replace_shell_exec')->info('The command %command was executed with message:' . PHP_EOL . '<pre>%message</pre>', [
+      '%command' => $command,
+      '%message' => $shell_exec,
+    ]);
+  }
+  else {
+    \Drupal::logger('file_replace_shell_exec')->error('The command %command could not be executed.', [
+      '%command' => $command,
+    ]);
+  }
+}

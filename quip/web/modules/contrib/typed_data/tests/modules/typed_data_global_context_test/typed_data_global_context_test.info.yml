@@ -5,7 +5,7 @@ description: 'Provides a simple global context for testing.'
 dependencies:
   - typed_data:typed_data
 
-# Information added by Drupal.org packaging script on 2021-11-02
-version: '8.x-1.0-beta1'
+# Information added by Drupal.org packaging script on 2023-03-21
+version: '8.x-1.0-beta2'
 project: 'typed_data'
-datestamp: 1635839875
+datestamp: 1679429198

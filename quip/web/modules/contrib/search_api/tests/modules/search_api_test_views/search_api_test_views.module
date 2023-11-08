@@ -5,10 +5,13 @@
  * Contains hook implementations for the Search API Views Test module.
  */
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\search_api\Query\QueryInterface;
+use Drupal\search_api\SearchApiException;
 
 /**
  * Implements hook_search_api_query_alter().
@@ -78,4 +81,46 @@ function search_api_test_views_entity_operation(EntityInterface $entity) {
   ];
 
   return $operations;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view_alter() for entity type "node".
+ *
+ * If the "search_api_test_views.testViewsBlockRenderedInCurrentRequest" state
+ * key is set to TRUE, this will display the return value of the
+ * isRenderedInCurrentRequest() method of the test view search block display on
+ * the page.
+ *
+ * @see \Drupal\Tests\search_api\Functional\LayoutBuilderTest::testViewsBlockRenderedInCurrentRequest()
+ */
+function search_api_test_views_node_view_alter(array &$build) {
+  $enabled = \Drupal::state()
+    ->get('search_api_test_views.testViewsBlockRenderedInCurrentRequest');
+  if (!$enabled) {
+    return;
+  }
+  /** @var \Drupal\search_api\Display\DisplayInterface $display */
+  $display = \Drupal::getContainer()->get('plugin.manager.search_api.display')
+    ->createInstance('views_block:search_api_test_view__block_1');
+  $result = $display->isRenderedInCurrentRequest();
+  $string = 'views_block:search_api_test_view__block_1.isRenderedInCurrentRequest(): @result';
+  $build['search_api_test_views']['#markup'] = new FormattableMarkup($string, [
+    '@result' => $result ? 'TRUE' : 'FALSE',
+  ]);
+}
+
+/**
+ * Implements hook_search_api_db_query_alter().
+ *
+ * Throws an exception when the search is executed if the
+ * "search_api_test_views.throw_exception" state key is set.
+ */
+function search_api_test_views_search_api_db_query_alter(SelectInterface &$db_query, QueryInterface $query) {
+  $throw_exception = \Drupal::state()->get('search_api_test_views.throw_exception', FALSE);
+  if ($throw_exception) {
+    if ($query instanceof RefinableCacheableDependencyInterface) {
+      $query->mergeCacheMaxAge(0);
+    }
+    throw new SearchApiException('Test exception thrown from search_api_test_views_search_api_query_alter().');
+  }
 }

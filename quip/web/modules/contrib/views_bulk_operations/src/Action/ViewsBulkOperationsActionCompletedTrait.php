@@ -2,6 +2,8 @@
 
 namespace Drupal\views_bulk_operations\Action;
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -14,7 +16,7 @@ trait ViewsBulkOperationsActionCompletedTrait {
    *
    * @see \Drupal\Core\Messenger\MessengerInterface
    */
-  public static function message($message = NULL, $type = 'status', $repeat = TRUE) {
+  public static function message($message = NULL, $type = 'status', $repeat = TRUE): void {
     \Drupal::messenger()->addMessage($message, $type, $repeat);
   }
 
@@ -23,7 +25,7 @@ trait ViewsBulkOperationsActionCompletedTrait {
    *
    * @see \Drupal\Core\StringTranslation\TranslationInterface:translate()
    */
-  public static function translate($string, array $args = [], array $options = []) {
+  public static function translate($string, array $args = [], array $options = []): TranslatableMarkup {
     return \Drupal::translation()->translate($string, $args, $options);
   }
 
@@ -39,15 +41,25 @@ trait ViewsBulkOperationsActionCompletedTrait {
    */
   public static function finished($success, array $results, array $operations): ?RedirectResponse {
     if ($success) {
-      $operations = array_count_values($results['operations']);
-      $details = [];
-      foreach ($operations as $op => $count) {
-        $details[] = $op . ' (' . $count . ')';
+      foreach ($results['operations'] as $item) {
+        // Default fallback to maintain backwards compatibility:
+        // if api version equals to "1" and type equals to "status",
+        // previous message is displayed, otherwise we display exactly what's
+        // specified in the action.
+        if ($item['type'] === 'status' && $results['api_version'] === '1') {
+          $message = static::translate('Action processing results: @operation (@count).', [
+            '@operation' => $item['message'],
+            '@count' => $item['count'],
+          ]);
+        }
+        else {
+          $message = new FormattableMarkup('@message (@count)', [
+            '@message' => $item['message'],
+            '@count' => $item['count'],
+          ]);
+        }
+        static::message($message, $item['type']);
       }
-      $message = static::translate('Action processing results: @operations.', [
-        '@operations' => implode(', ', $details),
-      ]);
-      static::message($message);
     }
     else {
       $message = static::translate('Finished with an error.');

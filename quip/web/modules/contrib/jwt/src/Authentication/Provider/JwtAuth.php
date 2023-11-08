@@ -71,13 +71,13 @@ class JwtAuth implements AuthenticationProviderInterface {
 
     $validate = new JwtAuthValidateEvent($jwt);
     // Signature is validated, but allow modules to do additional validation.
-    $this->eventDispatcher->dispatch(JwtAuthEvents::VALIDATE, $validate);
+    $this->eventDispatcher->dispatch($validate, JwtAuthEvents::VALIDATE);
     if (!$validate->isValid()) {
       return NULL;
     }
 
     $valid = new JwtAuthValidEvent($jwt);
-    $this->eventDispatcher->dispatch(JwtAuthEvents::VALID, $valid);
+    $this->eventDispatcher->dispatch($valid, JwtAuthEvents::VALID);
     $user = $valid->getUser();
 
     if (!$user) {
@@ -95,7 +95,7 @@ class JwtAuth implements AuthenticationProviderInterface {
    */
   public function generateToken() {
     $event = new JwtAuthGenerateEvent(new JsonWebToken());
-    $this->eventDispatcher->dispatch(JwtAuthEvents::GENERATE, $event);
+    $this->eventDispatcher->dispatch($event, JwtAuthEvents::GENERATE);
     $jwt = $event->getToken();
     return $this->transcoder->encode($jwt);
   }

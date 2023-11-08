@@ -11,7 +11,7 @@ use Drupal\ctools\ConstraintConditionInterface;
  * Adds constraints to the core NodeType condition.
  *
  * @deprecated in ctools:8.x-1.10. Will be removed before ctools:4.1.0.
- *   Use \Drupal\ctools\Plugin\Condition\EntityBundleConstraint instead.
+ *   Use \Drupal\ctools\Plugin\Condition\EntityBundle instead.
  *
  * @see https://www.drupal.org/node/2983299
  */

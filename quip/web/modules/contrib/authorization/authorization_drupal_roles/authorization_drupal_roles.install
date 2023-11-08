@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * @file
- * Contains authorization_drupal_roles.module..
+ * Contains authorization_drupal_roles.module.
  */
+
+declare(strict_types=1);
 
 /**
  * Implements hook_module_preinstall().
@@ -25,5 +25,5 @@ function authorization_drupal_roles_module_preinstall($module) {
  */
 function authorization_drupal_roles_update_8001() {
   authorization_drupal_roles_module_preinstall('authorization_drupal_roles');
-  return t('See README.md for the current behaviour.');
+  return t('See README.md for the current behavior.');
 }

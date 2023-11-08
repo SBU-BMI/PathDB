@@ -25,7 +25,6 @@ class ResponseHeaderListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $entity->label();
     $row['id'] = $entity->id();
-
     return $row + parent::buildRow($entity);
   }
 

@@ -24,7 +24,7 @@ class TermsParseModeTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->plugin = new Terms([], '', []);
@@ -134,6 +134,16 @@ class TermsParseModeTest extends UnitTestCase {
         ],
       ],
     ];
+  }
+
+  /**
+   * Tests that invalid UTF-8 in the input string is handled correctly.
+   */
+  public function testInvalidInput(): void {
+    $parsed = $this->plugin->parseInput("\xc3\x28");
+    $this->assertEquals([
+      '#conjunction' => 'AND',
+    ], $parsed);
   }
 
 }

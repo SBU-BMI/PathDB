@@ -5,11 +5,17 @@ namespace Drupal\typed_data\Context;
 use Drupal\Component\Annotation\Doctrine\SimpleAnnotationReader;
 use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery as CoreAnnotatedClassDiscovery;
 
+@trigger_error('\Drupal\typed_data\Context\AnnotatedClassDiscovery is deprecated in typed_data:8.x-1.0 and is removed from typed_data:2.0.0. Use \Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery instead. See https://www.drupal.org/project/typed_data/issues/3169307', E_USER_DEPRECATED);
+
 /**
  * Extends the annotation class discovery for usage with Typed Data context.
  *
  * We modify the annotations classes for ContextDefinition and for Condition.
  * This class makes sure that our plugin managers apply these.
+ *
+ * @deprecated in typed_data:8.x-1.0 and is removed from typed_data:2.0.0. Use \Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery instead.
+ *
+ * @see https://www.drupal.org/project/typed_data/issues/3169307
  */
 class AnnotatedClassDiscovery extends CoreAnnotatedClassDiscovery {
 

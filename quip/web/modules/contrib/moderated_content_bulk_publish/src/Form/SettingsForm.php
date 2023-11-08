@@ -27,6 +27,12 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('moderated_content_bulk_publish.settings');
 
+    $form['disable_toolbar_language_switcher'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disable toolbar language switcher'),
+      '#default_value' => $config->get('disable_toolbar_language_switcher') ?? false,
+      '#description' => $this->t('Hide the language switcher in the toolbar, for sites that have more than one language.'),
+    ];
     $form['enable_dialog_node_edit_form'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable dialog on node edit form'),
@@ -48,6 +54,7 @@ class SettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->config('moderated_content_bulk_publish.settings')
+      ->set('disable_toolbar_language_switcher', $form_state->getValue('disable_toolbar_language_switcher'))
       ->set('enable_dialog_node_edit_form', $form_state->getValue('enable_dialog_node_edit_form'))
       ->set('enable_dialog_admin_content', $form_state->getValue('enable_dialog_admin_content'))
       ->save();

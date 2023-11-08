@@ -1,12 +1,14 @@
 <?php
+
 /**
  * @file
  * Contains install and update functions for Bulk Update Fields.
  */
 
- /**
+/**
  * Rename the action id to match the plugin.
- * Needed for Contrib VBO compatibility
+ *
+ * Needed for Contrib VBO compatibility.
  */
 function bulk_update_fields_update_8001(&$sandbox) {
   $actions_storage = \Drupal::entityTypeManager()->getStorage('action');

@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\typed_data\Kernel;
 
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Tests that data fetcher autocomplete function works correctly.
@@ -101,7 +101,7 @@ class DataFetcherAutocompleteTest extends KernelTestBase {
    *
    * @covers ::autocompletePropertyPath
    */
-  public function testAutocomplete() {
+  public function testAutocomplete(): void {
     $definitions = ['node' => $this->nodeDefinition];
     $results = $this->dataFetcher
       ->autocompletePropertyPath($definitions, 'n');
@@ -123,7 +123,7 @@ class DataFetcherAutocompleteTest extends KernelTestBase {
    *
    * @covers ::autocompletePropertyPath
    */
-  public function testGlobalAutocomplete() {
+  public function testGlobalAutocomplete(): void {
     $definitions = ['@node.node_route_context:node' => $this->globalNodeDefinition];
     $results = $this->dataFetcher
       ->autocompletePropertyPath($definitions, '@n');
@@ -145,7 +145,7 @@ class DataFetcherAutocompleteTest extends KernelTestBase {
    *
    * @covers ::autocompletePropertyPath
    */
-  public function testNodeAutocomplete() {
+  public function testNodeAutocomplete(): void {
     $definitions = ['node' => $this->nodeDefinition];
 
     // Tests that "node.uid.en" returns the suggestion "node.uid.entity".
@@ -407,7 +407,7 @@ class DataFetcherAutocompleteTest extends KernelTestBase {
    *
    * @covers ::autocompletePropertyPath
    */
-  public function testGlobalNodeAutocomplete() {
+  public function testGlobalNodeAutocomplete(): void {
     $definitions = ['@node.node_route_context:node' => $this->globalNodeDefinition];
 
     // Tests that "node.uid.en" returns the suggestion "node.uid.entity".
@@ -629,7 +629,7 @@ class DataFetcherAutocompleteTest extends KernelTestBase {
    *
    * @covers ::autocompletePropertyPath
    */
-  public function testListAutocomplete() {
+  public function testListAutocomplete(): void {
     $list_definition = $this->typedDataManager->createListDataDefinition('integer');
     $definitions = ['list' => $list_definition];
 

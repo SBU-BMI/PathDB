@@ -4,17 +4,17 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\ldap_user\Unit;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\ldap_authentication\Controller\LoginValidatorBase;
 use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
 use Drupal\ldap_user\Plugin\Validation\Constraint\LdapProtectedUserFieldConstraint;
 use Drupal\ldap_user\Plugin\Validation\Constraint\LdapProtectedUserFieldConstraintValidator;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\user\UserInterface;
 use Drupal\user\UserStorageInterface;
-use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Extended from core tests.

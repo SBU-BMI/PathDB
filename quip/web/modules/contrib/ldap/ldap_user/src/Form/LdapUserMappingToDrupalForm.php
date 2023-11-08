@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\ldap_user\Form;
 
-use Drupal\ldap_user\FieldProvider;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_servers\Mapping;
+use Drupal\ldap_user\FieldProvider;
 
 /**
  * Provides the form to configure user configuration and field mapping.
@@ -38,7 +38,7 @@ class LdapUserMappingToDrupalForm extends LdapUserMappingBaseForm {
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager,
     FieldProvider $field_provider
   ) {

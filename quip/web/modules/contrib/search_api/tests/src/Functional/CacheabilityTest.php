@@ -29,7 +29,7 @@ class CacheabilityTest extends SearchApiBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Set up example structure and content and populate the test index with
@@ -53,7 +53,7 @@ class CacheabilityTest extends SearchApiBrowserTestBase {
     $this->drupalGet('search-api-test');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseHeaderEquals('x-drupal-dynamic-cache', 'UNCACHEABLE');
-    $this->assertStringContainsString('no-cache', $this->drupalGetHeader('cache-control'));
+    $this->assertSession()->responseHeaderContains('cache-control', 'no-cache');
 
     // Verify that the search results are displayed.
     $this->assertSession()->pageTextContains('foo test');
@@ -139,6 +139,22 @@ class CacheabilityTest extends SearchApiBrowserTestBase {
     // Check that the deleted entity is now no longer shown.
     $this->drupalGet('search-api-test-search-view-caching-tag');
     $this->assertSession()->pageTextContains('Displaying 5 search results');
+  }
+
+  /**
+   * Tests that exceptions during searches are handled correctly.
+   */
+  public function testExceptionHandling(): void {
+    $state = \Drupal::state();
+    $state->set('search_api_test_views.throw_exception', TRUE);
+    $this->drupalGet('search-api-test-search-view-caching-tag');
+    $this->assertSession()->pageTextContains('Test exception thrown from search_api_test_views_search_api_query_alter().');
+
+    $state->set('search_api_test_views.throw_exception', FALSE);
+    $this->drupalGet('search-api-test-search-view-caching-tag');
+    $this->assertSession()->pageTextNotContains('Test exception thrown from search_api_test_views_search_api_query_alter().');
+    $this->assertSession()->pageTextContains('Displaying 5 search results');
+    $this->assertSession()->pageTextContains('foo test');
   }
 
 }

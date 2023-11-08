@@ -115,7 +115,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::scan
    */
-  public function testScanningForPlaceholders() {
+  public function testScanningForPlaceholders(): void {
     $text = 'token {{example.foo}} and {{example.foo.bar}} just as {{example.foo|default(bar)}} and {{ example.whitespace }}';
     $placeholders = $this->placeholderResolver->scan($text);
     $this->assertEquals([
@@ -174,7 +174,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::scan
    */
-  public function testEmptyPlaceholders() {
+  public function testEmptyPlaceholders(): void {
     $text = 'text {{ }} text';
     $placeholders = $this->placeholderResolver->scan($text);
     $this->assertEquals([
@@ -187,7 +187,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::scan
    */
-  public function testNoPlaceholders() {
+  public function testNoPlaceholders(): void {
     $text = 'test text does not have any placeholders';
     $placeholders = $this->placeholderResolver->scan($text);
     $this->assertEquals([], $placeholders);
@@ -196,7 +196,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::scan
    */
-  public function testMalformedPlaceholders() {
+  public function testMalformedPlaceholders(): void {
     $text = "text {{ node. title }} text";
     $placeholders = $this->placeholderResolver->scan($text);
     $this->assertEquals([], $placeholders);
@@ -221,7 +221,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::scan
    */
-  public function testFilterOnly() {
+  public function testFilterOnly(): void {
     $text = "text {{ |filter }} text";
     $placeholders = $this->placeholderResolver->scan($text);
     $this->assertEquals([
@@ -234,7 +234,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::resolvePlaceholders
    */
-  public function testResolvingPlaceholders() {
+  public function testResolvingPlaceholders(): void {
     // Test resolving multiple tokens.
     $text = 'test {{node.title}} and {{node.title.value}}';
     $result = $this->placeholderResolver->resolvePlaceholders($text, ['node' => $this->node->getTypedData()]);
@@ -280,7 +280,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testReplacePlaceholders() {
+  public function testReplacePlaceholders(): void {
     $text = 'test {{node.title}} and {{node.title.value}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test test and test', $result);
@@ -289,7 +289,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testPlaceholdersAcrossReferences() {
+  public function testPlaceholdersAcrossReferences(): void {
     $user = $this->entityTypeManager->getStorage('user')
       ->create([
         'name' => 'test',
@@ -304,7 +304,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testPlaceholdersWithMissingData() {
+  public function testPlaceholdersWithMissingData(): void {
     $text = 'test {{node.title.1.value}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()], NULL, []);
     $this->assertEquals('test {{node.title.1.value}}', $result);
@@ -317,7 +317,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testStringEncoding() {
+  public function testStringEncoding(): void {
     $this->node->title->value = '<b>XSS</b>';
     $text = 'test {{node.title}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
@@ -327,7 +327,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testIntegerPlaceholder() {
+  public function testIntegerPlaceholder(): void {
     $this->node->field_integer->value = 3;
     $text = 'test {{node.field_integer.0.value}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
@@ -337,7 +337,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testListPlaceholder() {
+  public function testListPlaceholder(): void {
     $this->node->field_integer = [1, 2];
     $text = 'test {{node.field_integer}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
@@ -347,7 +347,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testApplyingFilters() {
+  public function testApplyingFilters(): void {
     // Test filter expression.
     $this->node->field_integer = [1, 2, NULL];
     $this->node->title->value = NULL;
@@ -384,7 +384,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testBubbleableMetadata() {
+  public function testBubbleableMetadata(): void {
     // Make sure the bubbleable metadata added by the fetcher is properly passed
     // though.
     $bubbleable_metadata = new BubbleableMetadata();
@@ -404,7 +404,7 @@ class PlaceholderResolverTest extends KernelTestBase {
   /**
    * @covers ::replacePlaceHolders
    */
-  public function testGlobalContextVariable() {
+  public function testGlobalContextVariable(): void {
     $text = 'test {{ @typed_data_global_context_test.simple_test_context:dragons }}';
     $context = $this->simpleTestContext->getRuntimeContexts(['dragons']);
     $result = $this->placeholderResolver->replacePlaceHolders($text, [

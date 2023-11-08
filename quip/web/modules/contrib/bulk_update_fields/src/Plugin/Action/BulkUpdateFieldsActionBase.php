@@ -3,6 +3,7 @@
 namespace Drupal\bulk_update_fields\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,14 +24,14 @@ class BulkUpdateFieldsActionBase extends ActionBase implements ContainerFactoryP
   /**
    * The plugin_id.
    *
-   * @var pluginId
+   * @var string
    */
   protected $pluginId;
 
   /**
    * The plugin implementation definition.
    *
-   * @var pluginDefinition
+   * @var array
    */
   protected $pluginDefinition;
 
@@ -44,28 +45,28 @@ class BulkUpdateFieldsActionBase extends ActionBase implements ContainerFactoryP
    * Plugin configuration is optional, so plugin implementations must provide
    * their own setters and getters.
    *
-   * @var configuration
+   * @var array
    */
   protected $configuration;
 
   /**
    * The tempstore factory.
    *
-   * @var tempStoreFactory
+   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
    */
   protected $tempStoreFactory;
 
   /**
    * Session.
    *
-   * @var sessionManager
+   * @var \Drupal\Core\Session\SessionManagerInterface
    */
   private $sessionManager;
 
   /**
    * User.
    *
-   * @var currentUser
+   * @var \Drupal\Core\Session\AccountInterface
    */
   private $currentUser;
 
@@ -78,7 +79,7 @@ class BulkUpdateFieldsActionBase extends ActionBase implements ContainerFactoryP
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    * @param \Drupal\Core\Session\SessionManagerInterface $session_manager
    *   The session.
@@ -111,7 +112,7 @@ class BulkUpdateFieldsActionBase extends ActionBase implements ContainerFactoryP
   public function executeMultiple(array $entities) {
     $ids = [];
     foreach ($entities as $entity) {
-      $ids[$entity->id()] = $entity;
+      $ids[$entity->id() .':' . $entity->language()->getId()] = $entity;
     }
     $this->tempStoreFactory->get('bulk_update_fields_ids')
       ->set($this->currentUser->id(), $ids);

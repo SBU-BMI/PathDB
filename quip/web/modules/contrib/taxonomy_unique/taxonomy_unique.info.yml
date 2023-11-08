@@ -1,12 +1,11 @@
 name: Taxonomy Unique
 type: module
 description: 'Checks for duplicate occurrences of term names.'
-core: 8.x
 dependencies:
   - drupal:taxonomy
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8.9 || ^9 || ^10
 
-# Information added by Drupal.org packaging script on 2020-06-02
-version: '8.x-2.3'
+# Information added by Drupal.org packaging script on 2023-02-09
+version: '8.x-2.5'
 project: 'taxonomy_unique'
-datestamp: 1591087099
+datestamp: 1675954514

@@ -53,7 +53,7 @@ class LdapProtectedUserFieldConstraintValidator extends ProtectedUserFieldConstr
 
     /** @var \Drupal\user\UserInterface $account */
     $account = $items->getEntity();
-    if (!isset($account) || !empty($account->_skipProtectedUserFieldConstraint)) {
+    if (is_null($account) || !empty($account->_skipProtectedUserFieldConstraint)) {
       // Looks like we are validating a field not being part of a user, or the
       // constraint should be skipped, so do nothing.
       return;

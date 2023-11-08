@@ -42,7 +42,7 @@ class TestRouteController extends ControllerBase {
    *
    * Used in views page titles.
    *
-   * @return \Drupal\Component\Render\Markup
+   * @return string|\Drupal\Component\Render\MarkupInterface
    *   The page title.
    */
   public function pageTitleMarkup() {

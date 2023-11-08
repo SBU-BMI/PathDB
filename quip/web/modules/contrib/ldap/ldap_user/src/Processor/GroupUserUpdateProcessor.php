@@ -6,7 +6,7 @@ namespace Drupal\ldap_user\Processor;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\externalauth\Authmap;
 use Drupal\ldap_query\Controller\QueryController;
@@ -51,7 +51,7 @@ class GroupUserUpdateProcessor {
   /**
    * Module handler.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -108,7 +108,7 @@ class GroupUserUpdateProcessor {
    *   Config factory.
    * @param \Drupal\Core\State\StateInterface $state
    *   State.
-   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   Module handler.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity type manager.
@@ -124,7 +124,7 @@ class GroupUserUpdateProcessor {
     LdapDetailLog $detail_log,
     ConfigFactory $config,
     StateInterface $state,
-    ModuleHandler $module_handler,
+    ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager,
     Authmap $external_auth,
     QueryController $query_controller,
@@ -201,7 +201,7 @@ class GroupUserUpdateProcessor {
     if ($this->moduleHandler->moduleExists('ldap_authorization')) {
       // We are not injecting this service properly to avoid forcing this
       // dependency on authorization.
-      /** @var \Drupal\authorization\AuthorizationController $authorization_manager */
+      /** @var \Drupal\authorization\AuthorizationServiceInterface $authorization_manager */
       // phpcs:ignore
       $authorization_manager = \Drupal::service('authorization.manager');
       $authorization_manager->setUser($user);
@@ -294,6 +294,13 @@ class GroupUserUpdateProcessor {
         );
         return;
       }
+    }
+    if (!$uid) {
+      $this->logger->error(
+        'Periodic update: Error creating user @name',
+        ['@name' => $username]
+      );
+      return;
     }
 
     // User exists and is mapped in authmap.

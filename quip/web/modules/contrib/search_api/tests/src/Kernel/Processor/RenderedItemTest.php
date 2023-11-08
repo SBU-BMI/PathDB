@@ -17,6 +17,7 @@ use Drupal\node\NodeInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Plugin\search_api\data_type\value\TextValueInterface;
 use Drupal\search_api\Utility\Utility;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 
@@ -28,6 +29,8 @@ use Drupal\user\UserInterface;
  * @see \Drupal\search_api\Plugin\search_api\processor\RenderedItem
  */
 class RenderedItemTest extends ProcessorTestBase {
+
+  use UserCreationTrait;
 
   /**
    * List of nodes which are published.
@@ -55,7 +58,7 @@ class RenderedItemTest extends ProcessorTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp($processor = NULL) {
+  public function setUp($processor = NULL): void {
     parent::setUp('rendered_item');
 
     // Enable the optional "path_alias" entity type as well to make sure the
@@ -161,19 +164,23 @@ class RenderedItemTest extends ProcessorTestBase {
       ->get('search_api.fields_helper')
       ->createField($this->index, 'rendered_item', $field_info);
     $this->index->addField($field);
+    $field_1 = \Drupal::getContainer()
+      ->get('search_api.fields_helper')
+      ->createField($this->index, 'rendered_item_1', $field_info);
+    $this->index->addField($field_1);
     $datasources = \Drupal::getContainer()
       ->get('search_api.plugin_helper')
       ->createDatasourcePlugins($this->index);
     $this->index->setDatasources($datasources);
     $this->index->save();
 
-    // Enable the classy and stable themes as the tests rely on markup from
-    // that. Set stable as the active theme, but make classy the default. The
-    // processor should switch to classy to perform the rendering.
-    \Drupal::service('theme_installer')->install(['classy']);
-    \Drupal::service('theme_installer')->install(['stable']);
-    \Drupal::configFactory()->getEditable('system.theme')->set('default', 'classy')->save();
-    \Drupal::theme()->setActiveTheme(\Drupal::service('theme.initialization')->initTheme('stable'));
+    // Enable the Claro and Stable 9 themes as the tests rely on markup from
+    // that. Set Claro as the active theme, but make Stable 9 the default. The
+    // processor should switch to Stable 9 to perform the rendering.
+    \Drupal::service('theme_installer')->install(['stable9']);
+    \Drupal::service('theme_installer')->install(['claro']);
+    \Drupal::configFactory()->getEditable('system.theme')->set('default', 'stable9')->save();
+    \Drupal::theme()->setActiveTheme(\Drupal::service('theme.initialization')->initTheme('claro'));
   }
 
   /**
@@ -227,9 +234,14 @@ class RenderedItemTest extends ProcessorTestBase {
     $items = $this->generateItems($items);
 
     // Add the processor's field values to the items.
+    $admin_account = $this->setUpCurrentUser([], [], TRUE);
     foreach ($items as $item) {
+      $this->assertEquals($admin_account->id(), \Drupal::currentUser()->id());
       $this->processor->addFieldValues($item);
+      $this->assertEquals($admin_account->id(), \Drupal::currentUser()->id());
     }
+    \Drupal::currentUser()->setAccount(User::load(0));
+    $this->assertEquals(0, \Drupal::currentUser()->id());
 
     foreach ($items as $key => $item) {
       list($datasource_id, $entity_id) = Utility::splitCombinedId($key);
@@ -242,7 +254,7 @@ class RenderedItemTest extends ProcessorTestBase {
       // Test that the value is properly wrapped in a
       // \Drupal\search_api\Plugin\search_api\data_type\value\TextValueInterface
       // object, which contains a string (not, for example, some markup object).
-      $this->assertInstanceOf('Drupal\search_api\Plugin\search_api\data_type\value\TextValueInterface', $values[0], "$type item $entity_id rendered value is properly wrapped in a text value object.");
+      $this->assertInstanceOf(TextValueInterface::class, $values[0], "$type item $entity_id rendered value is properly wrapped in a text value object.");
       $field_value = $values[0]->getText();
       $this->assertIsString($field_value, "$type item $entity_id rendered value is a string.");
       $this->assertEquals(1, count($values), "$type item $entity_id rendered value is a single value.");
@@ -276,23 +288,26 @@ class RenderedItemTest extends ProcessorTestBase {
    */
   protected function checkRenderedNode(NodeInterface $node, $field_value) {
     // These tests rely on the template not changing. However, if we'd only
-    // check whether the field values themselves are included, there could
-    // easier be false positives. For example, the title text was present even
+    // check whether the field values themselves are included, there could more
+    // easily be false positives. For example, the title text was present even
     // when the processor was broken, because the schema metadata was also
     // adding it to the output.
     $nid = $node->id();
-    $full_view = $node->bundle() === 'page';
-    $view_mode = $full_view ? 'full' : 'teaser';
-    $this->assertStringContainsString("view-mode-$view_mode", $field_value, 'Node item ' . $nid . " rendered in view-mode \"$view_mode\".");
-    $this->assertStringContainsString('field--name-title', $field_value, 'Node item ' . $nid . ' has a rendered title field.');
-    $this->assertStringContainsString('>' . $node->label() . '<', $field_value, 'Node item ' . $nid . ' has a rendered title inside HTML-Tags.');
-    if ($full_view) {
-      $body_value = $node->get('body')->getValue()[0]['value'] . '<';
+    // The role="article" ARIA attribute was removed in Drupal 10.1. To be able
+    // to run this test both against earlier and later versions of Drupal Core,
+    // we need to use a regular expression.
+    // @todo Change to check only for "<article>" once we depend on Drupal 10.1.
+    $this->assertMatchesRegularExpression('#<article(?: role="article")?>#', $field_value, 'Node item ' . $nid . ' not rendered in theme Stable.');
+    if ($node->bundle() === 'page') {
+      $this->assertStringNotContainsString('>Read more<', $field_value, 'Node item ' . $nid . " rendered in view-mode \"full\".");
+      $this->assertStringContainsString('>' . $node->get('body')->getValue()[0]['value'] . '<', $field_value, 'Node item ' . $nid . ' does not have rendered body inside HTML-Tags.');
     }
     else {
-      $body_value = $node->get('body')->getValue()[0]['summary'] . '<';
+      $this->assertStringContainsString('>Read more<', $field_value, 'Node item ' . $nid . " rendered in view-mode \"teaser\".");
+      $this->assertStringContainsString('>' . $node->get('body')->getValue()[0]['summary'] . '<', $field_value, 'Node item ' . $nid . ' does not have rendered summary inside HTML-Tags.');
     }
-    $this->assertStringContainsString('>' . $body_value, $field_value, 'Node item ' . $nid . ' has rendered content inside HTML-Tags.');
+    $this->assertStringContainsString('<h2>', $field_value, 'Node item ' . $nid . ' does not have a rendered title field.');
+    $this->assertStringContainsString('>' . $node->label() . '<', $field_value, 'Node item ' . $nid . ' does not have a rendered title inside HTML-Tags.');
   }
 
   /**
@@ -353,7 +368,7 @@ class RenderedItemTest extends ProcessorTestBase {
     }
 
     // Verify that no field values were added.
-    foreach ($items as $key => $item) {
+    foreach ($items as $item) {
       $rendered_item = $item->getField('rendered_item');
       $this->assertEmpty($rendered_item->getValues(), 'No rendered_item field value added when disabled for content type.');
     }

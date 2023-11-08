@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * @file
  * Contains authorization_drupal_roles.module.
  */
+
+declare(strict_types=1);
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;

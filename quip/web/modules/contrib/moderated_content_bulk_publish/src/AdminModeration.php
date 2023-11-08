@@ -41,7 +41,7 @@ class AdminModeration
       foreach ($allLanguages as $langcode => $languageName) {
         if ($this->entity->hasTranslation($langcode)) {
           \Drupal::logger('moderated_content_bulk_publish')->notice(
-            utf8_encode("Unpublish $langcode for " . $this->id . " in moderated_content_bulk_publish")
+            mb_convert_encoding("Unpublish $langcode for " . $this->id . " in moderated_content_bulk_publish", 'UTF-8')
           );
           $this->entity = $this->entity->getTranslation($langcode);
           $this->entity->set('moderation_state', $archived_state);
@@ -66,7 +66,7 @@ class AdminModeration
           }
           else {
             \Drupal::logger('moderated_content_bulk_publish')->notice(
-              utf8_encode("Bulk unpublish not permitted, check permissions")
+              mb_convert_encoding("Bulk unpublish not permitted, check permissions", 'UTF-8')
             );
           }
         }
@@ -102,7 +102,7 @@ class AdminModeration
           }
           else {
             \Drupal::logger('moderated_content_bulk_publish')->notice(
-              utf8_encode("Bulk unpublish not permitted, check permissions.")
+              mb_convert_encoding("Bulk unpublish not permitted, check permissions", 'UTF-8')
             );
           }
         }
@@ -127,9 +127,9 @@ class AdminModeration
       foreach ($allLanguages as $langcode => $languageName) {
         if ($this->entity->hasTranslation($langcode)) {
           \Drupal::logger('moderated_content_bulk_publish')->notice(
-            utf8_encode("Publish latest revision $langcode for " . $this->id . " in moderated_content_bulk_publish")
+            mb_convert_encoding("Publish latest revision $langcode for " . $this->id . " in moderated_content_bulk_publish", 'UTF-8')
           );
-          $latest_revision = self::_latest_revision($this->entity->id(), $vid, $langcode);
+          $latest_revision = self::_latest_revision($this->entity, $this->entity->id(), $vid, $langcode);
           if (!$latest_revision === FALSE) {
             $this->entity = $latest_revision;
           }
@@ -176,7 +176,7 @@ class AdminModeration
           }
           else {
             \Drupal::logger('moderated_content_bulk_publish')->notice(
-              utf8_encode("Bulk publish not permitted, check permissions.")
+              mb_convert_encoding("Bulk publish not permitted, check permissions.", 'UTF-8')
             );
           }
         }
@@ -187,16 +187,17 @@ class AdminModeration
     /**
      * Get the latest revision.
      */
-    public static function _latest_revision($nid, &$vid, $langcode = NULL) {
+    public static function _latest_revision($entity, $entityId, &$vid, $langcode = NULL) {
       // Can be removed once we move to Drupal >= 8.6.0 , currently on 8.5.0.
       // See change record here: https://www.drupal.org/node/2942013 .
       $lang = $langcode;
       if (!isset($lang)) {
         $lang = \Drupal::languageManager()->getCurrentLanguage()->getId();
       }
-      $latestRevisionResult = \Drupal::entityTypeManager()->getStorage('node')->getQuery()
+      $latestRevisionResult = \Drupal::entityTypeManager()->getStorage($entity->getEntityType()->id())->getQuery()
         ->latestRevision()
-        ->condition('nid', $nid, '=')
+        ->condition($entity->getEntityType()->getKey('id'), $entityId, '=')
+        ->accessCheck(TRUE)
         ->execute();
       if (count($latestRevisionResult)) {
         $node_revision_id = key($latestRevisionResult);
@@ -205,7 +206,7 @@ class AdminModeration
           return FALSE;
         }
         $vid = $node_revision_id;
-        $latestRevision = \Drupal::entityTypeManager()->getStorage('node')->loadRevision($node_revision_id);
+        $latestRevision = \Drupal::entityTypeManager()->getStorage($entity->getEntityType()->id())->loadRevision($node_revision_id);
         if ($latestRevision->language()->getId() != $lang && $latestRevision->hasTranslation($lang)) {
           $latestRevision = $latestRevision->getTranslation($lang);
         }
@@ -245,7 +246,7 @@ class AdminModeration
             return NULL;
           }
           \Drupal::logger('moderated_content_bulk_publish')->notice(
-            utf8_encode("Archive $langcode for " . $this->id . " in moderated_content_bulk_publish")
+            mb_convert_encoding("Archive $langcode for " . $this->id . " in moderated_content_bulk_publish", 'UTF-8')
           );
           $this->entity = $this->entity->getTranslation($langcode);
           $this->entity->set('moderation_state', $archived_state);
@@ -270,7 +271,7 @@ class AdminModeration
           }
           else {
             \Drupal::logger('moderated_content_bulk_publish')->notice(
-              utf8_encode("Bulk archive not permitted, check permissions")
+              mb_convert_encoding("Bulk archive not permitted, check permissions", 'UTF-8')
             );
           }
         }
