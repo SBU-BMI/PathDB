@@ -1,13 +1,16 @@
-FROM centos:8
-MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
+FROM centos:7
+#MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 # QuIP - PathDB Docker Container
 #
 ### update OS
+RUN sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
+RUN sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
+RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
+
 RUN yum update -y && yum clean all
 RUN yum -y install wget which zip unzip bind-utils epel-release
-RUN rpm -Uvh http://mirror.usi.edu/pub/remi/enterprise/remi-release-7.rpm
-#RUN yum-config-manager --disable remi-php73
+RUN rpm -Uvh https://mirror.digitalnova.at/remi/enterprise/remi-release-7.rpm
 RUN yum-config-manager --enable remi-php81
 RUN curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | bash
 RUN yum -y install httpd telnet openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip php-ldap
