@@ -1,4 +1,4 @@
-FROM centos:7
+FROM centos:8
 MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 # QuIP - PathDB Docker Container
