@@ -53,6 +53,15 @@ chown apache:apache /data/pathdb
 chown -R apache:apache /data/pathdb/config
 chown apache:apache /data/pathdb/files
 chown apache:apache /data/pathdb/wsi
+
+# validate and start php-fpm
+if [ ! -d /run/php-fpm ]; then
+  mkdir -p /run/php-fpm
+fi
+chown -R apache:apache /run/php-fpm
+chmod -R 755 /run/php-fpm
+php-fpm -D
+
 #create logs directory if missing
 if [ ! -d /data/pathdb/logs ]; then
         mkdir -p /data/pathdb/logs

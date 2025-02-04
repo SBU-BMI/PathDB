@@ -1,26 +1,20 @@
-FROM rockylinux:9
+FROM centos:7
 #MAINTAINER Erich Bremer "erich.bremer@stonybrook.edu"
 #
 # QuIP - PathDB Docker Container
 #
 ### update OS
+RUN sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
+RUN sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
+RUN sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
 
-RUN dnf -y update && dnf clean all
-RUN yum -y install wget which zip unzip bind-utils
-RUN dnf -y install epel-release && dnf clean all
-RUN dnf module reset php -y && \
-    dnf module enable php:8.1 -y && \
-    dnf -y install php php-cli php-common && \
-    dnf clean all
-COPY mariadb.repo /etc/yum.repos.d/mariadb.repo
-RUN dnf install -y epel-release
-RUN dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm
-RUN dnf module reset php -y
-RUN dnf module enable php:remi-8.1 -y
-RUN dnf install -y php php-fpm php-mysqlnd php-pecl-uploadprogress httpd
-RUN dnf install -y httpd telnet openssl mod_ssl php php-opcache php-xml php-mcrypt php-gd php-devel php-mysqlnd php-intl php-mbstring php-pecl-zip php-ldap
-RUN yum install -y MariaDB-server MariaDB-client git
-RUN dnf install -y procps-ng sudo
+RUN yum update -y && yum clean all
+RUN yum -y install wget which zip unzip bind-utils epel-release
+RUN rpm -Uvh https://mirror.digitalnova.at/remi/enterprise/remi-release-7.rpm
+RUN yum-config-manager --enable remi-php81
+RUN curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | bash
+RUN yum -y install httpd telnet openssl mod_ssl mod_php php-opcache php-xml php-mcrypt php-gd php-devel php-mysql php-intl php-mbstring php-uploadprogress php-pecl-zip php-ldap
+RUN yum -y install mariadb-server mariadb-client git
 RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
 RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
 
@@ -80,4 +74,3 @@ RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
 RUN yum update -y && yum clean all
 CMD ["sh", "/root/run.sh"]
-
