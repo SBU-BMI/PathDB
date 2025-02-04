@@ -6,6 +6,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Drupal\taxonomy_unique\TaxonomyUniqueConstants;
 
 /**
  * Taxonomy unique constraint validator.
@@ -42,12 +43,17 @@ class TaxonomyUniqueValidator extends ConstraintValidator implements ContainerIn
   public function validate($value, Constraint $constraint) {
     /** @var \Drupal\taxonomy\TermInterface $term */
     $term = $value->getEntity();
-    if (\Drupal::config('taxonomy_unique.settings')->get($term->bundle()) && !$this->taxonomyUniqueManager->isUnique($term)) {
-      $message = \Drupal::config('taxonomy_unique.settings')->get($term->bundle() . '_message');
+    /** @var \Drupal\taxonomy\VocabularyInterface $vocabulary */
+    $vocabulary = $this
+      ->entityTypeManager
+      ->getStorage('taxonomy_vocabulary')
+      ->load($term->bundle());
+
+    if ($vocabulary->getThirdPartySetting('taxonomy_unique', 'enabled') && !$this->taxonomyUniqueManager->isUnique($term)) {
+      $message = $vocabulary->getThirdPartySetting('taxonomy_unique', 'message', TaxonomyUniqueConstants::NOT_UNIQUE_DEFAULT_ERROR_MESSAGE);
       if ($message != '') {
         $constraint->setErrorMessage($message);
       }
-      $vocabulary = $this->entityTypeManager->getStorage('taxonomy_vocabulary')->load($term->bundle());
       $this->context->addViolation($constraint->notUnique, ['%term' => $term->getName(), '%vocabulary' => $vocabulary->label()]);
     }
   }

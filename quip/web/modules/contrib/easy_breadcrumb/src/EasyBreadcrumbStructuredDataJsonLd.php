@@ -4,11 +4,12 @@ namespace Drupal\easy_breadcrumb;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class EasyBreadcrumbStructuredDataJsonLd.
+ * Generates structured data in JSON-LD format for Easy Breadcrumb.
  *
  * @package Drupal\easy_breadcrumb
  */
@@ -36,6 +37,13 @@ class EasyBreadcrumbStructuredDataJsonLd implements ContainerInjectionInterface 
   protected $routeMatch;
 
   /**
+   * The module handler to invoke the alter hook.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * EasyBreadcrumbStructuredDataJsonLd constructor.
    *
    * @param \Drupal\easy_breadcrumb\EasyBreadcrumbBuilder $easy_breadcrumb_builder
@@ -44,21 +52,25 @@ class EasyBreadcrumbStructuredDataJsonLd implements ContainerInjectionInterface 
    *   The config factory.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler;.
    */
-  public function __construct(EasyBreadcrumbBuilder $easy_breadcrumb_builder, ConfigFactoryInterface $config_factory, RouteMatchInterface $route_match) {
+  public function __construct(EasyBreadcrumbBuilder $easy_breadcrumb_builder, ConfigFactoryInterface $config_factory, RouteMatchInterface $route_match, ModuleHandlerInterface $module_handler) {
     $this->easyBreadcrumbBuilder = $easy_breadcrumb_builder;
     $this->configFactory = $config_factory;
     $this->routeMatch = $route_match;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
+    return new self(
       $container->get('easy_breadcrumb.breadcrumb'),
       $container->get('config.factory'),
-      $container->get('current_route_match')
+      $container->get('current_route_match'),
+      $container->get('module_handler')
     );
   }
 
@@ -74,56 +86,52 @@ class EasyBreadcrumbStructuredDataJsonLd implements ContainerInjectionInterface 
 
       /** @var \Drupal\Core\Breadcrumb\Breadcrumb $breadcrumb */
       $breadcrumb = $this->easyBreadcrumbBuilder->build($this->routeMatch);
+
+      // Allow modules to alter the breadcrumb.
+      $context = ['builder' => $this->easyBreadcrumbBuilder];
+      $this->moduleHandler->alter('system_breadcrumb', $breadcrumb, $this->routeMatch, $context);
+
       $links = $breadcrumb->getLinks();
 
       // Only fire if at least one link present.
       if (count($links) > 0) {
 
-        // Open JSON.
-        $value = '{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          "itemListElement": [';
+        $value = [
+          '@context' => 'https://schema.org',
+          '@type' => 'BreadcrumbList',
+          'itemListElement' => [],
+        ];
 
         $position = 1;
         /** @var \Drupal\Core\Link $link */
-        foreach ($links as $link) {
+        foreach ($links as $key => $link) {
           $name = $link->getText();
           $item = $link->getUrl()->setAbsolute(TRUE)->toString();
 
-          // Escape " to produce valid json for titles with "" in them.
-          $name = str_replace('"', '\"', $name);
-          $item = str_replace('"', '\"', $item);
+          // Only allow an empty item for the last link.
+          if (!empty($item && !empty($name)) || ($key === count($links) - 1) && !empty($name)) {
+            if (!empty($item)) {
+              $value['itemListElement'][] = [
+                '@type' => 'ListItem',
+                'position' => $position,
+                'name' => $name,
+                'item' => $item,
+              ];
+            }
+            else {
+              $value['itemListElement'][] = [
+                '@type' => 'ListItem',
+                'position' => $position,
+                'name' => $name,
+              ];
+            }
 
-          // Add a comma before each item except the first.
-          if ($position > 1) {
-            $value .= ',';
+            // Increment position for next run.
+            $position++;
           }
-
-          // Only add item if link's not empty.
-          if (!empty($item)) {
-            $value .= '{
-            "@type": "ListItem",
-            "position": "' . $position . '",
-            "name": "' . $name . '",
-            "item": "' . $item . '"
-          }';
-          }
-          else {
-            $value .= '{
-              "@type": "ListItem",
-              "position": "' . $position . '",
-              "name": "' . $name . '"
-            }';
-          }
-
-          // Increment position for next run.
-          $position++;
-
         }
 
-        // Close JSON.
-        $value .= ']}';
+        $value = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
       }
     }
 

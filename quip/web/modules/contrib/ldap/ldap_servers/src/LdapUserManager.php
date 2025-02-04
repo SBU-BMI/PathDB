@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -56,7 +56,8 @@ class LdapUserManager extends LdapBaseManager {
     LdapBridgeInterface $ldap_bridge,
     ModuleHandlerInterface $module_handler,
     CacheBackendInterface $cache,
-    Authmap $external_auth) {
+    Authmap $external_auth,
+  ) {
     parent::__construct($logger, $entity_type_manager, $ldap_bridge, $module_handler);
     $this->cache = $cache;
     $this->externalAuth = $external_auth;

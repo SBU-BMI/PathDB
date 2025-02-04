@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\TypedData\ListDataDefinitionInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -66,6 +69,7 @@ class DataDefinitionFetcherTest extends KernelTestBase {
       'entity_type' => 'node',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ])->save();
+    // Bundle the field with an entity.
     FieldConfig::create([
       'field_name' => 'field_integer',
       'entity_type' => 'node',
@@ -84,16 +88,27 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionByPropertyPath
    */
   public function testFetchingByBasicPropertyPath(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('title')
-      ->getItemDefinition()
-      ->getPropertyDefinition('value');
+    $definition = $this->nodeDefinition->getPropertyDefinition('title');
+    if ($definition->isList()) {
+      $this->assertInstanceOf(ListDataDefinitionInterface::class, $definition);
+      /** @var \Drupal\Core\TypedData\ListDataDefinitionInterface $definition */
+      $definition = $definition->getItemDefinition();
+    }
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinitionInterface $definition */
+    $target_definition = $definition->getPropertyDefinition('value');
 
+    // List syntax.
     $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
       $this->nodeDefinition,
       'title.0.value'
     );
+    $this->assertSame($target_definition, $fetched_definition);
 
+    // Single-valued property syntax.
+    $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
+      $this->nodeDefinition,
+      'title.value'
+    );
     $this->assertSame($target_definition, $fetched_definition);
   }
 
@@ -101,10 +116,12 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionBySubPaths
    */
   public function testFetchingByBasicSubPath(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('title')
-      ->getItemDefinition()
-      ->getPropertyDefinition('value');
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_definition */
+    $field_definition = $this->nodeDefinition->getPropertyDefinition('title');
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
+    $item_definition = $field_definition->getItemDefinition();
+    /** @var \Drupal\Core\TypedData\DataDefinition $target_definition */
+    $target_definition = $item_definition->getPropertyDefinition('value');
 
     $fetched_definition = $this->dataFetcher->fetchDefinitionBySubPaths(
       $this->nodeDefinition,
@@ -118,10 +135,12 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionByPropertyPath
    */
   public function testFetchingEntityReference(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('uid')
-      ->getItemDefinition()
-      ->getPropertyDefinition('entity');
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_definition */
+    $field_definition = $this->nodeDefinition->getPropertyDefinition('uid');
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
+    $item_definition = $field_definition->getItemDefinition();
+    /** @var \Drupal\Core\TypedData\DataReferenceDefinition $target_definition */
+    $target_definition = $item_definition->getPropertyDefinition('entity');
 
     $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
       $this->nodeDefinition,
@@ -135,14 +154,20 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionByPropertyPath
    */
   public function testFetchingAcrossReferences(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('uid')
-      ->getItemDefinition()
-      ->getPropertyDefinition('entity')
-      ->getTargetDefinition()
-      ->getPropertyDefinition('name')
-      ->getItemDefinition()
-      ->getPropertyDefinition('value');
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_definition */
+    $field_definition = $this->nodeDefinition->getPropertyDefinition('uid');
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
+    $item_definition = $field_definition->getItemDefinition();
+    /** @var \Drupal\Core\TypedData\DataReferenceDefinition $reference_definition */
+    $reference_definition = $item_definition->getPropertyDefinition('entity');
+    /** @var \Drupal\Core\Entity\TypedData\EntityDataDefinition $entity_definition */
+    $entity_definition = $reference_definition->getTargetDefinition();
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_definition */
+    $field_definition = $entity_definition->getPropertyDefinition('name');
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
+    $item_definition = $field_definition->getItemDefinition();
+    /** @var \Drupal\Core\Entity\TypedData\EntityDataDefinition $target_definition */
+    $target_definition = $item_definition->getPropertyDefinition('value');
 
     $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
       $this->nodeDefinition,
@@ -156,10 +181,12 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionByPropertyPath
    */
   public function testFetchingAtValidPositions(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('field_integer')
-      ->getItemDefinition()
-      ->getPropertyDefinition('value');
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_definition */
+    $field_definition = $this->nodeDefinition->getPropertyDefinition('field_integer');
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
+    $item_definition = $field_definition->getItemDefinition();
+    /** @var \Drupal\Core\TypedData\DataReferenceDefinition $target_definition */
+    $target_definition = $item_definition->getPropertyDefinition('value');
 
     $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
       $this->nodeDefinition,
@@ -193,8 +220,7 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionByPropertyPath
    */
   public function testFetchingField(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('field_integer');
+    $target_definition = $this->nodeDefinition->getPropertyDefinition('field_integer');
 
     $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
       $this->nodeDefinition,
@@ -208,8 +234,7 @@ class DataDefinitionFetcherTest extends KernelTestBase {
    * @covers ::fetchDefinitionByPropertyPath
    */
   public function testFetchingReferenceField(): void {
-    $target_definition = $this->nodeDefinition
-      ->getPropertyDefinition('uid');
+    $target_definition = $this->nodeDefinition->getPropertyDefinition('uid');
 
     $fetched_definition = $this->dataFetcher->fetchDefinitionByPropertyPath(
       $this->nodeDefinition,
@@ -238,14 +263,17 @@ class DataDefinitionFetcherTest extends KernelTestBase {
   public function testFetchingFromPrimitive(): void {
     $this->expectException(InvalidArgumentException::class);
     $this->expectExceptionMessage("The data selector 'unknown_property' cannot be applied because the definition of type 'string' is not a list or a complex structure");
-    $definition = $this->nodeDefinition
-      ->getPropertyDefinition('title')
-      ->getItemDefinition()
-      ->getPropertyDefinition('value');
+
+    /** @var \Drupal\Core\Field\BaseFieldDefinition $field_definition */
+    $field_definition = $this->nodeDefinition->getPropertyDefinition('title');
+    /** @var \Drupal\Core\Field\TypedData\FieldItemDataDefinition $item_definition */
+    $item_definition = $field_definition->getItemDefinition();
+    /** @var \Drupal\Core\TypedData\DataDefinition $target_definition */
+    $target_definition = $item_definition->getPropertyDefinition('value');
 
     // This should trigger an exception.
     $this->dataFetcher->fetchDefinitionByPropertyPath(
-      $definition,
+      $target_definition,
       'unknown_property'
     );
   }

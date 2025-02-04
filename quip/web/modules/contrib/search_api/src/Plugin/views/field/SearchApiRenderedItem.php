@@ -127,7 +127,7 @@ class SearchApiRenderedItem extends FieldPluginBase {
     if (!(($row->_object ?? NULL) instanceof ComplexDataInterface)) {
       $context = [
         '%item_id' => $row->search_api_id,
-        '%view' => $this->view->storage->label(),
+        '%view' => $this->view->storage->label() ?? $this->view->storage->id(),
       ];
       $this->getLogger()->warning('Failed to load item %item_id in view %view.', $context);
       return '';
@@ -136,8 +136,8 @@ class SearchApiRenderedItem extends FieldPluginBase {
     $datasource_id = $row->search_api_datasource;
     if (!$this->index->isValidDatasource($datasource_id)) {
       $context = [
-        '%datasource' => $datasource_id,
-        '%view' => $this->view->storage->label(),
+        '%datasource' => $datasource_id ?? '(null)',
+        '%view' => $this->view->storage->label() ?? $this->view->storage->id(),
       ];
       $this->getLogger()->warning('Item of unknown datasource %datasource returned in view %view.', $context);
       return '';

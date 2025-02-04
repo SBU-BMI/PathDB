@@ -1,3 +1,37 @@
+Unreleased
+==========
+
+1.20.0
+======
+
+**Added:**
+
+* Add support for PHP 8.4 (@andypost)
+
+**Fixed:**
+
+* Fix support for doubling methods using an enum case as default value of a parameter (@jdreesen)
+* Fix deprecation when doubling a class with constructor parameters (@singinwhale, @W0rma)
+* Fix deprecation warning when using phpdocumentor/reflection-docblock 5.4+ (@jrfnl)
+
+1.19.0
+======
+
+**Added:**
+
+* Allow sebastian/comparator and sebastian/recursion-context 6
+
+1.18.0 / 2023-12-07
+===================
+
+* [added] Add support for PHP 8.3 [@rajeshreeputra]
+* [changed] Improve the error when using return types that Prophecy does not support for mocking [@stof]
+* [changed] Add more precise type for static analysis [@stof]
+* [fixed] Error when comparing object arguments with integers [@lucassabreu]
+* [changed] Add PHP 8.2 to test matrix [@Jean85]
+* [Added] Allow sebastian/comparator and sebastian/recursion-context 5, and phpunit/phpunit 10 [@Jean85]
+* [docs] Switch travis status badge to GHA one [@michalbundyra]
+
 1.17.0 / 2023-02-02
 ===================
 

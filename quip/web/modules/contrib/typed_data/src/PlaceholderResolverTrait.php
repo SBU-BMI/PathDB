@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\typed_data;
 
 /**
@@ -10,7 +12,7 @@ trait PlaceholderResolverTrait {
   /**
    * The placeholder resolver.
    *
-   * @var \Drupal\typed_data\PlaceholderResolverInterface
+   * @var \Drupal\typed_data\PlaceholderResolverInterface|null
    */
   protected $placeholderResolver;
 
@@ -22,7 +24,7 @@ trait PlaceholderResolverTrait {
    *
    * @return $this
    */
-  public function setPlaceholderResolver(PlaceholderResolverInterface $placeholder_resolver) {
+  public function setPlaceholderResolver(PlaceholderResolverInterface $placeholder_resolver): static {
     $this->placeholderResolver = $placeholder_resolver;
     return $this;
   }
@@ -33,11 +35,10 @@ trait PlaceholderResolverTrait {
    * @return \Drupal\typed_data\PlaceholderResolverInterface
    *   The placeholder resolver.
    */
-  public function getPlaceholderResolver() {
-    if (empty($this->placeholderResolver)) {
+  public function getPlaceholderResolver(): PlaceholderResolverInterface {
+    if (!isset($this->placeholderResolver)) {
       $this->placeholderResolver = \Drupal::service('typed_data.placeholder_resolver');
     }
-
     return $this->placeholderResolver;
   }
 

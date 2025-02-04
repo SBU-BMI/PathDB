@@ -69,16 +69,16 @@ entity.ldap_server.enable_disable_form:
   options:
     _admin_route: TRUE
 
-ldap_servers.debugging_review:
-  path: /admin/config/people/ldap/help/debugging
+ldap_servers.debug_report:
+  path: /admin/config/people/ldap/debug/report
   defaults:
-    _title: 'LDAP Debugging Review'
-    _form: \Drupal\ldap_servers\Form\DebuggingReviewForm
+    _title: 'LDAP Debug Report'
+    _controller: '\Drupal\ldap_servers\Controller\DebugController::report'
   requirements:
     _permission: 'administer ldap'
 
 ldap_servers.debug_settings:
-  path: /admin/config/people/ldap/help
+  path: /admin/config/people/ldap/debug
   defaults:
     _title: 'Debugging'
     _form: \Drupal\ldap_servers\Form\LdapDebugSettings

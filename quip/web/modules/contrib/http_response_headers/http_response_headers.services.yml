@@ -1,6 +1,6 @@
 services:
   http_response_headers:
     class: '\Drupal\http_response_headers\EventSubscriber\AddHTTPHeaders'
-    arguments: ['@config.factory']
+    arguments: ['@entity_type.manager', '@context.handler', '@context.repository']
     tags:
       - { name: 'event_subscriber' }

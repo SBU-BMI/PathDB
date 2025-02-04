@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\typed_data;
 
 /**
@@ -10,7 +12,7 @@ trait DataFetcherTrait {
   /**
    * The data fetcher.
    *
-   * @var \Drupal\typed_data\DataFetcherInterface
+   * @var \Drupal\typed_data\DataFetcherInterface|null
    */
   protected $dataFetcher;
 
@@ -22,7 +24,7 @@ trait DataFetcherTrait {
    *
    * @return $this
    */
-  public function setDataFetcher(DataFetcherInterface $data_fetcher) {
+  public function setDataFetcher(DataFetcherInterface $data_fetcher): static {
     $this->dataFetcher = $data_fetcher;
     return $this;
   }
@@ -33,11 +35,10 @@ trait DataFetcherTrait {
    * @return \Drupal\typed_data\DataFetcherInterface
    *   The data fetcher.
    */
-  public function getDataFetcher() {
-    if (empty($this->dataFetcher)) {
+  public function getDataFetcher(): DataFetcherInterface {
+    if (!isset($this->dataFetcher)) {
       $this->dataFetcher = \Drupal::service('typed_data.data_fetcher');
     }
-
     return $this->dataFetcher;
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\facets_searchbox_widget\tests\Unit\Plugin\widget;
+namespace Drupal\Tests\facets_searchbox_widget\Unit\Plugin\widget;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\facets\Entity\Facet;
@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\facets\FacetSource\FacetSourcePluginManager;
 use Drupal\facets\UrlProcessor\UrlProcessorInterface;
+use Drupal\facets\Utility\FacetsUrlGenerator;
 use Drupal\Tests\facets\Unit\Plugin\widget\LinksWidgetTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -256,13 +257,15 @@ class SearchboxLinksWidgetTest extends LinksWidgetTest {
     $url_processor = $this->createMock(UrlProcessorInterface::class);
 
     $manager = $this->createMock(FacetSourcePluginManager::class);
-    $manager->expects($this->exactly(1))
+    $manager->expects($this->atLeastOnce())
       ->method('createInstance')
       ->willReturn($url_processor);
 
+    $facets_url_generator = $this->createMock(FacetsUrlGenerator::class);
+
     $storage = $this->createMock(EntityStorageInterface::class);
     $em = $this->createMock(EntityTypeManagerInterface::class);
-    $em->expects($this->exactly(1))
+    $em->expects($this->atLeastOnce())
       ->method('getStorage')
       ->willReturn($storage);
 
@@ -270,6 +273,7 @@ class SearchboxLinksWidgetTest extends LinksWidgetTest {
     $container->set('router.no_access_checks', $router);
     $container->set('entity_type.manager', $em);
     $container->set('plugin.manager.facets.url_processor', $manager);
+    $container->set('facets.utility.url_generator', $facets_url_generator);
     \Drupal::setContainer($container);
   }
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\authorization\Service;
 
-use Drupal\authorization\AuthorizationServiceInterface;
-use Drupal\authorization\Entity\AuthorizationProfile;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\authorization\AuthorizationProfileInterface;
+use Drupal\authorization\AuthorizationServiceInterface;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 
@@ -51,7 +51,7 @@ class AuthorizationService implements AuthorizationServiceInterface {
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
-    LoggerInterface $logger_channel_authorization
+    LoggerInterface $logger_channel_authorization,
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger_channel_authorization;
@@ -75,7 +75,7 @@ class AuthorizationService implements AuthorizationServiceInterface {
    * {@inheritdoc}
    */
   public function setIndividualProfile($profile_id): void {
-    /** @var \Drupal\authorization\Entity\AuthorizationProfile $profile */
+    /** @var \Drupal\authorization\AuthorizationProfileInterface $profile */
     $profile = $this->entityTypeManager->getStorage('authorization_profile')->load($profile_id);
     if ($profile) {
       $this->processAuthorizations($profile, TRUE);
@@ -92,8 +92,8 @@ class AuthorizationService implements AuthorizationServiceInterface {
     $queryResults = $this->entityTypeManager
       ->getStorage('authorization_profile')
       ->getQuery()
-      ->accessCheck(TRUE)
-      ->execute();
+      ->accessCheck(FALSE)
+      ->execute() ?? [];
     foreach ($queryResults as $key => $value) {
       $this->setIndividualProfile($key);
     }
@@ -103,7 +103,7 @@ class AuthorizationService implements AuthorizationServiceInterface {
    * {@inheritdoc}
    */
   public function queryIndividualProfile(string $profile_id): void {
-    /** @var \Drupal\authorization\Entity\AuthorizationProfile $profile */
+    /** @var \Drupal\authorization\AuthorizationProfileInterface $profile */
     $profile = $this->entityTypeManager->getStorage('authorization_profile')->load($profile_id);
     if ($profile) {
       $this->processAuthorizations($profile, FALSE);
@@ -120,7 +120,7 @@ class AuthorizationService implements AuthorizationServiceInterface {
   public function queryAllProfiles(): void {
     $queryResults = $this->entityTypeManager->getStorage('authorization_profile')
       ->getQuery()
-      ->accessCheck(TRUE)
+      ->accessCheck(FALSE)
       ->execute();
     foreach ($queryResults as $key => $value) {
       $this->queryIndividualProfile($key);
@@ -144,12 +144,12 @@ class AuthorizationService implements AuthorizationServiceInterface {
   /**
    * Process Authorizations.
    *
-   * @param \Drupal\authorization\Entity\AuthorizationProfile $profile
+   * @param \Drupal\authorization\AuthorizationProfileInterface $profile
    *   The profile to act upon.
    * @param bool $save_user
    *   Save the user in the end.
    */
-  private function processAuthorizations(AuthorizationProfile $profile, $save_user): void {
+  private function processAuthorizations(AuthorizationProfileInterface $profile, $save_user): void {
     if ($profile->checkConditions()) {
       $this->processedAuthorizations[] = $profile->grantsAndRevokes($this->user, $save_user);
     }

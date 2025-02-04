@@ -5,6 +5,7 @@ namespace Drupal\facets\Plugin\facets\widget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\facets\FacetInterface;
 use Drupal\facets\Result\Result;
+use Drupal\facets\Result\ResultInterface;
 use Drupal\facets\Widget\WidgetPluginBase;
 
 /**
@@ -116,13 +117,24 @@ class LinksWidget extends WidgetPluginBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function buildListItems(FacetInterface $facet, ResultInterface $result) {
+    $items = parent::buildListItems($facet, $result);
+
+    $items['#attributes']['data-drupal-facet-widget-element-class'] = 'facets-link';
+
+    return $items;
+  }
+
+  /**
    * Appends widget library and relevant information for it to build array.
    *
    * @param array $build
    *   Reference to build array.
    */
   protected function appendWidgetLibrary(array &$build) {
-    $build['#attached']['library'][] = 'facets/drupal.facets.link-widget';
+    $build['#attached']['library'][] = 'facets/drupal.facets.checkbox-widget';
     $build['#attributes']['class'][] = 'js-facets-links';
   }
 

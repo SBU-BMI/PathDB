@@ -3,37 +3,47 @@
 namespace Drupal\jwt\Transcoder;
 
 use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
+use Drupal\key\KeyInterface;
 
 /**
- * Interface JwtTranscoderInterface.
- *
- * @package Drupal\jwt
+ * The Interface for the JWT Transcoder.
  */
 interface JwtTranscoderInterface {
 
   /**
+   * Set a new key for the RaftJwtTranscoder.
+   *
+   * @param \Drupal\key\KeyInterface $key
+   *   The JWT key.
+   */
+  public function setKey(KeyInterface $key): void;
+
+  /**
    * Gets a validated JsonWebToken from an encoded JWT.
    *
-   * @param string $jwt
-   *   The encoded JWT.
+   * @param string $raw_jwt
+   *   The encoded JWT in raw string form.
    *
    * @return \Drupal\jwt\JsonWebToken\JsonWebTokenInterface
    *   Validated JWT.
    *
    * @throws \Drupal\jwt\Transcoder\JwtDecodeException
    */
-  public function decode($jwt);
+  public function decode(string $raw_jwt): JsonWebTokenInterface;
 
   /**
    * Encodes a JsonWebToken.
    *
-   * @param \Drupal\jwt\JsonWebToken\JsonWebTokenInterface $jwt
-   *   A JWT.
+   * Note that headers 'alg' and 'typ' will be removed and replaced by the
+   * default values if they are set on the JsonWebTokenInterface object.
    *
-   * @return string
-   *   The encoded JWT.
+   * @param \Drupal\jwt\JsonWebToken\JsonWebTokenInterface $jwt
+   *   A JWT object.
+   *
+   * @return string|null
+   *   The encoded JWT or null on failure.
    */
-  public function encode(JsonWebTokenInterface $jwt);
+  public function encode(JsonWebTokenInterface $jwt): ?string;
 
   /**
    * Sets the secret that is used for a symmetric algorithm signature.
@@ -47,8 +57,11 @@ interface JwtTranscoderInterface {
    *
    * @param string $secret
    *   The secret for the JWT.
+   *
+   * @return bool
+   *   Function does some validation of the key. Returns TRUE on success.
    */
-  public function setSecret($secret);
+  public function setSecret(string $secret): bool;
 
   /**
    * Sets the algorithm to be used for the JWT.
@@ -57,9 +70,12 @@ interface JwtTranscoderInterface {
    *   This can be any of the array keys returned by the getAlgorithmOptions
    *   function.
    *
+   * @return string|null
+   *   The algorithm type, or NULL if the algorithm is invalid.
+   *
    * @see getAlgorithmOptions()
    */
-  public function setAlgorithm($algorithm);
+  public function setAlgorithm(string $algorithm): ?string;
 
   /**
    * Sets the private key used to create signatures for an asymmetric algorithm.
@@ -76,7 +92,7 @@ interface JwtTranscoderInterface {
    * @return bool
    *   Function does some validation of the key. Returns TRUE on success.
    */
-  public function setPrivateKey($private_key, $derive_public_key = TRUE);
+  public function setPrivateKey(string $private_key, bool $derive_public_key = TRUE): bool;
 
   /**
    * Sets the public key used to verify signatures for an asymmetric algorithm.
@@ -91,7 +107,7 @@ interface JwtTranscoderInterface {
    * @return mixed
    *   Function does some validation of the key. Returns TRUE on success.
    */
-  public function setPublicKey($public_key);
+  public function setPublicKey(string $public_key): bool;
 
   /**
    * Return the type of algorithm selected.
@@ -99,10 +115,10 @@ interface JwtTranscoderInterface {
    * @param string $algorithm
    *   The algorithm.
    *
-   * @return string
+   * @return string|null
    *   The algorithm type. Returns NULL if algorithm not found.
    */
-  public static function getAlgorithmType($algorithm);
+  public static function getAlgorithmType(string $algorithm): ?string;
 
   /**
    * Gets a list of algorithms supported by this transcoder.
@@ -110,6 +126,6 @@ interface JwtTranscoderInterface {
    * @return array
    *   An array of options formatted for a select list.
    */
-  public static function getAlgorithmOptions();
+  public static function getAlgorithmOptions(): array;
 
 }

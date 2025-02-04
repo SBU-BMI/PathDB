@@ -5,7 +5,7 @@
  * The ldap_servers module file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -13,16 +13,31 @@ use Drupal\Core\Routing\RouteMatchInterface;
  * Implements hook_help().
  */
 function ldap_servers_help($route_name, RouteMatchInterface $route_match) {
-
+  $output = '';
   switch ($route_name) {
     case 'help.page.ldap_servers':
       $output = '<p>' . t('<em>LDAP Servers</em> stores LDAP server configurations so other modules can connect to them and leverage their data <em>LDAP Authentication</em> and <em>LDAP Authorization</em> are two such modules. Generally, only one LDAP Server configuration is needed.') . '</p>';
       $output .= '<p>' . t('When multiple LDAP server configurations are needed, each is not necessarily a separate physical LDAP server; they may have different binding users or some other configuration difference.') . ' </p>';
-      return $output;
+      break;
 
     case 'entity.ldap_server.collection':
-      return '<p>' . t('More than one LDAP server configuration can exist for a physical LDAP server. Multiple configurations for the same physical LDAP server are useful in cases such as either different base DN for authentication and authorization or service accounts with different privileges for different purposes.') . '</p>';
+      $output = '<p>' . t('More than one LDAP server configuration can exist for a physical LDAP server. Multiple configurations for the same physical LDAP server are useful in cases such as either different base DN for authentication and authorization or service accounts with different privileges for different purposes.') . '</p>';
+      break;
+
+    case 'entity.ldap_server.edit_form':
+      $ldap_server = $route_match->getParameter('ldap_server');
+      $output = '<p>' . t('Override the account and password . <a href="@url">More information.</a>', [
+        '@url' => 'https://www.drupal.org/docs/extending-drupal/contributed-modules/contributed-module-documentation/lightweight-directory-access-protocol/servers',
+      ]) . '</p>';
+      $output .= '<p>' . t('@config', ['@config' => '$config[\'ldap_servers.server.' . $ldap_server->id() . '\'][\'binddn\'] = \'actual-distinguished-name\';']) . '</p>';
+      $output .= '<p>' . t('@config', ['@config' => '$config[\'ldap_servers.server.' . $ldap_server->id() . '\'][\'bindpw\'] = \'actual-password\';']) . '</p>';
+      break;
+
+    default:
+      break;
   }
+
+  return $output;
 }
 
 /**

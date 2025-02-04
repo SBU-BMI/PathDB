@@ -3,12 +3,14 @@
 namespace Drupal\typed_data\Plugin\TypedDataFormWidget;
 
 use Drupal\Core\Form\SubformStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\Core\TypedData\Type\FloatInterface;
 use Drupal\Core\TypedData\Type\IntegerInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\Core\TypedData\TypedDataInterface;
+use Drupal\typed_data\Attribute\TypedDataFormWidget;
 use Drupal\typed_data\Form\SubformState;
 use Drupal\typed_data\Widget\FormWidgetBase;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
@@ -22,12 +24,17 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  *   description = @Translation("A simple, one-line text input widget."),
  * )
  */
+#[TypedDataFormWidget(
+  id: "text_input",
+  label: new TranslatableMarkup("Text input"),
+  description: new TranslatableMarkup("A simple, one-line text input widget.")
+)]
 class TextInputWidget extends FormWidgetBase {
 
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
+  public function defaultConfiguration(): array {
     return parent::defaultConfiguration() + [
       'label' => NULL,
       'description' => NULL,
@@ -40,7 +47,7 @@ class TextInputWidget extends FormWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function isApplicable(DataDefinitionInterface $definition) {
+  public function isApplicable(DataDefinitionInterface $definition): bool {
     return is_subclass_of($definition->getClass(), StringInterface::class) ||
       is_subclass_of($definition->getClass(), IntegerInterface::class) ||
       is_subclass_of($definition->getClass(), FloatInterface::class);
@@ -49,7 +56,7 @@ class TextInputWidget extends FormWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function form(TypedDataInterface $data, SubformStateInterface $form_state) {
+  public function form(TypedDataInterface $data, SubformStateInterface $form_state): array {
     $form = SubformState::getNewSubForm();
     $form['value'] = [
       '#type' => 'textfield',
@@ -68,7 +75,7 @@ class TextInputWidget extends FormWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function extractFormValues(TypedDataInterface $data, SubformStateInterface $form_state) {
+  public function extractFormValues(TypedDataInterface $data, SubformStateInterface $form_state): void {
     // Ensure empty values correctly end up as NULL value.
     $value = $form_state->getValue('value');
     if ($value === '') {
@@ -80,7 +87,7 @@ class TextInputWidget extends FormWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function flagViolations(TypedDataInterface $data, ConstraintViolationListInterface $violations, SubformStateInterface $formState) {
+  public function flagViolations(TypedDataInterface $data, ConstraintViolationListInterface $violations, SubformStateInterface $formState): void {
     foreach ($violations as $violation) {
       /** @var \Symfony\Component\Validator\ConstraintViolationInterface $violation */
       $formState->setErrorByName('value', $violation->getMessage());
@@ -90,7 +97,7 @@ class TextInputWidget extends FormWidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function getConfigurationDefinitions(DataDefinitionInterface $definition) {
+  public function getConfigurationDefinitions(DataDefinitionInterface $definition): array {
     return [
       'label' => DataDefinition::create('string')
         ->setLabel($this->t('Label')),

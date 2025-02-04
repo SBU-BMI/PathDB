@@ -141,6 +141,7 @@ class FacetsSummaryForm extends EntityForm {
             'label' => $facet->getName(),
             'separator' => ', ',
             'show_count' => FALSE,
+            'weight' => 0,
           ];
         }
         $facets[$facet->id()]['name'] = $facet->getName();
@@ -174,6 +175,7 @@ class FacetsSummaryForm extends EntityForm {
             '#title' => $this->t('Weight for @title', ['@title' => $facet['name']]),
             '#title_display' => 'invisible',
             '#attributes' => ['class' => ['facets-order-weight']],
+            '#default_value' => $facet['weight'],
           ],
           '#attributes' => ['class' => ['draggable']],
         ];
@@ -209,6 +211,14 @@ class FacetsSummaryForm extends EntityForm {
         ],
       ],
     ];
+
+    $form['facets_summary_settings']['only_visible_when_facet_source_is_visible'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Hide Summary when Facet Source is not rendered'),
+      '#description' => $this->t('When checked, this facet will only be rendered when the facet source is rendered. If you want to show facets on other pages too, you need to uncheck this setting.'),
+      '#default_value' => $facets_summary->getOnlyVisibleWhenFacetSourceIsVisible(),
+    ];
+
     foreach ($all_processors as $processor_id => $processor) {
       $clean_css_id = Html::cleanCssIdentifier($processor_id);
       $form['facets_summary_settings'][$processor_id]['status'] = [
@@ -362,6 +372,7 @@ class FacetsSummaryForm extends EntityForm {
     // Store processor settings.
     /** @var \Drupal\facets_summary\FacetsSummaryInterface $facets_summary */
     $facets_summary = $this->entity;
+    $facets_summary->setOnlyVisibleWhenFacetSourceIsVisible($values['facets_summary_settings']['only_visible_when_facet_source_is_visible'] ?? FALSE);
 
     /** @var \Drupal\facets_summary\Processor\ProcessorInterface $processor */
     $processors = $facets_summary->getProcessors(FALSE);

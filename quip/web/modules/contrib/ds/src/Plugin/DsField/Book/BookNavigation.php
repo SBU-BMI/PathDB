@@ -2,18 +2,19 @@
 
 namespace Drupal\ds\Plugin\DsField\Book;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ds\Attribute\DsField;
 use Drupal\ds\Plugin\DsField\DsFieldBase;
 
 /**
  * Plugin that the book navigation.
- *
- * @DsField(
- *   id = "book_navigation",
- *   title = @Translation("Book navigation"),
- *   entity_type = "node",
- *   provider = "book"
- * )
  */
+#[DsField(
+  id: 'book_navigation',
+  title: new TranslatableMarkup('Book navigation'),
+  entity_type: 'node',
+  provider: 'book'
+)]
 class BookNavigation extends DsFieldBase {
 
   /**
@@ -21,8 +22,8 @@ class BookNavigation extends DsFieldBase {
    */
   public function isAllowed() {
 
-    // We only allow the 'full' view mode.
-    if ($this->viewMode() != 'full') {
+    // We only allow the 'full' and 'default' view mode.
+    if (!in_array($this->viewMode(), ['default', 'full'])) {
       return FALSE;
     }
 
@@ -37,7 +38,7 @@ class BookNavigation extends DsFieldBase {
       }
     }
 
-    // Return false when there where no displays.
+    // Return false when there are no displays.
     return FALSE;
   }
 

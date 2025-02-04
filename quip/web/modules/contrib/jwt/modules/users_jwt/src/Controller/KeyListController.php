@@ -10,7 +10,7 @@ use Drupal\users_jwt\UsersJwtKeyRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class KeyListController.
+ * Key List Controller renders the key list.
  */
 class KeyListController extends ControllerBase {
 
@@ -19,7 +19,7 @@ class KeyListController extends ControllerBase {
    *
    * @var \Drupal\users_jwt\UsersJwtKeyRepositoryInterface
    */
-  protected $usersJwtKeyRepository;
+  protected UsersJwtKeyRepositoryInterface $keyRepository;
 
   /**
    * Constructs a key form.

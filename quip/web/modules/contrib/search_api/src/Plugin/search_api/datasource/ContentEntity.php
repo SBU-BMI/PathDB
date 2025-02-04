@@ -677,10 +677,27 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
       $langcode = $entity->language()->getId();
       if (isset($this->getBundles()[$entity->bundle()])
           && isset($this->getLanguages()[$langcode])) {
-        return $entity->id() . ':' . $langcode;
+        return static::formatItemId($entity->getEntityTypeId(), $entity->id(), $langcode);
       }
     }
     return NULL;
+  }
+
+  /**
+   * Computes the item ID for the given entity and language.
+   *
+   * @param string $entity_type
+   *   The entity type ID.
+   * @param string|int $entity_id
+   *   The entity ID.
+   * @param string $langcode
+   *   The language ID of the entity.
+   *
+   * @return string
+   *   The datasource-specific item ID.
+   */
+  public static function formatItemId(string $entity_type, string|int $entity_id, string $langcode): string {
+    return $entity_id . ':' . $langcode;
   }
 
   /**
@@ -774,7 +791,23 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
   }
 
   /**
-   * {@inheritdoc}
+   * Retrieves all item IDs of entities of the specified bundles.
+   *
+   * @param int|null $page
+   *   The zero-based page of IDs to retrieve, for the paging mechanism
+   *   implemented by this datasource; or NULL to retrieve all items at once.
+   * @param string[]|null $bundles
+   *   (optional) The bundles for which all item IDs should be returned; or NULL
+   *   to retrieve IDs from all enabled bundles in this datasource.
+   * @param string[]|null $languages
+   *   (optional) The languages for which all item IDs should be returned; or
+   *   NULL to retrieve IDs from all enabled languages in this datasource.
+   *
+   * @return string[]|null
+   *   An array of all item IDs matching these conditions; or NULL if a page was
+   *   specified and there are no more items for that and all following pages.
+   *   In case both bundles and languages are specified, they are combined with
+   *   OR.
    */
   public function getPartialItemIds($page = NULL, array $bundles = NULL, array $languages = NULL) {
     // These would be pretty pointless calls, but for the sake of completeness
@@ -923,7 +956,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
         $translations = array_intersect($translations, $languages);
       }
       foreach ($translations as $langcode) {
-        $item_ids[] = "$entity_id:$langcode";
+        $item_ids[] = static::formatItemId($entity->getEntityTypeId(), $entity_id, $langcode);
       }
     }
 
@@ -1012,7 +1045,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
         return $this->getEntityTypeManager()->getViewBuilder($this->getEntityTypeId())->view($entity, $view_mode, $langcode);
       }
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       // The most common reason for this would be a
       // \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException in
       // getViewBuilder(), because the entity type definition doesn't specify a
@@ -1056,7 +1089,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
       }
       return $build;
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       // The most common reason for this would be a
       // \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException in
       // getViewBuilder(), because the entity type definition doesn't specify a
@@ -1156,7 +1189,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
             throw $e;
           }
           $vars = [
-            '%index' => $this->index->label(),
+            '%index' => $this->index->label() ?? $this->index->id(),
             '%entity_type' => $entity->getEntityType()->getLabel(),
             '@entity_id' => $entity->id(),
           ];
@@ -1164,7 +1197,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
             $link = $entity->toLink($this->t('Go to changed %entity_type with ID "@entity_id"', $vars))
               ->toString()->getGeneratedLink();
           }
-          catch (\Throwable $e) {
+          catch (\Throwable) {
             // Ignore any errors here, it's not that important that the log
             // message contains a link.
             $link = NULL;
@@ -1174,7 +1207,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
         }
         foreach ($entity_ids as $entity_id) {
           foreach ($this->getLanguages() as $language) {
-            $ids_to_reindex["$entity_id:{$language->getId()}"] = 1;
+            $ids_to_reindex[static::formatItemId($this->getEntityTypeId(), $entity_id, $language->getId())] = 1;
           }
         }
       }
@@ -1196,7 +1229,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
    *   mapping dependency types to arrays of dependency names.
    */
   protected function getPropertyPathDependencies($property_path, array $properties) {
-    list($key, $nested_path) = Utility::splitPropertyPath($property_path, FALSE);
+    [$key, $nested_path] = Utility::splitPropertyPath($property_path, FALSE);
     if (!isset($properties[$key])) {
       return [];
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\Processor;
 
@@ -10,7 +10,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Password\DefaultPasswordGenerator;
+use Drupal\Core\Password\PasswordGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Utility\Token;
@@ -25,6 +25,7 @@ use Drupal\ldap_user\FieldProvider;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function in_array;
 
@@ -87,7 +88,7 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
   /**
    * Filesystem.
    *
-   * @var \Drupal\Core\File\FileSystemInterface
+   * @var \Drupal\Core\File\FileSystemInterface|null
    */
   protected $fileSystem;
 
@@ -164,16 +165,23 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
   /**
    * Password generator.
    *
-   * @var \Drupal\Core\Password\DefaultPasswordGenerator
+   * @var \Drupal\Core\Password\PasswordGeneratorInterface
    */
-  private $passwordGenerator;
+  protected $passwordGenerator;
 
   /**
    * File repository.
    *
    * @var \Drupal\file\FileRepositoryInterface|null
    */
-  private $fileRepository;
+  protected $fileRepository;
+
+  /**
+   * File validator.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface|null
+   */
+  protected $fileValidator;
 
   /**
    * Constructor.
@@ -209,8 +217,10 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
    *   Field Provider.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   Messenger.
-   * @param \Drupal\Core\Password\DefaultPasswordGenerator $passwordGenerator
+   * @param \Drupal\Core\Password\PasswordGeneratorInterface $passwordGenerator
    *   Password Generator.
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   Container.
    */
   public function __construct(
     LoggerInterface $logger,
@@ -227,8 +237,10 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     EventDispatcherInterface $event_dispatcher,
     FieldProvider $field_provider,
     MessengerInterface $messenger,
-    DefaultPasswordGenerator $passwordGenerator
-    ) {
+    PasswordGeneratorInterface $passwordGenerator,
+    ContainerInterface $container,
+  ) {
+
     $this->logger = $logger;
     $this->config = $config_factory->get('ldap_user.settings');
     $this->configAuthentication = $config_factory->get('ldap_authentication.settings');
@@ -245,9 +257,12 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     $this->fieldProvider = $field_provider;
     $this->messenger = $messenger;
     $this->passwordGenerator = $passwordGenerator;
+
     if ($this->moduleHandler->moduleExists('file')) {
-      // phpcs:ignore
-      $this->fileRepository = \Drupal::service('file.repository');
+      $this->fileRepository = $container->get('file.repository');
+      if (version_compare(\Drupal::VERSION, '10.2.0', '>=')) {
+        $this->fileValidator = $container->get('file.validator');
+      }
     }
 
   }
@@ -539,11 +554,11 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
       return NULL;
     }
 
-    $ldapUserPicture = $this->ldapEntry->getAttribute($picture_attribute, FALSE)[0];
+    $ldap_user_picture = $this->ldapEntry->getAttribute($picture_attribute, FALSE)[0];
     $currentUserPicture = $this->account->get('user_picture')->getValue();
 
     if (empty($currentUserPicture)) {
-      return $this->saveUserPicture($this->account->get('user_picture'), $ldapUserPicture);
+      return $this->saveUserPicture($this->account->get('user_picture'), $ldap_user_picture);
     }
 
     /** @var \Drupal\file\Entity\File $file */
@@ -552,13 +567,13 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
       ->load($currentUserPicture[0]['target_id']);
     if ($file && file_exists($file->getFileUri())) {
       $file_data = file_get_contents($file->getFileUri());
-      if (md5($file_data) === md5($ldapUserPicture)) {
+      if (md5($file_data) === md5($ldap_user_picture)) {
         // Same image, do nothing.
         return NULL;
       }
     }
 
-    return $this->saveUserPicture($this->account->get('user_picture'), $ldapUserPicture);
+    return $this->saveUserPicture($this->account->get('user_picture'), $ldap_user_picture);
   }
 
   /**
@@ -566,17 +581,17 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
    *
    * @param \Drupal\Core\Field\FieldItemListInterface $field
    *   The field attached to the user.
-   * @param string $ldapUserPicture
+   * @param string $ldap_user_picture
    *   The picture itself.
    *
    * @return array|null
    *   Nullable array of form ['target_id' => 123].
    */
-  private function saveUserPicture(FieldItemListInterface $field, string $ldapUserPicture): ?array {
+  private function saveUserPicture(FieldItemListInterface $field, string $ldap_user_picture): ?array {
     // Create tmp file to get image format and derive extension.
     $fileName = uniqid('', FALSE);
     $unmanagedFile = $this->fileSystem->getTempDirectory() . '/' . $fileName;
-    $unmanaged_file_length = file_put_contents($unmanagedFile, $ldapUserPicture);
+    $unmanaged_file_length = file_put_contents($unmanagedFile, $ldap_user_picture);
     if ($unmanaged_file_length === FALSE) {
       $this->detailLog
         ->log('Unable to save file @file',
@@ -590,9 +605,9 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     $extension = image_type_to_extension($image_type, FALSE);
     unlink($unmanagedFile);
 
-    $fieldSettings = $field->getFieldDefinition()->getItemDefinition()->getSettings();
-    $directory = $this->token->replace($fieldSettings['file_directory']);
-    $directory_path = $fieldSettings['uri_scheme'] . '://' . $directory;
+    $field_settings = $field->getFieldDefinition()->getItemDefinition()->getSettings();
+    $directory = $this->token->replace($field_settings['file_directory']);
+    $directory_path = $field_settings['uri_scheme'] . '://' . $directory;
     $realpath = $this->fileSystem->realpath($directory_path);
 
     if ($realpath && !is_dir((string) $realpath)) {
@@ -600,17 +615,29 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     }
 
     $managed_file_path = $directory_path . '/' . $fileName . '.' . $extension;
-    $managed_file = $this->fileRepository->writeData($ldapUserPicture, $managed_file_path);
-
-    $validators = [
-      'file_validate_is_image' => [],
-      'file_validate_image_resolution' => [$fieldSettings['max_resolution']],
-      'file_validate_size' => [$fieldSettings['max_filesize']],
-    ];
-
-    $errors = file_validate($managed_file, $validators);
-    if ($managed_file && empty(file_validate($managed_file, $validators))) {
-      return ['target_id' => $managed_file->id()];
+    $managed_file = $this->fileRepository->writeData($ldap_user_picture, $managed_file_path);
+    $errors = [];
+    $has_error = FALSE;
+    if (version_compare(\Drupal::VERSION, '10.2.0', '<')) {
+      $validators = [
+        'file_validate_is_image' => [],
+        'file_validate_extensions' => [$field_settings['file_extensions']],
+        'file_validate_image_resolution' => [$field_settings['max_resolution']],
+        'file_validate_size' => [$field_settings['max_filesize']],
+      ];
+      // @phpstan-ignore-next-line
+      $errors = file_validate($managed_file, $validators);
+      $has_error = (bool) count($errors);
+    }
+    else {
+      $validators = [
+        'FileIsImage' => [],
+        'FileExtension' => ['extensions' => $field_settings['file_extensions']],
+        'FileImageDimensions' => ['maxDimensions' => $field_settings['max_resolution']],
+        'FileSizeLimit' => ['fileLimit' => (int) $field_settings['max_filesize']],
+      ];
+      $errors = $this->fileValidator->validate($managed_file, $validators);
+      $has_error = $errors->count() > 0;
     }
 
     // @todo Verify file garbage collection.
@@ -620,7 +647,12 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
           ['@error' => $error]
         );
     }
-    return NULL;
+
+    if (!$managed_file || $has_error) {
+      return NULL;
+    }
+
+    return ['target_id' => $managed_file->id()];
   }
 
   /**

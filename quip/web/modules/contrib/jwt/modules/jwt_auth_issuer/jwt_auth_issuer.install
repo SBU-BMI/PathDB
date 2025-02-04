@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the JWT Auth issuer module.
+ */
+
+/**
+ * Add jwt_auth_issuer.config to the system.
+ */
+function jwt_auth_issuer_update_20001() {
+  \Drupal::configFactory()
+    ->getEditable('jwt_auth_issuer.config')
+    ->set('jwt_in_login_response', FALSE)
+    ->save(TRUE);
+}

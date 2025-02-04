@@ -76,7 +76,7 @@ class AutoEntityLabelFormTest extends EntityKernelTestBase {
 
     $this->installConfig(self::$modules);
 
-    $this->mockRouteMatch = $this->getMockBuilder(RouteMatchInterface::class)->disableOriginalConstructor()->getMock();
+    $this->mockRouteMatch = $this->createMock(RouteMatchInterface::class);
     $this->mockRouteMatch->method('getRouteObject')->willReturn(new Route(
       '/admin/structure/types/manage/{node_type}/auto-label',
       [

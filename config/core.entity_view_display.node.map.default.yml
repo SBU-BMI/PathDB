@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.node.map.execution_id
     - field.field.node.map.field_map
+    - field.field.node.map.field_map_type
     - field.field.node.map.field_target_collection
     - field.field.node.map.field_wsi
     - node.type.map
@@ -49,5 +50,6 @@ content:
     weight: 3
     region: content
 hidden:
+  field_map_type: true
   links: true
   search_api_excerpt: true

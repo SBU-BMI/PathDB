@@ -8,22 +8,126 @@
 declare(strict_types=1);
 
 /**
- * Implements hook_module_preinstall().
+ * Migrate roles from field 'authorization_drupal_roles_roles' to user data.
  */
-function authorization_drupal_roles_module_preinstall($module) {
-  if ($module === 'authorization_drupal_roles') {
-    $type = \Drupal::entityTypeManager()->getDefinition('user');
-    $fields = authorization_drupal_roles_entity_base_field_info($type);
-    foreach ($fields as $name => $data) {
-      \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition($name, 'user', 'authorization_drupal_roles', $data);
-    }
-  }
-}
+function authorization_drupal_roles_update_8004(&$sandbox) {
 
-/**
- * Enable grant records on existing sites.
- */
-function authorization_drupal_roles_update_8001() {
-  authorization_drupal_roles_module_preinstall('authorization_drupal_roles');
-  return t('See README.md for the current behavior.');
+  if (!isset($sandbox['total'])) {
+    $update_manager = \Drupal::entityDefinitionUpdateManager();
+    $definition = $update_manager->getFieldStorageDefinition('authorization_drupal_roles_roles', 'user');
+    if (is_null($definition)) {
+      $sandbox['#finished'] = 1;
+      \Drupal::logger('authorization_drupal_roles')
+        ->error('"authorization_drupal_roles_roles" field is not present. Unable to move roles to user data.');
+      return;
+    }
+    $profiles = \Drupal::entityTypeManager()
+      ->getStorage('authorization_profile')
+      ->loadMultiple();
+
+    $sandbox['profiles'] = [];
+    foreach ($profiles as $profile) {
+      $sync_actions = $profile->get('synchronization_actions');
+      if (!$sync_actions['revoke_provider_provisioned']) {
+        continue;
+      }
+      $mappings = $profile->getConsumerMappings();
+      $roles = [];
+      foreach ($mappings as $mapping) {
+        $role = $mapping['role'];
+        if ($role == 'none') {
+          continue;
+        }
+        $roles[] = $role;
+      }
+      if (empty($roles)) {
+        continue;
+      }
+      $sandbox['profiles'][$profile->id()] = $roles;
+
+    }
+    if (empty($sandbox['profiles'])) {
+      $sandbox['#finished'] = 1;
+      \Drupal::logger('authorization_drupal_roles')
+        ->notice('No profiles have revoke_provider_provisioned enabled. No roles to move to user data.');
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $definition = $update_manager->getFieldStorageDefinition('authorization_drupal_roles_roles', 'user');
+      $update_manager->uninstallFieldStorageDefinition($definition);
+      return;
+    }
+
+    $sandbox['current'] = 0;
+    $sandbox['user_ids'] = \Drupal::database()->select('user__authorization_drupal_roles_roles', 'ur')
+      ->fields('ur', ['entity_id'])
+      ->distinct()
+      ->execute()
+      ->fetchCol();
+
+    $sandbox['total'] = count($sandbox['user_ids']);
+
+    if ($sandbox['total'] == 0) {
+      $sandbox['#finished'] = 1;
+      \Drupal::logger('authorization_drupal_roles')
+        ->notice('No users have authorization_drupal_roles_roles values. No roles to move to user data.');
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $definition = $update_manager->getFieldStorageDefinition('authorization_drupal_roles_roles', 'user');
+      $update_manager->uninstallFieldStorageDefinition($definition);
+      return;
+    }
+
+    $sandbox['#finished'] = 0;
+
+    return;
+  }
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+  $start = \Drupal::time()->getRequestTime();
+  $now = \Drupal::time()->getRequestTime();
+  $user_service = \Drupal::service('user.data');
+  $database = \Drupal::service('database');
+
+  while (30 > ($now - $start) && !empty($sandbox['user_ids'])) {
+    $user_id = array_pop($sandbox['user_ids']);
+    $sandbox['current'] += 1;
+    $user = $user_storage->load($user_id);
+    $drupal_roles = $database->select('user__authorization_drupal_roles_roles', 'ur')
+      ->fields('ur', ['authorization_drupal_roles_roles_value'])
+      ->condition('entity_id', $user_id)
+      ->condition('bundle', 'user')
+      ->execute()
+      ->fetchCol();
+    $roles = [];
+    foreach ($drupal_roles as $role) {
+      if (!$user->hasRole($role)) {
+        continue;
+      }
+      $roles[$role] = $role;
+    }
+    $user_roles = [];
+    foreach ($sandbox['profiles'] as $profile_id => $profile_roles) {
+      foreach ($profile_roles as $role) {
+        if (!isset($roles[$role])) {
+          continue;
+        }
+        $user_roles[$role] = $profile_id;
+        unset($roles[$role]);
+      }
+      if (empty($user_roles)) {
+        continue;
+      }
+    }
+
+    if (!empty($user_roles)) {
+      $user_service->set('authorization_drupal_roles', $user_id, 'roles', $user_roles);
+    }
+
+    $now = \Drupal::time()->getCurrentTime();
+  }
+
+  if (empty($sandbox['user_ids'])) {
+    $update_manager = \Drupal::entityDefinitionUpdateManager();
+    $definition = $update_manager->getFieldStorageDefinition('authorization_drupal_roles_roles', 'user');
+    $update_manager->uninstallFieldStorageDefinition($definition);
+  }
+
+  $sandbox['#finished'] = empty($sandbox['user_ids']) ? 1 : $sandbox['current'] / $sandbox['total'];
 }

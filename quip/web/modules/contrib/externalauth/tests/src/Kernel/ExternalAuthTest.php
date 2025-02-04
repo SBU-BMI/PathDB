@@ -11,7 +11,10 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class ExternalAuthTest extends KernelTestBase {
 
-  public static $modules = [
+  /**
+   * {@inheritdoc}
+   */
+  protected static $modules = [
     'externalauth',
     'system',
     'user',

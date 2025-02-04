@@ -79,7 +79,7 @@ abstract class BlockBase extends DsFieldBase implements ContainerFactoryPluginIn
     $block_config = $this->blockConfig();
     $block->setConfiguration($block_config);
 
-    $add_wrappers = isset($this->getFieldConfiguration()['properties']['add_block_wrappers']) ? $this->getFieldConfiguration()['properties']['add_block_wrappers'] : FALSE;
+    $add_wrappers = isset($this->getFieldConfiguration()['properties']['add_block_wrappers']) && $this->getFieldConfiguration()['properties']['add_block_wrappers'];
 
     if ($block->access(\Drupal::currentUser())) {
       // Inject context values.

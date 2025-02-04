@@ -1,0 +1,7 @@
+jwt_auth_issuer.config:
+  type: config_object
+  label: 'JWT Auth Issuer settings'
+  mapping:
+    jwt_in_login_response:
+      type: boolean
+      label: 'Add JWT token to user login response'

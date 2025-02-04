@@ -1,10 +1,10 @@
-name: HTTP Response Headers
+name: 'HTTP Response Headers'
+description: 'HTTP header manipulations to improve performance and secure HTTP headers.'
 type: module
-description: 'HTTP Header manipulations to improve performance and secure HTTP headers.'
-core_version_requirement: ^9.3 || ^10
-package: Other
+configure: entity.response_header.collection
+core_version_requirement: ^9.5 || ^10 || ^11
 
-# Information added by Drupal.org packaging script on 2023-08-06
-version: '8.x-2.0-rc4'
+# Information added by Drupal.org packaging script on 2024-08-06
+version: '3.0.9'
 project: 'http_response_headers'
-datestamp: 1691303976
+datestamp: 1722936899

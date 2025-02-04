@@ -3,7 +3,7 @@
 namespace Drupal\jwt\Authentication\Event;
 
 /**
- * Class JwtAuthValidateEvent.
+ * An event triggered before a JWT token is validated.
  */
 class JwtAuthValidateEvent extends JwtAuthBaseEvent {
 

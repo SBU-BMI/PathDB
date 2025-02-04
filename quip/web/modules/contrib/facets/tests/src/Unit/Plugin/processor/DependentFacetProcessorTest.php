@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\facets\Unit\Plugin\processor;
 
+use Drupal\Core\Cache\Context\CacheContextsManager;
 use Drupal\Tests\facets\Unit\Drupal10CompatibilityUnitTestCase;
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -33,6 +34,7 @@ class DependentFacetProcessorTest extends Drupal10CompatibilityUnitTestCase {
    * {@inheritdoc}
    */
   public function setUp(): void {
+    parent::setUp();
     $facet = new Facet([], 'facets_facet');
     $this->results = [
       new Result($facet, 'snow_owl', 'Snow owl', 2),
@@ -57,10 +59,14 @@ class DependentFacetProcessorTest extends Drupal10CompatibilityUnitTestCase {
 
     $event_dispatcher = $this->createMock(EventDispatcher::class);
 
+    $cache_contexts_manager = $this->createMock(CacheContextsManager::class);
+    $cache_contexts_manager->method('assertValidTokens')->willReturn(TRUE);
+
     $container = new ContainerBuilder();
     $container->set('entity_type.manager', $entity_type_manager);
     $container->set('plugin.manager.facets.processor', $processor_plugin_manager);
     $container->set('event_dispatcher', $event_dispatcher);
+    $container->set('cache_contexts_manager', $cache_contexts_manager);
     \Drupal::setContainer($container);
   }
 
@@ -140,7 +146,7 @@ class DependentFacetProcessorTest extends Drupal10CompatibilityUnitTestCase {
    * @return array
    *   An array of test data.
    */
-  public function provideNegated() {
+  public static function provideNegated() {
     return [
       'negated' => [TRUE],
       'normal' => [FALSE],

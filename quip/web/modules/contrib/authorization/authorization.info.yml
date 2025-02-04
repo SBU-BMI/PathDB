@@ -1,13 +1,13 @@
 name: Authorization
 type: module
 description: Authorization API connects up providers (for example LDAP) with consumers (for example Organic Groups or Drupal roles).
-core_version_requirement: ^9 || ^10
-package: Other
+core_version_requirement: ^9 || ^10 || ^11
+package: Authorization
 configure: entity.authorization_profile.configuration_form
 dependencies:
   - externalauth:externalauth
 
-# Information added by Drupal.org packaging script on 2023-10-20
-version: '8.x-1.1'
+# Information added by Drupal.org packaging script on 2024-11-07
+version: '8.x-1.5'
 project: 'authorization'
-datestamp: 1697822595
+datestamp: 1731019648

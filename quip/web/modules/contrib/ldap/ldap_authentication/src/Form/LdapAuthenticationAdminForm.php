@@ -1,10 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_authentication\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -16,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides the form for ldap_authentication options.
  */
-class LdapAuthenticationAdminForm extends ConfigFormBase {
+final class LdapAuthenticationAdminForm extends ConfigFormBase {
 
   /**
    * Module handler.
@@ -54,14 +55,30 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Constructor.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Config factory.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   Module handler.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface|null $config_type_manager
+   *   Config type manager.
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
     ModuleHandlerInterface $module_handler,
-    EntityTypeManagerInterface $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager,
+    ?TypedConfigManagerInterface $config_type_manager = NULL,
   ) {
-    parent::__construct($config_factory);
+    if (version_compare(\Drupal::VERSION, '10.2.0', '>=')) {
+      parent::__construct($config_factory, $config_type_manager);
+    }
+    else {
+      parent::__construct($config_factory);
+    }
+
     $this->moduleHandler = $module_handler;
     $this->entityTypeManager = $entity_type_manager;
     $this->storage = $entity_type_manager->getStorage('ldap_server');
@@ -71,10 +88,11 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): LdapAuthenticationAdminForm {
-    return new static(
+    return new self(
       $container->get('config.factory'),
       $container->get('module_handler'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('config.typed')
     );
   }
 
@@ -109,20 +127,19 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
 
       return $form;
     }
-
-    $form['intro'] = [
-      '#type' => 'item',
-      '#markup' => $this->t('<h1>LDAP Authentication Settings</h1>'),
+    $form['advanced'] = [
+      '#type' => 'vertical_tabs',
+      '#title' => $this->t('Advanced Settings'),
+      '#title_display' => 'invisible',
     ];
 
-    $form['logon'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Logon Options'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+    $form['login'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Login'),
+      '#group' => 'advanced',
     ];
 
-    $form['logon']['authenticationMode'] = [
+    $form['login']['authenticationMode'] = [
       '#type' => 'radios',
       '#title' => $this->t('Allowable Authentications'),
       '#required' => TRUE,
@@ -143,7 +160,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
       ->condition('is_admin', TRUE)
       ->execute();
 
-    $form['logon']['skipAdministrators'] = [
+    $form['login']['skipAdministrators'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Exclude members of the administrative group from LDAP authentication'),
       '#default_value' => $config->get('skipAdministrators'),
@@ -153,7 +170,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
       ),
     ];
 
-    $form['logon']['authenticationServers'] = [
+    $form['login']['authenticationServers'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Authentication LDAP Server Configurations'),
       '#required' => FALSE,
@@ -164,14 +181,13 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
      until each is exhausted.  In most cases only one server configuration is selected.'),
     ];
 
-    $form['login_UI'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('User Login Interface'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+    $form['user_interface'] = [
+      '#type' => 'details',
+      '#title' => $this->t('User Interface'),
+      '#group' => 'advanced',
     ];
 
-    $form['login_UI']['loginUIUsernameTxt'] = [
+    $form['user_interface']['loginUIUsernameTxt'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Username Description Text'),
       '#required' => FALSE,
@@ -179,7 +195,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
       '#description' => $this->t('Text to be displayed to user below the username field of the user login screen.'),
     ];
 
-    $form['login_UI']['loginUIPasswordTxt'] = [
+    $form['user_interface']['loginUIPasswordTxt'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Password Description Text'),
       '#required' => FALSE,
@@ -187,7 +203,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
       '#description' => $this->t('Text to be displayed to user below the password field of the user login screen.'),
     ];
 
-    $form['login_UI']['ldapUserHelpLinkUrl'] = [
+    $form['user_interface']['ldapUserHelpLinkUrl'] = [
       '#type' => 'textfield',
       '#title' => $this->t('LDAP Account User Help URL'),
       '#required' => FALSE,
@@ -197,7 +213,7 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
      or a page within this Drupal site that is available to anonymous users.'),
     ];
 
-    $form['login_UI']['ldapUserHelpLinkText'] = [
+    $form['user_interface']['ldapUserHelpLinkText'] = [
       '#type' => 'textfield',
       '#title' => $this->t('LDAP Account User Help Link Text'),
       '#required' => FALSE,
@@ -206,10 +222,9 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
     ];
 
     $form['restrictions'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('LDAP User "Whitelists" and Restrictions'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+      '#type' => 'details',
+      '#title' => $this->t('Access Restrictions'),
+      '#group' => 'advanced',
     ];
 
     $form['restrictions']['allowOnlyIfTextInDn'] = [
@@ -238,11 +253,13 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
       '#default_value' => $config->get('excludeIfNoAuthorizations'),
       '#description' => $this->t('If the user is not granted any Drupal roles, organic groups, etc. by LDAP Authorization, login will be denied.  LDAP Authorization must be enabled for this to work.'),
       '#disabled' => !$this->moduleHandler->moduleExists('ldap_authorization'),
+      '#weight' => -10,
     ];
 
     $form['email'] = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => $this->t('Email'),
+      '#group' => 'advanced',
     ];
 
     $form['email']['emailOption'] = [
@@ -332,8 +349,9 @@ class LdapAuthenticationAdminForm extends ConfigFormBase {
     ];
 
     $form['password'] = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => $this->t('Password'),
+      '#group' => 'advanced',
     ];
     $form['password']['passwordOption'] = [
       '#type' => 'radios',

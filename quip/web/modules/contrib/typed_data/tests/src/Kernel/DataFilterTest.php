@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Kernel;
 
 use Drupal\Core\Datetime\Entity\DateFormat;
@@ -141,6 +143,7 @@ class DataFilterTest extends KernelTestBase {
     $this->assertEquals('This value should be of the correct primitive type.', $fails[0]);
     $this->assertEquals('This value should be of the correct primitive type.', $fails[1]);
 
+    // cspell:ignore mispeling
     $this->assertEquals('Text with misspelling to correct', $filter->filter($data->getDataDefinition(), $data->getValue(), ['mispeling', 'misspelling']));
   }
 

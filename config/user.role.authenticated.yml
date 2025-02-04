@@ -8,6 +8,7 @@ dependencies:
     - node.type.wsi
   module:
     - comment
+    - file
     - filter
     - node
     - system
@@ -22,6 +23,7 @@ permissions:
   - 'access content'
   - 'create map content'
   - 'create wsi content'
+  - 'delete own files'
   - 'delete own map content'
   - 'delete own wsi content'
   - 'edit own map content'

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -70,7 +70,7 @@ class LdapBridge implements LdapBridgeInterface {
    */
   public function __construct(
     LoggerInterface $logger,
-    EntityTypeManagerInterface $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager,
   ) {
     $this->logger = $logger;
     $this->entityManager = $entity_type_manager

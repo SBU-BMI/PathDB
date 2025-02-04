@@ -2132,16 +2132,16 @@ mail: Albus.Dumbledore@Hogwarts.edu
 uid: 20010
 userPassword: {SHA}nU4eI71bcnBGqeO0t9tXvY1u5oQ=
 
-dn: cn=mmcgonagal,ou=people,dc=hogwarts,dc=edu
+dn: cn=mmcgonagall,ou=people,dc=hogwarts,dc=edu
 objectClass: organizationalPerson
 objectClass: person
 objectClass: inetOrgPerson
 objectClass: top
-cn: mmcgonagal
-sn: Mcgonagal
+cn: mmcgonagall
+sn: Mcgonagall
 businessCategory: professor
 businessCategory: administrator
-displayName: Minerva Mcgonagal
+displayName: Minerva Mcgonagall
 givenName: Minerva
 jpegPhoto:: /9j/4AAQSkZJRgABAQEASABIAAD/4ghESUNDX1BST0ZJTEUAAQEAAAg0bXNmdAIA
  AABtbnRyUkdCIFhZWiAH0gAIAAUADQAWAAFhY3NwTVNGVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -2347,7 +2347,7 @@ jpegPhoto:: /9j/4AAQSkZJRgABAQEASABIAAD/4ghESUNDX1BST0ZJTEUAAQEAAAg0bXNmdAIA
  9md/gUHvKT484cMed5BXmXeTUIYjAg2AcNCCXmfTMHGxJm4p94JBOOsT3uLwfHTi6D0bxhuogm8
  aab9Zuzw4PVg8/nhy1XtxnEcneuHO97wJVLOzNLcHozQW7mWml/ecbl+M2XWLFP8Acr6GK6JM4v
  S/hds5dP8AA7P1iFJs272Zy3r24x0oZIWrXgzlk+s//9k=
-mail: Minerva.Mcgonagal@Hogwarts.edu
+mail: Minerva.Mcgonagall@Hogwarts.edu
 uid: 20011
 userPassword: {SHA}nU4eI71bcnBGqeO0t9tXvY1u5oQ=
 

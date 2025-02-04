@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\typed_data;
 
 use Drupal\Core\Cache\CacheableDependencyInterface;
@@ -27,7 +29,7 @@ class DataFetcher implements DataFetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchDataByPropertyPath(TypedDataInterface $typed_data, $property_path, BubbleableMetadata $bubbleable_metadata = NULL, $langcode = NULL) {
+  public function fetchDataByPropertyPath(TypedDataInterface $typed_data, string $property_path, ?BubbleableMetadata $bubbleable_metadata = NULL, ?string $langcode = NULL): TypedDataInterface {
     $sub_paths = explode('.', $property_path);
     return $this->fetchDataBySubPaths($typed_data, $sub_paths, $bubbleable_metadata, $langcode);
   }
@@ -35,7 +37,7 @@ class DataFetcher implements DataFetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchDataBySubPaths(TypedDataInterface $typed_data, array $sub_paths, BubbleableMetadata $bubbleable_metadata = NULL, $langcode = NULL) {
+  public function fetchDataBySubPaths(TypedDataInterface $typed_data, array $sub_paths, ?BubbleableMetadata $bubbleable_metadata = NULL, ?string $langcode = NULL): TypedDataInterface {
     $current_selector = [];
     $bubbleable_metadata = $bubbleable_metadata ?: new BubbleableMetadata();
 
@@ -104,7 +106,7 @@ class DataFetcher implements DataFetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchDefinitionByPropertyPath(DataDefinitionInterface $data_definition, $property_path, $langcode = NULL) {
+  public function fetchDefinitionByPropertyPath(DataDefinitionInterface $data_definition, string $property_path, ?string $langcode = NULL): DataDefinitionInterface {
     $sub_paths = explode('.', $property_path);
     return $this->fetchDefinitionBySubPaths($data_definition, $sub_paths, $langcode);
   }
@@ -112,7 +114,7 @@ class DataFetcher implements DataFetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchDefinitionBySubPaths(DataDefinitionInterface $data_definition, array $sub_paths, $langcode = NULL) {
+  public function fetchDefinitionBySubPaths(DataDefinitionInterface $data_definition, array $sub_paths, ?string $langcode = NULL): DataDefinitionInterface {
     $current_selector = [];
 
     foreach ($sub_paths as $name) {
@@ -149,8 +151,7 @@ class DataFetcher implements DataFetcherInterface {
         }
       }
 
-      // If an accessed property is not existing, $data_definition will be
-      // NULL.
+      // If an accessed property does not exist, $data_definition will be NULL.
       if (!isset($data_definition)) {
         $selector_string = implode('.', $sub_paths);
         $current_selector_string = implode('.', $current_selector);
@@ -163,7 +164,7 @@ class DataFetcher implements DataFetcherInterface {
   /**
    * {@inheritdoc}
    */
-  public function autocompletePropertyPath(array $data_definitions, $partial_property_path) {
+  public function autocompletePropertyPath(array $data_definitions, string $partial_property_path): array {
     // For the empty string we suggest the names of the data definitions.
     if ($partial_property_path == '') {
       return array_keys($data_definitions);
@@ -290,7 +291,7 @@ class DataFetcher implements DataFetcherInterface {
    *   - value: the data selector property path.
    *   - label: the human readable label suggestion.
    */
-  protected function getAutocompleteSuggestion(DataDefinitionInterface $data_definition, $variable_name) {
+  protected function getAutocompleteSuggestion(DataDefinitionInterface $data_definition, string $variable_name): array {
     $label = $variable_name;
     if ($data_label = $data_definition->getLabel()) {
       $label .= " ($data_label)";
@@ -324,7 +325,7 @@ class DataFetcher implements DataFetcherInterface {
    * @param \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata
    *   The bubbleable metadata to which to add the data.
    */
-  protected function addBubbleableMetadata(TypedDataInterface $data, BubbleableMetadata $bubbleable_metadata) {
+  protected function addBubbleableMetadata(TypedDataInterface $data, BubbleableMetadata $bubbleable_metadata): void {
     if ($data instanceof PrimitiveInterface) {
       // Primitives do not have any metadata attached.
       return;

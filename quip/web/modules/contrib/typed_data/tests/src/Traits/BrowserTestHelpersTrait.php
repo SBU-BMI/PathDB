@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Traits;
 
 use Behat\Mink\Element\NodeElement;

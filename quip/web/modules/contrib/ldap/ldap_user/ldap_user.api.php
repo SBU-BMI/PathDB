@@ -5,7 +5,7 @@
  * Hooks and functions relevant to developers.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\user\UserInterface;
 use Symfony\Component\Ldap\Entry;
@@ -66,5 +66,5 @@ function hook_ldap_user_edit_user_alter(UserInterface $account, Entry $entry, ar
   $tokenProcessor = \Drupal::service('ldap.token_processor');
 
   $value = $tokenProcessor->ldapEntryReplacementsForDrupalAccount($entry, '[sn]');
-  $account->set('myfield', $value);
+  $account->set('my_field', $value);
 }

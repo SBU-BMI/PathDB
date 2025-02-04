@@ -5,26 +5,33 @@
  * This module injects itself into Drupal's Authentication stack.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
  */
-function ldap_authentication_help($path, $arg) {
+function ldap_authentication_help($route_name, RouteMatchInterface $route_match) {
 
-  $authentication_help = t('LDAP authentication allows authentication against an LDAP server. It may be used alongside other authentication means such as built in Drupal authentication, OpenID, etc.  More detailed help is available on drupal.org at !helplink.', [
-    '%helplink' => Link::fromTextAndUrl('http://drupal.org/node/997082', Url::fromUri('http://drupal.org/node/997082')),
-  ]
-  );
-  switch ($path) {
-    case 'admin/config/people/ldap/authentication':
-    case 'admin/help#ldap_authentication':
-      return '<p>' . $authentication_help . '</p>';
+  $output = '';
+  switch ($route_name) {
+    case 'ldap_authentication.admin_form':
+    case 'help.page.ldap_authentication':
+      $authentication_help = t('LDAP authentication allows authentication against an LDAP server. It may be used alongside other authentication means such as built in Drupal authentication, OpenID, etc.  More detailed help is available on drupal.org at <a href=":url">:url</a>.', [
+        ':url' => 'http://drupal.org/node/997082',
+      ]);
+      $output = '<p>' . $authentication_help . '</p>';
+      break;
+
+    default:
+      break;
   }
+
+  return $output;
 }
 
 /**

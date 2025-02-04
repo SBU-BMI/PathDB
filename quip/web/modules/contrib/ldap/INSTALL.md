@@ -70,7 +70,7 @@ entering a dummy password and providing the real password as a configuration
 override via settings.php, e.g.:
 
 ```
-$config['ldap_servers.server.YOURSERVER']['bindpw'] = 'actual-password';
+$config['ldap_servers.server.YOUR_SERVER']['bindpw'] = 'actual-password';
 ```
 
 Furthermore, you have the option of adding this password to a file outside the

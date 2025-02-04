@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -371,7 +371,7 @@ class LdapGroupManager extends LdapBaseManager {
    * @param array $tested_group_dns
    *   Tested group IDs as an array array of tested group dn, cn, uid, etc.
    *   Mixed case values. Whether these value are dn, cn, uid, etc depends on
-   *   what attribute members, uniquemember, memberUid contains whatever
+   *   what attribute members, uniqueMember, memberUid contains whatever
    *   attribute is in $this->$tested_group_ids to avoid redundant recursion.
    * @param int $level
    *   Current level of recursion.
@@ -387,7 +387,7 @@ class LdapGroupManager extends LdapBaseManager {
     array $tested_group_dns,
     int $level,
     int $max_levels,
-    ?array $object_classes = NULL
+    ?array $object_classes = NULL,
   ): void {
     if (!$this->checkAvailability()) {
       return;
@@ -529,7 +529,7 @@ class LdapGroupManager extends LdapBaseManager {
         else {
           $member_value = $this->getFirstRdnValueFromDn($member_group_dn);
         }
-        $orFilters[] = $this->server->get('grp_memb_attr') . '=' . $this->ldapEscapeDn($member_value);
+        $orFilters[] = $this->server->get('grp_memb_attr') . '=' . $this->ldapEscapeFilter($member_value);
       }
     }
 
@@ -570,7 +570,7 @@ class LdapGroupManager extends LdapBaseManager {
       $member_value = $ldap_entry->getAttribute($this->server->get('grp_memb_attr_match_user_attr'), FALSE)[0];
     }
 
-    // Need to search on all basedns one at a time.
+    // Need to search on all baseDNS one at a time.
     foreach ($this->server->getBaseDn() as $baseDn) {
       // Only need dn, so empty array forces return of no attributes.
       // @todo See if this syntax is correct.
@@ -605,7 +605,7 @@ class LdapGroupManager extends LdapBaseManager {
    * @param array $tested_group_ids
    *   An array of tested group DN, CN, UID, etc. in mixed-case. Whether these
    *   value are DN, CN, UID, etc. depends on what attribute members,
-   *   uniquemember, or memberUid contains whatever attribute in
+   *   uniqueMember, or memberUid contains whatever attribute in
    *   $this->$tested_group_ids to avoid redundant recursion.
    * @param int $level
    *   Levels of recursion.
@@ -623,7 +623,7 @@ class LdapGroupManager extends LdapBaseManager {
     array &$all_group_dns,
     array &$tested_group_ids,
     int $level,
-    int $max_levels
+    int $max_levels,
   ): bool {
 
     if (!$this->groupGroupEntryMembershipsConfigured() || $current_group_entries->count() === 0) {

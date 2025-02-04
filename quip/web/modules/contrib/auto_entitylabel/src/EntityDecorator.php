@@ -64,7 +64,7 @@ class EntityDecorator implements EntityDecoratorInterface {
     ConfigFactoryInterface $config_factory,
     EntityTypeManagerInterface $entity_type_manager,
     Token $token,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
   ) {
     $this->configFactory = $config_factory;
     $this->entityTypeManager = $entity_type_manager;

@@ -1,4 +1,12 @@
 services:
+  logger.channel.ldap_query:
+    parent: logger.channel_base
+    arguments:
+      - 'ldap_query'
+
   ldap.query:
     class: Drupal\ldap_query\Controller\QueryController
-    arguments: ['@entity_type.manager', '@ldap.bridge', '@logger.channel.ldap_servers']
+    arguments:
+      - '@entity_type.manager'
+      - '@ldap.bridge'
+      - '@logger.channel.ldap_query'

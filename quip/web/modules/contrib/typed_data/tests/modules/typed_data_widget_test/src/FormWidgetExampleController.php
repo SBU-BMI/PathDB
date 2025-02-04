@@ -14,8 +14,11 @@ class FormWidgetExampleController extends ControllerBase {
 
   /**
    * Returns a couple of links to widgets.
+   *
+   * @return array
+   *   A Drupal render array.
    */
-  public function listWidgetExamples() {
+  public function listWidgetExamples(): array {
     $build = [
       '#theme' => 'item_list',
       '#title' => 'Widgets',

@@ -134,32 +134,27 @@ class AdminModeration
             $this->entity = $latest_revision;
           }
           // Add a hook that allows verifications outside of moderated_content_bulk_publish.
-          $entity = $this->entity->getTranslation($langcode);
-          $bodyfields = $entity->getFields();
-          $bodyfield = NULL;
+          $this->entity = $this->entity->getTranslation($langcode);
+          $bodyfields = $this->entity->getFields();
+          $bodyFieldVal = NULL;
           if (isset($bodyfields['body'])) {
             $bodyfield = $bodyfields['body'];
+            $bodyFieldVal = $bodyfield->getValue();
           }
-          if (isset($bodyfield)) {
-            $fieldval = $bodyfield->getValue();
-            if (isset($fieldval)) {
-              if (isset($fieldval[0])) {
-                $hookObject = new HookObject();
-                $hookObject->nid = $this->entity->id();
-                $hookObject->body_field_val = $fieldval[0]['value'];
-                $hookObject->validate_failure = $validate_failure;
-                \Drupal::moduleHandler()->invokeAll('moderated_content_bulk_publish_verify_publish', [$hookObject]);
-                if ($hookObject->validate_failure) {
-                  $error_message = $hookObject->error_message;
-                  $msgdetail_isToken = $hookObject->msgdetail_isToken;
-                  $msgdetail_isPublished = $hookObject->msgdetail_isPublished;
-                  $msgdetail_isAbsoluteURL = $hookObject->msgdetail_isAbsoluteURL;
-                  return NULL;
-                }
-              }
-            }
+          $hookObject = new HookObject();
+          $hookObject->nid = $this->entity->id();
+          $hookObject->body_field_val = $bodyFieldVal[0]['value'] ?? NULL;
+          $hookObject->bundle = $this->entity->bundle();
+          $hookObject->langcode = $langcode;
+          $hookObject->validate_failure = $validate_failure;
+          \Drupal::moduleHandler()->invokeAll('moderated_content_bulk_publish_verify_publish', [$hookObject]);
+          if ($hookObject->validate_failure) {
+            $error_message = $hookObject->error_message;
+            $msgdetail_isToken = $hookObject->msgdetail_isToken;
+            $msgdetail_isPublished = $hookObject->msgdetail_isPublished;
+            $msgdetail_isAbsoluteURL = $hookObject->msgdetail_isAbsoluteURL;
+            return NULL;
           }
-          $this->entity = $this->entity->getTranslation($langcode);
           $this->entity->set('moderation_state', $published_state);
           if ($this->entity instanceof RevisionLogInterface) {
             // $now = time();
@@ -236,6 +231,7 @@ class AdminModeration
           $hookObject = new HookObject();
           $hookObject->nid = $nid;
           $hookObject->bundle = $bundle;
+          $hookObject->langcode = $langcode;
           $hookObject->show_button = TRUE;
           $hookObject->markup = $markup;
           $hookObject->error_message = $error_message;

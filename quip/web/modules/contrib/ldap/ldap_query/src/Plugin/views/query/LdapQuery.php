@@ -1,14 +1,18 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_query\Plugin\views\query;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Views query plugin for an SQL query.
@@ -41,7 +45,84 @@ class LdapQuery extends QueryPluginBase {
    *
    * @var array
    */
-  private const LDAP_FILTER_OPERATORS = ['AND' => '&', 'OR' => '|'];
+  protected const LDAP_FILTER_OPERATORS = ['AND' => '&', 'OR' => '|'];
+
+  /**
+   * The query logger.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * LDAP Query.
+   *
+   * @var \Drupal\ldap_query\Controller\QueryController
+   */
+  protected $ldapQuery;
+
+  /**
+   * Creates a new LdapQuery object.
+   *
+   * @param array $configuration
+   *   Configuration.
+   * @param string $plugin_id
+   *   Plugin ID.
+   * @param mixed $plugin_definition
+   *   Plugin definition.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   Logger.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   Module handler.
+   * @param \Drupal\ldap_query\Controller\QueryController $ldap_query
+   *   LDAP Query.
+   */
+  final public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    LoggerInterface $logger,
+    EntityTypeManagerInterface $entity_type_manager,
+    ModuleHandlerInterface $module_handler,
+    $ldap_query,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->logger = $logger;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->moduleHandler = $module_handler;
+    $this->ldapQuery = $ldap_query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new self(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('logger.channel.ldap_query'),
+      $container->get('entity_type.manager'),
+      $container->get('module_handler'),
+      $container->get('ldap.query')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -77,20 +158,17 @@ class LdapQuery extends QueryPluginBase {
    */
   public function execute(ViewExecutable $view) {
     if (!isset($this->options['query_id']) || empty($this->options['query_id'])) {
-      \Drupal::logger('ldap')->error('You are trying to use Views without having chosen an LDAP Query under Advanced => Query settings.');
+      $this->logger->error('You are trying to use Views without having chosen an LDAP Query under Advanced => Query settings.');
       return FALSE;
     }
     $start = microtime(TRUE);
 
-    // @todo Dependency Injection.
-    /** @var \Drupal\ldap_query\Controller\QueryController $controller */
-    $controller = \Drupal::service('ldap.query');
-    $controller->load($this->options['query_id']);
-    $filter = $this->buildLdapFilter($controller->getFilter());
+    $this->ldapQuery->load($this->options['query_id']);
+    $filter = $this->buildLdapFilter($this->ldapQuery->getFilter());
 
-    $controller->execute($filter);
-    $results = $controller->getRawResults();
-    $fields = $controller->availableFields();
+    $this->ldapQuery->execute($filter);
+    $results = $this->ldapQuery->getRawResults();
+    $fields = $this->ldapQuery->availableFields();
 
     $index = 0;
     $rows = [];
@@ -206,8 +284,10 @@ class LdapQuery extends QueryPluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     parent::buildOptionsForm($form, $form_state);
 
-    $queries = \Drupal::EntityQuery('ldap_query_entity')
+    $queries = $this->entityTypeManager->getStorage('ldap_query_entity')
+      ->getQuery()
       ->condition('status', 1)
+      ->accessCheck(FALSE)
       ->execute();
 
     $form['query_id'] = [
@@ -341,7 +421,7 @@ class LdapQuery extends QueryPluginBase {
    *   View.
    */
   public function alter(ViewExecutable $view): void {
-    \Drupal::moduleHandler()->invokeAll('views_query_alter', [$view, $this]);
+    $this->moduleHandler->invokeAll('views_query_alter', [$view, $this]);
   }
 
 }

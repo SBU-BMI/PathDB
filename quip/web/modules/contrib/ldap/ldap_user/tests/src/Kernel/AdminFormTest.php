@@ -41,7 +41,8 @@ class AdminFormTest extends KernelTestBase {
     $adminForm = new LdapUserAdminForm(
       $this->container->get('config.factory'),
       $this->container->get('module_handler'),
-      $this->container->get('entity_type.manager')
+      $this->container->get('entity_type.manager'),
+      $this->container->get('config.typed')
     );
 
     $form = [];
@@ -65,7 +66,8 @@ class AdminFormTest extends KernelTestBase {
     $adminForm = new LdapUserAdminForm(
       $this->container->get('config.factory'),
       $this->container->get('module_handler'),
-      $this->container->get('entity_type.manager')
+      $this->container->get('entity_type.manager'),
+      $this->container->get('config.typed')
     );
 
     $form = [];

@@ -5,18 +5,19 @@ namespace Drupal\views_data_export\Plugin\views\display;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Config\StorageException;
+use Drupal\Core\File\FileExists;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\rest\Plugin\views\display\RestExport;
-use Drupal\views\Views;
-use Drupal\views\ViewExecutable;
 use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Drupal\rest\Plugin\views\display\RestExport;
 use Drupal\search_api\Plugin\views\query\SearchApiQuery;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Views;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Drupal\Core\File\FileSystemInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 /**
  * Provides a data export display plugin.
@@ -148,7 +149,7 @@ class DataExport extends RestExport {
       ],
       'title' => t('Exporting data...'),
       'progressive' => TRUE,
-      'progress_message' => t('@percentage% complete. Time elapsed: @elapsed'),
+      'progress_message' => t('Time elapsed: @elapsed'),
       'finished' => [static::class, 'finishBatch'],
     ];
     batch_set($batch_definition);
@@ -633,7 +634,7 @@ class DataExport extends RestExport {
    * {@inheritdoc}
    */
   public function getAvailableGlobalTokens($prepared = FALSE, array $types = []) {
-    $types += ['date'];
+    $types = array_merge($types, ['date']);
     return parent::getAvailableGlobalTokens($prepared, $types);
   }
 
@@ -746,7 +747,13 @@ class DataExport extends RestExport {
         $fileSystem = \Drupal::service('file_system');
         $fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
         $destination = $directory . $filename;
-        $file = \Drupal::service('file.repository')->writeData('', $destination, FileSystemInterface::EXISTS_REPLACE);
+        if (version_compare(\Drupal::VERSION, '10.3', '>=')) {
+          $file = \Drupal::service('file.repository')->writeData('', $destination, FileExists::Replace);
+        }
+        else {
+          // @phpstan-ignore-next-line
+          $file = \Drupal::service('file.repository')->writeData('', $destination, FileSystemInterface::EXISTS_REPLACE);
+        }
         if (!$file) {
           // Failed to create the file, abort the batch.
           unset($context['sandbox']);
@@ -835,7 +842,7 @@ class DataExport extends RestExport {
         $rowIndex++;
         $colIndex = 0;
         foreach ($row->getCellIterator() as $cell) {
-          $previousExcel->getActiveSheet()->setCellValueByColumnAndRow(++$colIndex, $rowIndex, $cell->getValue());
+          $previousExcel->getActiveSheet()->setCellValue([++$colIndex, $rowIndex], $cell->getValue());
         }
       }
 

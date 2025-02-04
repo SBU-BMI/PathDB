@@ -2,6 +2,8 @@
 
 namespace Drupal\typed_data\Plugin\DataType;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\TypedData\Attribute\DataType;
 use Drupal\Core\TypedData\Plugin\DataType\StringData;
 use Drupal\typed_data\TypedData\Type\TextInterface;
 
@@ -17,12 +19,11 @@ use Drupal\typed_data\TypedData\Type\TextInterface;
  *
  * The plain value of a text type is a regular PHP string. For setting the value
  * any PHP variable that casts to a string may be passed.
- *
- * @DataType(
- *   id = "text",
- *   label = @Translation("Text")
- * )
  */
+#[DataType(
+  id: "text",
+  label: new TranslatableMarkup("Text")
+)]
 class TextData extends StringData implements TextInterface {
   // Simply extends StringData.
 }

@@ -2,41 +2,26 @@
 
 namespace Drupal\views_bulk_operations\Plugin\Action;
 
+use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Cancels a user account.
- *
- * @Action(
- *   id = "vbo_cancel_user_action",
- *   label = @Translation("Cancel the selected user accounts"),
- *   type = "user",
- * )
+ * Cancel a user account.
  */
+#[Action(
+  id: 'vbo_cancel_user_action',
+  label: new TranslatableMarkup('Cancel the selected user accounts'),
+  type: 'user'
+)]
 class CancelUserAction extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
-
-  /**
-   * The current user.
-   */
-  protected AccountInterface $currentUser;
-
-  /**
-   * User module config.
-   */
-  protected ImmutableConfig $userConfig;
-
-  /**
-   * Module handler service.
-   */
-  protected ModuleHandlerInterface $moduleHandler;
 
   /**
    * Object constructor.
@@ -49,23 +34,21 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
    *   Plugin definition.
    * @param \Drupal\views_bulk_operations\Plugin\Action\Drupal\Core\Session\AccountInterface $currentUser
    *   The current user.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory object.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   Module handler service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory object.
    */
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    AccountInterface $currentUser,
-    ConfigFactoryInterface $configFactory,
-    ModuleHandlerInterface $moduleHandler
+    protected readonly AccountInterface $currentUser,
+    protected readonly ModuleHandlerInterface $moduleHandler,
+    ConfigFactoryInterface $config_factory,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->currentUser = $currentUser;
-    $this->userConfig = $configFactory->get('user.settings');
-    $this->moduleHandler = $moduleHandler;
+    $this->userConfig = $config_factory->get('user.settings');
   }
 
   /**
@@ -77,8 +60,8 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
       $plugin_id,
       $plugin_definition,
       $container->get('current_user'),
-      $container->get('config.factory'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('config.factory')
     );
   }
 
@@ -86,7 +69,7 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
    * {@inheritdoc}
    */
   public function execute($account = NULL) {
-    if ($account->id() === $this->currentUser->id() && (empty($this->context['list']) || \count($this->context['list'] > 1))) {
+    if ($account->id() === $this->currentUser->id() && (empty($this->context['list']) || \count($this->context['list']) > 1)) {
       $this->messenger()->addError($this->t('The current user account cannot be canceled in a batch operation. Select your account only or cancel it from your account page.'));
     }
     elseif (\intval($account->id()) === 1) {

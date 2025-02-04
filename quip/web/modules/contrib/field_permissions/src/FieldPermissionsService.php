@@ -6,12 +6,12 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\field\FieldStorageConfigInterface;
+use Drupal\field_permissions\Plugin\CustomPermissionsInterface;
 use Drupal\field_permissions\Plugin\FieldPermissionType\Base;
 use Drupal\field_permissions\Plugin\FieldPermissionType\Manager;
 use Drupal\field_permissions\Plugin\FieldPermissionTypeInterface;
-use Drupal\field_permissions\Plugin\CustomPermissionsInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -135,8 +135,11 @@ class FieldPermissionsService implements FieldPermissionsServiceInterface, Conta
   /**
    * {@inheritdoc}
    */
-  public function fieldGetPermissionType(FieldStorageConfigInterface $field) {
-    return $field->getThirdPartySetting('field_permissions', 'permission_type', FieldPermissionTypeInterface::ACCESS_PUBLIC);
+  public function fieldGetPermissionType(FieldStorageDefinitionInterface $field) {
+    if (method_exists($field, 'getThirdPartySetting')) {
+      return $field->getThirdPartySetting('field_permissions', 'permission_type', FieldPermissionTypeInterface::ACCESS_PUBLIC);
+    }
+    return FieldPermissionTypeInterface::ACCESS_PUBLIC;
   }
 
   /**
@@ -171,7 +174,7 @@ class FieldPermissionsService implements FieldPermissionsServiceInterface, Conta
 
     // Pass access control to the plugin.
     $plugin = $this->permissionTypeManager->createInstance($permission_type, [], $field_definition->getFieldStorageDefinition());
-    return $plugin->hasFieldAccess($operation, $items->getEntity(), $account);
+    return $plugin->appliesToField($field_definition) && $plugin->hasFieldAccess($operation, $items->getEntity(), $account);
   }
 
   /**
@@ -207,7 +210,7 @@ class FieldPermissionsService implements FieldPermissionsServiceInterface, Conta
     // Pass access control to the plugin.
     $plugin = $this->permissionTypeManager->createInstance($permission_type, [], $field_definition->getFieldStorageDefinition());
     if ($plugin instanceof Base) {
-      return $plugin->hasFieldViewAccessForEveryEntity($account);
+      return $plugin->appliesToField($field_definition) && $plugin->hasFieldViewAccessForEveryEntity($account);
     }
     else {
       return FALSE;

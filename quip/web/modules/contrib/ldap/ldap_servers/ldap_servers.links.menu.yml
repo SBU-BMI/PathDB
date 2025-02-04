@@ -11,8 +11,8 @@ entity.ldap_server.collection:
   parent: ldap.settings
 
 ldap_servers.debugging:
-  title: 'Debugging'
-  route_name: ldap_servers.debugging_review
+  title: 'Debug'
+  route_name: ldap_servers.debug_report
   description: 'Configure additional debug logging.'
   parent: ldap.settings
   weight: 90

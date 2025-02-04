@@ -45,7 +45,7 @@ interface PlaceholderResolverInterface {
    *   An array of replacement values for the placeholders contained in the
    *   text, keyed by placeholder.
    */
-  public function resolvePlaceholders($text, array $data = [], BubbleableMetadata $bubbleable_metadata = NULL, array $options = []);
+  public function resolvePlaceholders(string $text, array $data = [], ?BubbleableMetadata $bubbleable_metadata = NULL, array $options = []): array;
 
   /**
    * Replaces the placeholders in the given text.
@@ -87,7 +87,7 @@ interface PlaceholderResolverInterface {
    *   otherwise for example the result can be put into #markup, in which case
    *   it would be sanitized by Xss::filterAdmin().
    */
-  public function replacePlaceHolders($text, array $data = [], BubbleableMetadata $bubbleable_metadata = NULL, array $options = []);
+  public function replacePlaceHolders(string $text, array $data = [], ?BubbleableMetadata $bubbleable_metadata = NULL, array $options = []): string;
 
   /**
    * Builds a list of all placeholder tokens that appear in the text.
@@ -103,6 +103,6 @@ interface PlaceholderResolverInterface {
    *   example, for the placeholder {{ data.property.property|filter }} the
    *   main placeholder part is 'property.property|filter'.
    */
-  public function scan($text);
+  public function scan(string $text): array;
 
 }

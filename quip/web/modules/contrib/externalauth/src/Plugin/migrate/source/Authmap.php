@@ -2,6 +2,7 @@
 
 namespace Drupal\externalauth\Plugin\migrate\source;
 
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
 
 /**
@@ -17,14 +18,14 @@ class Authmap extends DrupalSqlBase {
   /**
    * {@inheritdoc}
    */
-  public function query() {
+  public function query(): SelectInterface {
     return $this->select('authmap', 'a')->fields('a');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function fields() {
+  public function fields(): array {
     return [
       'uid' => $this->t('User’s users.uid.'),
       'authname' => $this->t('Unique authentication name.'),
@@ -35,7 +36,7 @@ class Authmap extends DrupalSqlBase {
   /**
    * {@inheritdoc}
    */
-  public function getIds() {
+  public function getIds(): array {
     return [
       'uid' => [
         'type' => 'integer',

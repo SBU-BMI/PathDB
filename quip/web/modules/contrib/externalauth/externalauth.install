@@ -10,7 +10,7 @@ use Drupal\Core\Database\Database;
 /**
  * Implements hook_install().
  */
-function externalauth_install() {
+function externalauth_install(): void {
   // Increase module weight to perform the authmap cleanup later.
   module_set_weight('externalauth', 10);
 }
@@ -18,7 +18,7 @@ function externalauth_install() {
 /**
  * Implements hook_schema().
  */
-function externalauth_schema() {
+function externalauth_schema(): array {
   $schema['authmap'] = [
     'description' => 'Stores distributed authentication mapping.',
     'fields' => [
@@ -68,15 +68,15 @@ function externalauth_schema() {
 /**
  * Change {authmap}.authname type from varchar_ascii to varchar.
  */
-function externalauth_update_8101() {
+function externalauth_update_8101(): void {
   $schema = Database::getConnection()->schema();
   if ($schema->tableExists('authmap')) {
     $schema->changeField('authmap', 'authname', 'authname', [
-    'description' => 'Unique authentication name provided by authentication provider',
-    'type' => 'varchar',
-    'length' => 128,
-    'not null' => TRUE,
-    'default' => '',
+      'description' => 'Unique authentication name provided by authentication provider',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => TRUE,
+      'default' => '',
     ]);
   }
 }
@@ -84,7 +84,7 @@ function externalauth_update_8101() {
 /**
  * Make index on authname+provider unique.
  */
-function externalauth_update_8102() {
+function externalauth_update_8102(): void {
   /** @var \Drupal\Core\Database\Schema $schema */
   $schema = \Drupal::service('database')->schema();
   // This 'add' can potentially fail, if duplicate authnames are registered
@@ -97,7 +97,7 @@ function externalauth_update_8102() {
 /**
  * Increase externalauth module weight.
  */
-function externalauth_update_8103() {
+function externalauth_update_8103(): void {
   // Increase module weight to perform the authmap cleanup later.
   module_set_weight('externalauth', 10);
 }

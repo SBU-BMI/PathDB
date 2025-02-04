@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Processor;
 
@@ -41,16 +41,16 @@ class TokenProcessor {
    *   [ou:reverse:1] = campus accounts
    *   [dc] = ad
    *   [dc:0] = ad
-   *   [dc:1] = myuniversity
+   *   [dc:1] = university
    *   [dc:2] = edu
    *   [dc:last] = edu
    *   [dc:reverse:0] = edu
-   *   [dc:reverse:1] = myuniversity
+   *   [dc:reverse:1] = university
    *   [dc:reverse:2] = ad
    * From other attributes:
-   *   [mail] = jdoe@myuniversity.edu
-   *   [mail:0] = jdoe@myuniversity.edu
-   *   [mail:last] = jdoe@myuniversity.edu
+   *   [mail] = jdoe@university.edu
+   *   [mail:0] = jdoe@university.edu
+   *   [mail:last] = jdoe@university.edu
    *   [samaccountname] = jdoe
    *   [samaccountname:0] = jdoe
    *   [samaccountname:last] = jdoe
@@ -83,7 +83,7 @@ class TokenProcessor {
    *
    * @see \Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber::fetchDrupalAttributeValue()
    */
-  public function ldapEntryReplacementsForDrupalAccount(Entry $resource, string $text): string {
+  public function ldapEntryReplacementsForDrupalAccount(Entry $resource, string $text): ?string {
     // Reset since service can be reused in multi-user processors.
     $this->tokens = [];
     // Greedy matching of groups of [], ignore spaces and trailing data with /x.
@@ -204,10 +204,6 @@ class TokenProcessor {
     [$token_key, $conversion] = explode(';', $required_token . ';');
 
     $parts = explode(':', $token_key);
-
-    if ($parts === FALSE) {
-      return;
-    }
 
     $requested_name = $parts[0];
     $requested_index = $parts[1] ?? 0;

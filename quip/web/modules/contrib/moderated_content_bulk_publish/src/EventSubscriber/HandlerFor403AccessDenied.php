@@ -35,7 +35,7 @@ class HandlerFor403AccessDenied extends HttpExceptionSubscriberBase {
       // Fait de la magique ici.
       // Latest revision doesn't exist in this language, redirect to node page.
       $new_path = $base_path . str_replace('/latest', '', $current_path);
-      \Drupal::logger('moderated_content_bulk_publish')->notice(utf8_encode('HandlerFor403AccessDenied: Redirecting from ' . $current_path . ' to ' . $new_path));
+      \Drupal::logger('moderated_content_bulk_publish')->notice(mb_convert_encoding('HandlerFor403AccessDenied: Redirecting from ' . $current_path . ' to ' . $new_path, 'UTF-8'));
       $base_url = \Drupal::request()->getSchemeAndHttpHost();
       $parts = array_filter(explode('/', \Drupal::request()->getRequestUri()));
       $has_prefix = count($parts) && $parts[1] == $langId;

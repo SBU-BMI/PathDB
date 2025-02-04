@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\externalauth\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\externalauth\Authmap;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * Authmap unit tests.
@@ -19,14 +19,14 @@ class AuthmapTest extends UnitTestCase {
   /**
    * The mocked database connection.
    *
-   * @var \Drupal\Core\Database\Connection|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Drupal\Core\Database\Connection|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $connection;
 
   /**
    * Mock statement.
    *
-   * @var \Drupal\Core\Database\Statement|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Drupal\Core\Database\StatementInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $statement;
 
@@ -47,7 +47,7 @@ class AuthmapTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create a Mock database connection object.
@@ -56,7 +56,7 @@ class AuthmapTest extends UnitTestCase {
       ->getMock();
 
     // Create a Mock Statement object.
-    $this->statement = $this->getMockBuilder('Drupal\Core\Database\Driver\sqlite\Statement')
+    $this->statement = $this->getMockBuilder('Drupal\Core\Database\StatementInterface')
       ->disableOriginalConstructor()
       ->getMock();
 
@@ -67,24 +67,24 @@ class AuthmapTest extends UnitTestCase {
 
     $this->select->expects($this->any())
       ->method('fields')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
     $this->select->expects($this->any())
       ->method('condition')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
     $this->select->expects($this->any())
       ->method('range')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
     $this->select->expects($this->any())
       ->method('orderBy')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
 
     $this->select->expects($this->any())
       ->method('execute')
-      ->will($this->returnValue($this->statement));
+      ->willReturn($this->statement);
 
     $this->connection->expects($this->any())
       ->method('select')
-      ->will($this->returnValue($this->select));
+      ->willReturn($this->select);
 
     // Create a Mock Delete object and set expectations.
     $this->delete = $this->getMockBuilder('Drupal\Core\Database\Query\Delete')
@@ -93,11 +93,11 @@ class AuthmapTest extends UnitTestCase {
 
     $this->delete->expects($this->any())
       ->method('condition')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
 
     $this->delete->expects($this->any())
       ->method('execute')
-      ->will($this->returnValue($this->statement));
+      ->willReturn($this->statement);
   }
 
   /**
@@ -115,20 +115,20 @@ class AuthmapTest extends UnitTestCase {
 
     $merge->expects($this->any())
       ->method('keys')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
 
     $merge->expects($this->any())
       ->method('fields')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
 
     $merge->expects($this->any())
       ->method('execute')
-      ->will($this->returnValue($this->statement));
+      ->willReturn($this->statement);
 
     $this->connection->expects($this->once())
       ->method('merge')
       ->with($this->equalTo('authmap'))
-      ->will($this->returnValue($merge));
+      ->willReturn($merge);
 
     $authmap = new Authmap($this->connection);
 
@@ -147,7 +147,7 @@ class AuthmapTest extends UnitTestCase {
     ];
     $this->statement->expects($this->any())
       ->method('fetchObject')
-      ->will($this->returnValue($actual_data));
+      ->willReturn($actual_data);
 
     $authmap = new Authmap($this->connection);
     $result = $authmap->get(2, "test_provider");
@@ -167,7 +167,7 @@ class AuthmapTest extends UnitTestCase {
     ];
     $this->statement->expects($this->any())
       ->method('fetchAssoc')
-      ->will($this->returnValue($actual_data));
+      ->willReturn($actual_data);
 
     $authmap = new Authmap($this->connection);
     $result = $authmap->getAuthData(2, "test_provider");
@@ -194,7 +194,7 @@ class AuthmapTest extends UnitTestCase {
 
     $this->statement->expects($this->any())
       ->method('fetchAllAssoc')
-      ->will($this->returnValue($actual_data));
+      ->willReturn($actual_data);
 
     $authmap = new Authmap($this->connection);
     $result = $authmap->getAll(2);
@@ -218,7 +218,7 @@ class AuthmapTest extends UnitTestCase {
 
     $this->statement->expects($this->any())
       ->method('fetchObject')
-      ->will($this->returnValue($actual_data));
+      ->willReturn($actual_data);
 
     $authmap = new Authmap($this->connection);
     $result = $authmap->getUid(2, "test_provider");
@@ -235,7 +235,7 @@ class AuthmapTest extends UnitTestCase {
     $this->connection->expects($this->once())
       ->method('delete')
       ->with($this->equalTo('authmap'))
-      ->will($this->returnValue($this->delete));
+      ->willReturn($this->delete);
 
     $authmap = new Authmap($this->connection);
     $authmap->delete(2);
@@ -255,16 +255,16 @@ class AuthmapTest extends UnitTestCase {
 
     $this->delete->expects($this->exactly(2))
       ->method('condition')
-      ->will($this->returnSelf());
+      ->willReturnSelf();
 
     $this->delete->expects($this->any())
       ->method('execute')
-      ->will($this->returnValue($this->statement));
+      ->willReturn($this->statement);
 
     $this->connection->expects($this->once())
       ->method('delete')
       ->with($this->equalTo('authmap'))
-      ->will($this->returnValue($this->delete));
+      ->willReturn($this->delete);
 
     $authmap = new Authmap($this->connection);
     $authmap->delete(2, 'some_provider');
@@ -280,7 +280,7 @@ class AuthmapTest extends UnitTestCase {
     $this->connection->expects($this->once())
       ->method('delete')
       ->with($this->equalTo('authmap'))
-      ->will($this->returnValue($this->delete));
+      ->willReturn($this->delete);
 
     $authmap = new Authmap($this->connection);
     $authmap->deleteProvider("test_provider");

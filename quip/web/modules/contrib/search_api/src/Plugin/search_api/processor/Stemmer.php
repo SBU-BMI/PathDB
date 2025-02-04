@@ -74,7 +74,7 @@ class Stemmer extends FieldsProcessorPluginBase {
    *   otherwise.
    */
   protected static function isEnglish(string $langcode): bool {
-    return substr($langcode, 0, 2) === 'en';
+    return str_starts_with($langcode, 'en');
   }
 
   /**
@@ -108,8 +108,10 @@ class Stemmer extends FieldsProcessorPluginBase {
 
     $configuration += [
       'exceptions' => [
+        // cspell:disable
         'texan' => 'texa',
         'mexican' => 'mexic',
+        // cspell:enable
       ],
     ];
 

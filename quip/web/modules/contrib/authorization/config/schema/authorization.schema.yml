@@ -1,6 +1,6 @@
 authorization.settings:
   type: config_object
-  label: 'Suthorization settings'
+  label: 'Authorization settings'
   mapping:
     authorization_message:
       type: boolean

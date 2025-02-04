@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_servers\Kernel;
 
@@ -158,7 +158,7 @@ class ServerTest extends KernelTestBase {
     self::assertEquals('6', $this->server->getGroupMembershipAttribute());
 
     $this->server->set('grp_nested', FALSE);
-    self::assertEquals(FALSE, $this->server->isGrouppNested());
+    self::assertEquals(FALSE, $this->server->isGroupNested());
 
     self::assertNull($this->server->getGroupObjectClass());
     $this->server->set('grp_object_cat', '7');

@@ -51,7 +51,7 @@ class RevisionLogWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create users.
@@ -95,6 +95,18 @@ class RevisionLogWidgetTest extends BrowserTestBase {
     ])->save();
     $this->drupalGet('node/add/article');
     $session->fieldNotExists('revision_log[0][value]');
+    $session->pageTextContains('Revision information');
+
+    // Confirm field fully hidden when set to hide.
+    $this->form->setComponent('revision_log', [
+      'type' => 'hide_revision_field_log_widget',
+      'settings' => [
+        'show' => FALSE,
+        'hide_revision' => TRUE,
+      ],
+    ])->save();
+    $this->drupalGet('node/add/article');
+    $session->pageTextNotContains('Revision information');
 
     // Confirm field hidden correctly based on permissions.
     $this->form->setComponent('revision_log', [
@@ -114,7 +126,6 @@ class RevisionLogWidgetTest extends BrowserTestBase {
     $this->drupalGet('node/add/article');
     $session->fieldExists('revision_log[0][value]');
     $session->fieldValueEquals('revision_log[0][value]', 'A new log message');
-
   }
 
   /**

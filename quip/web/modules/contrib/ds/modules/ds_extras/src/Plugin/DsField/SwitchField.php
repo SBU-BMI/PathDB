@@ -6,19 +6,21 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\ds\Attribute\DsField;
 use Drupal\ds\Plugin\DsField\DsFieldBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Link;
+
 /**
  * Plugin that generates a link to switch view mode with via ajax.
- *
- * @DsField(
- *   id = "switch_field",
- *   title = @Translation("Switch field"),
- *   entity_type = "node"
- * )
  */
+#[DsField(
+  id: 'switch_field',
+  title: new TranslatableMarkup('Switch field'),
+  entity_type: 'node'
+)]
 class SwitchField extends DsFieldBase {
 
   /**
@@ -79,7 +81,7 @@ class SwitchField extends DsFieldBase {
       // Basic route options.
       $route_options = [
         'query' => [
-          'selector' => 'view-mode-' . $selector,
+          'selector' => \Drupal::config('ds_extras.settings')->get('switch_field_prefix') . str_replace(['_', '.'], '-', $selector),
         ],
         'attributes' => [
           'class' => [
@@ -128,7 +130,7 @@ class SwitchField extends DsFieldBase {
     ];
 
     $config = $this->getConfiguration();
-    $config = isset($config['vms']) ? $config['vms'] : [];
+    $config = $config['vms'] ?? [];
     foreach ($view_modes as $key => $value) {
       $entity_display = $this->entityTypeManager
         ->getStorage('entity_view_display')
@@ -137,7 +139,7 @@ class SwitchField extends DsFieldBase {
         if ($entity_display->status()) {
           $form['vms'][$key] = [
             '#type' => 'textfield',
-            '#default_value' => isset($config[$key]) ? $config[$key] : '',
+            '#default_value' => $config[$key] ?? '',
             '#size' => 20,
             '#title' => Html::escape($value['label']),
           ];
@@ -154,7 +156,7 @@ class SwitchField extends DsFieldBase {
   public function settingsSummary($settings) {
     $entity_type = $this->getEntityTypeId();
     $bundle = $this->bundle();
-    $settings = isset($settings['vms']) ? $settings['vms'] : [];
+    $settings = $settings['vms'] ?? [];
     $view_modes = $this->entityDisplayRepository->getViewModes($entity_type);
 
     $summary = [];
@@ -166,7 +168,7 @@ class SwitchField extends DsFieldBase {
         ->load($entity_type . '.' . $bundle . '.' . $key);
       if (!empty($entity_display)) {
         if ($entity_display->status()) {
-          $label = isset($settings[$key]) ? $settings[$key] : $key;
+          $label = $settings[$key] ?? $key;
           $summary[] = $key . ' : ' . $label;
         }
       }

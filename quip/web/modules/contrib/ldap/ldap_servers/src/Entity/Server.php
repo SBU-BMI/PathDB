@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Entity;
 
@@ -37,6 +37,7 @@ use Symfony\Component\Ldap\Entry;
  *   links = {
  *     "edit-form" = "/admin/config/people/ldap/server/{server}/edit",
  *     "delete-form" = "/admin/config/people/ldap/server/{server}/delete",
+ *     "test-form" = "/admin/config/people/ldap/server/{server}/test",
  *     "collection" = "/admin/config/people/ldap/server"
  *   },
  *   config_export = {
@@ -373,22 +374,22 @@ class Server extends ConfigEntityBase implements ServerInterface {
     switch ($this->get('bind_method')) {
       case 'service_account':
       default:
-        $namedBind = $this->t('service account bind');
+        $named_bind = $this->t('service account bind');
         break;
 
       case 'user':
-        $namedBind = $this->t('user credentials bind');
+        $named_bind = $this->t('user credentials bind');
         break;
 
       case 'anon':
-        $namedBind = $this->t('anonymous bind (search), then user credentials');
+        $named_bind = $this->t('anonymous bind (search), then user credentials');
         break;
 
       case 'anon_user':
-        $namedBind = $this->t('anonymous bind');
+        $named_bind = $this->t('anonymous bind');
         break;
     }
-    return $namedBind;
+    return $named_bind;
   }
 
   /**
@@ -522,7 +523,7 @@ class Server extends ConfigEntityBase implements ServerInterface {
   /**
    * {@inheritdoc}
    */
-  public function isGrouppNested(): bool {
+  public function isGroupNested(): bool {
     return $this->grp_nested;
   }
 

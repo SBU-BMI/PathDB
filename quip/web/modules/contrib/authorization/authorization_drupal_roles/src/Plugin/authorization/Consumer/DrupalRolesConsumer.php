@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\authorization_drupal_roles\Plugin\authorization\Consumer;
 
-use Drupal\authorization\Consumer\ConsumerPluginBase;
 use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\authorization\Consumer\ConsumerPluginBase;
+use Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use function in_array;
@@ -51,30 +52,41 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   protected $entityTypeManager;
 
   /**
+   * Authorization Drupal roles.
+   *
+   * @var \Drupal\authorization_drupal_roles\AuthorizationDrupalRolesInterface
+   */
+  protected $authorizationDrupalRoles;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(
+  final public function __construct(
     array $configuration,
     $plugin_id,
     array $plugin_definition,
     TransliterationInterface $transliteration,
-    EntityTypeManagerInterface $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager,
+    AuthorizationDrupalRolesInterface $authorization_drupal_roles,
   ) {
+
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->transliteration = $transliteration;
     $this->entityTypeManager = $entity_type_manager;
+    $this->authorizationDrupalRoles = $authorization_drupal_roles;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
+    return new self(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->get('transliteration'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('authorization_drupal_roles.manager')
     );
   }
 
@@ -95,18 +107,18 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   public function buildRowForm(array $form, FormStateInterface $form_state, $index = 0): array {
     $row = [];
     $mappings = $this->configuration['profile']->getConsumerMappings();
-    $roleOptions = ['none' => $this->t('- N/A -')];
-    $roles = user_roles(TRUE);
+    $role_options = ['none' => $this->t('- N/A -')];
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
     foreach ($roles as $key => $role) {
       if ($key !== 'authenticated') {
-        $roleOptions[$key] = $role->label();
+        $role_options[$key] = $role->label();
       }
     }
-    $roleOptions['source'] = $this->t('Source (Any group)');
+    $role_options['source'] = $this->t('Source (Any group)');
     $row['role'] = [
       '#type' => 'select',
       '#title' => $this->t('Role'),
-      '#options' => $roleOptions,
+      '#options' => $role_options,
       '#default_value' => isset($mappings[$index]) ? $mappings[$index]['role'] : NULL,
       '#description' => $this->t("Choosing 'Source' maps any input directly to Drupal, use with caution."),
     ];
@@ -116,51 +128,44 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function grantSingleAuthorization(UserInterface $user, $mapping): void {
+  public function grantSingleAuthorization(UserInterface $user, $mapping, string $profile_id): void {
     $mapping = $this->sanitizeRoleId($mapping);
 
-    $previousRoles = [];
-    $savedRoles = $user->get('authorization_drupal_roles_roles')->getValue();
-    foreach ($savedRoles as $savedRole) {
-      $previousRoles[] = $savedRole['value'];
+    $roles = $this->authorizationDrupalRoles->getRoles($user->id(), $profile_id) ?? [];
+    if (!in_array($mapping, $roles, TRUE)) {
+      $roles[] = $mapping;
     }
-    if (!in_array($mapping, $previousRoles, TRUE)) {
-      $previousRoles[] = $mapping;
-    }
-    $user->set('authorization_drupal_roles_roles', $previousRoles);
+
+    $this->authorizationDrupalRoles->setRoles($user->id(), $profile_id, $roles);
     $user->addRole($mapping);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function revokeGrants(UserInterface $user, array $context): void {
+  public function revokeGrants(UserInterface $user, array $context, string $profile_id): void {
     foreach ($context as $key => $mapping) {
       $context[$key] = $this->sanitizeRoleId($mapping);
     }
 
-    $previousRoles = [];
-    $savedRoles = $user->get('authorization_drupal_roles_roles')->getValue();
-    foreach ($savedRoles as $savedRole) {
-      $previousRoles[] = $savedRole['value'];
-    }
-    foreach ($previousRoles as $key => $value) {
+    $roles = $this->authorizationDrupalRoles->getRoles($user->id(), $profile_id) ?? [];
+    foreach ($roles as $key => $value) {
       if (!in_array($value, $context, TRUE)) {
         $user->removeRole($value);
-        unset($previousRoles[$key]);
+        unset($roles[$key]);
       }
     }
-    $user->set('authorization_drupal_roles_roles', $previousRoles);
+    $this->authorizationDrupalRoles->setRoles($user->id(), $profile_id, $roles);
   }
 
   /**
    * {@inheritdoc}
    */
   public function createConsumerTarget(string $mapping): void {
-    $sanitizedId = $this->sanitizeRoleId($mapping);
+    $sanitized_id = $this->sanitizeRoleId($mapping);
     $storage = $this->entityTypeManager->getStorage('user_role');
-    if (!$storage->load($sanitizedId)) {
-      $role = $storage->create(['id' => $sanitizedId, 'label' => $mapping]);
+    if (!$storage->load($sanitized_id)) {
+      $role = $storage->create(['id' => $sanitized_id, 'label' => $mapping]);
       $role->save();
     }
   }
@@ -173,7 +178,7 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
    * @return string
    *   Wildcard.
    */
-  private function getWildcard(): string {
+  protected function getWildcard(): string {
     return $this->wildcard;
   }
 
@@ -208,10 +213,11 @@ class DrupalRolesConsumer extends ConsumerPluginBase {
    * @return string
    *   A valid string for Drupal roles.
    */
-  private function sanitizeRoleId(string $consumer): string {
-    $sanitizedId = $this->transliteration->transliterate($consumer, 'en', '');
-    $sanitizedId = mb_strtolower($sanitizedId);
-    return preg_replace('@[^a-z0-9_.]+@', '_', $sanitizedId);
+  protected function sanitizeRoleId(string $consumer): string {
+    $sanitized_id = $this->transliteration->transliterate($consumer, 'en', '');
+    $sanitized_id = mb_strtolower($sanitized_id);
+
+    return preg_replace('@[^a-z0-9_.]+@', '_', $sanitized_id);
   }
 
 }

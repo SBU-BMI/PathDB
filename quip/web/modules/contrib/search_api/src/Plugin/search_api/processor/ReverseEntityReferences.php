@@ -241,7 +241,7 @@ class ReverseEntityReferences extends ProcessorPluginBase {
           $entity_type = $this->getEntityTypeManager()
             ->getDefinition($entity_type_id);
         }
-        catch (PluginNotFoundException $e) {
+        catch (PluginNotFoundException) {
           continue;
         }
         $args = [
@@ -273,7 +273,7 @@ class ReverseEntityReferences extends ProcessorPluginBase {
     try {
       $entity = $item->getOriginalObject()->getValue();
     }
-    catch (SearchApiException $e) {
+    catch (SearchApiException) {
       return;
     }
 
@@ -291,7 +291,7 @@ class ReverseEntityReferences extends ProcessorPluginBase {
     $prefix_length = strlen($prefix);
     foreach ($item->getFields() as $field) {
       $property_path = $field->getPropertyPath();
-      list($direct, $nested) = Utility::splitPropertyPath($property_path, FALSE);
+      [$direct, $nested] = Utility::splitPropertyPath($property_path, FALSE);
       if ($field->getDatasourceId() === $datasource_id
           && substr($direct, 0, $prefix_length) === $prefix) {
         $property_name = substr($direct, $prefix_length);
@@ -310,8 +310,7 @@ class ReverseEntityReferences extends ProcessorPluginBase {
         $storage = $this->getEntityTypeManager()
           ->getStorage($property_info['entity_type']);
       }
-      // @todo Remove $e once we depend on PHP 8.0+.
-      catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+      catch (InvalidPluginDefinitionException | PluginNotFoundException) {
         continue;
       }
       $entity_ids = $storage->getQuery()

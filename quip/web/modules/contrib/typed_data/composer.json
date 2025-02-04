@@ -9,13 +9,6 @@
         "source": "https://git.drupalcode.org/project/typed_data"
     },
     "require": {
-        "drupal/core": "^9.1 || ^10"
-    },
-    "extra": {
-        "drush": {
-            "services": {
-                "drush.services.yml": ">=9"
-            }
-        }
+        "drupal/core": "^10.3 | ^11"
     }
 }

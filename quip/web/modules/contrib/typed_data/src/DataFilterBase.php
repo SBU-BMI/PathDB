@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\typed_data;
 
 use Drupal\Component\Plugin\PluginBase;
@@ -40,28 +42,28 @@ abstract class DataFilterBase extends PluginBase implements DataFilterInterface 
   /**
    * {@inheritdoc}
    */
-  public function getNumberOfRequiredArguments() {
+  public function getNumberOfRequiredArguments(): int {
     return 0;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function allowsNullValues() {
+  public function allowsNullValues(): bool {
     return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function suggestArgument(DataDefinitionInterface $definition, array $arguments, $input = '') {
+  public function suggestArgument(DataDefinitionInterface $definition, array $arguments, string $input = ''): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function validateArguments(DataDefinitionInterface $definition, array $arguments) {
+  public function validateArguments(DataDefinitionInterface $definition, array $arguments): array {
     $errors = [];
     if (count($arguments) < $this->getNumberOfRequiredArguments()) {
       $errors[] = $this->t('Missing arguments for filter %filter_id', ['%filter_id' => $this->filterId]);

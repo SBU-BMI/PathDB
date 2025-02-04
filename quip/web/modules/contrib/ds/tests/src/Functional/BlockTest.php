@@ -19,7 +19,7 @@ class BlockTest extends TestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
     'user',
     'comment',
@@ -48,6 +48,8 @@ class BlockTest extends TestBase {
       'admin display suite',
       'admin fields',
       'administer blocks',
+      'administer block types',
+      'administer block content',
       'administer block_content display',
     ]);
     $this->drupalLogin($this->adminUser);
@@ -63,16 +65,16 @@ class BlockTest extends TestBase {
       'label' => 'Basic Block',
       'id' => 'basic',
     ];
-    $this->drupalGet('admin/structure/block/block-content/types/add', []);
+    $this->drupalGet('admin/structure/block-content/add');
     $this->submitForm($edit, 'Save');
-    $this->assertSession()->pageTextContains('Custom block type Basic Block has been added.');
+    $this->assertSession()->pageTextContains('Block type Basic Block has been added.');
 
     // Create a basic block.
     $edit = [];
     $edit['info[0][value]'] = 'Test Block';
     $edit['body[0][value]'] = $this->randomMachineName(16);
     $this->drupalGet('block/add/basic', []);
-    $this->submitForm($edit, t('Save'));
+    $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains('Basic Block Test Block has been created.');
 
     // Place the block.
@@ -84,19 +86,19 @@ class BlockTest extends TestBase {
     $block = BlockContent::load(1);
     $url = 'admin/structure/block/add/block_content:' . $block->uuid() . '/' . $this->config('system.theme')->get('default');
     $this->drupalGet($url);
-    $this->submitForm($instance, t('Save block'));
+    $this->submitForm($instance, 'Save block');
 
     // Change to a DS layout.
-    $url = 'admin/structure/block/block-content/manage/basic/display';
+    $url = 'admin/structure/block-content/manage/basic/display';
     $edit = ['ds_layout' => 'ds_2col'];
     $this->drupalGet($url, []);
-    $this->submitForm($edit, t('Save'));
+    $this->submitForm($edit, 'Save');
 
     $fields = [
       'fields[block_description][region]' => 'left',
       'fields[body][region]' => 'right',
     ];
-    $this->dsConfigureUi($fields, 'admin/structure/block/block-content/manage/basic/display');
+    $this->dsConfigureUi($fields, 'admin/structure/block-content/manage/basic/display');
 
     // View the block.
     $this->drupalGet('<front>');

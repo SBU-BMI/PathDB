@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_query\Controller;
 
@@ -72,7 +72,7 @@ class QueryController {
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
     LdapBridgeInterface $ldap_bridge,
-    LoggerInterface $logger
+    LoggerInterface $logger,
   ) {
     $this->storage = $entity_type_manager->getStorage('ldap_query_entity');
     $this->ldapBridge = $ldap_bridge;
@@ -146,7 +146,12 @@ class QueryController {
             $base_dn_results[] = $ldap_response;
           }
         }
-        $this->results = array_merge(...$base_dn_results);
+        if (!empty($base_dn_results) && is_array($base_dn_results)) {
+          $this->results = array_merge(...$base_dn_results);
+        }
+        else {
+          $this->results = $base_dn_results;
+        }
       }
     }
     else {

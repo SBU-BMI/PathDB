@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_authentication\Controller;
 
@@ -21,6 +21,7 @@ use Drupal\ldap_servers\Logger\LdapDetailLog;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Ldap\Entry;
 
 /**
@@ -222,6 +223,13 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
   protected $drupalUserProcessor;
 
   /**
+   * Authorization Manager.
+   *
+   * @var \Drupal\authorization\AuthorizationServiceInterface|null
+   */
+  protected $authorizationManager;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
@@ -246,6 +254,8 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
    *   Messenger.
    * @param \Drupal\ldap_user\Processor\DrupalUserProcessor $drupal_user_processor
    *   Drupal User Processor.
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   Container.
    */
   public function __construct(
     ConfigFactoryInterface $configFactory,
@@ -258,7 +268,8 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
     AuthenticationServers $authentication_servers,
     LdapUserManager $ldap_user_manager,
     MessengerInterface $messenger,
-    DrupalUserProcessor $drupal_user_processor
+    DrupalUserProcessor $drupal_user_processor,
+    ContainerInterface $container,
   ) {
     $this->configFactory = $configFactory;
     $this->config = $configFactory->get('ldap_authentication.settings');
@@ -272,6 +283,10 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
     $this->ldapUserManager = $ldap_user_manager;
     $this->messenger = $messenger;
     $this->drupalUserProcessor = $drupal_user_processor;
+    if ($module_handler->moduleExists('ldap_authorization')) {
+      $this->authorizationManager = $container->get('authorization.manager');
+    }
+
   }
 
   /**
@@ -349,7 +364,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
    */
   protected function verifyAccountCreation(): bool {
     if (
-      $this->configFactory->get('ldap_user.settings')->get('acctCreation') === self::ACCOUNT_CREATION_LDAP_BEHAVIOUR ||
+      $this->configFactory->get('ldap_user.settings')->get('acctCreation') === self::ACCOUNT_CREATION_LDAP_BEHAVIOR ||
       $this->configFactory->get('user.settings')->get('register') === UserInterface::REGISTER_VISITORS
     ) {
       $this->detailLog->log(
@@ -540,11 +555,8 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
 
       // We are not injecting this service properly to avoid forcing this
       // dependency on authorization.
-      /** @var \Drupal\user\Entity\User $user */
-      /** @var \Drupal\authorization\AuthorizationServiceInterface $controller */
-      // @codingStandardsIgnoreLine
-      $controller = \Drupal::service('authorization.manager');
-      $controller->setUser($user);
+      /** @var \Drupal\user\UserInterface $user */
+      $this->authorizationManager->setUser($user);
 
       $profiles = $this->entityTypeManager
         ->getStorage('authorization_profile')
@@ -553,10 +565,10 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
         ->condition('provider', 'ldap_provider')
         ->execute();
       foreach ($profiles as $profile) {
-        $controller->queryIndividualProfile($profile);
+        $this->authorizationManager->queryIndividualProfile($profile);
       }
-      $authorizations = $controller->getProcessedAuthorizations();
-      $controller->clearAuthorizations();
+      $authorizations = $this->authorizationManager->getProcessedAuthorizations();
+      $this->authorizationManager->clearAuthorizations();
 
       $valid_profile = FALSE;
       foreach ($authorizations as $authorization) {
@@ -616,7 +628,7 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
       }
       elseif ($update_type === 'update_notify') {
         $this->messenger->addStatus(
-          $this->t('Your e-mail has been updated to match your current account (%mail).', [
+          $this->t('Your email has been updated to match your current account (%mail).', [
             '%mail' => $this->serverDrupalUser->deriveEmailFromLdapResponse($this->ldapEntry),
           ]
           )

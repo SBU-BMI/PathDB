@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user;
 
@@ -88,7 +88,7 @@ class FieldProvider implements LdapUserAttributesInterface {
     ConfigFactory $config_factory,
     EntityTypeManagerInterface $entity_type_manager,
     ModuleHandlerInterface $module_handler,
-    EntityFieldManager $entity_field_manager
+    EntityFieldManager $entity_field_manager,
   ) {
     $this->config = $config_factory->get('ldap_user.settings');
     $this->entityTypeManager = $entity_type_manager;

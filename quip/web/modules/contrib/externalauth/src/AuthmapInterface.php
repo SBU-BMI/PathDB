@@ -5,9 +5,7 @@ namespace Drupal\externalauth;
 use Drupal\user\UserInterface;
 
 /**
- * Interface AuthmapInterface.
- *
- * @package Drupal\externalauth
+ * Interface for Authmap service.
  */
 interface AuthmapInterface {
 
@@ -24,7 +22,7 @@ interface AuthmapInterface {
    * @param mixed $data
    *   Optional extra (serialized) data to store with the authname.
    */
-  public function save(UserInterface $account, $provider, $authname, $data = NULL);
+  public function save(UserInterface $account, string $provider, string $authname, $data = NULL);
 
   /**
    * Get the external authname for a given user ID.
@@ -37,7 +35,7 @@ interface AuthmapInterface {
    * @return string|bool
    *   The external authname / ID, or FALSE.
    */
-  public function get($uid, $provider);
+  public function get(int $uid, string $provider);
 
   /**
    * Get the external authname & extra data for a given user ID.
@@ -47,10 +45,10 @@ interface AuthmapInterface {
    * @param string $provider
    *   The name of the service providing external authentication.
    *
-   * @return array
+   * @return array|bool
    *   An array with authname & data values.
    */
-  public function getAuthData($uid, $provider);
+  public function getAuthData(int $uid, string $provider);
 
   /**
    * Get all external authnames for a given user ID.
@@ -62,7 +60,7 @@ interface AuthmapInterface {
    *   An array of external authnames / IDs for the given user ID, keyed by
    *   provider name.
    */
-  public function getAll($uid);
+  public function getAll(int $uid): array;
 
   /**
    * Get a Drupal user ID based on an authname.
@@ -77,7 +75,7 @@ interface AuthmapInterface {
    * @return int|bool
    *   The Drupal user ID or FALSE.
    */
-  public function getUid($authname, $provider);
+  public function getUid(string $authname, string $provider);
 
   /**
    * Delete authmap entries for a given Drupal user ID.
@@ -86,10 +84,10 @@ interface AuthmapInterface {
    *
    * @param int $uid
    *   The Drupal user ID.
-   * @param string $provider
+   * @param string|null $provider
    *   (optional) The name of the service providing external authentication.
    */
-  public function delete($uid, $provider = NULL);
+  public function delete(int $uid, ?string $provider = NULL);
 
   /**
    * Delete all authmap entries for a given provider.
@@ -97,6 +95,6 @@ interface AuthmapInterface {
    * @param string $provider
    *   The name of the service providing external authentication.
    */
-  public function deleteProvider($provider);
+  public function deleteProvider(string $provider);
 
 }

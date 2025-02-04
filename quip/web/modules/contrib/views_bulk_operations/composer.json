@@ -17,20 +17,15 @@
   "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {
-    "drupal/core": "^9.4 || ^10",
-    "php": ">=7.4.0"
+    "drupal/core": "^10.3 || ^11"
   },
   "require-dev": {
-    "drush/drush": "^11"
+    "drush/drush": "^12 || ^13"
   },
   "suggest": {
-    "drush/drush": "^10 || ^11"
+    "drush/drush": "^12 || ^13"
   },
-  "extra": {
-    "drush": {
-      "services": {
-        "drush.services.yml": "^10 || ^11"
-      }
-    }
+  "conflict": {
+    "drush/drush": "<12.5.1"
   }
 }

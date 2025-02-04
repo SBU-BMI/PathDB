@@ -7,7 +7,7 @@ dependencies:
 
 configure: typed_data_widget_test.examples
 
-# Information added by Drupal.org packaging script on 2023-03-21
-version: '8.x-1.0-beta2'
+# Information added by Drupal.org packaging script on 2024-10-07
+version: '2.1.1'
 project: 'typed_data'
-datestamp: 1679429198
+datestamp: 1728332114

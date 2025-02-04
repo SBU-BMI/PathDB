@@ -1,0 +1,18 @@
+parameters:
+  level: 2
+
+  ignoreErrors:
+    -
+      message: '#\Drupal calls should be avoided in classes, use dependency injection instead#'
+      path: src/Drush/Commands/TypedDataDrushCommands.php
+      count: 4
+
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    # @see https://www.drupal.org/docs/develop/development-tools/phpstan/handling-unsafe-usage-of-new-static
+    -
+      message: "#^Unsafe usage of new static#"
+      paths:
+        - src/Plugin/TypedDataFilter/FormatDateFilter.php
+        - src/Plugin/TypedDataFormWidget/DatetimeWidgetBase.php
+        - src/Widget/FormWidgetBase.php
+        - tests/modules/typed_data_widget_test/src/FormWidgetExampleForm.php

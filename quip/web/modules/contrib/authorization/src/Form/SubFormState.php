@@ -839,4 +839,19 @@ class SubFormState implements FormStateInterface {
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function setIgnoreDestination(bool $status = TRUE) {
+    $this->mainFormState->setIgnoreDestination($status);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIgnoreDestination(): bool {
+    return $this->mainFormState->getIgnoreDestination();
+  }
+
 }

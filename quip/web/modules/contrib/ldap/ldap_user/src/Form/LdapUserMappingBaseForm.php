@@ -1,10 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -12,7 +13,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers\Mapping;
 use Drupal\ldap_user\FieldProvider;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the form to configure user configuration and field mapping.
@@ -69,31 +69,39 @@ abstract class LdapUserMappingBaseForm extends ConfigFormBase implements LdapUse
   protected $server;
 
   /**
+   * Fields and properties to exclude from the mapping form.
+   *
+   * @var array
+   */
+  protected $exclude = [
+    '[field.mail]',
+    '[field.name]',
+    '[field.pass]',
+    '[field.roles]',
+    '[field.status]',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
     ModuleHandlerInterface $module_handler,
     EntityTypeManagerInterface $entity_type_manager,
-    FieldProvider $field_provider
+    FieldProvider $field_provider,
+    ?TypedConfigManagerInterface $config_type_manager = NULL,
   ) {
-    parent::__construct($config_factory);
+    if (version_compare(\Drupal::VERSION, '10.2.0', '>=')) {
+      parent::__construct($config_factory, $config_type_manager);
+    }
+    else {
+      parent::__construct($config_factory);
+    }
+
     $this->moduleHandler = $module_handler;
     $this->entityTypeManager = $entity_type_manager;
     $this->fieldProvider = $field_provider;
     $this->currentConfig = $this->config('ldap_user.settings');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('module_handler'),
-      $container->get('entity_type.manager'),
-      $container->get('ldap_user.field_provider')
-    );
   }
 
   /**
@@ -169,6 +177,11 @@ abstract class LdapUserMappingBaseForm extends ConfigFormBase implements LdapUse
       }
     }
     $params = [$direction, $sid];
+    foreach ($this->exclude as $exclude) {
+      if (array_key_exists($exclude, $attributes)) {
+        unset($attributes[$exclude]);
+      }
+    }
 
     $this->moduleHandler->alter(
       'ldap_user_attributes',

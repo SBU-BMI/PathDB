@@ -115,7 +115,7 @@ class FormWidgetExampleForm extends FormBase {
     $data = $this->getTypedDataManager()
       ->create($context_definition->getDataDefinition());
     $value = $this->state->get('typed_data_widgets.' . $widget_id);
-    $value = isset($value) ? $value : $context_definition->getDefaultValue();
+    $value = $value ?? $context_definition->getDefaultValue();
     $data->setValue($value);
 
     $subform_state = SubformState::createWithParents(['data'], $form, $form_state);

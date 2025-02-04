@@ -1,0 +1,16 @@
+entity.authorization_profile.collection:
+  route_name: entity.authorization_profile.collection
+  title: 'Authorization'
+  base_route: user.admin_index
+
+entity.authorization_profile.collection_sub:
+  route_name: entity.authorization_profile.collection
+  title: 'Profiles'
+  weight: 10
+  parent_id: entity.authorization_profile.collection
+
+entity.authorization_profile.configuration_form:
+  route_name: entity.authorization_profile.configuration_form
+  title: 'Settings'
+  weight: 20
+  parent_id: entity.authorization_profile.collection

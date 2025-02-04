@@ -4,14 +4,13 @@ status: true
 dependencies:
   config:
     - field.storage.node.clinicaltrialsubjectid
-    - field.storage.node.imageid
     - field.storage.node.field_collection
+    - field.storage.node.imageid
     - field.storage.node.studyid
     - search_api.server.default_server
   module:
-    - taxonomy
     - node
-    - search_api
+    - taxonomy
 _core:
   default_config_hash: GLmLegZGHtMF6annRqgjizJAoiAip-IT-XOsDMCZfog
 id: default_index

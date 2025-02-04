@@ -1,0 +1,21 @@
+parameters:
+	ignoreErrors:
+		-
+			message: """
+				#^Call to deprecated method setCellValueByColumnAndRow\\(\\) of class PhpOffice\\\\PhpSpreadsheet\\\\Worksheet\\\\Worksheet\\:
+				1\\.23\\.0
+				     Use the setCellValue\\(\\) method with a cell address such as 'C5' instead;,
+				         or passing in an array of \\[\\$columnIndex, \\$row\\] \\(e\\.g\\. \\[3, 5\\]\\), or a CellAddress object\\.$#
+			"""
+			count: 1
+			path: src/Plugin/views/display/DataExport.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 5
+			path: src/Plugin/views/display/DataExport.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 1
+			path: src/Plugin/views/style/DataExport.php

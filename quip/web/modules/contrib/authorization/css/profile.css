@@ -1,0 +1,12 @@
+.authorization-mappings table td {
+  vertical-align: top;
+}
+
+.authorization-mappings table td:last-child {
+  vertical-align: middle;
+}
+
+.authorization-mappings table th:last-child,
+.authorization-mappings table td:nth-child(3) {
+  text-align: center;
+}

@@ -104,6 +104,15 @@ class Facet extends ConfigEntityBase implements FacetInterface {
   protected $description;
 
   /**
+   * A string describing the facet type.
+   *
+   * Defaults to 'facet_entity'.
+   *
+   * @var string
+   */
+  protected $facet_type;
+
+  /**
    * The widget plugin definition.
    *
    * @var array
@@ -487,14 +496,18 @@ class Facet extends ConfigEntityBase implements FacetInterface {
 
     $query_types = $facet_source->getQueryTypesForFacet($this);
 
-    // Get the widget configured for this facet.
-    /** @var \Drupal\facets\Widget\WidgetPluginInterface $widget */
-    $widget = $this->getWidgetInstance();
+    // Allow Facets without widgets (e.g. for facets exposed filters, where views handles the widget part).
+    $widgetQueryType = NULL;
+    if($this->widget != "<nowidget>") {
+      // Get the widget configured for this facet.
+      /** @var \Drupal\facets\Widget\WidgetPluginInterface $widget */
+      $widget = $this->getWidgetInstance();
 
-    // Give the widget the chance to select a preferred query type. This is
-    // needed for widget that have different query type. For example the need
-    // for a range query.
-    $widgetQueryType = $widget->getQueryType();
+      // Give the widget the chance to select a preferred query type. This is
+      // needed for widget that have different query type. For example the need
+      // for a range query.
+      $widgetQueryType = $widget->getQueryType();
+    }
 
     // Allow widgets to also specify a query type.
     $processorQueryTypes = [];
@@ -704,6 +717,12 @@ class Facet extends ConfigEntityBase implements FacetInterface {
   public function getName() {
     return $this->name;
   }
+  /**
+   * {@inheritdoc}
+   */
+  public function getFacetType() {
+    return $this->facet_type ?: 'facet_entity';
+  }
 
   /**
    * {@inheritdoc}
@@ -775,12 +794,12 @@ class Facet extends ConfigEntityBase implements FacetInterface {
 
     $storage = \Drupal::entityTypeManager()->getStorage('facets_facet_source');
     if ($source_id = str_replace(':', '__', $this->facet_source_id ?? '')) {
-        // Load and return the facet source config object from the storage.
-        $facet_source = $storage->load($source_id);
-        if ($facet_source instanceof FacetSource) {
-            $this->facetSourceConfig = $facet_source;
-            return $this->facetSourceConfig;
-        }
+      // Load and return the facet source config object from the storage.
+      $facet_source = $storage->load($source_id);
+      if ($facet_source instanceof FacetSource) {
+        $this->facetSourceConfig = $facet_source;
+        return $this->facetSourceConfig;
+      }
     }
 
     // We didn't have a facet source config entity yet for this facet source
@@ -1116,7 +1135,11 @@ class Facet extends ConfigEntityBase implements FacetInterface {
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
-    if (!$update) {
+    // If a facet is new, update the caching metadata of the facet source.
+    // But only if the facet has been created via the UI and not via config
+    // import.
+    // @see https://www.drupal.org/project/facets/issues/3395567
+    if (!$update && !\Drupal::service('config.installer')->isSyncing()) {
       self::clearBlockCache();
       // Register newly created facet within its source, for the caching.
       if (($source = $this->getFacetSource()) && $source->getCacheMaxAge() !== 0) {
@@ -1174,9 +1197,12 @@ class Facet extends ConfigEntityBase implements FacetInterface {
     $eventDispatcher = \Drupal::service('event_dispatcher');
     $event = new GetFacetCacheContexts(parent::getCacheContexts(), $this);
     $eventDispatcher->dispatch($event);
-    $this->cacheContexts = $event->getCacheContexts() ?? $this->cacheContexts;
+    $contexts = $event->getCacheContexts() ?? $this->cacheContexts;
+    $contexts[] = 'facets_filter:' . ($this->getFacetSourceConfig()->getFilterKey() ?: 'f');
 
-    return array_values($this->cacheContexts);
+    $this->cacheContexts = array_unique(array_values($contexts));
+
+    return $this->cacheContexts;
   }
 
   /**
@@ -1210,7 +1236,7 @@ class Facet extends ConfigEntityBase implements FacetInterface {
   /**
    * Remove the facet lazy built data when the facet is serialized.
    */
-  public function __sleep() {
+  public function __sleep(): array {
     unset($this->facet_source_instance);
     unset($this->processors);
 

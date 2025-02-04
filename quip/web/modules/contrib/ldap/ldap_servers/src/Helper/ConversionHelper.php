@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Helper;
 
@@ -12,7 +12,7 @@ class ConversionHelper {
   /**
    * Undoes the conversion done by escape_dn_value().
    *
-   * Any escape sequence starting with a baskslash - hexpair or special
+   * Any escape sequence starting with a backslash - hexpair or special
    * character - will be transformed back to the corresponding character.
    *
    * @param string $value
@@ -116,7 +116,7 @@ class ConversionHelper {
    * Find the tokens needed for the template.
    *
    * @param string $template
-   *   In the form of [cn]@myuniversity.edu.
+   *   In the form of [cn]@university.edu.
    *
    * @return array
    *   Array of all tokens in the template such as array('cn').

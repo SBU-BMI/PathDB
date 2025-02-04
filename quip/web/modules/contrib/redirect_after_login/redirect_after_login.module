@@ -9,9 +9,7 @@
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Drupal\user\UserInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-
 
 /**
  * Implements hook_help().
@@ -67,13 +65,15 @@ function redirect_after_login_user_login($account) {
     return;
   }
 
- //Accessing the site in maintenance mode.
+  $middleware = \Drupal::service('http_middleware.redirect_after_login');
+  // Accessing the site in maintenance mode.
   if (\Drupal::state()
       ->get('system.maintenance_mode') && !$account->hasPermission('access site in maintenance mode')) {
     // The site is in maintenance mode and the user is not allowed in.
     // Step out and let Drupal handle it.
-    $homeResponse = new RedirectResponse(URL::fromUserInput('/')->toString());
-    $homeResponse->send();
+    \Drupal::service('request_stack')
+      ->getCurrentRequest()->query->set('destination', URL::fromUserInput('/')
+      ->toString());
   }
 
   $config = Drupal::config('redirect_after_login.settings');
@@ -89,19 +89,14 @@ function redirect_after_login_user_login($account) {
   }
 
   if (!in_array($current_route, ['user.reset', 'user.reset.login'])) {
-    // We want to redirect user on login.
+    // Redirect user on login.
     $current_user = Drupal::currentUser();
     $username = $current_user->getRoles();
     $login_redirection = Drupal::config('redirect_after_login.settings')
       ->get('login_redirection');
-    if (isset($login_redirection[array_reverse($username)[0]])) {
-      $response = new RedirectResponse(Url::fromUserInput($login_redirection[array_reverse($username)[0]])
-        ->toString());
-      $response->send();
-    }
-    else {
-      $homeResponse = new RedirectResponse(URL::fromUserInput('/')->toString());
-      $homeResponse->send();
-    }
+
+    $url = (isset($login_redirection[array_reverse($username)[0]])) ? $login_redirection[array_reverse($username)[0]] : '/';
+    \Drupal::service('request_stack')
+      ->getCurrentRequest()->query->set('destination', URL::fromUserInput($url)->toString());
   }
 }

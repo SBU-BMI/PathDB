@@ -5,7 +5,7 @@ namespace Drupal\Tests\facets_summary\Functional;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\search_api\Item\Field;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\facets\Functional\FacetsTestBase;
 use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
@@ -17,7 +17,7 @@ use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 class HierarchicalFacetIntegrationTest extends FacetsTestBase {
 
   use TaxonomyTestTrait;
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * {@inheritdoc}

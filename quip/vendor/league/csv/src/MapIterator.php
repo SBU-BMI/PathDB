@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace League\Csv;
 
+use ArrayIterator;
+use Iterator;
+use IteratorAggregate;
 use IteratorIterator;
 use Traversable;
 
@@ -32,8 +35,33 @@ final class MapIterator extends IteratorIterator
         $this->callable = $callable;
     }
 
+    public static function fromIterable(iterable $iterator, callable $callable): self
+    {
+        return match (true) {
+            $iterator instanceof Traversable => new self($iterator, $callable),
+            is_array($iterator) => new self(new ArrayIterator($iterator), $callable),
+        };
+    }
+
     public function current(): mixed
     {
         return ($this->callable)(parent::current(), parent::key());
+    }
+
+    public static function toIterator(iterable $value): Iterator
+    {
+        if ($value instanceof IteratorAggregate) {
+            $value = $value->getIterator();
+        }
+
+        return match (true) {
+            $value instanceof Iterator => $value,
+            $value instanceof Traversable => (function () use ($value): Iterator {
+                foreach ($value as $offset => $record) {
+                    yield $offset => $record;
+                }
+            })(),
+            default => new ArrayIterator($value),
+        };
     }
 }

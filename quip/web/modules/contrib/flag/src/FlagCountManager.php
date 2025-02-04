@@ -9,10 +9,11 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\Event\FlagEvents;
 use Drupal\flag\Event\FlaggingEvent;
 use Drupal\flag\Event\UnflaggingEvent;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class FlagCountManager.
+ * Flag Count Manager.
  */
 class FlagCountManager implements FlagCountManagerInterface, EventSubscriberInterface {
 
@@ -70,7 +71,7 @@ class FlagCountManager implements FlagCountManagerInterface, EventSubscriberInte
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new self (
+    return new self(
       $container->get('database'),
       $container->get('datetime.time')
     );
@@ -197,7 +198,7 @@ class FlagCountManager implements FlagCountManagerInterface, EventSubscriberInte
     $entity = $flagging->getFlaggable();
 
     $this->connection->merge('flag_counts')
-      ->key([
+      ->keys([
         'flag_id' => $flag->id(),
         'entity_id' => $entity->id(),
         'entity_type' => $entity->getEntityTypeId(),
@@ -243,7 +244,11 @@ class FlagCountManager implements FlagCountManagerInterface, EventSubscriberInte
         $flaggings_count[$flag_id][$entity_id]++;
       }
 
-      $this->resetLoadedCounts($flagging->getFlaggable(), $flagging->getFlag());
+      // Workaround to correct error caused by orphaned flags.
+      $entity = $flagging->getFlaggable();
+      if ($entity) {
+        $this->resetLoadedCounts($entity, $flagging->getFlag());
+      }
     }
 
     // Build a query that fetches the count for all flag and entity ID

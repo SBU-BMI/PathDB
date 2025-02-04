@@ -2,6 +2,7 @@
 
 namespace Drupal\facets_summary\FacetsSummaryManager;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Link;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\facets\Exception\InvalidProcessorException;
@@ -11,6 +12,7 @@ use Drupal\facets_summary\Processor\BuildProcessorInterface;
 use Drupal\facets_summary\Processor\ProcessorInterface;
 use Drupal\facets_summary\Processor\ProcessorPluginManager;
 use Drupal\facets_summary\FacetsSummaryInterface;
+use Drupal\Component\Utility\Xss;
 
 /**
  * The facet summary manager.
@@ -46,6 +48,8 @@ class DefaultFacetsSummaryManager {
   protected $facetManager;
 
   /**
+   * The facets.
+   *
    * @var \Drupal\facets\FacetInterface[]
    */
   protected $facets = [];
@@ -87,6 +91,20 @@ class DefaultFacetsSummaryManager {
    *   Throws an exception when an invalid processor is linked to the facet.
    */
   public function build(FacetsSummaryInterface $facets_summary) {
+    if ($facets_summary->getOnlyVisibleWhenFacetSourceIsVisible()) {
+      // Block rendering and processing should be stopped when the facet source
+      // is not available on the page. Returning an empty array here is enough
+      // to halt all further processing.
+      $facet_source = $facets_summary->getFacetSource();
+      if (is_null($facet_source) || !$facet_source->isRenderedInCurrentRequest()) {
+        $build = [];
+        $cacheableMetadata = new CacheableMetadata();
+        $cacheableMetadata->addCacheableDependency($facet_source);
+        $cacheableMetadata->applyTo($build);
+        return $build;
+      }
+    }
+
     // Let the facet_manager build the facets.
     $facets = $this->getFacets($facets_summary);
     $facets_config = $facets_summary->getFacets();
@@ -118,6 +136,11 @@ class DefaultFacetsSummaryManager {
       ],
     ];
 
+    // Order results by the $facets_config.
+    usort($facets, function ($a, $b) use ($facets_config) {
+      return $facets_config[$a->id()]['weight'] <=> $facets_config[$b->id()]['weight'];
+    });
+
     $results = [];
     foreach ($facets as $facet) {
       $show_count = $facets_config[$facet->id()]['show_count'];
@@ -132,6 +155,14 @@ class DefaultFacetsSummaryManager {
         throw new InvalidProcessorException("The processor {$processor->getPluginDefinition()['id']} has a build definition but doesn't implement the required BuildProcessorInterface interface");
       }
       $build = $processor->build($facets_summary, $build, $facets);
+    }
+
+    if (isset($build["#items"])) {
+      foreach ($build["#items"] as &$item) {
+        if (isset($item["#title"]) and is_string($item["#title"])) {
+          $item["#title"] = Xss::filter($item["#title"]);
+        }
+      }
     }
 
     return $build;

@@ -1,0 +1,13 @@
+administer http response headers:
+  title: 'Administer HTTP response headers'
+  description: 'Allow to access the administration form to configure HTTP response headers.'
+  restrict access: true
+
+add http response headers:
+  title: 'Add HTTP response headers'
+
+edit http response headers:
+  title: 'Edit HTTP response headers'
+
+delete http response headers:
+  title: 'Delete HTTP response headers'

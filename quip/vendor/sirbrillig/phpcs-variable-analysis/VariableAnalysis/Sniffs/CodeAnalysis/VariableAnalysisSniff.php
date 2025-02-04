@@ -245,6 +245,13 @@ class VariableAnalysisSniff implements Sniff
 			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
+		// Find and process variables to perform two jobs: to record variable
+		// definition or use, and to report variables as undefined if they are used
+		// without having been first defined.
+		if ($token['code'] === T_VARIABLE) {
+			$this->processVariable($phpcsFile, $stackPtr);
+		}
+
 		// Report variables defined but not used in the current scope as unused
 		// variables if the current token closes scopes.
 		$this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
@@ -253,13 +260,10 @@ class VariableAnalysisSniff implements Sniff
 		// expression of a for loop if the current token closes a loop.
 		$this->processClosingForLoopsAt($phpcsFile, $stackPtr);
 
-		// Find and process variables to perform two jobs: to record variable
-		// definition or use, and to report variables as undefined if they are used
-		// without having been first defined.
 		if ($token['code'] === T_VARIABLE) {
-			$this->processVariable($phpcsFile, $stackPtr);
 			return;
 		}
+
 		if (($token['code'] === T_DOUBLE_QUOTED_STRING) || ($token['code'] === T_HEREDOC)) {
 			$this->processVariableInString($phpcsFile, $stackPtr);
 			return;
@@ -860,29 +864,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processVariableAsClassProperty(File $phpcsFile, $stackPtr)
 	{
-		$propertyDeclarationKeywords = [
-			T_PUBLIC,
-			T_PRIVATE,
-			T_PROTECTED,
-			T_VAR,
-		];
-		$stopAtPtr = $stackPtr - 2;
-		$visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
-		if ($visibilityPtr) {
-			return true;
-		}
-		$staticPtr = $phpcsFile->findPrevious(T_STATIC, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
-		if (! $staticPtr) {
-			return false;
-		}
-		$stopAtPtr = $staticPtr - 2;
-		$visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $staticPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
-		if ($visibilityPtr) {
-			return true;
-		}
-		// it's legal to use `static` to define properties as well as to
-		// define variables, so make sure we are not in a function before
-		// assuming it's a property.
+		// Make sure we are not in a class method before assuming it's a property.
 		$tokens = $phpcsFile->getTokens();
 
 		/** @var array{conditions?: (int|string)[], content?: string}|null */
@@ -1888,61 +1870,6 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * @param File                   $phpcsFile
-	 * @param int                    $stackPtr
-	 * @param array<int, array<int>> $arguments The stack pointers of each argument
-	 * @param int                    $currScope
-	 *
-	 * @return void
-	 */
-	protected function processCompactArguments(File $phpcsFile, $stackPtr, $arguments, $currScope)
-	{
-		$tokens = $phpcsFile->getTokens();
-
-		foreach ($arguments as $argumentPtrs) {
-			$argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
-				return isset(Tokens::$emptyTokens[$tokens[$argumentPtr]['code']]) === false;
-			}));
-			if (empty($argumentPtrs)) {
-				continue;
-			}
-			if (!isset($tokens[$argumentPtrs[0]])) {
-				continue;
-			}
-			$argumentFirstToken = $tokens[$argumentPtrs[0]];
-			if ($argumentFirstToken['code'] === T_ARRAY) {
-				// It's an array argument, recurse.
-				$arrayArguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
-				$this->processCompactArguments($phpcsFile, $stackPtr, $arrayArguments, $currScope);
-				continue;
-			}
-			if (count($argumentPtrs) > 1) {
-				// Complex argument, we can't handle it, ignore.
-				continue;
-			}
-			if ($argumentFirstToken['code'] === T_CONSTANT_ENCAPSED_STRING) {
-				// Single-quoted string literal, ie compact('whatever').
-				// Substr is to strip the enclosing single-quotes.
-				$varName = substr($argumentFirstToken['content'], 1, -1);
-				$this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $argumentPtrs[0], $currScope);
-				continue;
-			}
-			if ($argumentFirstToken['code'] === T_DOUBLE_QUOTED_STRING) {
-				// Double-quoted string literal.
-				$regexp = Constants::getDoubleQuotedVarRegexp();
-				if (! empty($regexp) && preg_match($regexp, $argumentFirstToken['content'])) {
-					// Bail if the string needs variable expansion, that's runtime stuff.
-					continue;
-				}
-				// Substr is to strip the enclosing double-quotes.
-				$varName = substr($argumentFirstToken['content'], 1, -1);
-				$this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $argumentPtrs[0], $currScope);
-				continue;
-			}
-		}
-	}
-
-	/**
 	 * Called to process variables named in a call to compact().
 	 *
 	 * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
@@ -1952,13 +1879,17 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processCompact(File $phpcsFile, $stackPtr)
 	{
-		$currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-		if ($currScope === null) {
-			return;
-		}
-
+		Helpers::debug("processCompact at {$stackPtr}");
 		$arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
-		$this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
+		$variables = Helpers::getVariablesInsideCompact($phpcsFile, $stackPtr, $arguments);
+		foreach ($variables as $variable) {
+			$currScope = Helpers::findVariableScope($phpcsFile, $stackPtr, $variable->name);
+			if ($currScope === null) {
+				continue;
+			}
+			$variablePosition = $variable->firstRead ? $variable->firstRead : $stackPtr;
+			$this->markVariableReadAndWarnIfUndefined($phpcsFile, $variable->name, $variablePosition, $currScope);
+		}
 	}
 
 	/**

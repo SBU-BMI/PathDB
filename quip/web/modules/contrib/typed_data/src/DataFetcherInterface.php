@@ -34,7 +34,7 @@ interface DataFetcherInterface {
    *   Thrown if the given path is not valid for the given data; e.g., a not
    *   existing property is referenced.
    */
-  public function fetchDataByPropertyPath(TypedDataInterface $typed_data, $property_path, BubbleableMetadata $bubbleable_metadata = NULL, $langcode = NULL);
+  public function fetchDataByPropertyPath(TypedDataInterface $typed_data, string $property_path, ?BubbleableMetadata $bubbleable_metadata = NULL, ?string $langcode = NULL): TypedDataInterface;
 
   /**
    * Fetches data based upon the given sub-paths.
@@ -56,10 +56,10 @@ interface DataFetcherInterface {
    *   Thrown if the data cannot be fetched due to missing data; e.g., unset
    *   properties or list items.
    * @throws \Drupal\typed_data\Exception\InvalidArgumentException
-   *   Thrown if the given path is not valid for the given data; e.g., a not
-   *   existing property is referenced.
+   *   Thrown if the given path is not valid for the given data; e.g., a non-
+   *   existent property is referenced.
    */
-  public function fetchDataBySubPaths(TypedDataInterface $typed_data, array $sub_paths, BubbleableMetadata $bubbleable_metadata = NULL, $langcode = NULL);
+  public function fetchDataBySubPaths(TypedDataInterface $typed_data, array $sub_paths, ?BubbleableMetadata $bubbleable_metadata = NULL, ?string $langcode = NULL): TypedDataInterface;
 
   /**
    * Fetches a data definition based upon the given property path.
@@ -79,7 +79,7 @@ interface DataFetcherInterface {
    *   Thrown if the given path is not valid for the given data; e.g., a not
    *   existing property is referenced.
    */
-  public function fetchDefinitionByPropertyPath(DataDefinitionInterface $data_definition, $property_path, $langcode = NULL);
+  public function fetchDefinitionByPropertyPath(DataDefinitionInterface $data_definition, string $property_path, ?string $langcode = NULL): DataDefinitionInterface;
 
   /**
    * Fetches a data definition based upon the given sub-paths.
@@ -99,13 +99,13 @@ interface DataFetcherInterface {
    *   Thrown if the given path is not valid for the given data; e.g., a not
    *   existing property is referenced.
    */
-  public function fetchDefinitionBySubPaths(DataDefinitionInterface $data_definition, array $sub_paths, $langcode = NULL);
+  public function fetchDefinitionBySubPaths(DataDefinitionInterface $data_definition, array $sub_paths, ?string $langcode = NULL): DataDefinitionInterface;
 
   /**
    * Provides autocomplete suggestions for an incomplete property path.
    *
    * @param \Drupal\Core\TypedData\DataDefinitionInterface[] $data_definitions
-   *   A map of available data definitions that should be seareched. The array
+   *   A map of available data definitions that should be searched. The array
    *   keys are the first part of the property path.
    * @param string $partial_property_path
    *   The partial property path, example: "node.uid.ent".
@@ -117,6 +117,6 @@ interface DataFetcherInterface {
    *   - value: the data selector property path.
    *   - label: the human readable label suggestion.
    */
-  public function autocompletePropertyPath(array $data_definitions, $partial_property_path);
+  public function autocompletePropertyPath(array $data_definitions, string $partial_property_path): array;
 
 }

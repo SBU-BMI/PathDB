@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Composer.
@@ -13,7 +13,6 @@
 namespace Composer\Util;
 
 use Composer\IO\IOInterface;
-use Composer\Pcre\Preg;
 
 /**
  * Convert PHP errors into exceptions
@@ -35,12 +34,13 @@ class ErrorHandler
      *
      * @static
      * @throws \ErrorException
-     * @return bool
      */
-    public static function handle($level, $message, $file, $line)
+    public static function handle(int $level, string $message, string $file, int $line): bool
     {
+        $isDeprecationNotice = $level === E_DEPRECATED || $level === E_USER_DEPRECATED;
+
         // error code is not included in error_reporting
-        if (!(error_reporting() & $level)) {
+        if (!$isDeprecationNotice && 0 === (error_reporting() & $level)) {
             return true;
         }
 
@@ -49,30 +49,23 @@ class ErrorHandler
             "\na legitimately suppressed error that you were not supposed to see.";
         }
 
-        if ($level !== E_DEPRECATED && $level !== E_USER_DEPRECATED) {
+        if (!$isDeprecationNotice) {
             throw new \ErrorException($message, 0, $level, $file, $line);
         }
 
-        if (self::$io) {
-            // ignore symfony/* deprecation warnings
-            // TODO remove in 2.3
-            if (Preg::isMatch('{^Return type of Symfony\\\\.*ReturnTypeWillChange}is', $message)) {
-                return true;
-            }
-            if (strpos(strtr($file, '\\', '/'), 'vendor/symfony/') !== false) {
-                return true;
-            }
-
+        if (self::$io !== null) {
             self::$io->writeError('<warning>Deprecation Notice: '.$message.' in '.$file.':'.$line.'</warning>');
             if (self::$io->isVerbose()) {
                 self::$io->writeError('<warning>Stack trace:</warning>');
-                self::$io->writeError(array_filter(array_map(function ($a) {
+                self::$io->writeError(array_filter(array_map(static function ($a): ?string {
                     if (isset($a['line'], $a['file'])) {
                         return '<warning> '.$a['file'].':'.$a['line'].'</warning>';
                     }
 
                     return null;
-                }, array_slice(debug_backtrace(), 2))));
+                }, array_slice(debug_backtrace(), 2)), function (?string $line) {
+                    return $line !== null;
+                }));
             }
         }
 
@@ -81,15 +74,11 @@ class ErrorHandler
 
     /**
      * Register error handler.
-     *
-     * @param IOInterface|null $io
-     *
-     * @return void
      */
-    public static function register(IOInterface $io = null)
+    public static function register(?IOInterface $io = null): void
     {
-        set_error_handler(array(__CLASS__, 'handle'));
-        error_reporting(E_ALL | E_STRICT);
+        set_error_handler([__CLASS__, 'handle']);
+        error_reporting(E_ALL);
         self::$io = $io;
     }
 }

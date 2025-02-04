@@ -11,6 +11,7 @@
 
 namespace Symfony\Bridge\PhpUnit;
 
+use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
 use PHPUnit\Runner\ErrorHandler;
 use PHPUnit\Util\Error\Handler;
@@ -140,6 +141,9 @@ class DeprecationErrorHandler
 
         $deprecation = new Deprecation($msg, $trace, $file, \E_DEPRECATED === $type);
         if ($deprecation->isMuted()) {
+            return null;
+        }
+        if ($this->getConfiguration()->isIgnoredDeprecation($deprecation)) {
             return null;
         }
         if ($this->getConfiguration()->isBaselineDeprecation($deprecation)) {
@@ -337,9 +341,14 @@ class DeprecationErrorHandler
 
                     $countsByCaller = $notice->getCountsByCaller();
                     arsort($countsByCaller);
+                    $limit = 5;
 
                     foreach ($countsByCaller as $method => $count) {
                         if ('count' !== $method) {
+                            if (!$limit--) {
+                                fwrite($handle, "    ...\n");
+                                break;
+                            }
                             fwrite($handle, sprintf("    %dx in %s\n", $count, preg_replace('/(.*)\\\\(.*?::.*?)$/', '$2 from $1', $method)));
                         }
                     }
@@ -352,7 +361,7 @@ class DeprecationErrorHandler
         }
     }
 
-    private static function getPhpUnitErrorHandler()
+    private static function getPhpUnitErrorHandler(): callable
     {
         if (!$eh = self::$errorHandler) {
             if (class_exists(Handler::class)) {
@@ -371,13 +380,23 @@ class DeprecationErrorHandler
         }
 
         foreach (debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT | \DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
-            if (isset($frame['object']) && $frame['object'] instanceof TestResult) {
+            if (!isset($frame['object'])) {
+                continue;
+            }
+
+            if ($frame['object'] instanceof TestResult) {
                 return new $eh(
                     $frame['object']->getConvertDeprecationsToExceptions(),
                     $frame['object']->getConvertErrorsToExceptions(),
                     $frame['object']->getConvertNoticesToExceptions(),
                     $frame['object']->getConvertWarningsToExceptions()
                 );
+            } elseif (ErrorHandler::class === $eh && $frame['object'] instanceof TestCase) {
+                return function (int $errorNumber, string $errorString, string $errorFile, int $errorLine) {
+                    ErrorHandler::instance()($errorNumber, $errorString, $errorFile, $errorLine);
+
+                    return true;
+                };
             }
         }
 
@@ -399,31 +418,59 @@ class DeprecationErrorHandler
         }
 
         // Follow https://no-color.org/
-        if (isset($_SERVER['NO_COLOR']) || false !== getenv('NO_COLOR')) {
+        if ('' !== (($_SERVER['NO_COLOR'] ?? getenv('NO_COLOR'))[0] ?? '')) {
             return false;
         }
 
-        if ('Hyper' === getenv('TERM_PROGRAM')) {
+        if (!self::isTty()) {
+            return false;
+        }
+
+        if ('\\' === \DIRECTORY_SEPARATOR && \function_exists('sapi_windows_vt100_support') && @sapi_windows_vt100_support(\STDOUT)) {
             return true;
         }
 
-        if (\DIRECTORY_SEPARATOR === '\\') {
-            return (\function_exists('sapi_windows_vt100_support')
-                && sapi_windows_vt100_support(\STDOUT))
-                || false !== getenv('ANSICON')
-                || 'ON' === getenv('ConEmuANSI')
-                || 'xterm' === getenv('TERM');
+        if ('Hyper' === getenv('TERM_PROGRAM')
+            || false !== getenv('COLORTERM')
+            || false !== getenv('ANSICON')
+            || 'ON' === getenv('ConEmuANSI')
+        ) {
+            return true;
         }
 
+        if ('dumb' === $term = (string) getenv('TERM')) {
+            return false;
+        }
+
+        // See https://github.com/chalk/supports-color/blob/d4f413efaf8da045c5ab440ed418ef02dbb28bf1/index.js#L157
+        return preg_match('/^((screen|xterm|vt100|vt220|putty|rxvt|ansi|cygwin|linux).*)|(.*-256(color)?(-bce)?)$/', $term);
+    }
+
+    /**
+     * Checks if the stream is a TTY, i.e; whether the output stream is connected to a terminal.
+     *
+     * Reference: Composer\Util\Platform::isTty
+     * https://github.com/composer/composer
+     */
+    private static function isTty(): bool
+    {
+        // Detect msysgit/mingw and assume this is a tty because detection
+        // does not work correctly, see https://github.com/composer/composer/issues/9690
+        if (\in_array(strtoupper((string) getenv('MSYSTEM')), ['MINGW32', 'MINGW64'], true)) {
+            return true;
+        }
+
+        // Modern cross-platform function, includes the fstat fallback so if it is present we trust it
         if (\function_exists('stream_isatty')) {
             return @stream_isatty(\STDOUT);
         }
 
-        if (\function_exists('posix_isatty')) {
-            return @posix_isatty(\STDOUT);
+        // Only trusting this if it is positive, otherwise prefer fstat fallback.
+        if (\function_exists('posix_isatty') && @posix_isatty(\STDOUT)) {
+            return true;
         }
 
-        $stat = fstat(\STDOUT);
+        $stat = @fstat(\STDOUT);
 
         // Check if formatted mode is S_IFCHR
         return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;

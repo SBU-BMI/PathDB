@@ -20,3 +20,6 @@ field.widget.settings.hide_revision_field_log_widget:
     allow_user_settings:
       type: boolean
       label: 'Allow users to alter their own settings for field.'
+    hide_revision:
+      type: boolean
+      label: 'Hide whole revision tab'

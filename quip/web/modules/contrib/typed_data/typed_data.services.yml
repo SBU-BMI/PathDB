@@ -4,7 +4,7 @@ services:
     parent: default_plugin_manager
   plugin.manager.typed_data_form_widget:
     class: Drupal\typed_data\Widget\FormWidgetManager
-    arguments: ['@container.namespaces', '@module_handler']
+    parent: default_plugin_manager
   typed_data.data_fetcher:
     class: Drupal\typed_data\DataFetcher
   typed_data.placeholder_resolver:

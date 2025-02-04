@@ -60,7 +60,7 @@ class PostRequestIndexing implements PostRequestIndexingInterface, DestructableI
       try {
         $storage = $this->entityTypeManager->getStorage('search_api_index');
       }
-      catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+      catch (InvalidPluginDefinitionException | PluginNotFoundException) {
         // It might be possible that the module got uninstalled during the rest
         // of the page request, or something else happened. To be on the safe
         // side, catch the exception in case the entity type isn't found.
@@ -94,8 +94,8 @@ class PostRequestIndexing implements PostRequestIndexingInterface, DestructableI
         }
       }
       catch (SearchApiException $e) {
-        $vars['%index'] = $index->label();
-        watchdog_exception('search_api', $e, '%type while trying to index items on %index: @message in %function (line %line of %file).', $vars);
+        $vars['%index'] = $index->label() ?? $index->id();
+        $this->logException($e, '%type while trying to index items on %index: @message in %function (line %line of %file).', $vars);
       }
 
       // We usually shouldn't be called twice in a page request, but no harm in
@@ -117,6 +117,15 @@ class PostRequestIndexing implements PostRequestIndexingInterface, DestructableI
   public function registerIndexingOperation($index_id, array $item_ids) {
     foreach ($item_ids as $item_id) {
       $this->operations[$index_id][$item_id] = $item_id;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeFromIndexing($index_id, array $item_ids): void {
+    foreach ($item_ids as $item_id) {
+      unset($this->operations[$index_id][$item_id]);
     }
   }
 

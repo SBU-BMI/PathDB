@@ -10,7 +10,7 @@ use Drupal\Core\Entity\Schema\EntityStorageSchemaInterface;
 use Drupal\user\RoleInterface;
 
 /**
- * Implements HOOK_install().
+ * Implements hook_install().
  */
 function hide_revision_field_install() {
   module_set_weight('hide_revision_field', 1);
@@ -18,9 +18,12 @@ function hide_revision_field_install() {
 
 /**
  * Apply updates.
+ *
  * @see https://www.drupal.org/project/hide_revision_field/issues/3165347
  *
  * @return mixed
+ *   Entity type manager.
+ *
  * @throws \ReflectionException
  */
 function hide_revision_field_apply_updates() {
@@ -73,8 +76,8 @@ function hide_revision_field_apply_updates() {
       $original_storage_definitions = $entity_last_installed_schema_repository->getLastInstalledFieldStorageDefinitions($entity_type_id);
 
       foreach ($change_list['field_storage_definitions'] as $field_name => $change) {
-        $storage_definition = isset($storage_definitions[$field_name]) ? $storage_definitions[$field_name] : NULL;
-        $original_storage_definition = isset($original_storage_definitions[$field_name]) ? $original_storage_definitions[$field_name] : NULL;
+        $storage_definition = $storage_definitions[$field_name] ?? NULL;
+        $original_storage_definition = $original_storage_definitions[$field_name] ?? NULL;
         $op = $change;
         switch ($op) {
           case EntityDefinitionUpdateManagerInterface::DEFINITION_CREATED:
@@ -124,7 +127,7 @@ function hide_revision_field_update_8201() {
     /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $bundle */
     foreach ($entity_type_manager->getStorage($type)->loadMultiple() as $k => $bundle) {
       $entity_type_manager->getStorage('entity_form_display')
-        ->load("{$type_id}.{$k}.default")
+        ->load("$type_id.$k.default")
         ->setComponent('revision_log', [
           'type' => 'hide_revision_field_log_widget',
           'settings' => [

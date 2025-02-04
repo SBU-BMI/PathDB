@@ -1,44 +1,27 @@
 <?php
 
-/**
- * @file
- * HTTP Header manipulations install.
- */
-
-use Drupal\http_response_headers\ResponseHeaderInterface;
+use Drupal\http_response_headers\Entity\ResponseHeaderInterface;
 
 /**
  * Implements hook_requirements().
  */
 function http_response_headers_requirements($phase) {
-  $requirements = array();
-
+  $requirements = [];
   if ($phase == 'runtime') {
     $entity_manager = \Drupal::entityTypeManager()->getStorage('response_header');
-
     // Report response headers that should be configured.
-    $strict_transport_security = $entity_manager->load('strict_transport_security');
-    $public_key_pins = $entity_manager->load('public_key_pins');
-    if (!isset($strict_transport_security) || $strict_transport_security instanceof ResponseHeaderInterface || empty($strict_transport_security->get('value'))) {
-      $requirements['response_header_security_policy'] = array(
+    $content_security_policy = $entity_manager->load('content_security_policy');
+    if (!isset($content_security_policy) || !($content_security_policy instanceof ResponseHeaderInterface) || empty($content_security_policy->get('value'))) {
+      $requirements['response_header_security_policy'] = [
         'title' => t('Content Security Policy'),
         'value' => t('Not configured'),
-        'description' => t("It is highly recommended to set a secure Content Security Policy. A recommended value would be `default-src https: data: \'unsafe-inline\' \'unsafe-eval\'`. See the <a href=':help'>HTTP Response Headers Help page</a> for more information.", array(':help' => '/admin/help/http_response_headers')),
+        'description' => t("It is highly recommended to set a secure Content Security Policy.
+        See the <a href=':help'>help page</a> for more information.", [':help' => '/admin/help/http_response_headers']),
         'severity' => REQUIREMENT_WARNING,
-      );
-    }
-    if (!isset($public_key_pins) || $public_key_pins instanceof ResponseHeaderInterface || empty($public_key_pins->get('value'))) {
-      $requirements['response_header_public_key_pins'] = array(
-        'title' => t('Public Key Pins'),
-        'value' => t('Not configured'),
-        'description' => t("It is highly recommended to configure your Public Key Pins. See the <a href=':help'>HTTP Response Headers Help page</a> for more information.", array(':help' => '/admin/help/http_response_headers')),
-        'severity' => REQUIREMENT_WARNING,
-      );
+      ];
     }
   }
-
   return $requirements;
-
 }
 
 /**
@@ -48,14 +31,14 @@ function http_response_headers_update_8001() {
   $old_config = \Drupal::configFactory()->get('http_response_headers.settings');
   if (!empty($old_config->get('headers'))) {
     foreach ($old_config->get('headers') as $header) {
-      $entity = array(
+      $entity = [
         'id' => preg_replace('/[^a-z0-9_]+/', '_', strtolower($header['name'])),
         'label' => $header['name'],
         'name' => $header['name'],
         'description' => '',
-        'group' => $header['group'],
         'value' => $header['value'],
-      );
+        'visibility' => [],
+      ];
       $entity_manager = \Drupal::entityTypeManager()->getStorage('response_header');
       if ($existing_entity = current($entity_manager->loadByProperties(array('name' => $entity['name'])))) {
         $saved = $existing_entity->set('value', $entity['value'])->save();
@@ -64,7 +47,6 @@ function http_response_headers_update_8001() {
         $saved = $entity_manager->create($entity)->save();
       }
     }
-
     \Drupal::configFactory()->getEditable('http_response_headers.settings')->delete();
   }
 }

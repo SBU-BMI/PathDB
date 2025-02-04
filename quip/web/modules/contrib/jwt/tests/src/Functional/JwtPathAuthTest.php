@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\jwt\Functional;
 
+use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\jwt\JsonWebToken\JsonWebToken;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Core\Url;
 use Drupal\Tests\file\Functional\FileFieldCreationTrait;
 use Drupal\Tests\TestFileCreationTrait;
 
@@ -51,7 +51,8 @@ class JwtPathAuthTest extends BrowserTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->adminUser = $this->drupalCreateUser(['administer jwt', 'access content']);
+    $perms = ['administer jwt', 'access content'];
+    $this->adminUser = $this->drupalCreateUser($perms);
     // Enable a REST resource for file entities to verify that that path-based
     // auth can also be used to authenticate REST requests.
     $params = [
@@ -212,7 +213,7 @@ class JwtPathAuthTest extends BrowserTestBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function createPrivateFile($file_name, $uid = 1, $status = Drupal\file\FileInterface::STATUS_PERMANENT) {
+  protected function createPrivateFile($file_name, $uid = 1, $status = FileInterface::STATUS_PERMANENT) {
     // Create a new file entity.
     $file = File::create([
       'uid' => $uid,

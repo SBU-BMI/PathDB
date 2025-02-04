@@ -3,8 +3,8 @@
 namespace Drupal\jwt\Plugin\KeyType;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\key\Plugin\KeyTypeBase;
 use Drupal\key\Plugin\KeyPluginFormInterface;
+use Drupal\key\Plugin\KeyTypeBase;
 
 /**
  * Defines a key type for JWT RSA Signatures.
@@ -68,7 +68,7 @@ class JwtRsKeyType extends KeyTypeBase implements KeyPluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public static function generateKeyValue(array $configuration) {
+  public static function generateKeyValue(array $configuration): string {
     $algorithm_keysize = self::getAlgorithmKeysize();
     $algorithm = $configuration['algorithm'];
 
@@ -82,9 +82,7 @@ class JwtRsKeyType extends KeyTypeBase implements KeyPluginFormInterface {
     ]);
 
     $key_string = '';
-
     openssl_pkey_export($key_resource, $key_string);
-    openssl_pkey_free($key_resource);
 
     return $key_string;
   }
@@ -127,16 +125,15 @@ class JwtRsKeyType extends KeyTypeBase implements KeyPluginFormInterface {
     if ($key_details['type'] != OPENSSL_KEYTYPE_RSA) {
       $form_state->setErrorByName('key_type', $this->t('Key must be RSA.'));
     }
-    openssl_pkey_free($key_resource);
   }
 
   /**
-   * Get keysizes for the various algorithms.
+   * Get key sizes for the various algorithms.
    *
    * @return array
-   *   An array key keysizes.
+   *   An array of key algorithms and minimum sizes.
    */
-  protected static function getAlgorithmKeysize() {
+  protected static function getAlgorithmKeysize(): array {
     return [
       'RS256' => 2048,
     ];

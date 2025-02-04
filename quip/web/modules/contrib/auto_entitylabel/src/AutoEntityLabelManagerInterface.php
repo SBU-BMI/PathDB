@@ -58,4 +58,12 @@ interface AutoEntityLabelManagerInterface {
    */
   public function getPattern();
 
+  /**
+   * Returns the action to take on new entities.
+   *
+   * @return int
+   *   The new entity action value.
+   */
+  public function getNewContentBehavior();
+
 }

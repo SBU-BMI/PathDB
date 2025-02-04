@@ -3,6 +3,7 @@
 namespace Drupal\Tests\auto_entitylabel\Kernel;
 
 use Drupal\auto_entitylabel\AutoEntityLabelPermissionController;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 
@@ -14,6 +15,7 @@ use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 class AutoEntityLabelPermissionControllerTest extends EntityKernelTestBase {
 
   use ContentTypeCreationTrait;
+  use StringTranslationTrait;
 
   /**
    * Node type.
@@ -67,7 +69,7 @@ class AutoEntityLabelPermissionControllerTest extends EntityKernelTestBase {
     $this->assertNotEmpty($this->autoEntityLabelPermissionController->autoEntityLabelPermissions());
     $this->assertEquals([
       'administer node_type labels' => [
-        'title' => '<em class="placeholder">Content type</em>: Administer automatic entity labels',
+        'title' => $this->t('<em class="placeholder">Content type</em>: Administer automatic entity labels'),
         'restrict access' => TRUE,
       ],
     ], $this->autoEntityLabelPermissionController->autoEntityLabelPermissions());

@@ -8,7 +8,7 @@ use Drupal\jwt\Authentication\Event\JwtAuthGenerateEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class JwtAuthIssuerSubscriber.
+ * JWT Auth Issuer Subscriber set claims on a JWT being issued.
  */
 class JwtAuthIssuerSubscriber implements EventSubscriberInterface {
 
@@ -17,7 +17,7 @@ class JwtAuthIssuerSubscriber implements EventSubscriberInterface {
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
-  protected $currentUser;
+  protected AccountInterface $currentUser;
 
   /**
    * Constructor.
@@ -33,6 +33,7 @@ class JwtAuthIssuerSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
+    $events = [];
     $events[JwtAuthEvents::GENERATE][] = ['setStandardClaims', 100];
     $events[JwtAuthEvents::GENERATE][] = ['setDrupalClaims', 99];
     return $events;

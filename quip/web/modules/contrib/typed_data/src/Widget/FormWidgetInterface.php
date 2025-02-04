@@ -23,7 +23,7 @@ interface FormWidgetInterface extends ConfigurableInterface, PluginInspectionInt
    * @return bool
    *   Whether the data can be edited with the widget.
    */
-  public function isApplicable(DataDefinitionInterface $definition);
+  public function isApplicable(DataDefinitionInterface $definition): bool;
 
   /**
    * Creates the widget's form elements for editing the given data.
@@ -45,7 +45,7 @@ interface FormWidgetInterface extends ConfigurableInterface, PluginInspectionInt
    *   The form elements for the given data. Note that this must be an array,
    *   holding one or more form-elements.
    */
-  public function form(TypedDataInterface $data, SubformStateInterface $form_state);
+  public function form(TypedDataInterface $data, SubformStateInterface $form_state): array;
 
   /**
    * Extracts the data value from submitted form values.
@@ -55,7 +55,7 @@ interface FormWidgetInterface extends ConfigurableInterface, PluginInspectionInt
    * @param \Drupal\Core\Form\SubformStateInterface $form_state
    *   The form state of the widget's form.
    */
-  public function extractFormValues(TypedDataInterface $data, SubformStateInterface $form_state);
+  public function extractFormValues(TypedDataInterface $data, SubformStateInterface $form_state): void;
 
   /**
    * Reports validation errors against actual form elements.
@@ -74,7 +74,7 @@ interface FormWidgetInterface extends ConfigurableInterface, PluginInspectionInt
    * @param \Drupal\Core\Form\SubformStateInterface $formState
    *   The form state of the widget's form.
    */
-  public function flagViolations(TypedDataInterface $data, ConstraintViolationListInterface $violations, SubformStateInterface $formState);
+  public function flagViolations(TypedDataInterface $data, ConstraintViolationListInterface $violations, SubformStateInterface $formState): void;
 
   /**
    * Defines the supported configuration settings.
@@ -86,11 +86,11 @@ interface FormWidgetInterface extends ConfigurableInterface, PluginInspectionInt
    * @param \Drupal\Core\TypedData\DataDefinitionInterface $definition
    *   The definition of the edited data.
    *
-   * @return \Drupal\typed_data\Context\ContextDefinitionInterface[]
+   * @return \Drupal\Core\Plugin\Context\ContextDefinitionInterface[]
    *   An array of context definitions describing the configuration values,
    *   keyed by configuration setting name. The keys must match the actual keys
    *   of the supported configuration.
    */
-  public function getConfigurationDefinitions(DataDefinitionInterface $definition);
+  public function getConfigurationDefinitions(DataDefinitionInterface $definition): array;
 
 }

@@ -3,7 +3,7 @@
 namespace Drupal\jwt\Authentication\Event;
 
 /**
- * Class JwtAuthEvents.
+ * Defines events for JWT authentication.
  */
 final class JwtAuthEvents {
   /**

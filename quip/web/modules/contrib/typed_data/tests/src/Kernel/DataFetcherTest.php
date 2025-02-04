@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Kernel;
 
 use Drupal\Core\Entity\TypedData\EntityDataDefinition;
@@ -68,7 +70,6 @@ class DataFetcherTest extends KernelTestBase {
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installSchema('system', ['sequences']);
 
     $this->typedDataManager = $this->container->get('typed_data_manager');
     $this->dataFetcher = $this->container->get('typed_data.data_fetcher');
@@ -102,7 +103,7 @@ class DataFetcherTest extends KernelTestBase {
    */
   public function testFetchingByBasicPropertyPath(): void {
     $this->assertEquals(
-      $this->node->title->value,
+      $this->node->get('title')->value,
       $this->dataFetcher
         ->fetchDataByPropertyPath($this->node->getTypedData(), 'title.0.value')
         ->getValue()
@@ -114,7 +115,7 @@ class DataFetcherTest extends KernelTestBase {
    */
   public function testFetchingByBasicSubPath(): void {
     $this->assertEquals(
-      $this->node->title->value,
+      $this->node->get('title')->value,
       $this->dataFetcher
         ->fetchDataBySubPaths(
           $this->node->getTypedData(),
@@ -133,7 +134,7 @@ class DataFetcherTest extends KernelTestBase {
         'name' => 'test',
         'type' => 'user',
       ]);
-    $this->node->uid->entity = $user;
+    $this->node->get('uid')->entity = $user;
 
     $fetched_user = $this->dataFetcher
       ->fetchDataByPropertyPath($this->node->getTypedData(), 'uid.entity')
@@ -150,7 +151,7 @@ class DataFetcherTest extends KernelTestBase {
         'name' => 'test',
         'type' => 'user',
       ]);
-    $this->node->uid->entity = $user;
+    $this->node->get('uid')->entity = $user;
 
     $fetched_value = $this->dataFetcher
       ->fetchDataByPropertyPath($this->node->getTypedData(), 'uid.entity.name.value')
@@ -172,7 +173,7 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testFetchingValueAtValidPositions(): void {
-    $this->node->field_integer->setValue(['0' => 1, '1' => 2]);
+    $this->node->get('field_integer')->setValue(['0' => 1, '1' => 2]);
 
     $fetched_value = $this->dataFetcher
       ->fetchDataByPropertyPath($this->node->getTypedData(), 'field_integer.0.value')
@@ -191,7 +192,7 @@ class DataFetcherTest extends KernelTestBase {
   public function testFetchingValueAtInvalidPosition(): void {
     $this->expectException(MissingDataException::class);
     $this->expectExceptionMessage("Unable to apply data selector 'field_integer.0.value' at 'field_integer.0'");
-    $this->node->field_integer->setValue([]);
+    $this->node->get('field_integer')->setValue([]);
 
     // This should trigger an exception.
     $this->dataFetcher
@@ -215,7 +216,7 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testFetchingEmptyProperty(): void {
-    $this->node->field_integer->setValue([]);
+    $this->node->get('field_integer')->setValue([]);
 
     $fetched_value = $this->dataFetcher
       ->fetchDataByPropertyPath($this->node->getTypedData(), 'field_integer')
@@ -228,7 +229,7 @@ class DataFetcherTest extends KernelTestBase {
    */
   public function testFetchingNotExistingListItem(): void {
     $this->expectException(MissingDataException::class);
-    $this->node->field_integer->setValue([]);
+    $this->node->get('field_integer')->setValue([]);
 
     // This will throw an exception.
     $this->dataFetcher
@@ -253,7 +254,7 @@ class DataFetcherTest extends KernelTestBase {
    * @covers ::fetchDataByPropertyPath
    */
   public function testBubbleableMetadata(): void {
-    $this->node->field_integer->setValue([]);
+    $this->node->get('field_integer')->setValue([]);
     // Save the node, so that it gets an ID and it has a cache tag.
     $this->node->save();
     // Also add a user for testing cache tags of references.
@@ -263,7 +264,7 @@ class DataFetcherTest extends KernelTestBase {
         'type' => 'user',
       ]);
     $user->save();
-    $this->node->uid->entity = $user;
+    $this->node->get('uid')->entity = $user;
 
     $bubbleable_metadata = new BubbleableMetadata();
     $this->dataFetcher

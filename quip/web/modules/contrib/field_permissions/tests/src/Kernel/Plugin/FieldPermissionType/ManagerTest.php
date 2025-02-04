@@ -3,6 +3,7 @@
 namespace Drupal\Tests\field_permissions\Kernel\Plugin\FieldPermissionType;
 
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -27,6 +28,7 @@ class ManagerTest extends KernelTestBase {
     'field_permissions',
     'field_permissions_test',
     'system',
+    'text',
     'user',
   ];
 
@@ -50,7 +52,6 @@ class ManagerTest extends KernelTestBase {
   public function setUp():void {
     parent::setUp();
 
-    $this->installSchema('system', ['sequences']);
     $this->installEntitySchema('user');
     $this->installEntitySchema('entity_test');
 
@@ -69,7 +70,7 @@ class ManagerTest extends KernelTestBase {
     $entity = EntityTest::create();
     $field_storage = FieldStorageConfig::create([
       'field_name' => 'test_foo',
-      'type' => 'text',
+      'type' => 'string',
       'entity_type' => 'entity_test',
     ]);
     $plugin = $this->fieldPermissionTypeManager->createInstance('test_access', [], $field_storage);
@@ -95,6 +96,48 @@ class ManagerTest extends KernelTestBase {
     // The test plugin should be between the private and custom.
     $expected = ['private', 'test_access', 'custom'];
     $this->assertSame($expected, array_keys($definitions));
+  }
+
+  /**
+   * Tests FieldPermissionTypeInterface::appliesToField().
+   *
+   * @covers \Drupal\field_permissions\Plugin\FieldPermissionTypeInterface::appliesToField
+   */
+  public function testAppliesToField(): void {
+    $state = $this->container->get('state');
+    $service = $this->container->get('field_permissions.permissions_service');
+
+    FieldStorageConfig::create([
+      'type' => 'string',
+      'entity_type' => 'entity_test',
+      'field_name' => 'test_foo',
+      'third_party_settings' => [
+        'field_permissions' => [
+          'permission_type' => 'test_access',
+        ],
+      ],
+    ])->save();
+    $field_config = FieldConfig::create([
+      'entity_type' => 'entity_test',
+      'bundle' => 'entity_test',
+      'field_name' => 'test_foo',
+    ]);
+    $field_config->save();
+    $entity = EntityTest::create();
+
+    $service->getFieldAccess('view', $entity->get('test_foo'), $this->account, $field_config);
+
+    // Check that, by default, the plugin ::hasFieldAccess() method is called.
+    $this->assertTrue($state->get('field_permissions_test.called_TestAccess::hasFieldAccess'));
+
+    // Reset the state variable.
+    $state->delete('field_permissions_test.called_TestAccess::hasFieldAccess');
+
+    // Simulate that 'test_access' ::appliesToField() returns FALSE.
+    $state->set('field_permissions_test.applies_to_field', FALSE);
+
+    // Check that TestAccess::hasFieldAccess() hasn't been called.
+    $this->assertNull($state->get('field_permissions_test.called_TestAccess::hasFieldAccess'));
   }
 
 }

@@ -8,9 +8,6 @@ authorization.authorization_profile.*:
     label:
       type: label
       label: Label
-    description:
-      type: text
-      label: Description
     uuid:
       type: uuid
       label: UUID
@@ -44,14 +41,14 @@ authorization.authorization_profile.*:
     # TODO: Restructure as booleans.
     synchronization_modes:
       type: mapping
-      label: 'When should roles be granted/revoked from user?'
+      label: 'When should authorization be granted/revoked from user?'
       mapping:
         user_logon:
           type: string
           label: 'When a user logs in via the configured provider.'
     synchronization_actions:
       type: mapping
-      label: 'What actions would you like performed when roles are granted/revoked from user?'
+      label: 'What actions would you like performed when authorization is granted/revoked from user?'
       mapping:
         create_consumers:
           type: string

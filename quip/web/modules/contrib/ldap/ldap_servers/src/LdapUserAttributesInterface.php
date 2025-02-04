@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -122,7 +122,7 @@ interface LdapUserAttributesInterface {
    *
    * @var string
    */
-  public const ACCOUNT_CREATION_LDAP_BEHAVIOUR = 'ldap_behaviour';
+  public const ACCOUNT_CREATION_LDAP_BEHAVIOR = 'ldap_behavior';
 
   /**
    * Config.

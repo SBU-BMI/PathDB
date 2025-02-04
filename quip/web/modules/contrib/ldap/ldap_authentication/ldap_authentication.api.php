@@ -5,7 +5,7 @@
  * Summary of hooks and other developer related functions.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Symfony\Component\Ldap\Entry;
 
@@ -32,7 +32,7 @@ function hook_ldap_authentication_allowuser_results_alter(Entry $ldap_user, stri
   }
 
   // Other module has allowed, maybe override.
-  if (mymodule_dissapproves($ldap_user, $name)) {
+  if (mymodule_disapproves($ldap_user, $name)) {
     $hook_result = FALSE;
   }
 }

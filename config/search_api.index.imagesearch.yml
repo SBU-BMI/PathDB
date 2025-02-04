@@ -9,9 +9,8 @@ dependencies:
     - field.storage.node.studyid
     - search_api.server.default_server
   module:
-    - taxonomy
     - node
-    - search_api
+    - taxonomy
 id: imagesearch
 name: imagesearch
 description: ''

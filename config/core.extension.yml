@@ -1,9 +1,9 @@
 _core:
   default_config_hash: R4IF-ClDHXxblLcG0L7MgsLvfBIMAvi_skumNFQwkDc
 module:
+  auto_entitylabel: -100
   action: 0
   authorization: 0
-  auto_entitylabel: 0
   automated_cron: 0
   ban: 0
   basic_auth: 0
@@ -12,7 +12,6 @@ module:
   block_content: 0
   breakpoint: 0
   bulk_update_fields: 0
-  ckeditor: 0
   comment: 0
   config: 0
   content_moderation: 0
@@ -56,10 +55,9 @@ module:
   page_cache: 0
   path: 0
   path_alias: 0
+  phpass: 0
   prepopulate: 0
-  quickedit: 0
   quip: 0
-  rdf: 0
   rest: 0
   restui: 0
   search_api: 0
@@ -73,7 +71,6 @@ module:
   text: 0
   token: 0
   toolbar: 0
-  tour: 0
   typed_data: 0
   update: 0
   user: 0

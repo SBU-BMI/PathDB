@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Composer.
@@ -19,11 +19,11 @@ namespace Composer\DependencyResolver;
  */
 class MultiConflictRule extends Rule
 {
-    /** @var int[] */
+    /** @var non-empty-list<int> */
     protected $literals;
 
     /**
-     * @param int[] $literals
+     * @param non-empty-list<int> $literals
      */
     public function __construct(array $literals, $reason, $reasonData)
     {
@@ -40,9 +40,9 @@ class MultiConflictRule extends Rule
     }
 
     /**
-     * @return int[]
+     * @return non-empty-list<int>
      */
-    public function getLiterals()
+    public function getLiterals(): array
     {
         return $this->literals;
     }
@@ -52,7 +52,10 @@ class MultiConflictRule extends Rule
      */
     public function getHash()
     {
-        $data = unpack('ihash', md5('c:'.implode(',', $this->literals), true));
+        $data = unpack('ihash', (string) hash(\PHP_VERSION_ID > 80100 ? 'xxh3' : 'sha1', 'c:'.implode(',', $this->literals), true));
+        if (false === $data) {
+            throw new \RuntimeException('Failed unpacking: '.implode(', ', $this->literals));
+        }
 
         return $data['hash'];
     }
@@ -65,7 +68,7 @@ class MultiConflictRule extends Rule
      * @param  Rule $rule The rule to check against
      * @return bool Whether the rules are equal
      */
-    public function equals(Rule $rule)
+    public function equals(Rule $rule): bool
     {
         if ($rule instanceof MultiConflictRule) {
             return $this->literals === $rule->getLiterals();
@@ -74,10 +77,7 @@ class MultiConflictRule extends Rule
         return false;
     }
 
-    /**
-     * @return bool
-     */
-    public function isAssertion()
+    public function isAssertion(): bool
     {
         return false;
     }
@@ -86,23 +86,21 @@ class MultiConflictRule extends Rule
      * @return never
      * @throws \RuntimeException
      */
-    public function disable()
+    public function disable(): void
     {
         throw new \RuntimeException("Disabling multi conflict rules is not possible. Please contact composer at https://github.com/composer/composer to let us debug what lead to this situation.");
     }
 
     /**
      * Formats a rule as a string of the format (Literal1|Literal2|...)
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         // TODO multi conflict?
         $result = $this->isDisabled() ? 'disabled(multi(' : '(multi(';
 
         foreach ($this->literals as $i => $literal) {
-            if ($i != 0) {
+            if ($i !== 0) {
                 $result .= '|';
             }
             $result .= $literal;

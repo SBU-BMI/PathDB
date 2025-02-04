@@ -41,10 +41,10 @@ function quip_theme() {
 }
 
 function quip_custom_term_validator(array &$form, \Drupal\Core\Form\FormStateInterface &$form_state) {
-	preg_match("/^[A-Za-z0-9_:]+$/", $form_state->getValue('name')[0]['value'], $matches);
-	if (!$matches) {
-		$form_state->setErrorByName($form_state->getValue('name')[0]['value'], t('Error Message : only upper and lower case letters, numbers, and underscore allowed in collection names'));
-	}
+    preg_match("/^[A-Za-z0-9_:\- ]+$/", $form_state->getValue('name')[0]['value'], $matches);
+    if (!$matches) {
+        $form_state->setErrorByName($form_state->getValue('name')[0]['value'], t('Error Message: only upper and lower case letters, numbers, underscore, dashes, and spaces allowed in collection names'));
+    }
 }
 
 function quip_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {

@@ -2,20 +2,21 @@
 
 namespace Drupal\jwt\Authentication\Event;
 
+use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
-use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
 
 /**
- * Class JwtAuthValidEvent.
+ * An event triggered after a JWT token is validated.
  */
 class JwtAuthValidEvent extends JwtAuthBaseEvent {
+
   /**
    * Variable holding the user authenticated by the token in the payload.
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $user;
+  protected UserInterface $user;
 
   /**
    * {@inheritdoc}

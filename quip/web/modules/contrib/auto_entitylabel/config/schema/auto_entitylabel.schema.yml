@@ -23,3 +23,6 @@ auto_entitylabel.settings.*:
     dependencies:
       type: config_dependencies
       label: 'Dependencies'
+    new_content_behavior:
+      type: integer
+      label: 'When to generate labels for new content'

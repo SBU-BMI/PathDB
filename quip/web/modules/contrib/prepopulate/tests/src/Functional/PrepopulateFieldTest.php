@@ -3,8 +3,8 @@
 namespace Drupal\Tests\prepopulate\Functional;
 
 use Drupal\Core\Url;
-use Drupal\taxonomy\Entity\Term;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Field functionality tests of prepopulate.

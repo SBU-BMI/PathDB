@@ -2,7 +2,7 @@
 
 namespace Drupal\externalauth\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Drupal\Component\EventDispatcher\Event;
 
 /**
  * Allow event listeners to alter the authmap data that will get stored.
@@ -65,7 +65,7 @@ class ExternalAuthAuthmapAlterEvent extends Event {
    * @return string
    *   The name of the service providing external authentication.
    */
-  public function getProvider() {
+  public function getProvider(): string {
     return $this->provider;
   }
 
@@ -76,7 +76,7 @@ class ExternalAuthAuthmapAlterEvent extends Event {
    *   The unique, external authentication name provided by authentication
    *   provider.
    */
-  public function getAuthname() {
+  public function getAuthname(): string {
     return $this->authname;
   }
 
@@ -97,7 +97,7 @@ class ExternalAuthAuthmapAlterEvent extends Event {
    * @return string
    *   The username to generate when registering this user.
    */
-  public function getUsername() {
+  public function getUsername(): string {
     return $this->username;
   }
 

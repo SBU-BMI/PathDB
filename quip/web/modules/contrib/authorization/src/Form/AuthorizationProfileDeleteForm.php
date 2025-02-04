@@ -17,6 +17,13 @@ class AuthorizationProfileDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
+  public function getFormId(): string {
+    return 'authorization_profile_delete_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getQuestion(): TranslatableMarkup {
     return $this->t('Are you sure you want to delete %name?', ['%name' => $this->entity->label()]);
   }
@@ -25,7 +32,7 @@ class AuthorizationProfileDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl(): Url {
-    return new Url('entity.authorization_profile.collection');
+    return new Url('entity.authorization_profile.edit_form', ['authorization_profile' => $this->entity->id()]);
   }
 
   /**
@@ -48,7 +55,7 @@ class AuthorizationProfileDeleteForm extends EntityConfirmFormBase {
       ]
       ));
 
-    $form_state->setRedirectUrl($this->getCancelUrl());
+    $form_state->setRedirect('entity.authorization_profile.collection');
   }
 
 }

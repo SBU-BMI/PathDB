@@ -4,6 +4,7 @@ namespace Drupal\auto_entitylabel\Form;
 
 use Drupal\auto_entitylabel\AutoEntityLabelManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -83,6 +84,8 @@ class AutoEntityLabelForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Config Factory.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface|null $typed_config_manager
+   *   The typed config manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager service.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
@@ -94,12 +97,13 @@ class AutoEntityLabelForm extends ConfigFormBase {
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typed_config_manager,
     EntityTypeManagerInterface $entity_type_manager,
     RouteMatchInterface $route_match,
     ModuleHandlerInterface $moduleHandler,
-    AccountInterface $user
+    AccountInterface $user,
   ) {
-    parent::__construct($config_factory);
+    parent::__construct($config_factory, $typed_config_manager);
     $this->entityTypeManager = $entity_type_manager;
     $this->routeMatch = $route_match;
     $route_options = $this->routeMatch->getRouteObject()->getOptions();
@@ -110,6 +114,20 @@ class AutoEntityLabelForm extends ConfigFormBase {
     $this->entityTypeBundleOf = $entity_type->getEntityType()->getBundleOf();
     $this->moduleHandler = $moduleHandler;
     $this->user = $user;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get('entity_type.manager'),
+      $container->get('current_route_match'),
+      $container->get('module_handler'),
+      $container->get('current_user')
+    );
   }
 
   /**
@@ -133,19 +151,6 @@ class AutoEntityLabelForm extends ConfigFormBase {
    */
   public function getFormId() {
     return 'auto_entitylabel_settings_form';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('entity_type.manager'),
-      $container->get('current_route_match'),
-      $container->get('module_handler'),
-      $container->get('current_user')
-    );
   }
 
   /**
@@ -214,7 +219,7 @@ class AutoEntityLabelForm extends ConfigFormBase {
       '#type' => 'textarea',
       '#title' => $this->t('Pattern for the label'),
       '#description' => $this->t('Leave blank for using the per default generated label. Otherwise this string will be used as label. Use the syntax [token] if you want to insert a replacement pattern.
-      <br>Pattern string can be translated via User interface translation by searching fot the string <b>@pattern</b>.'),
+      <br>Pattern string can be translated via User interface translation by searching for the string <b>@pattern</b>.'),
       '#default_value' => $config->get('pattern') ?: '',
       '#attributes' => ['class' => ['pattern-label']],
       '#states' => $invisible_state,
@@ -259,6 +264,28 @@ class AutoEntityLabelForm extends ConfigFormBase {
       ],
     ];
 
+    $newActionOptions = [
+      AutoEntityLabelManager::BEFORE_SAVE => $this->t('Create label before first save'),
+      AutoEntityLabelManager::AFTER_SAVE => $this->t('Create label after first save'),
+    ];
+    $newActionDescriptions = [
+      AutoEntityLabelManager::BEFORE_SAVE => [
+        '#description' => $this->t('Create the label before saving the content. This option is faster but does not support all tokens (ie the id token).'),
+      ],
+      AutoEntityLabelManager::AFTER_SAVE => [
+        '#description' => $this->t('Create the label after saving the content. All tokens are supported however the content will be saved twice. This may interfere with other modules.'),
+      ],
+    ];
+
+    $form['auto_entitylabel']['new_content_behavior'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('New content behavior'),
+      '#description' => $this->t('Select when to create the automatic label for new content of type %type', ['%type' => $this->entityBundle]),
+      '#default_value' => $config->get('new_content_behavior') ?: AutoEntityLabelManager::BEFORE_SAVE,
+      '#options' => $newActionOptions,
+    ];
+    $form['auto_entitylabel']['new_content_behavior'] += $newActionDescriptions;
+
     $form['#attached']['library'][] = 'auto_entitylabel/auto_entitylabel.admin';
 
     $form['auto_entitylabel']['save'] = [
@@ -291,6 +318,7 @@ class AutoEntityLabelForm extends ConfigFormBase {
         'pattern',
         'escape',
         'preserve_titles',
+        'new_content_behavior',
         'save',
         'chunk',
       ] as $key) {
@@ -360,20 +388,10 @@ class AutoEntityLabelForm extends ConfigFormBase {
    *   An array with IDs.
    */
   public function getIds($entity_type, $bundle) {
+    $type_definition = $this->entityTypeManager->getDefinition($bundle);
+    $bundle_field = $type_definition->getKey('bundle');
     $query = $this->entityTypeManager->getStorage($bundle)->getQuery()->accessCheck(TRUE);
-    switch ($bundle) {
-      case 'taxonomy_term':
-        return $query->condition('vid', $entity_type, 'IN')->execute();
-
-      case 'media':
-        return $query->condition('bundle', $entity_type, 'IN')->execute();
-
-      case 'comment':
-        return $query->condition('comment_type', $entity_type, 'IN')->execute();
-
-      default:
-        return $query->condition('type', $entity_type, 'IN')->execute();
-    }
+    return $query->condition($bundle_field, $entity_type, 'IN')->execute();
   }
 
 }

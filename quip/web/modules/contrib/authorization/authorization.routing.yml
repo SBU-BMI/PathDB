@@ -1,9 +1,8 @@
-# AuthorizationProfile routing definition
 entity.authorization_profile.collection:
   path: '/admin/config/people/authorization/profile'
   defaults:
     _entity_list: 'authorization_profile'
-    _title: 'Authorization profile'
+    _title: 'Authorization'
   requirements:
     _permission: 'administer site configuration'
   options:
@@ -46,3 +45,5 @@ entity.authorization_profile.configuration_form:
     _title: 'Authorization settings'
   requirements:
     _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

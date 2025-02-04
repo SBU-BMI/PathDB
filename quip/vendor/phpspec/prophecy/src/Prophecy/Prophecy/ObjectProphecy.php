@@ -31,6 +31,9 @@ use Prophecy\Exception\Prediction\PredictionException;
  */
 class ObjectProphecy implements ProphecyInterface
 {
+    /**
+     * @var LazyDouble<T>
+     */
     private $lazyDouble;
     private $callCenter;
     private $revealer;
@@ -41,15 +44,18 @@ class ObjectProphecy implements ProphecyInterface
      */
     private $methodProphecies = array();
 
+    /**
+     * @param LazyDouble<T> $lazyDouble
+     */
     public function __construct(
         LazyDouble $lazyDouble,
-        CallCenter $callCenter = null,
-        RevealerInterface $revealer = null,
-        ComparatorFactory $comparatorFactory = null
+        ?CallCenter $callCenter = null,
+        ?RevealerInterface $revealer = null,
+        ?ComparatorFactory $comparatorFactory = null
     ) {
         $this->lazyDouble = $lazyDouble;
-        $this->callCenter = $callCenter ?: new CallCenter;
-        $this->revealer   = $revealer ?: new Revealer;
+        $this->callCenter = $callCenter ?: new CallCenter();
+        $this->revealer   = $revealer ?: new Revealer();
 
         $this->comparatorFactory = $comparatorFactory ?: FactoryProvider::getInstance();
     }
@@ -61,7 +67,7 @@ class ObjectProphecy implements ProphecyInterface
      *
      * @return $this
      *
-     * @template U
+     * @template U of object
      * @phpstan-param class-string<U> $class
      * @phpstan-this-out static<T&U>
      */
@@ -79,7 +85,7 @@ class ObjectProphecy implements ProphecyInterface
      *
      * @return $this
      *
-     * @template U
+     * @template U of object
      * @phpstan-param class-string<U> $interface
      * @phpstan-this-out static<T&U>
      */
@@ -97,7 +103,7 @@ class ObjectProphecy implements ProphecyInterface
      *
      * @return $this
      */
-    public function willBeConstructedWith(array $arguments = null)
+    public function willBeConstructedWith(?array $arguments = null)
     {
         $this->lazyDouble->setArguments($arguments);
 
@@ -255,7 +261,8 @@ class ObjectProphecy implements ProphecyInterface
             try {
                 $comparator->assertEquals($argumentsWildcard, $arguments);
                 return $prophecy;
-            } catch (ComparisonFailure $failure) {}
+            } catch (ComparisonFailure $failure) {
+            }
         }
 
         return new MethodProphecy($this, $methodName, $arguments);

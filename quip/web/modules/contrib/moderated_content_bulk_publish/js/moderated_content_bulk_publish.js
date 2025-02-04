@@ -153,8 +153,8 @@
                     class: 'button button--primary',
                     click: function click(e) {
                       confirmationDialog_publish.close();
-                      $(".node-form #edit-submit, .node-layout-builder-form  #edit-submit").unbind('click.moderated_content_bulk_publish');
-                      $(".node-form #edit-submit, .node-layout-builder-form  #edit-submit").trigger('click.moderated_content_bulk_publish');
+                      $(".node-form #edit-submit, .node-layout-builder-form  #edit-submit, .gin-sticky-form-actions #edit-submit").unbind('click.moderated_content_bulk_publish');
+                      $(".node-form #edit-submit, .node-layout-builder-form  #edit-submit, .gin-sticky-form-actions #edit-submit").trigger('click.moderated_content_bulk_publish');
                       $(e.target).remove();
                       return true;
                     },

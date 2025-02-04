@@ -3,33 +3,45 @@
 namespace Drupal\jwt\JsonWebToken;
 
 /**
- * Class JsonWebToken.
+ * JSON Web Token class helps manage claims to be transcoded into a JWT.
  */
 class JsonWebToken implements JsonWebTokenInterface {
 
   /**
    * Internal representation of the token.
    *
-   * @var string
+   * @var object
    */
-  protected $payload;
+  protected object $payload;
+
+  /**
+   * Internal representation of added JWT headers.
+   *
+   * @var object
+   */
+  protected array $headers = [];
 
   /**
    * JsonWebToken constructor.
    *
    * @param object $jwt
    *   The Object to turn into a JWT.
+   * @param mixed $headers
+   *   Header claims.
    */
-  public function __construct($jwt = NULL) {
+  public function __construct($jwt = NULL, $headers = NULL) {
     $jwt = (is_null($jwt)) ? new \stdClass() : $jwt;
-    $this->payload = $jwt;
+    $this->payload = (object) $jwt;
+    if (!empty($headers)) {
+      $this->headers = (array) $headers;
+    }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getPayload() {
-    return $this->payload;
+  public function getPayload(): array {
+    return (array) $this->payload;
   }
 
   /**
@@ -133,6 +145,34 @@ class JsonWebToken implements JsonWebTokenInterface {
     else {
       unset($payload->$current_claim);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getHeaders(): array {
+    return (array) $this->headers;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getHeader(string $claim) {
+    return $this->headers[$claim] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setHeader(string $claim, $value) {
+    $this->headers[$claim] = $value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function unsetHeader(string $claim) {
+    unset($this->headers[$claim]);
   }
 
 }

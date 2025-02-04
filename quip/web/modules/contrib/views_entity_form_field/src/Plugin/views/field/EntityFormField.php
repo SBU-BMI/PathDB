@@ -481,14 +481,15 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
       $form[$this->options['id']]['#tree'] = TRUE;
       $form[$this->options['id']]['#entity_form_field'] = TRUE;
       foreach ($this->getView()->result as $row_index => $row) {
+        $entity_id = $row->_entity->id();
         // Initialize this row and column.
-        $form[$this->options['id']][$row_index]['#parents'] = [$this->options['id'], $row_index];
+        $form[$this->options['id']][$row_index]['#parents'] = [$this->options['id'], $entity_id];
         $form[$this->options['id']][$row_index]['#tree'] = TRUE;
 
         // Make sure there's an entity for this row (relationships can be null).
         if ($this->getEntity($row)) {
           // Load field definition based on current entity bundle.
-          $entity = $this->getEntityTranslation($this->getEntity($row), $row);
+          $entity = $this->getEntityTranslationByRelationship($this->getEntity($row), $row);
           if ($entity->hasField($field_name) && $this->getBundleFieldDefinition($entity->bundle())->isDisplayConfigurable('form')) {
             $items = $entity->get($field_name)->filterEmptyItems();
 
@@ -499,7 +500,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
             $form[$this->options['id']][$row_index][$field_name]['#cache']['tags'] = $entity->getCacheTags();
             $form[$this->options['id']][$row_index][$field_name]['#parents'] = [
               $this->options['id'],
-              $row_index,
+              $entity_id,
               $field_name,
             ];
 
@@ -605,8 +606,8 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
         $entity = $this->getEntity($row);
 
         if ($entity) {
-          $entity = $this->getEntityTranslation($entity, $row);
-          $original_entity = $this->getEntityTranslation($storage->loadUnchanged($entity->id()), $row);
+          $entity = $this->getEntityTranslationByRelationship($entity, $row);
+          $original_entity = $this->getEntityTranslationByRelationship($storage->loadUnchanged($entity->id()), $row);
 
           try {
             if ($this->entityShouldBeSaved($entity, $original_entity)) {
@@ -672,6 +673,16 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
    */
   public function query() {
     // Do nothing.
+  }
+
+  /**
+   * Returns the entity repository.
+   *
+   * @return \Drupal\Core\Entity\EntityRepositoryInterface
+   *   The entity repository.
+   */
+  protected function getEntityRepository() {
+    return \Drupal::service('entity.repository');
   }
 
 }

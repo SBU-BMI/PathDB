@@ -2,11 +2,11 @@
 
 namespace Drupal\prepopulate;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Render\Element;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Drupal\Component\Utility\Html;
 
 /**
  * Service to populate fields from URL.
@@ -87,7 +87,7 @@ class Populate implements PopulateInterface {
   /**
    * {@inheritdoc}
    */
-  public function populateForm(array &$form, $request_slice = NULL) {
+  public function populateForm(array &$form, $request_slice = NULL): void {
     if (is_null($request_slice)) {
       if ($this->request->getCurrentRequest()->query->has('edit')) {
         $request_slice = $this->request->getCurrentRequest()->query->all()['edit'];
@@ -159,7 +159,7 @@ class Populate implements PopulateInterface {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function formatEntityAutocomplete($value, array &$element) {
+  protected function formatEntityAutocomplete(string $value, array &$element): string {
     $entity = $this->entityTypeManager
       ->getStorage($element['#target_type'])
       ->load($value);

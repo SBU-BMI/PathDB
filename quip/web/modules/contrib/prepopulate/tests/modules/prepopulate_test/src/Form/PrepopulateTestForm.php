@@ -9,21 +9,21 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class PrepopulateTestForm.
+ * Test artifact for prepopulating a form.
  */
 class PrepopulateTestForm extends FormBase {
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'prepopulate_test_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $form['checkboxes'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Checkboxes'),
@@ -130,7 +130,7 @@ class PrepopulateTestForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Display result.
     foreach ($form_state->getValues() as $key => $value) {
       if ($value instanceof MarkupInterface) {

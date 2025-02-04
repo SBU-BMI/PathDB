@@ -7,7 +7,7 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 
 /**
- * Class JwtDecodeException.
+ * Provides a decode exception.
  */
 class JwtDecodeException extends \Exception {
 

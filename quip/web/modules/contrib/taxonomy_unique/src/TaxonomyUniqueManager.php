@@ -41,7 +41,7 @@ class TaxonomyUniqueManager {
       ->entityTypeManager
       ->getStorage('taxonomy_term')
       ->getQuery()
-      ->accessCheck()
+      ->accessCheck(FALSE)
       ->condition('vid', $term->bundle())
       ->condition('name', $term->getName())
       ->condition('langcode', $term->language()->getId())

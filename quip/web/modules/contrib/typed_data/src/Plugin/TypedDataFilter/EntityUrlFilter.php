@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\typed_data\Plugin\TypedDataFilter;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\file\FileInterface;
+use Drupal\typed_data\Attribute\DataFilter;
 use Drupal\typed_data\DataFilterBase;
 
 /**
@@ -18,12 +22,16 @@ use Drupal\typed_data\DataFilterBase;
  *   label = @Translation("Provides the URL of an entity."),
  * )
  */
+#[DataFilter(
+  id: "entity_url",
+  label: new TranslatableMarkup("Provides the URL of an entity.")
+)]
 class EntityUrlFilter extends DataFilterBase {
 
   /**
    * {@inheritdoc}
    */
-  public function filter(DataDefinitionInterface $definition, $value, array $arguments, BubbleableMetadata $bubbleable_metadata = NULL) {
+  public function filter(DataDefinitionInterface $definition, $value, array $arguments, ?BubbleableMetadata $bubbleable_metadata = NULL) {
     assert($value instanceof EntityInterface);
     // EntityInterface::toUrl() does not work properly for File entities; this
     // is evidently "by design" and will not be fixed in core. Thus in order
@@ -42,14 +50,14 @@ class EntityUrlFilter extends DataFilterBase {
   /**
    * {@inheritdoc}
    */
-  public function canFilter(DataDefinitionInterface $definition) {
+  public function canFilter(DataDefinitionInterface $definition): bool {
     return $definition instanceof EntityDataDefinitionInterface;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function filtersTo(DataDefinitionInterface $definition, array $arguments) {
+  public function filtersTo(DataDefinitionInterface $definition, array $arguments): DataDefinitionInterface {
     return DataDefinition::create('uri');
   }
 

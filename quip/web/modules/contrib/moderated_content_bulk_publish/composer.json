@@ -13,8 +13,9 @@
     "issues": "https://www.drupal.org/project/issues/moderated_content_bulk_publish",
     "source": "git://git.drupal.org/project/moderated_content_bulk_publish.git"
   },
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "require": {
-    "drupal/views_bulk_operations": "^4.0"
+    "drupal/views_bulk_operations": "^4.0",
+    "drupal/pathauto": "*"
   }
 }

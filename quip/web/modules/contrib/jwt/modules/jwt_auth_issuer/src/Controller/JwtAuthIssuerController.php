@@ -2,13 +2,13 @@
 
 namespace Drupal\jwt_auth_issuer\Controller;
 
-use Drupal\jwt\Authentication\Provider\JwtAuth;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\jwt\Authentication\Provider\JwtAuth;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
- * Class JwtAuthIssuerController.
+ * JWT Auth Issuer Controller returns a JSON-encoded JWT.
  */
 class JwtAuthIssuerController extends ControllerBase {
 
@@ -17,7 +17,7 @@ class JwtAuthIssuerController extends ControllerBase {
    *
    * @var \Drupal\jwt\Authentication\Provider\JwtAuth
    */
-  private $auth;
+  private JwtAuth $auth;
 
   /**
    * {@inheritdoc}

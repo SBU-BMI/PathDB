@@ -1,5 +1,6 @@
 _core:
   default_config_hash: ALaJtTMWaPkrzRKrWM1z4u7BslSR_0tTzlGXfeZPhDQ
+langcode: en
 include_invalid_paths: true
 excluded_paths: "admin\r\noverview\r\ntac_lite\r\nadd\r\npeople\r\nupdates\r\nupdate\r\ncollections"
 replaced_titles: ''
@@ -22,3 +23,4 @@ capitalizator_forced_words: {  }
 capitalizator_forced_words_case_sensitivity: false
 capitalizator_forced_words_first_letter: false
 follow_redirects: true
+segment_display_minimum: 1

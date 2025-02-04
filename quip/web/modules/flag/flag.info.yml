@@ -9,5 +9,6 @@ configure: entity.flag.collection
 
 # Information added by Drupal.org packaging script on 2019-10-30
 version: '8.x-4.0-beta1'
+core_version_requirement: '8.x'
 project: 'flag'
 datestamp: 1572442088

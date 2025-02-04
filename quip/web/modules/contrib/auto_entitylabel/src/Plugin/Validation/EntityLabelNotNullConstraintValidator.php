@@ -2,12 +2,12 @@
 
 namespace Drupal\auto_entitylabel\Plugin\Validation;
 
+use Drupal\auto_entitylabel\EntityDecorator;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraintValidator;
 use Drupal\Core\Field\FieldItemList;
+use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraintValidator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
-use Drupal\auto_entitylabel\EntityDecorator;
 
 /**
  * EntityLabelNotNull constraint validator.
@@ -44,7 +44,7 @@ class EntityLabelNotNullConstraintValidator extends NotNullConstraintValidator i
   /**
    * {@inheritdoc}
    */
-  public function validate($value, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
     $typed_data = $this->getTypedData();
     if ($typed_data instanceof FieldItemList && $typed_data->isEmpty()) {
       $entity = $typed_data->getEntity();

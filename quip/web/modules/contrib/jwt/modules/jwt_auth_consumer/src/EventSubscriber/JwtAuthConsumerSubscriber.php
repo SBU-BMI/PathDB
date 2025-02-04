@@ -3,14 +3,14 @@
 namespace Drupal\jwt_auth_consumer\EventSubscriber;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\jwt\Authentication\Event\JwtAuthEvents;
 use Drupal\jwt\Authentication\Event\JwtAuthValidateEvent;
 use Drupal\jwt\Authentication\Event\JwtAuthValidEvent;
-use Drupal\jwt\Authentication\Event\JwtAuthEvents;
 use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class JwtAuthConsumerSubscriber.
+ * JWT Auth Consumer Subscriber loads or validates a user on a JWT event.
  */
 class JwtAuthConsumerSubscriber implements EventSubscriberInterface {
 
@@ -19,7 +19,7 @@ class JwtAuthConsumerSubscriber implements EventSubscriberInterface {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Constructor.
@@ -35,6 +35,7 @@ class JwtAuthConsumerSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
+    $events = [];
     $events[JwtAuthEvents::VALIDATE][] = ['validate'];
     $events[JwtAuthEvents::VALID][] = ['loadUser'];
 

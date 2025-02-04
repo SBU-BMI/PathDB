@@ -1,3 +1,14 @@
+taxonomy.vocabulary.*.third_party.taxonomy_unique:
+  type: mapping
+  label: 'Taxonomy unique vocabulary settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Enabled'
+    message:
+      type: string
+      label: 'Message'
+
 entity_reference_selection.taxonomy_unique:
   type: entity_reference_selection.default
   label: 'Unique taxonomy term selection handler settings'

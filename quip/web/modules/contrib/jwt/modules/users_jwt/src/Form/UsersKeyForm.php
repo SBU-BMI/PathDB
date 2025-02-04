@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Class UsersKeyForm.
+ * Provides a user key edit form.
  */
 class UsersKeyForm extends FormBase {
 

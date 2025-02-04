@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\Processor;
 
@@ -143,7 +143,7 @@ class OrphanProcessor {
     EntityTypeManagerInterface $entity_type_manager,
     LdapUserManager $ldap_user_manager,
     LdapBridgeInterface $ldap_bridge,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
   ) {
     $this->logger = $logger;
     $this->configFactory = $config;
@@ -220,7 +220,7 @@ class OrphanProcessor {
    * Create a "binary safe" string for use in LDAP filters.
    *
    * @param string $value
-   *   Unsfe string.
+   *   Unsafe string.
    *
    * @return string
    *   Safe string.
@@ -318,9 +318,12 @@ class OrphanProcessor {
       ->exists('ldap_user_puid_sid')
       ->exists('ldap_user_puid')
       ->condition('uid', $lastUidChecked, '>')
-      ->condition('status', 1)
       ->sort('uid')
       ->range(0, $this->configLdapUser->get('orphanedCheckQty'));
+
+    if (!$this->configLdapUser->get('orphanedIncludeDisabledUsers')) {
+      $query->condition('status', 1);
+    }
 
     $group = $query->orConditionGroup();
     $group->notExists('ldap_user_last_checked');
@@ -398,7 +401,7 @@ class OrphanProcessor {
    *   Method.
    */
   private function cancelUser(UserInterface $account, string $method): void {
-    // Copied from user_canel().
+    // Copied from user_cancel().
     // When the 'user_cancel_delete' method is used, user_delete() is called,
     // which invokes hook_ENTITY_TYPE_predelete() and hook_ENTITY_TYPE_delete()
     // for the user entity. Modules should use those hooks to respond to the

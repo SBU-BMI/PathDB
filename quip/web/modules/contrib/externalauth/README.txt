@@ -4,7 +4,7 @@ Description:
 The ExternalAuth module provides a generic service for logging in and
 registering users that are authenticated against an external site or service and
 storing the authentication details.
-It is the Drupal 8 equivalent of user_external_login_register() and related
+It is the Drupal 8+ equivalent of user_external_login_register() and related
 functions, as well as the authmap table in Drupal 6 & 7 core.
 
 Usage:
@@ -29,7 +29,7 @@ Installation of this module is just like any other Drupal module.
 Upgrading:
 ==========
 
-The Drupal 8 version of this module provides Migrate functionality to upgrade
+The Drupal 8+ version of this module provides Migrate functionality to upgrade
 your Drupal 6 or Drupal 7 authmap entries to your Drupal 8 installation.
 
 In order to upgrade the authmap table from your Drupal 6 or Drupal 7

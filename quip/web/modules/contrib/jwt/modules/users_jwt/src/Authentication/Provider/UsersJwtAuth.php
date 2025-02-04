@@ -9,8 +9,8 @@ use Drupal\Core\Site\Settings;
 use Drupal\user\UserInterface;
 use Drupal\users_jwt\UsersJwtKeyRepositoryInterface;
 use Drupal\users_jwt\UsersKey;
-use Symfony\Component\HttpFoundation\Request;
 use Firebase\JWT\JWT;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Authentication provider UsersJwtAuth.
@@ -46,6 +46,13 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
   protected $loggerFactory;
 
   /**
+   * A firebase/php-jwt instance or another instance with the same methods.
+   *
+   * @var \Firebase\JWT\JWT
+   */
+  protected $transcoder;
+
+  /**
    * Constructs a HTTP basic authentication provider object.
    *
    * @param \Drupal\users_jwt\UsersJwtKeyRepositoryInterface $key_repository
@@ -56,12 +63,18 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
    *   The site settings.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger channel factory.
+   * @param string|null $jwt_class
+   *   The JWT library class.
    */
-  public function __construct(UsersJwtKeyRepositoryInterface $key_repository, EntityTypeManagerInterface $entity_type_manager, Settings $settings, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(UsersJwtKeyRepositoryInterface $key_repository, EntityTypeManagerInterface $entity_type_manager, Settings $settings, LoggerChannelFactoryInterface $logger_factory, string $jwt_class = NULL) {
     $this->keyRepository = $key_repository;
     $this->entityTypeManager = $entity_type_manager;
     $this->settings = $settings;
     $this->loggerFactory = $logger_factory;
+    if (!$jwt_class) {
+      $jwt_class = JWT::class;
+    }
+    $this->transcoder = new $jwt_class();
   }
 
   /**
@@ -84,10 +97,9 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
   public function authenticate(Request $request) {
     $raw_jwt = self::getJwtFromRequest($request);
     try {
-      // @todo add Ed25519 here as allowed when it's supported. We verify the
-      // algorithm from the key matches the header below so we can allow
-      // multiple here.
-      $payload = JWT::decode($raw_jwt, $this->keyRepository, ['RS256']);
+      // @todo add Ed25519 support. JWT::decode() now verifies that the
+      // algorithm from the key matches the alg in the JWT header.
+      $payload = $this->transcoder->decode($raw_jwt, $this->keyRepository);
     }
     catch (\Exception $e) {
       return $this->debugLog('JWT decode exception', $e);
@@ -100,11 +112,11 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
       return $this->debugLog('Bad iat, exp claims', NULL, $payload);
     }
     // Unfortunately this JWT implementation does not save or allow the
-    // header to be retrieved via a simple method, so we need to decode it
-    // again. The decode call above has already validated it.
+    // header to be retrieved via a simple method before v6.6.0, so we need to
+    // decode it again. The decode call above has already validated it.
     $tks = explode('.', $raw_jwt);
     $headb64 = $tks[0];
-    $header = JWT::jsonDecode(JWT::urlsafeB64Decode($headb64));
+    $header = $this->transcoder->jsonDecode($this->transcoder->urlsafeB64Decode($headb64));
     $key = $this->keyRepository->getKey($header->kid);
     if ($header->alg !== $key->alg) {
       return $this->debugLog('Bad header alg', NULL, $payload, $key);
@@ -141,7 +153,7 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
         break;
       }
     }
-    if ($id === NULL) {
+    if (!isset($id)) {
       return [
         NULL,
         'No Drupal uid, uuid, or name was provided in the JWT payload.',

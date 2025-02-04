@@ -14,8 +14,11 @@ use Behat\Mink\Exception\DriverException;
 use Behat\Mink\KeyModifier;
 use Behat\Mink\Selector\Xpath\Escaper;
 use WebDriver\Element;
+use WebDriver\Exception\InvalidArgument;
 use WebDriver\Exception\NoSuchElement;
+use WebDriver\Exception\ScriptTimeout;
 use WebDriver\Exception\StaleElementReference;
+use WebDriver\Exception\Timeout;
 use WebDriver\Exception\UnknownCommand;
 use WebDriver\Exception\UnknownError;
 use WebDriver\Key;
@@ -30,6 +33,8 @@ use WebDriver\Window;
  */
 class Selenium2Driver extends CoreDriver
 {
+    private const W3C_WINDOW_HANDLE_PREFIX = 'w3cwh:';
+
     /**
      * Whether the browser has been started
      * @var bool
@@ -59,10 +64,20 @@ class Selenium2Driver extends CoreDriver
     private $wdSession;
 
     /**
+     * @var bool
+     */
+    private $isW3C = false;
+
+    /**
      * The timeout configuration
      * @var array{script?: int, implicit?: int, page?: int}
      */
     private $timeouts = array();
+
+    /**
+     * @var string|null
+     */
+    private $initialWindowHandle = null;
 
     /**
      * @var Escaper
@@ -117,6 +132,8 @@ class Selenium2Driver extends CoreDriver
         if (null === $desiredCapabilities) {
             $desiredCapabilities = array();
         }
+
+        $desiredCapabilities['browserName'] = $this->browserName;
 
         // Join $desiredCapabilities with defaultCapabilities
         $desiredCapabilities = array_replace(self::getDefaultCapabilities(), $desiredCapabilities);
@@ -332,14 +349,33 @@ class Selenium2Driver extends CoreDriver
     public function start()
     {
         try {
+            $status = $this->webDriver->status();
+            $seleniumVersion = $status['build']['version'] ?? $status['nodes'][0]['version'] ?? 'unknown';
+            $seleniumMajorVersion = (int) explode('.', $seleniumVersion)[0];
+        } catch (\Throwable $ex) {
+            throw new DriverException("Selenium Server version could not be detected: {$ex->getMessage()}", 0, $ex);
+        }
+
+        if ($seleniumMajorVersion > 3) {
+            throw new DriverException(<<<TEXT
+This driver requires Selenium version 3 or lower, but version {$seleniumVersion} was found.
+
+Please use the "mink/webdriver-classic-driver" Mink driver or switch to Selenium Server 2.x/3.x.
+TEXT
+            );
+        }
+
+        try {
+            $this->isW3C = $seleniumMajorVersion === 3;
             $this->wdSession = $this->webDriver->session($this->browserName, $this->desiredCapabilities);
+
+            $this->applyTimeouts();
+            $this->initialWindowHandle = $this->getWebDriverSession()->window_handle();
         } catch (\Exception $e) {
-            throw new DriverException('Could not open connection: '.$e->getMessage(), 0, $e);
+            throw new DriverException('Could not open connection: ' . $e->getMessage(), 0, $e);
         }
 
         $this->started = true;
-
-        $this->applyTimeouts();
     }
 
     /**
@@ -365,11 +401,34 @@ class Selenium2Driver extends CoreDriver
      */
     private function applyTimeouts(): void
     {
+        $validTimeoutTypes = array('script', 'implicit', 'page', 'page load', 'pageLoad');
+
         try {
             foreach ($this->timeouts as $type => $param) {
-                $this->getWebDriverSession()->timeouts($type, $param);
+                if (!in_array($type, $validTimeoutTypes)) {
+                    throw new DriverException('Invalid timeout type: ' . $type);
+                }
+
+                if ($type === 'page load' || $type === 'pageLoad') {
+                    @trigger_error(
+                        'Using "' . $type . '" timeout type is deprecated, please use "page" instead',
+                        E_USER_DEPRECATED
+                    );
+                    $type = 'page';
+                }
+
+                if ($type === 'page') {
+                    $type = $this->isW3C ? 'pageLoad' : 'page load';
+                }
+
+                if ($this->isW3C) {
+                    $this->getWebDriverSession()->timeouts(array($type => $param));
+                } else {
+                    $this->getWebDriverSession()->timeouts($type, $param);
+                }
             }
-        } catch (UnknownError $e) {
+        } catch (UnknownError|InvalidArgument $e) {
+            // UnknownError (Selenium 2.x). InvalidArgument (Selenium 3.x).
             throw new DriverException('Error setting timeout: ' . $e->getMessage(), 0, $e);
         }
     }
@@ -386,6 +445,7 @@ class Selenium2Driver extends CoreDriver
         }
 
         $this->started = false;
+        $this->isW3C = false;
         try {
             $this->wdSession->close();
         } catch (\Exception $e) {
@@ -395,12 +455,30 @@ class Selenium2Driver extends CoreDriver
 
     public function reset()
     {
-        $this->getWebDriverSession()->deleteAllCookies();
+        $webDriverSession = $this->getWebDriverSession();
+
+        // Close all windows except the initial one.
+        foreach ($webDriverSession->window_handles() as $windowHandle) {
+            if ($windowHandle === $this->initialWindowHandle) {
+                continue;
+            }
+
+            $webDriverSession->focusWindow($windowHandle);
+            $webDriverSession->deleteWindow();
+        }
+
+        $this->switchToWindow();
+        $webDriverSession->deleteAllCookies();
     }
 
     public function visit(string $url)
     {
-        $this->getWebDriverSession()->open($url);
+        try {
+            $this->getWebDriverSession()->open($url);
+        } catch (ScriptTimeout|Timeout $e) {
+            // ScriptTimeout (Selenium 2.x). Timeout (Selenium 3.x).
+            throw new DriverException('Page failed to load: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     public function getCurrentUrl()
@@ -425,12 +503,83 @@ class Selenium2Driver extends CoreDriver
 
     public function switchToWindow(?string $name = null)
     {
-        $this->getWebDriverSession()->focusWindow($name ?: '');
+        $handle = $name === null
+            ? $this->initialWindowHandle
+            : $this->getWindowHandleFromName($name);
+
+        $this->getWebDriverSession()->focusWindow($handle);
+    }
+
+    /**
+     * @throws DriverException
+     */
+    private function getWindowHandleFromName(string $name): string
+    {
+        // if name is actually prefixed window handle, just remove the prefix
+        if (strpos($name, self::W3C_WINDOW_HANDLE_PREFIX) === 0) {
+            return substr($name, strlen(self::W3C_WINDOW_HANDLE_PREFIX));
+        }
+
+        // ..otherwise check if any existing window has the specified name
+
+        $origWindowHandle = $this->getWebDriverSession()->window_handle();
+
+        try {
+            foreach ($this->getWebDriverSession()->window_handles() as $handle) {
+                $this->getWebDriverSession()->focusWindow($handle);
+
+                if ($this->evaluateScript('window.name') === $name) {
+                    return $handle;
+                }
+            }
+
+            throw new DriverException("Could not find handle of window named \"$name\"");
+        } finally {
+            $this->getWebDriverSession()->focusWindow($origWindowHandle);
+        }
     }
 
     public function switchToIFrame(?string $name = null)
     {
-        $this->getWebDriverSession()->frame(array('id' => $name));
+        $frameQuery = $name;
+
+        if ($name) {
+            try {
+                $frameQuery = $this->getWebDriverSession()->element('id', $name);
+            } catch (NoSuchElement $e) {
+                $frameQuery = $this->getWebDriverSession()->element('name', $name);
+            }
+
+            $frameQuery = $this->serializeWebElement($frameQuery);
+        }
+
+        $this->getWebDriverSession()->frame(array('id' => $frameQuery));
+    }
+
+    /**
+     * Serialize an Web Element
+     *
+     * @param Element $webElement Web webElement.
+     *
+     * @return array
+     * @todo   Remove once the https://github.com/instaclick/php-webdriver/issues/131 is fixed.
+     */
+    private function serializeWebElement(Element $webElement)
+    {
+        // Code for WebDriver 2.x version.
+        if (class_exists('\WebDriver\LegacyElement') && \defined('\WebDriver\Element::WEB_ELEMENT_ID')) {
+            if ($webElement instanceof \WebDriver\LegacyElement) {
+                return array(\WebDriver\LegacyElement::LEGACY_ELEMENT_ID => $webElement->getID());
+            }
+
+            return array(Element::WEB_ELEMENT_ID => $webElement->getID());
+        }
+
+        // Code for WebDriver 1.x version.
+        return array(
+            \WebDriver\Container::WEBDRIVER_ELEMENT_ID => $webElement->getID(),
+            \WebDriver\Container::LEGACY_ELEMENT_ID => $webElement->getID(),
+        );
     }
 
     public function setCookie(string $name, ?string $value = null)
@@ -492,12 +641,29 @@ class Selenium2Driver extends CoreDriver
 
     public function getWindowNames()
     {
-        return $this->getWebDriverSession()->window_handles();
+        $origWindow = $this->getWebDriverSession()->window_handle();
+
+        try {
+            $result = array();
+            foreach ($this->getWebDriverSession()->window_handles() as $tempWindow) {
+                $this->getWebDriverSession()->focusWindow($tempWindow);
+                $result[] = $this->getWindowName();
+            }
+            return $result;
+        } finally {
+            $this->getWebDriverSession()->focusWindow($origWindow);
+        }
     }
 
     public function getWindowName()
     {
-        return $this->getWebDriverSession()->window_handle();
+        $name = (string) $this->evaluateScript('window.name');
+
+        if ($name === '') {
+            $name = self::W3C_WINDOW_HANDLE_PREFIX . $this->getWebDriverSession()->window_handle();
+        }
+
+        return $name;
     }
 
     /**
@@ -522,11 +688,11 @@ class Selenium2Driver extends CoreDriver
 
     public function getText(string $xpath)
     {
-        $node = $this->findElement($xpath);
-        $text = $node->text();
-        $text = (string) str_replace(array("\r", "\r\n", "\n"), ' ', $text);
-
-        return $text;
+        return trim(str_replace(
+            array("\r\n", "\r", "\n", "\xc2\xa0"),
+            ' ',
+            $this->executeJsOnXpath($xpath, 'return {{ELEMENT}}.innerText;')
+        ));
     }
 
     public function getHtml(string $xpath)
@@ -636,7 +802,11 @@ JS;
             }
 
             if ('checkbox' === $elementType) {
-                if ($element->selected() xor (bool) $value) {
+                if (!is_bool($value)) {
+                    throw new DriverException('Only boolean values can be used for a checkbox input.');
+                }
+
+                if ($element->selected() xor $value) {
                     $this->clickOnElement($element);
                 }
 
@@ -781,6 +951,16 @@ JS;
 
     public function rightClick(string $xpath)
     {
+        if ($this->isW3C) {
+            // See: https://github.com/SeleniumHQ/selenium/commit/085ceed1f55fbaaa1d419b19c73264415c394905.
+            throw new DriverException(<<<TEXT
+Right-clicking via JsonWireProtocol is not possible on Selenium Server 3.x.
+
+Please use the "mink/webdriver-classic-driver" Mink driver or switch to Selenium Server 2.x.
+TEXT
+            );
+        }
+
         $this->mouseOver($xpath);
         $this->getWebDriverSession()->click(array('button' => 2));
     }
@@ -845,42 +1025,35 @@ JS;
 
     public function dragTo(string $sourceXpath, string $destinationXpath)
     {
-        $source      = $this->findElement($sourceXpath);
-        $destination = $this->findElement($destinationXpath);
+        $source = $this->findElement($sourceXpath);
+        $target = $this->findElement($destinationXpath);
 
-        $this->getWebDriverSession()->moveto(array(
-            'element' => $source->getID()
-        ));
-
-        $script = <<<JS
-(function (element) {
-    var event = document.createEvent("HTMLEvents");
-
-    event.initEvent("dragstart", true, true);
-    event.dataTransfer = {};
-
-    element.dispatchEvent(event);
-}({{ELEMENT}}));
-JS;
-        $this->withSyn()->executeJsOnElement($source, $script);
-
+        $this->getWebDriverSession()->moveto(array('element' => $source->getID()));
         $this->getWebDriverSession()->buttondown();
-        $this->getWebDriverSession()->moveto(array(
-            'element' => $destination->getID()
-        ));
+
+        $this->executeJsOnElement($source, <<<'JS'
+            (function (sourceElement) {
+                window['__minkDragAndDropSourceElement'] = sourceElement;
+
+                sourceElement.dispatchEvent(new DragEvent('dragstart', {bubbles: true, cancelable: true}));
+            }({{ELEMENT}}));
+JS
+        );
+
+        $this->getWebDriverSession()->moveto(array('element' => $target->getID()));
         $this->getWebDriverSession()->buttonup();
 
-        $script = <<<JS
-(function (element) {
-    var event = document.createEvent("HTMLEvents");
+        $this->executeJsOnElement($target, <<<'JS'
+            (function (targetElement) {
+                var sourceElement = window['__minkDragAndDropSourceElement'];
 
-    event.initEvent("drop", true, true);
-    event.dataTransfer = {};
-
-    element.dispatchEvent(event);
-}({{ELEMENT}}));
-JS;
-        $this->withSyn()->executeJsOnElement($destination, $script);
+                sourceElement.dispatchEvent(new DragEvent('drag', {bubbles: true, cancelable: true}));
+                targetElement.dispatchEvent(new DragEvent('dragover', {bubbles: true, cancelable: true}));
+                targetElement.dispatchEvent(new DragEvent('drop', {bubbles: true, cancelable: true}));
+                sourceElement.dispatchEvent(new DragEvent('dragend', {bubbles: true, cancelable: true}));
+            }({{ELEMENT}}));
+JS
+        );
     }
 
     public function executeScript(string $script)
@@ -921,11 +1094,13 @@ JS;
 
     public function resizeWindow(int $width, int $height, ?string $name = null)
     {
-        $window = $this->getWebDriverSession()->window($name ?: 'current');
-        \assert($window instanceof Window);
-        $window->postSize(
-            array('width' => $width, 'height' => $height)
-        );
+        $this->withWindow($name, function () use ($width, $height) {
+            $window = $this->getWebDriverSession()->window('current');
+            \assert($window instanceof Window);
+            $window->postSize(
+                array('width' => $width, 'height' => $height)
+            );
+        });
     }
 
     public function submitForm(string $xpath)
@@ -935,9 +1110,34 @@ JS;
 
     public function maximizeWindow(?string $name = null)
     {
-        $window = $this->getWebDriverSession()->window($name ?: 'current');
-        \assert($window instanceof Window);
-        $window->maximize();
+        $this->withWindow($name, function () {
+            $window = $this->getWebDriverSession()->window('current');
+            \assert($window instanceof Window);
+            $window->maximize();
+        });
+    }
+
+    private function withWindow(?string $name, callable $callback): void
+    {
+        if ($name === null) {
+            $callback();
+
+            return;
+        }
+
+        $origName = $this->getWindowName();
+
+        try {
+            if ($origName !== $name) {
+                $this->switchToWindow($name);
+            }
+
+            $callback();
+        } finally {
+            if ($origName !== $name) {
+                $this->switchToWindow($origName);
+            }
+        }
     }
 
     /**

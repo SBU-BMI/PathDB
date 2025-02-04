@@ -5,7 +5,10 @@ namespace Drupal\Tests\jwt\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
+
+// cspell:ignore wxyz
 
 /**
  * Tests RSA keys.
@@ -18,7 +21,16 @@ class RsaKeyTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'user', 'field', 'key', 'jwt', 'jwt_auth_issuer', 'jwt_auth_consumer', 'jwt_test'];
+  protected static $modules = [
+    'system',
+    'user',
+    'field',
+    'key',
+    'jwt',
+    'jwt_auth_issuer',
+    'jwt_auth_consumer',
+    'jwt_test',
+  ];
 
   /**
    * {@inheritdoc}
@@ -52,12 +64,12 @@ class RsaKeyTest extends KernelTestBase {
     // Test decoding with the matched and mis-matched public keys.
     $path = \Drupal::service('extension.list.module')->getPath('jwt_test') . '/fixtures/jwt_test_rsa-public.pem';
     $public_key = file_get_contents($path);
-    $payload = JWT::decode($token, $public_key, ['RS256']);
+    $payload = JWT::decode($token, new Key($public_key, 'RS256'));
     $this->assertEquals($account->id(), $payload->drupal->uid);
     $path = \Drupal::service('extension.list.module')->getPath('jwt_test') . '/fixtures/jwt_test_rsa2-public.pem';
     $public_key = file_get_contents($path);
     $this->expectException(SignatureInvalidException::class);
-    $payload = JWT::decode($token, $public_key, ['RS256']);
+    $payload = JWT::decode($token, new Key($public_key, 'RS256'));
   }
 
   /**

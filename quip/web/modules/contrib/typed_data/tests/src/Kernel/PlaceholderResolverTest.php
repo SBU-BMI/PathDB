@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Kernel;
 
 use Drupal\Component\Render\HtmlEscapedText;
@@ -8,9 +10,9 @@ use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests the placeholder resolver.
@@ -77,7 +79,6 @@ class PlaceholderResolverTest extends KernelTestBase {
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installSchema('system', ['sequences']);
 
     // Make sure default date formats are there for testing the format_date
     // filter.
@@ -245,7 +246,7 @@ class PlaceholderResolverTest extends KernelTestBase {
     $this->assertEquals($expected, $result);
 
     // Test resolving multiple tokens, one with a filter.
-    $this->node->title->value = 'tEsT';
+    $this->node->get('title')->setValue('tEsT');
     $result = $this->placeholderResolver->resolvePlaceHolders("test {{ node.title.value | lower }} and {{ node.title.value }}", ['node' => $this->node->getTypedData()]);
     $expected = [
       '{{ node.title.value | lower }}' => 'test',
@@ -295,7 +296,7 @@ class PlaceholderResolverTest extends KernelTestBase {
         'name' => 'test',
         'type' => 'user',
       ]);
-    $this->node->uid->entity = $user;
+    $this->node->get('uid')->entity = $user;
     $text = 'test {{node.title}} and {{node.uid.entity.name}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test test and test', $result);
@@ -318,7 +319,7 @@ class PlaceholderResolverTest extends KernelTestBase {
    * @covers ::replacePlaceHolders
    */
   public function testStringEncoding(): void {
-    $this->node->title->value = '<b>XSS</b>';
+    $this->node->get('title')->setValue('<b>XSS</b>');
     $text = 'test {{node.title}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test ' . new HtmlEscapedText('<b>XSS</b>'), $result);
@@ -328,7 +329,7 @@ class PlaceholderResolverTest extends KernelTestBase {
    * @covers ::replacePlaceHolders
    */
   public function testIntegerPlaceholder(): void {
-    $this->node->field_integer->value = 3;
+    $this->node->get('field_integer')->setValue(3);
     $text = 'test {{node.field_integer.0.value}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test 3', $result);
@@ -338,7 +339,7 @@ class PlaceholderResolverTest extends KernelTestBase {
    * @covers ::replacePlaceHolders
    */
   public function testListPlaceholder(): void {
-    $this->node->field_integer = [1, 2];
+    $this->node->get('field_integer')->setValue(['0' => 1, '1' => 2]);
     $text = 'test {{node.field_integer}}';
     $result = $this->placeholderResolver->replacePlaceHolders($text, ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test 1, 2', $result);
@@ -349,8 +350,8 @@ class PlaceholderResolverTest extends KernelTestBase {
    */
   public function testApplyingFilters(): void {
     // Test filter expression.
-    $this->node->field_integer = [1, 2, NULL];
-    $this->node->title->value = NULL;
+    $this->node->get('field_integer')->setValue(['0' => 1, '1' => 2, '2' => NULL]);
+    $this->node->get('title')->value = NULL;
     $result = $this->placeholderResolver->replacePlaceHolders("test {{node.field_integer.2.value|default('0')}}", ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test 0', $result);
 
@@ -363,7 +364,7 @@ class PlaceholderResolverTest extends KernelTestBase {
     $this->assertEquals('test test', $result);
 
     // Test multiple tokens with filters.
-    $this->node->title->value = 'tEsT';
+    $this->node->get('title')->setValue('tEsT');
     $result = $this->placeholderResolver->replacePlaceHolders("test {{ node.title.value | lower }} and {{ node.title.value }}", ['node' => $this->node->getTypedData()]);
     $this->assertEquals('test test and tEsT', $result);
 

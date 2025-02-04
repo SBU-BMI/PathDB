@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\Plugin\Validation\Constraint;
 
 use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
-use Drupal\ldap_servers\Helper\CredentialsStorage;
 use Drupal\user\Plugin\Validation\Constraint\ProtectedUserFieldConstraintValidator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
@@ -78,10 +77,7 @@ class LdapProtectedUserFieldConstraintValidator extends ProtectedUserFieldConstr
       return;
     }
 
-    // We need the password, the existing one should be here.
-    CredentialsStorage::storeUserPassword($account->get('pass')->existing);
     $credentialsAuthenticationResult = $this->loginValidator->validateCredentialsLoggedIn($account_unchanged);
-
     if ($credentialsAuthenticationResult === $this->loginValidator::AUTHENTICATION_SUCCESS) {
       // Directory approved the request, existing password matches.
       return;

@@ -5,7 +5,7 @@
  * Hooks provided by ldap_servers module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\ldap_servers\Entity\Server;
 
@@ -47,7 +47,7 @@ function hook_ldap_servers_user_cron_needed(): bool {
  * @param array $ldap_entries
  *   LDAP entries as array keyed on lowercase DN of entry with value of array in
  *   format used in ldap_add or ldap_modify function, e.g.:
- *   ['cn=jkool,ou=guest accounts,dc=ad,dc=myuniversity,dc=edu' => [
+ *   ['cn=jkool,ou=guest accounts,dc=ad,dc=university,dc=edu' => [
  *    "attribute1" => array("value"),
  *    "attribute2" => array("value1", "value2"),
  *   ];.
@@ -61,8 +61,8 @@ function hook_ldap_servers_user_cron_needed(): bool {
  *     and Drupal roles; etc this will be array keyed on lowercase DN with
  *     values of objects, e.g.:
  *     ['corresponding_drupal_data'] => [
- *      'cn=jkool,ou=guest accounts,dc=ad,dc=myuniversity,dc=edu' => $userA,
- *      'cn=jfun,ou=guest accounts,dc=ad,dc=myuniversity,dc=edu' => $userB,
+ *      'cn=jkool,ou=guest accounts,dc=ad,dc=university,dc=edu' => $userA,
+ *      'cn=jfun,ou=guest accounts,dc=ad,dc=university,dc=edu' => $userB,
  *     ]
  *    'corresponding_drupal_data_type' => 'user', 'role', etc. If it is 'user',
  *     then $context has the account in the 'account' key.
@@ -77,7 +77,7 @@ function hook_ldap_entry_pre_provision_alter(array &$ldap_entries, Server $ldap_
  * This should be invoked after provisioning LDAP entries. Same signature as
  * hook_ldap_entry_pre_provision_alter with LDAP entries not passed by reference
  * LDAP entries are not queried after provisioning, so $ldap_entries are in form
- * hook_ldap_entry_pre_provision; not actual queryied LDAP entries. If actual
+ * hook_ldap_entry_pre_provision; not actual queried LDAP entries. If actual
  * LDAP entries are available after provisioning, they will be in
  * $context['provisioned_ldap_entries][<dn>] => LDAP entry array in format of an
  * LDAP LDAP query returned from ldap_get_entries() with 'count' keys.

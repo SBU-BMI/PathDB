@@ -1,7 +1,9 @@
 services:
   logger.channel.ldap_user:
     parent: logger.channel_base
-    arguments: ['ldap_user']
+    arguments:
+      - 'ldap_user'
+
   ldap.drupal_user_processor:
     class: Drupal\ldap_user\Processor\DrupalUserProcessor
     arguments:
@@ -20,6 +22,7 @@ services:
       - '@ldap_user.field_provider'
       - '@messenger'
       - '@password_generator'
+      - '@service_container'
 
   ldap_user.field_provider:
     class: Drupal\ldap_user\FieldProvider
@@ -28,6 +31,7 @@ services:
       - '@entity_type.manager'
       - '@module_handler'
       - '@entity_field.manager'
+
   ldap.orphan_processor:
     class: Drupal\ldap_user\Processor\OrphanProcessor
     arguments:
@@ -40,6 +44,7 @@ services:
       - '@ldap.user_manager'
       - '@ldap.bridge'
       - '@module_handler'
+
   ldap.group_user_update_processor:
     class: Drupal\ldap_user\Processor\GroupUserUpdateProcessor
     arguments:
@@ -50,8 +55,10 @@ services:
       - '@module_handler'
       - '@entity_type.manager'
       - '@externalauth.authmap'
-      - '@ldap.query'
+      - '@?ldap.query'
       - '@ldap.drupal_user_processor'
+      - '@?authorization.manager'
+
   ldap_user.ldap_provision:
     class: Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber
     arguments:
@@ -67,6 +74,7 @@ services:
       - '@externalauth.authmap'
     tags:
       - { name: event_subscriber }
+
   ldap_user.ldap_delete:
     class: Drupal\ldap_user\EventSubscriber\LdapEntryDeletionSubscriber
     arguments:

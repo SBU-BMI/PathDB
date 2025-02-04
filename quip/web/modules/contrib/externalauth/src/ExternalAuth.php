@@ -2,30 +2,20 @@
 
 namespace Drupal\externalauth;
 
-use Drupal\Core\DependencyInjection\DeprecatedServicePropertyTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
 use Drupal\externalauth\Event\ExternalAuthEvents;
 use Drupal\externalauth\Event\ExternalAuthLoginEvent;
 use Drupal\externalauth\Event\ExternalAuthRegisterEvent;
-use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
-use Drupal\user\UserInterface;
 use Drupal\externalauth\Exception\ExternalAuthRegisterException;
+use Drupal\user\UserInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Class ExternalAuth.
- *
- * @package Drupal\externalauth
+ * Service to handle external authentication logic.
  */
 class ExternalAuth implements ExternalAuthInterface {
-
-  use DeprecatedServicePropertyTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $deprecatedProperties = ['entityManager' => 'entity.manager'];
 
   /**
    * The entity type manager service.
@@ -77,7 +67,7 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * {@inheritdoc}
    */
-  public function load($authname, $provider) {
+  public function load(string $authname, string $provider) {
     if ($uid = $this->authmap->getUid($authname, $provider)) {
       return $this->entityTypeManager->getStorage('user')->load($uid);
     }
@@ -87,7 +77,7 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * {@inheritdoc}
    */
-  public function login($authname, $provider) {
+  public function login(string $authname, string $provider) {
     $account = $this->load($authname, $provider);
     if ($account) {
       return $this->userLoginFinalize($account, $authname, $provider);
@@ -98,7 +88,7 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * {@inheritdoc}
    */
-  public function register($authname, $provider, array $account_data = [], $authmap_data = NULL) {
+  public function register(string $authname, string $provider, array $account_data = [], $authmap_data = NULL) {
     if (!empty($account_data['name'])) {
       $username = $account_data['name'];
       unset($account_data['name']);
@@ -107,7 +97,7 @@ class ExternalAuth implements ExternalAuthInterface {
       $username = $provider . '_' . $authname;
     }
 
-    $authmap_event = $this->eventDispatcher->dispatch(ExternalAuthEvents::AUTHMAP_ALTER, new ExternalAuthAuthmapAlterEvent($provider, $authname, $username, $authmap_data));
+    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $username, $authmap_data), ExternalAuthEvents::AUTHMAP_ALTER);
     $entity_storage = $this->entityTypeManager->getStorage('user');
 
     $account_search = $entity_storage->loadByProperties(['name' => $authmap_event->getUsername()]);
@@ -130,7 +120,7 @@ class ExternalAuth implements ExternalAuthInterface {
     $account->enforceIsNew();
     $account->save();
     $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
-    $this->eventDispatcher->dispatch(ExternalAuthEvents::REGISTER, new ExternalAuthRegisterEvent($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData()));
+    $this->eventDispatcher->dispatch(new ExternalAuthRegisterEvent($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData()), ExternalAuthEvents::REGISTER);
     $this->logger->notice('External registration of user %name from provider %provider and authname %authname',
       [
         '%name' => $account->getAccountName(),
@@ -145,7 +135,7 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * {@inheritdoc}
    */
-  public function loginRegister($authname, $provider, array $account_data = [], $authmap_data = NULL) {
+  public function loginRegister(string $authname, string $provider, array $account_data = [], $authmap_data = NULL) {
     $account = $this->login($authname, $provider);
     if (!$account) {
       $account = $this->register($authname, $provider, $account_data, $authmap_data);
@@ -159,23 +149,37 @@ class ExternalAuth implements ExternalAuthInterface {
    *
    * @codeCoverageIgnore
    */
-  public function userLoginFinalize(UserInterface $account, $authname, $provider) {
+  public function userLoginFinalize(UserInterface $account, string $authname, string $provider): UserInterface {
     user_login_finalize($account);
     $this->logger->notice('External login of user %name', ['%name' => $account->getAccountName()]);
-    $this->eventDispatcher->dispatch(ExternalAuthEvents::LOGIN, new ExternalAuthLoginEvent($account, $provider, $authname));
+    $this->eventDispatcher->dispatch(new ExternalAuthLoginEvent($account, $provider, $authname), ExternalAuthEvents::LOGIN);
     return $account;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function linkExistingAccount($authname, $provider, UserInterface $account) {
-    // If a mapping (for the same provider) to this account already exists, we
-    // silently skip saving this auth mapping.
-    if (!$this->authmap->get($account->id(), $provider)) {
-      $authmap_event = $this->eventDispatcher->dispatch(ExternalAuthEvents::AUTHMAP_ALTER, new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), NULL));
-      $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
+  public function linkExistingAccount(string $authname, string $provider, UserInterface $account) {
+    // If a mapping (for the same provider) to this account already exists, and
+    // the authname is the same, we silently skip saving this auth mapping.
+    $current_authname = $this->authmap->get($account->id(), $provider);
+    if ($current_authname === $authname) {
+      return;
     }
+
+    // If we update the authmap entry, let's log the change.
+    if (!empty($current_authname)) {
+      $this->logger->debug('Authmap change (%old => %new) for user %name with uid %uid from provider %provider', [
+        '%old' => $current_authname,
+        '%new' => $authname,
+        '%name' => $account->getAccountName(),
+        '%uid' => $account->id(),
+        '%provider' => $provider,
+      ]);
+    }
+
+    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), NULL), ExternalAuthEvents::AUTHMAP_ALTER);
+    $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
   }
 
 }

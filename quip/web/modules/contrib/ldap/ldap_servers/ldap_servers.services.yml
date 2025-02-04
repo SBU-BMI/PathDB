@@ -2,18 +2,23 @@ services:
   ldap.bridge:
     class: Drupal\ldap_servers\LdapBridge
     arguments: ['@logger.channel.ldap_servers', '@entity_type.manager']
+
   ldap.group_manager:
     class: Drupal\ldap_servers\LdapGroupManager
     arguments: ['@logger.channel.ldap_servers', '@entity_type.manager', '@ldap.bridge', '@module_handler']
+
   ldap.user_manager:
     class: Drupal\ldap_servers\LdapUserManager
     arguments: ['@logger.channel.ldap_servers', '@entity_type.manager', '@ldap.bridge', '@module_handler', '@cache.default', '@externalauth.authmap']
+
   logger.channel.ldap_servers:
     parent: logger.channel_base
     arguments: ['ldap_servers']
+
   ldap.detail_log:
     class: Drupal\ldap_servers\Logger\LdapDetailLog
     arguments: ['@logger.factory', '@config.factory']
+
   ldap.token_processor:
     class: Drupal\ldap_servers\Processor\TokenProcessor
     arguments: [ '@ldap.detail_log']

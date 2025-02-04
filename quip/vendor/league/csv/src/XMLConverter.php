@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace League\Csv;
 
+use Closure;
 use DOMAttr;
 use DOMDocument;
 use DOMElement;
 use DOMException;
+use Exception;
 
 /**
  * Converts tabular data into a DOMDocument object.
@@ -33,6 +35,8 @@ class XMLConverter
     protected string $column_attr = '';
     /** XML offset attribute name. */
     protected string $offset_attr = '';
+    /** @var ?Closure(array, array-key): array */
+    public ?Closure $formatter = null;
 
     public static function create(): self
     {
@@ -54,11 +58,35 @@ class XMLConverter
      */
     public function convert(iterable $records): DOMDocument
     {
+        if (null !== $this->formatter) {
+            $records = MapIterator::fromIterable($records, $this->formatter);
+        }
+
         $doc = new DOMDocument('1.0');
         $node = $this->import($records, $doc);
         $doc->appendChild($node);
 
         return $doc;
+    }
+
+    /**
+     * Sends and makes the XML structure downloadable via HTTP.
+     *.
+     * Returns the number of characters read from the handle and passed through to the output.
+     *
+     * @throws Exception
+     */
+    public function download(iterable $records, ?string $filename = null, string $encoding = 'utf-8', bool $formatOutput = false): int|false
+    {
+        $document = $this->convert($records);
+        $document->encoding = $encoding;
+        $document->formatOutput = $formatOutput;
+
+        if (null !== $filename) {
+            HttpHeaders::forFileDownload($filename, 'application/xml; charset='.strtolower($encoding));
+        }
+
+        return $document->save('php://output');
     }
 
     /**
@@ -70,8 +98,7 @@ class XMLConverter
     {
         $root = $doc->createElement($this->root_name);
         foreach ($records as $offset => $record) {
-            $node = $this->recordToElement($doc, $record, $offset);
-            $root->appendChild($node);
+            $root->appendChild($this->recordToElement($doc, $record, $offset));
         }
 
         return $root;
@@ -123,6 +150,19 @@ class XMLConverter
     {
         $clone = clone $this;
         $clone->root_name = $this->filterElementName($node_name);
+
+        return $clone;
+    }
+
+    /**
+     * Set a callback to format each item before json encode.
+     *
+     * @param ?callable(array, array-key): array $formatter
+     */
+    public function formatter(?callable $formatter): self
+    {
+        $clone = clone $this;
+        $clone->formatter = ($formatter instanceof Closure || null === $formatter) ? $formatter : $formatter(...);
 
         return $clone;
     }

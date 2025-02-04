@@ -18,7 +18,7 @@ class BlockFieldPluginTest extends TestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
     'block',
     'ds',
@@ -90,8 +90,8 @@ class BlockFieldPluginTest extends TestBase {
       'use_block_title' => '1',
     ];
     $this->drupalGet('admin/structure/ds/fields/manage_block/test_block_title_field');
-    $this->submitForm($edit, t('Save'));
-    $text = t('The field %name has been saved', ['%name' => 'Test block title field']);
+    $this->submitForm($edit, 'Save');
+    $text = $this->t('The field %name has been saved', ['%name' => 'Test block title field']);
     $this->assertSession()->responseContains((string) $text);
 
     // Look at node and verify the block title is overridden.
@@ -203,7 +203,7 @@ class BlockFieldPluginTest extends TestBase {
       'add_block_wrappers' => '1',
     ];
     $this->drupalGet('admin/structure/ds/fields/manage_block/test_block_title_field');
-    $this->submitForm($edit, t('Save'));
+    $this->submitForm($edit, 'Save');
 
     // Verify block wrappers do exist.
     $this->drupalGet('node/' . $node->id());

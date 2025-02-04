@@ -7,9 +7,11 @@
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Field\TypedData\FieldItemDataDefinition;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceDefinitionInterface;
+use Drupal\Core\Utility\Error;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Event\MappingViewsFieldHandlersEvent;
@@ -112,7 +114,7 @@ function search_api_views_data() {
       $args = [
         '%index' => $index->label(),
       ];
-      watchdog_exception('search_api', $e, '%type while computing Views data for index %index: @message in %function (line %line of %file).', $args);
+      Error::logException(\Drupal::logger('search_api'), $e, '%type while computing Views data for index %index: @message in %function (line %line of %file).', $args);
     }
   }
 
@@ -137,6 +139,7 @@ function search_api_views_plugins_cache_alter(array &$plugins) {
     $bases = ['search_api_index_dummy'];
   }
 
+  $plugins['search_api_none']['base'] = $bases;
   $plugins['search_api_tag']['base'] = $bases;
   $plugins['search_api_time']['base'] = $bases;
 }
@@ -198,28 +201,45 @@ function _search_api_views_get_handlers(FieldInterface $field) {
   try {
     $types = [];
 
-    $definition = $field->getDataDefinition();
-    $entity_type_id = $definition->getSetting('target_type');
-    if ($entity_type_id) {
-      $entity_type = \Drupal::entityTypeManager()
-        ->getDefinition($entity_type_id);
-      $bundle_of = $entity_type->getBundleOf();
-      if ($bundle_of) {
-        $types[] = "bundle_of:$bundle_of";
-        $types[] = ['bundle_of', $bundle_of];
-      }
+    $definition = NULL;
+    if ($field->getPropertyPath() !== NULL) {
+      $definition = $field->getDataDefinition();
+    }
 
-      $types[] = "entity:$entity_type_id";
-      $types[] = ['entity', $entity_type_id];
+    // Since $definition->getClass() can throw an exception in specific setups,
+    // but $class is not always needed for determining the mappings, we catch
+    // and ignore the exception here.
+    try {
+      $class = $definition?->getClass();
+    }
+    catch (PluginNotFoundException) {
+      // Ignore.
+    }
+
+    // Check whether this is an entity reference field.
+    if (is_a($class ?? NULL, EntityReferenceItem::class, TRUE)) {
+      $entity_type_id = $definition->getSetting('target_type');
+      if ($entity_type_id) {
+        $entity_type = \Drupal::entityTypeManager()
+          ->getDefinition($entity_type_id);
+        $bundle_of = $entity_type->getBundleOf();
+        if ($bundle_of) {
+          $types[] = "bundle_of:$bundle_of";
+          $types[] = ['bundle_of', $bundle_of];
+        }
+
+        $types[] = "entity:$entity_type_id";
+        $types[] = ['entity', $entity_type_id];
+      }
     }
 
     // Special treatment for languages (as we have no specific Search API data
     // type for those).
-    if ($definition->getSetting('views_type') === 'language') {
+    if ($definition?->getSetting('views_type') === 'language') {
       $types[] = 'language';
     }
 
-    if ($definition->getSetting('allowed_values')) {
+    if ($definition?->getSetting('allowed_values')) {
       $types[] = 'options';
     }
 
@@ -244,7 +264,7 @@ function _search_api_views_get_handlers(FieldInterface $field) {
   catch (SearchApiException | PluginNotFoundException $e) {
     $vars['%index'] = $field->getIndex()->label();
     $vars['%field'] = $field->getPrefixedLabel();
-    watchdog_exception('search_api', $e, '%type while adding Views handlers for field %field on index %index: @message in %function (line %line of %file).', $vars);
+    Error::logException(\Drupal::logger('search_api'), $e, '%type while adding Views handlers for field %field on index %index: @message in %function (line %line of %file).', $vars);
   }
 
   return [];
@@ -395,7 +415,7 @@ function _search_api_views_handler_mapping() {
     ];
 
     $alter_id = 'search_api_views_handler_mapping';
-    $description = 'This hook is deprecated in search_api:8.x-1.14 and is removed from search_api:2.0.0. Please use the "search_api.mapping_views_handlers" event instead. See https://www.drupal.org/node/3059866';
+    $description = 'This hook is deprecated in search_api:8.x-1.14 and is removed from search_api:2.0.0. Use the "search_api.mapping_views_handlers" event instead. See https://www.drupal.org/node/3059866';
     \Drupal::moduleHandler()
       ->alterDeprecated($description, $alter_id, $mapping);
 
@@ -444,9 +464,9 @@ function _search_api_views_handler_adjustments($type, FieldInterface $field, arr
       // If this is a normal Field API field, dynamically retrieve the options
       // list at query time.
       $field_definition = $data_definition->getFieldDefinition();
-      $bundle = $field_definition->getTargetBundle();
-      $field_name = $field_definition->getName();
       $entity_type = $field_definition->getTargetEntityTypeId();
+      $bundle = $field_definition->getTargetBundle() ?? $entity_type;
+      $field_name = $field_definition->getName();
       $definitions['filter']['options callback'] = '_search_api_views_get_allowed_values';
       $definitions['filter']['options arguments'] = [$entity_type, $bundle, $field_name];
     }
@@ -603,7 +623,7 @@ function _search_api_views_data_special_fields(array &$table, IndexInterface $in
       $property = $field->getDataDefinition();
       $datasource = $field->getDatasource();
     }
-    catch (SearchApiException $e) {
+    catch (SearchApiException) {
       // Will probably cause other problems elsewhere, but here we can just
       // ignore it.
       continue;
@@ -897,7 +917,7 @@ function _search_api_views_get_field_handler_for_property(DataDefinitionInterfac
       && $property instanceof FieldItemDataDefinition
       && !$property->isComputed()
       && !$property->getFieldDefinition()->isComputed()) {
-    list(, $field_name) = Utility::splitPropertyPath($property_path, TRUE);
+    [, $field_name] = Utility::splitPropertyPath($property_path, TRUE);
     if (!isset($definition['fallback_handler'])) {
       $definition['fallback_handler'] = $definition['id'];
       $definition['id'] = 'search_api_field';
@@ -994,7 +1014,7 @@ function _search_api_views_get_field_handler_mapping() {
 
     // Let other modules change or expand this mapping.
     $alter_id = 'search_api_views_field_handler_mapping';
-    $description = 'This hook is deprecated in search_api:8.x-1.14 and is removed from search_api:2.0.0. Please use the "search_api.mapping_views_field_handlers" event instead. See https://www.drupal.org/node/3059866';
+    $description = 'This hook is deprecated in search_api:8.x-1.14 and is removed from search_api:2.0.0. Use the "search_api.mapping_views_field_handlers" event instead. See https://www.drupal.org/node/3059866';
     \Drupal::moduleHandler()
       ->alterDeprecated($description, $alter_id, $plain_mapping);
 
@@ -1013,7 +1033,7 @@ function _search_api_views_get_field_handler_mapping() {
       if ($type == '*') {
         $mappings['default'] = $definition;
       }
-      elseif (strpos($type, '*') === FALSE) {
+      elseif (!str_contains($type, '*')) {
         $mappings['simple'][$type] = $definition;
       }
       else {

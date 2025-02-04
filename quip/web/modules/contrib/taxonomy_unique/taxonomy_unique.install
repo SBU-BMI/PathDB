@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Taxonomy Unique module.
+ */
+
+/**
+ * Convert the taxonomy unique settings to third party settings.
+ */
+function taxonomy_unique_update_9001() {
+  /** @var \Drupal\taxonomy\VocabularyStorageInterface $vocabulary_storage */
+  $vocabulary_storage = \Drupal::entityTypeManager()
+    ->getStorage('taxonomy_vocabulary');
+
+  $settings = \Drupal::configFactory()
+    ->getEditable('taxonomy_unique.settings');
+  foreach ($settings->get() as $key => $value) {
+    /** @var \Drupal\taxonomy\VocabularyInterface $vocabulary */
+    $vocabulary = $vocabulary_storage->load($key);
+    if ($vocabulary && !empty($value)) {
+      $message = $settings->get("{$key}_message") ?? NULL;
+      if (!empty($message)) {
+        $vocabulary
+          ->setThirdPartySetting('taxonomy_unique', 'enabled', TRUE)
+          ->setThirdPartySetting('taxonomy_unique', 'message', $message)
+          ->save();
+      }
+    }
+  }
+
+  $settings->delete();
+}

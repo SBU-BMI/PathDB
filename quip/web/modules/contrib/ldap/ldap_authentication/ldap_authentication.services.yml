@@ -4,11 +4,13 @@ services:
     arguments: ['@config.factory']
     tags:
       - { name: event_subscriber }
+
   ldap_authentication.email_template:
     class: Drupal\ldap_authentication\Routing\EmailTemplateService
     tags:
       - { name: event_subscriber }
     arguments: ['@config.factory']
+
   ldap_authentication.user_help_tab_access:
     class: Drupal\ldap_authentication\Access\UserHelpTabAccess
     arguments:
@@ -17,9 +19,11 @@ services:
       - '@externalauth.authmap'
     tags:
       - { name: access_check, applies_to: _user_help_tab_access_check }
+
   logger.channel.ldap_authentication:
     parent: logger.channel_base
     arguments: ['ldap_authentication']
+
   ldap_authentication.login_validator:
     class: \Drupal\ldap_authentication\Controller\LoginValidatorLoginForm
     arguments:
@@ -34,6 +38,8 @@ services:
       - '@ldap.user_manager'
       - '@messenger'
       - '@ldap.drupal_user_processor'
+      - '@service_container'
+
   ldap_authentication.login_validator_sso:
     class: \Drupal\ldap_authentication\Controller\LoginValidatorSso
     arguments:
@@ -48,6 +54,8 @@ services:
       - '@ldap.user_manager'
       - '@messenger'
       - '@ldap.drupal_user_processor'
+      - '@service_container'
+
   ldap_authentication.servers:
     class: Drupal\ldap_authentication\AuthenticationServers
     arguments:

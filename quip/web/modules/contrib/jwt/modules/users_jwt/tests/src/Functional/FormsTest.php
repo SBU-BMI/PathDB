@@ -6,6 +6,8 @@ use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Firebase\JWT\JWT;
 
+// cspell:ignore wxyz
+
 /**
  * Simple test to ensure that user pages and forms work.
  *
@@ -33,7 +35,7 @@ class FormsTest extends BrowserTestBase {
   protected $adminUser;
 
   /**
-   * A user with no special perissions.
+   * A user with no special permissions.
    *
    * @var \Drupal\user\UserInterface
    */
@@ -68,7 +70,7 @@ class FormsTest extends BrowserTestBase {
     $generated_private_key = $this->getSession()->getPage()->getContent();
     self::assertNotFalse(\mb_strpos($generated_private_key, '-----BEGIN PRIVATE KEY-----'));
     $this->drupalGet(Url::fromRoute('users_jwt.key_list', ['user' => $this->user->id()]));
-    $this->assertSession()->pageTextnotContains('No keys found.');
+    $this->assertSession()->pageTextNotContains('No keys found.');
     $this->assertSession()->pageTextContains('-----BEGIN PUBLIC KEY-----');
     $expected_cache_tag = 'users_jwt:' . $this->user->id();
     $this->assertSession()->responseHeaderContains('X-Drupal-Cache-Tags', $expected_cache_tag);

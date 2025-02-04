@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Functional\TypedDataFormWidget;
 
 use Drupal\Core\Plugin\Context\ContextDefinition;
@@ -79,19 +81,7 @@ class TextareaWidgetTest extends FormWidgetBrowserTestBase {
     $context_definition = ContextDefinition::create('text')
       ->setLabel('Test text area')
       ->setDescription('Enter text, minimum 40 characters.');
-    // Omitting the 'allowEmptyString' argument in Symfony 4+ (which is used in
-    // Drupal 9.0+) gives a deprecation warning, but this option does not exist
-    // in Symfony 6 (which is used in Drupal 10).
-    // @see https://www.drupal.org/project/typed_data/issues/3266222
-    if (version_compare(\Drupal::VERSION, '10.0', '>=')) {
-      $context_definition->addConstraint('Length', ['min' => 40]);
-    }
-    else {
-      $context_definition->addConstraint('Length', [
-        'min' => 40,
-        'allowEmptyString' => FALSE,
-      ]);
-    }
+    $context_definition->addConstraint('Length', ['min' => 40]);
 
     $this->container->get('state')->set('typed_data_widgets.definition', $context_definition);
 

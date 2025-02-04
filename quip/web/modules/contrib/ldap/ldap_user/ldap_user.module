@@ -5,7 +5,7 @@
  * Module for the LDAP User Entity.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -104,12 +104,7 @@ function ldap_user_user_insert($account) {
   $event = new LdapNewUserCreatedEvent($account);
   /** @var \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher */
   $dispatcher = \Drupal::service('event_dispatcher');
-  if (version_compare(\Drupal::VERSION, '9.1', '>=')) {
-    $dispatcher->dispatch($event, LdapNewUserCreatedEvent::EVENT_NAME);
-  }
-  else {
-    $dispatcher->dispatch(LdapNewUserCreatedEvent::EVENT_NAME, $event);
-  }
+  $dispatcher->dispatch($event, LdapNewUserCreatedEvent::EVENT_NAME);
 }
 
 /**
@@ -135,12 +130,7 @@ function ldap_user_user_update($account) {
   $event = new LdapUserUpdatedEvent($account);
   /** @var \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher */
   $dispatcher = \Drupal::service('event_dispatcher');
-  if (version_compare(\Drupal::VERSION, '9.1', '>=')) {
-    $dispatcher->dispatch($event, LdapUserUpdatedEvent::EVENT_NAME);
-  }
-  else {
-    $dispatcher->dispatch(LdapUserUpdatedEvent::EVENT_NAME, $event);
-  }
+  $dispatcher->dispatch($event, LdapUserUpdatedEvent::EVENT_NAME);
 }
 
 /**
@@ -150,12 +140,7 @@ function ldap_user_user_delete($account) {
   $event = new LdapUserDeletedEvent($account);
   /** @var \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher */
   $dispatcher = \Drupal::service('event_dispatcher');
-  if (version_compare(\Drupal::VERSION, '9.1', '>=')) {
-    $dispatcher->dispatch($event, LdapUserDeletedEvent::EVENT_NAME);
-  }
-  else {
-    $dispatcher->dispatch(LdapUserDeletedEvent::EVENT_NAME, $event);
-  }
+  $dispatcher->dispatch($event, LdapUserDeletedEvent::EVENT_NAME);
 }
 
 /**
@@ -187,7 +172,7 @@ function ldap_user_entity_base_field_info(EntityTypeInterface $entity_type) {
 
     $fields['ldap_user_last_checked'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Last LDAP comparison'))
-      ->setDescription(t('Unix timestamp of when Drupal user was compared to LDAP entry. This could be for purposes of syncing, deleteing Drupal account, etc.'));
+      ->setDescription(t('Unix timestamp of when Drupal user was compared to LDAP entry. This could be for purposes of syncing, deleting Drupal account, etc.'));
 
     $fields['ldap_user_ldap_exclude'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Exclude from LDAP'))
@@ -223,7 +208,7 @@ function ldap_user_form_user_pass_reset_alter(&$form, $form_state) {
  *
  * Relevant for user_login_form.
  */
-function ldap_user_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function ldap_user_form_user_login_form_alter(&$form, FormStateInterface $form_state) {
   array_unshift($form['#validate'], 'ldap_user_grab_password_validate');
 }
 

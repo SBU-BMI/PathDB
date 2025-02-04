@@ -2,8 +2,8 @@
 
 namespace Drupal\externalauth\Event;
 
+use Drupal\Component\EventDispatcher\Event;
 use Drupal\user\UserInterface;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Notify event listeners about an externalauth user login.
@@ -56,7 +56,7 @@ class ExternalAuthLoginEvent extends Event {
    * @return \Drupal\user\UserInterface
    *   The Drupal user account.
    */
-  public function getAccount() {
+  public function getAccount(): UserInterface {
     return $this->account;
   }
 
@@ -66,7 +66,7 @@ class ExternalAuthLoginEvent extends Event {
    * @return string
    *   The name of the service providing external authentication.
    */
-  public function getProvider() {
+  public function getProvider(): string {
     return $this->provider;
   }
 
@@ -77,7 +77,7 @@ class ExternalAuthLoginEvent extends Event {
    *   The unique, external authentication name provided by authentication
    *   provider.
    */
-  public function getAuthname() {
+  public function getAuthname(): string {
     return $this->authname;
   }
 

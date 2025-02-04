@@ -1,15 +1,16 @@
 name: Moderated Content Bulk Publish
-description: 'Provides general administration features that Drupal 8 core does not provide.'
+description: 'Provides general administration features that Drupal 10 core does not provide.'
 package: Administration
 type: module
-core_version_requirement: ^8.9 || ^9 || ^10
+core_version_requirement: ^10.2 || ^11
 configure: moderated_content_bulk_publish.settings.form
 dependencies:
   - drupal:content_moderation
   - drupal:workflows
-  - drupal:views_bulk_operations
+  - pathauto:pathauto
+  - views_bulk_operations:views_bulk_operations
 
-# Information added by Drupal.org packaging script on 2023-10-20
-version: '2.0.30'
+# Information added by Drupal.org packaging script on 2025-01-07
+version: '2.0.34'
 project: 'moderated_content_bulk_publish'
-datestamp: 1697760230
+datestamp: 1736282637

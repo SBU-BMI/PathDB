@@ -7,7 +7,7 @@ Also provides setting moderation state to other translations in the node edit fo
 Also prevents a 403 when latest revision doesn't exist for a translation of a node (redirects to the node which will display correctly).
 Installation/setup instructions:
 
-Intended to work with content types using the editorial workflow provided by the Drupal 9 core workflow module (when enabled and configured for a content type).
+Intended to work with content types using the editorial workflow provided by the Drupal 10 / Drupal 11 core workflow module (when enabled and configured for a content type).
 
 Options for this module are here:
 /admin/config/content/moderated-content-bulk-publish 

@@ -2,19 +2,20 @@
 
 namespace Drupal\jwt\Authentication\Event;
 
-use Symfony\Contracts\EventDispatcher\Event;
 use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * Class JwtAuthBaseEvent.
+ * JWT Auth Base Event is extended by other JWT event classes.
  */
 class JwtAuthBaseEvent extends Event {
+
   /**
    * The JsonWebToken.
    *
    * @var \Drupal\jwt\JsonWebToken\JsonWebTokenInterface
    */
-  protected $jwt;
+  protected JsonWebTokenInterface $jwt;
 
   /**
    * Constructs a JwtAuthEvent with a JsonWebToken.
@@ -32,7 +33,7 @@ class JwtAuthBaseEvent extends Event {
    * @return \Drupal\jwt\JsonWebToken\JsonWebTokenInterface
    *   Returns the token.
    */
-  public function getToken() {
+  public function getToken(): JsonWebTokenInterface {
     return $this->jwt;
   }
 

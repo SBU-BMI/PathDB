@@ -877,7 +877,7 @@ class IntegrationTest extends FacetsTestBase {
   public function testViewsCacheDisable() {
     $caches = [
       // Tag cache plugin should be replaced by none, as it's not supported.
-      'page_1' => 'none',
+      'page_1' => 'search_api_none',
       // Search API cache plugin shouldn't be changed.
       'page_2_sapi_tag' => 'search_api_tag',
       'page_2_sapi_time' => 'search_api_time',

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_authentication\Plugin\Derivative;
 
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides help messages for users when configured.
  */
-class DynamicUserHelpLink extends DeriverBase implements ContainerDeriverInterface {
+final class DynamicUserHelpLink extends DeriverBase implements ContainerDeriverInterface {
 
   /**
    * Config.
@@ -35,7 +35,7 @@ class DynamicUserHelpLink extends DeriverBase implements ContainerDeriverInterfa
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id): DynamicUserHelpLink {
-    return new static($container->get('config.factory'));
+    return new self($container->get('config.factory'));
   }
 
   /**

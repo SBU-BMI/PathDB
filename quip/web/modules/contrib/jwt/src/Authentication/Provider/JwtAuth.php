@@ -2,14 +2,16 @@
 
 namespace Drupal\jwt\Authentication\Provider;
 
-use Drupal\jwt\Transcoder\JwtTranscoderInterface;
-use Drupal\jwt\Transcoder\JwtDecodeException;
+use Drupal\Core\Authentication\AuthenticationProviderInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\Core\Site\Settings;
+use Drupal\jwt\Authentication\Event\JwtAuthEvents;
 use Drupal\jwt\Authentication\Event\JwtAuthGenerateEvent;
 use Drupal\jwt\Authentication\Event\JwtAuthValidateEvent;
 use Drupal\jwt\Authentication\Event\JwtAuthValidEvent;
-use Drupal\jwt\Authentication\Event\JwtAuthEvents;
 use Drupal\jwt\JsonWebToken\JsonWebToken;
-use Drupal\Core\Authentication\AuthenticationProviderInterface;
+use Drupal\jwt\Transcoder\JwtDecodeException;
+use Drupal\jwt\Transcoder\JwtTranscoderInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -33,19 +35,41 @@ class JwtAuth implements AuthenticationProviderInterface {
   protected $eventDispatcher;
 
   /**
+   * The site settings.
+   *
+   * @var \Drupal\Core\Site\Settings
+   */
+  protected $settings;
+
+  /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $loggerChannel;
+
+  /**
    * Constructs a HTTP basic authentication provider object.
    *
    * @param \Drupal\jwt\Transcoder\JwtTranscoderInterface $transcoder
    *   The jwt transcoder service.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher service.
+   * @param \Drupal\Core\Site\Settings $settings
+   *   The site settings.
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   *   The logger channel factory.
    */
   public function __construct(
     JwtTranscoderInterface $transcoder,
-    EventDispatcherInterface $event_dispatcher
+    EventDispatcherInterface $event_dispatcher,
+    Settings $settings,
+    LoggerChannelInterface $logger
   ) {
     $this->transcoder = $transcoder;
     $this->eventDispatcher = $event_dispatcher;
+    $this->settings = $settings;
+    $this->loggerChannel = $logger;
   }
 
   /**
@@ -66,7 +90,7 @@ class JwtAuth implements AuthenticationProviderInterface {
       $jwt = $this->transcoder->decode($raw_jwt);
     }
     catch (JwtDecodeException $e) {
-      return NULL;
+      return $this->debugLog('JWT decode exception', $e);
     }
 
     $validate = new JwtAuthValidateEvent($jwt);
@@ -126,6 +150,31 @@ class JwtAuth implements AuthenticationProviderInterface {
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Log the reason that a JWT could not be used to authenticate.
+   *
+   * @param string $cause
+   *   The cause.
+   * @param \Exception|null $e
+   *   The caught exception.
+   * @param \StdClass|null $payload
+   *   The payload (claims) from the JWT.
+   *
+   * @return null
+   *   NULL to be returned instead of a user.
+   */
+  protected function debugLog($cause, \Exception $e = NULL, \StdClass $payload = NULL) {
+    if ($this->settings::get('jwt.debug_log')) {
+      $this->loggerChannel
+        ->error('Error authenticating with a JWT "%cause". Exception: "%exception" Payload: "%payload"', [
+          '%cause' => $cause,
+          '%exception' => $e ? get_class($e) . ' ' . $e->getMessage() : 'null',
+          '%payload' => $payload ? var_export($payload, TRUE) : 'null',
+        ]);
+    }
+    return NULL;
   }
 
 }

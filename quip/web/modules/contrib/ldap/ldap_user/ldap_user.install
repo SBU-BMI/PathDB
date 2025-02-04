@@ -5,7 +5,7 @@
  * Install, update and uninstall functions for the LDAP User module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Database\Database;
@@ -215,7 +215,7 @@ function ldap_user_update_8307() {
 
     default:
     case 4:
-      $value = LdapUserAttributesInterface::ACCOUNT_CREATION_LDAP_BEHAVIOUR;
+      $value = LdapUserAttributesInterface::ACCOUNT_CREATION_LDAP_BEHAVIOR;
       break;
   }
   $config->set('acctCreation', $value);
@@ -315,4 +315,111 @@ function ldap_user_update_8402() {
     $field_storage_definition = $manager->getFieldStorageDefinition($field, 'user');
     $manager->updateFieldStorageDefinition($field_storage_definition);
   }
+}
+
+/**
+ * Adds settings for orphan processing to include disabled users.
+ */
+function ldap_user_update_8407() {
+  // Clear all cache.
+  \Drupal::cache()->deleteAll();
+
+  $settings = \Drupal::configFactory()->getEditable('ldap_user.settings');
+  $settings->set('orphanedIncludeDisabledUsers', FALSE);
+  $settings->set('userUpdateOnly', FALSE);
+  $settings->save();
+}
+
+/**
+ * Fix account creation setting spelling and Drupal mappings.
+ */
+function ldap_user_update_8408() {
+  $settings = \Drupal::configFactory()->getEditable('ldap_user.settings');
+  /* cSpell:ignore behaviour */
+  if ($settings->get('acctCreation') === 'ldap_behaviour') {
+    $settings->set('acctCreation', 'ldap_behavior');
+    $settings->save();
+  }
+
+  $provision_server = $settings->get('drupalAcctProvisionServer');
+  if (empty($provision_server)) {
+    return;
+  }
+  $server = \Drupal::entityTypeManager()
+    ->getStorage('ldap_server')
+    ->load($provision_server);
+
+  if (empty($server)) {
+    return;
+  }
+
+  $drupal_mapping = $settings->get('ldapUserSyncMappings.drupal') ?? [];
+  // Regex to match the '[' at beginning of string.
+  $regex_begin = '/^\[/';
+  // Regex to match the ']' at end of string.
+  $regex_end = '/\]$/';
+
+  $update_server = FALSE;
+  $update_settings = FALSE;
+  $mail_attr = $server->get('mail_attr');
+  $mail_mapping = $settings->get('ldapUserSyncMappings.drupal.field-mail');
+  $update_mail_attr = empty($mail_attr) && !empty($mail_mapping);
+  if ($update_mail_attr) {
+    $ldap_mail = $mail_mapping['ldap_attr'];
+    $ldap_mail = preg_replace($regex_begin, '', $ldap_mail);
+    $ldap_mail = preg_replace($regex_end, '', $ldap_mail);
+    $server->set('mail_attr', $ldap_mail);
+    $update_server = TRUE;
+    $update_settings = TRUE;
+    unset($drupal_mapping['field-mail']);
+    $settings->set('ldapUserSyncMappings.drupal', $drupal_mapping);
+  }
+
+  $user_attr = $server->get('user_attr');
+  $account_name_attr = $server->get('account_name_attr');
+  $user_mapping = $settings->get('ldapUserSyncMappings.drupal.field-name');
+
+  $update_user_attr = empty($user_attr) && !empty($user_mapping);
+  $update_account_name_attr = !empty($user_attr) && !empty($user_mapping) && empty($account_name_attr) && $mail_mapping['ldap_attr'] !== $user_attr;
+
+  if ($update_user_attr) {
+    $ldap_name = $user_mapping['ldap_attr'];
+    $ldap_name = preg_replace($regex_begin, '', $ldap_name);
+    $ldap_name = preg_replace($regex_end, '', $ldap_name);
+    $server->set('user_attr', $ldap_name);
+    $update_server = TRUE;
+    $update_settings = TRUE;
+    unset($drupal_mapping['field-name']);
+  }
+  elseif ($update_account_name_attr) {
+    $ldap_name = $user_mapping['ldap_attr'];
+    $ldap_name = preg_replace($regex_begin, '', $ldap_name);
+    $ldap_name = preg_replace($regex_end, '', $ldap_name);
+    $server->set('account_name_attr', $ldap_name);
+    $update_server = TRUE;
+    $update_settings = TRUE;
+    unset($drupal_mapping['field-name']);
+  }
+
+  $old_fields = [
+    'field-mail',
+    'field-name',
+    'field-pass',
+    'field-status',
+  ];
+  foreach ($old_fields as $old_field) {
+    if (array_key_exists($old_field, $drupal_mapping)) {
+      unset($drupal_mapping[$old_field]);
+      $update_settings = TRUE;
+    }
+  }
+
+  if ($update_server) {
+    $server->save();
+  }
+  if ($update_settings) {
+    $settings->set('ldapUserSyncMappings.drupal', $drupal_mapping);
+    $settings->save();
+  }
+
 }

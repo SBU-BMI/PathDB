@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_user\Kernel;
 
@@ -64,9 +64,11 @@ class LdapEntryProvisionTest extends KernelTestBase {
   public function setUp(): void {
     parent::setUp();
 
-    $this->installSchema('system', 'sequences');
     $this->installEntitySchema('user');
     $this->installSchema('externalauth', 'authmap');
+    if (version_compare(\Drupal::VERSION, '10.2.0', '<')) {
+      $this->installSchema('system', 'sequences');
+    }
 
     $server = Server::create([
       'id' => 'test',

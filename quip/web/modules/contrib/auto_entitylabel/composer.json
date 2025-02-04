@@ -21,6 +21,7 @@
     }
   }],
   "require-dev": {
-    "drupal/token": "^1.0"
+    "drupal/token": "^1.0",
+    "drupal/book": "^1.0"
   }
 }

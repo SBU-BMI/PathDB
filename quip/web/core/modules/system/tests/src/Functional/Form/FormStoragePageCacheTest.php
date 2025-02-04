@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Form;
 
 use Drupal\Tests\BrowserTestBase;
@@ -35,7 +37,7 @@ class FormStoragePageCacheTest extends BrowserTestBase {
   /**
    * Return the build id of the current form.
    */
-  protected function getFormBuildId() {
+  protected function getFormBuildId(): string {
     // Ensure the hidden 'form_build_id' field is unique.
     $this->assertSession()->elementsCount('xpath', '//input[@name="form_build_id"]', 1);
     return (string) $this->assertSession()->hiddenFieldExists('form_build_id')->getAttribute('value');
@@ -44,7 +46,7 @@ class FormStoragePageCacheTest extends BrowserTestBase {
   /**
    * Build-id is regenerated when validating cached form.
    */
-  public function testValidateFormStorageOnCachedPage() {
+  public function testValidateFormStorageOnCachedPage(): void {
     $this->drupalGet('form-test/form-storage-page-cache');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'MISS');
     $this->assertSession()->pageTextContains('No old build id');
@@ -90,7 +92,7 @@ class FormStoragePageCacheTest extends BrowserTestBase {
   /**
    * Build-id is regenerated when rebuilding cached form.
    */
-  public function testRebuildFormStorageOnCachedPage() {
+  public function testRebuildFormStorageOnCachedPage(): void {
     $this->drupalGet('form-test/form-storage-page-cache');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', 'MISS');
     $this->assertSession()->pageTextContains('No old build id');

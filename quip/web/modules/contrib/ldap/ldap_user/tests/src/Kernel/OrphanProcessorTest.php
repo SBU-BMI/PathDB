@@ -57,7 +57,9 @@ class OrphanProcessorTest extends EntityKernelTestBase {
     );
     $bridge->setServer($this->server);
     $collection = ['(cn=hpotter)' => new FakeCollection([])];
-    $bridge->get()->setQueryResult($collection);
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
+    $ldap = $bridge->get();
+    $ldap->setQueryResult($collection);
     $bridge->setBindResult(TRUE);
     $this->container->set('ldap.bridge', $bridge);
   }

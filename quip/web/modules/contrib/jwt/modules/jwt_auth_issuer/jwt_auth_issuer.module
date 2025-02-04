@@ -5,6 +5,7 @@
  * Contains jwt_auth_issuer.module..
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -19,4 +20,43 @@ function jwt_auth_issuer_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<p>' . t('Provides an endpoint which will issue JWTs.') . '</p>';
       return $output;
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function jwt_auth_issuer_form_jwt_config_form_alter(&$form, FormStateInterface $form_state) {
+  $form['jwt_auth_issuer'] = [
+    '#type' => 'details',
+    '#title' => t('JWT Auth issuer settings'),
+    '#weight' => 20,
+    '#tree' => TRUE,
+    '#open' => TRUE,
+  ];
+  $form['jwt_auth_issuer']['jwt_in_login_response'] = [
+    '#type' => 'checkbox',
+    '#default_value' => \Drupal::configFactory()
+      ->getEditable('jwt_auth_issuer.config')
+      ->get('jwt_in_login_response'),
+    '#title' => t('Include a JWT token in the user login response.'),
+    '#weight' => 20,
+  ];
+
+  $form['#submit'][] = '_jwt_auth_issuer_form_jwt_config_form_submit';
+}
+
+/**
+ * Form submission handler.
+ *
+ * @see jwt_auth_issuer_form_jwt_config_form_alter()
+ */
+function _jwt_auth_issuer_form_jwt_config_form_submit($form, FormStateInterface $form_state) {
+  $value = (bool) $form_state->getValue([
+    'jwt_auth_issuer',
+    'jwt_in_login_response',
+  ]);
+  \Drupal::configFactory()
+    ->getEditable('jwt_auth_issuer.config')
+    ->set('jwt_in_login_response', $value)
+    ->save();
 }

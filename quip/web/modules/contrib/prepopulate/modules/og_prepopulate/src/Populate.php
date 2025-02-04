@@ -36,22 +36,23 @@ class Populate extends BasePopulate {
    *   The current user.
    */
   public function __construct(RequestStack $request, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler, AccountProxyInterface $current_user) {
-    $populator = parent::__construct($request, $entity_type_manager, $module_handler);
+    parent::__construct($request, $entity_type_manager, $module_handler);
     $this->currentUser = $current_user;
-    return $populator;
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function formatEntityAutocomplete($value, array &$element) {
+  protected function formatEntityAutocomplete($value, array &$element): string {
     $entity = $this->entityTypeManager
       ->getStorage($element['#target_type'])
       ->load($value);
     if ($entity && Og::isMember($entity, $this->currentUser->getAccount())) {
       $element['#value'] = "{$entity->label()} ($value)";
       $element['#access'] = FALSE;
+      return "{$entity->label()} ($value)";
     }
+    return $value;
   }
 
 }

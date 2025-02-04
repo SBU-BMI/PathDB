@@ -1,24 +1,24 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\externalauth\Authmap;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use function in_array;
 
 /**
  * A form to allow the administrator to query LDAP.
  */
-class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
+final class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
 
   /**
    * Sync Trigger Options.
@@ -88,7 +88,7 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
     LdapUserManager $ldap_user_manager,
     EntityTypeManagerInterface $entity_type_manager,
     Authmap $external_auth,
-    DrupalUserProcessor $drupal_user_processor
+    DrupalUserProcessor $drupal_user_processor,
   ) {
     $this->request = $request_stack->getCurrentRequest();
     $this->ldapUserManager = $ldap_user_manager;
@@ -110,7 +110,7 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): LdapUserTestForm {
-    return new static(
+    return new self(
       $container->get('request_stack'),
       $container->get('ldap.user_manager'),
       $container->get('entity_type.manager'),
@@ -157,6 +157,17 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
       '#weight' => 100,
     ];
 
+    if ($form_state->has('ldap_user_test_data')) {
+      $test_data = $form_state->get('ldap_user_test_data');
+      $form['test_data'] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('Test Results'),
+        '#rows' => 20,
+        '#default_value' => \json_encode($test_data, JSON_PRETTY_PRINT),
+        '#weight' => 200,
+      ];
+    }
+
     return $form;
   }
 
@@ -189,8 +200,9 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
       ->loadByProperties(['name' => $username]);
     $existingAccount = $existingAccount ? reset($existingAccount) : FALSE;
     if ($existingAccount) {
+      $user_id = (int) $existingAccount->id();
       $results['user entity (before provisioning or syncing)'] = $existingAccount->toArray();
-      $results['User Authmap'] = $this->externalAuth->get($existingAccount->id(), 'ldap_user');
+      $results['User Authmap'] = $this->externalAuth->get($user_id, 'ldap_user');
     }
     else {
       $results['User Authmap'] = 'No authmaps available.  Authmaps only shown if user account exists beforehand';
@@ -227,20 +239,8 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
       }
     }
 
-    if (\function_exists('kint')) {
-      // @phpcs:ignore
-      kint($results);
-    }
-    else {
-      $this->messenger()
-        ->addWarning($this->t('This form will not display results unless the devel and kint module is enabled.'));
-    }
-
-    $params = [
-      'action' => $selected_action,
-      'username' => $username,
-    ];
-    $form_state->setRedirectUrl(Url::fromRoute('ldap_user.test_form', $params));
+    $form_state->set('ldap_user_test_data', $results);
+    $form_state->setRebuild();
   }
 
   /**
@@ -262,10 +262,10 @@ class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
 
     $config = $this->configFactory()->get('ldap_user.settings');
     if ($direction === self::PROVISION_TO_LDAP) {
-      $result = \in_array($provision_trigger, $config->get('ldapEntryProvisionTriggers'), TRUE);
+      $result = in_array($provision_trigger, $config->get('ldapEntryProvisionTriggers'), TRUE);
     }
     elseif ($direction === self::PROVISION_TO_DRUPAL) {
-      $result = \in_array($provision_trigger, $config->get('drupalAcctProvisionTriggers'), TRUE);
+      $result = in_array($provision_trigger, $config->get('drupalAcctProvisionTriggers'), TRUE);
     }
 
     return $result;

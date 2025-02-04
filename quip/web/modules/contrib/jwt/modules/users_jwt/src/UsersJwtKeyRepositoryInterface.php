@@ -2,6 +2,8 @@
 
 namespace Drupal\users_jwt;
 
+use Firebase\JWT\Key;
+
 /**
  * Interface UsersJwtKeyRepositoryInterface.
  *
@@ -82,10 +84,9 @@ interface UsersJwtKeyRepositoryInterface extends \ArrayAccess {
    * @param string $id
    *   A key ID.
    *
-   * @return string|null
+   * @return \Firebase\JWT\Key|null
    *   The public key for a key ID, or null if there is no such key.
    */
-  #[\ReturnTypeWillChange]
-  public function offsetGet($id): ?string;
+  public function offsetGet($id): ?Key;
 
 }

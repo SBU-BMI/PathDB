@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_servers\Unit;
 
@@ -41,6 +41,34 @@ class CredentialsStorageTest extends UnitTestCase {
     CredentialsStorage::storeUserPassword(NULL);
     $this->assertEquals(NULL, CredentialsStorage::getUserDn());
     $this->assertEquals(NULL, CredentialsStorage::getPassword());
+  }
+
+  /**
+   * Test the testCredentials.
+   */
+  public function testTestCredentialsTrue(): void {
+    $user = 'my-user';
+    $password = 'my-pass';
+
+    CredentialsStorage::storeUserDn($user);
+    CredentialsStorage::storeUserPassword($password);
+
+    CredentialsStorage::testCredentials(TRUE);
+    $this->assertTrue(CredentialsStorage::validateCredentials());
+  }
+
+  /**
+   * Test the testCredentials.
+   */
+  public function testTestCredentialsFalse(): void {
+    $user = 'my-user';
+    $password = 'my-pass';
+
+    CredentialsStorage::storeUserDn($user);
+    CredentialsStorage::storeUserPassword($password);
+
+    CredentialsStorage::testCredentials(FALSE);
+    $this->assertFalse(CredentialsStorage::validateCredentials());
   }
 
 }

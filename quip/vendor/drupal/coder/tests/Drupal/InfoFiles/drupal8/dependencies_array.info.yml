@@ -1,4 +1,0 @@
-core: 8.x
-name: Dependencies Array Test
-dependencies : 
-  drupal:taxonomy

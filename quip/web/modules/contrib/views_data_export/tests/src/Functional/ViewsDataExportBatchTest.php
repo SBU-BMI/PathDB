@@ -2,12 +2,11 @@
 
 namespace Drupal\Tests\views_data_export\Functional;
 
-use Drupal\csv_serialization\Encoder\CsvEncoder;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\search_api\Functional\ExampleContentTrait;
 use Drupal\Tests\views\Functional\ViewTestBase;
-use Drupal\views\Tests\ViewTestData;
+use Drupal\csv_serialization\Encoder\CsvEncoder;
 
 /**
  * Tests views data export with batch.
@@ -91,7 +90,7 @@ class ViewsDataExportBatchTest extends ViewTestBase {
     $this->assertEquals(200, $this->getSession()->getStatusCode(), 'File was not created');
 
     // By this view we obtain file right after batch process finished.
-    // @todo - make separate FunctionalJavascript test to check automatic fetching.
+    // @todo make separate FunctionalJavascript test to check automatic fetching.
     $this->drupalGet('views_data_export/test_2');
     $this->assertSession()->pageTextContainsOnce('automatically downloaded');
 

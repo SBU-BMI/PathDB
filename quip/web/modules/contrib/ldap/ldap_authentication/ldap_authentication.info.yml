@@ -1,7 +1,7 @@
 name: 'LDAP Authentication'
 description: 'Implements LDAP authentication'
 type: module
-core_version_requirement: '^9.3 || ^10'
+core_version_requirement: ^9.3 || ^10 || ^11
 package: 'Lightweight Directory Access Protocol'
 dependencies:
   - ldap:ldap_servers
@@ -10,7 +10,7 @@ dependencies:
 
 configure: ldap_authentication.admin_form
 
-# Information added by Drupal.org packaging script on 2023-10-20
-version: '8.x-4.5'
+# Information added by Drupal.org packaging script on 2024-09-18
+version: '8.x-4.12'
 project: 'ldap'
-datestamp: 1697822898
+datestamp: 1726683621

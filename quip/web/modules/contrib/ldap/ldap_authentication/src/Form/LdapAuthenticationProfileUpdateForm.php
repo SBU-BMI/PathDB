@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_authentication\Form;
 
@@ -15,10 +15,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Profile update form.
  *
  * This form is meant to presented to the user if the LDAP account does not
- * have an e-mail address associated with it and we need it for Drupal
+ * have an email address associated with it and we need it for Drupal
  * to function correctly, thus we ask the user.
  */
-class LdapAuthenticationProfileUpdateForm extends FormBase {
+final class LdapAuthenticationProfileUpdateForm extends FormBase {
 
   /**
    * Current user.
@@ -58,7 +58,7 @@ class LdapAuthenticationProfileUpdateForm extends FormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): LdapAuthenticationProfileUpdateForm {
-    return new static(
+    return new self(
       $container->get('current_user'),
       $container->get('entity_type.manager')
     );

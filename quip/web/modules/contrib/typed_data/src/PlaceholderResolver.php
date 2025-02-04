@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\typed_data;
 
 use Drupal\Component\Render\HtmlEscapedText;
@@ -45,7 +47,7 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
   /**
    * {@inheritdoc}
    */
-  public function resolvePlaceholders($text, array $data = [], BubbleableMetadata $bubbleable_metadata = NULL, array $options = []) {
+  public function resolvePlaceholders(string $text, array $data = [], ?BubbleableMetadata $bubbleable_metadata = NULL, array $options = []): array {
     $options += [
       'langcode' => NULL,
       'clear' => FALSE,
@@ -62,7 +64,7 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
           if (!isset($data[$data_name])) {
             throw new MissingDataException("There is no data with the name '$data_name' available.");
           }
-          list ($property_sub_paths, $filters) = $this->parseMainPlaceholderPart($placeholder_main_part, $placeholder);
+          [$property_sub_paths, $filters] = $this->parseMainPlaceholderPart($placeholder_main_part, $placeholder);
           $fetched_data = $this->dataFetcher->fetchDataBySubPaths($data[$data_name], $property_sub_paths, $bubbleable_metadata, $options['langcode']);
 
           // Apply filters.
@@ -70,7 +72,7 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
             $value = $fetched_data->getValue();
             $definition = $fetched_data->getDataDefinition();
             foreach ($filters as $filter_data) {
-              list($filter_id, $arguments) = $filter_data;
+              [$filter_id, $arguments] = $filter_data;
               $filter = $this->dataFilterManager->createInstance($filter_id);
               if (!$filter->allowsNullValues() && !isset($value)) {
                 throw new MissingDataException("There is no data value for filter '$filter_id' to work on.");
@@ -123,7 +125,7 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
    * @throws \Drupal\typed_data\Exception\InvalidArgumentException
    *   Thrown if in invalid placeholders are to be parsed.
    */
-  protected function parseMainPlaceholderPart($main_part, $placeholder) {
+  protected function parseMainPlaceholderPart(string $main_part, string $placeholder): array {
     if (!$main_part) {
       return [[], []];
     }
@@ -147,13 +149,13 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
       \)             # ) - pattern end
       /x', $expression, $matches);
 
-      $filter_id = isset($matches[1][0]) ? $matches[1][0] : $expression;
+      $filter_id = $matches[1][0] ?? $expression;
       // Be sure to remove all whitespaces.
       $filter_id = str_replace(' ', '', $filter_id);
       $args = array_map(function ($arg) {
         // Remove surrounding whitespaces and then quotes.
         return trim(trim($arg), "'");
-      }, explode(',', isset($matches[2][0]) ? $matches[2][0] : ''));
+      }, explode(',', $matches[2][0] ?? ''));
 
       $filters[] = [$filter_id, $args];
     }
@@ -163,7 +165,7 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
   /**
    * {@inheritdoc}
    */
-  public function replacePlaceHolders($text, array $data = [], BubbleableMetadata $bubbleable_metadata = NULL, array $options = []) {
+  public function replacePlaceHolders(string $text, array $data = [], ?BubbleableMetadata $bubbleable_metadata = NULL, array $options = []): string {
     $replacements = $this->resolvePlaceholders($text, $data, $bubbleable_metadata, $options);
 
     $placeholders = array_keys($replacements);
@@ -175,7 +177,7 @@ class PlaceholderResolver implements PlaceholderResolverInterface {
   /**
    * {@inheritdoc}
    */
-  public function scan($text) {
+  public function scan(string $text): array {
     // Matches tokens with the following pattern: {{ $name.$property_path }}
     // $name and $property_path may not contain { or } characters.
     // $name may not contain . or whitespace characters, but $property_path may.

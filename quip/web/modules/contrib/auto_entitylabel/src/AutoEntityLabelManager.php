@@ -2,14 +2,14 @@
 
 namespace Drupal\auto_entitylabel;
 
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Utility\Token;
-use Drupal\Component\Utility\Html;
 
 /**
  * Class for Auto Entity Label Manager.
@@ -36,6 +36,22 @@ class AutoEntityLabelManager implements AutoEntityLabelManagerInterface {
    * Automatic label is prefilled.
    */
   const PREFILLED = 3;
+
+  /**
+   * Create the automatic label before the first save.
+   *
+   * Only applies to new entities (for existing entities the label is always
+   * created before the first save).
+   */
+  const BEFORE_SAVE = 0;
+
+  /**
+   * Create the automatic label after the first save.
+   *
+   * Only applies to new entities (for existing entities the label is always
+   * created before the first save).
+   */
+  const AFTER_SAVE = 1;
 
   /**
    * The content entity.
@@ -126,7 +142,7 @@ class AutoEntityLabelManager implements AutoEntityLabelManagerInterface {
     ConfigFactoryInterface $config_factory,
     EntityTypeManagerInterface $entity_type_manager,
     Token $token,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
   ) {
     $this->entity = $entity;
     $this->entityType = $entity->getEntityType()->id();
@@ -359,6 +375,18 @@ class AutoEntityLabelManager implements AutoEntityLabelManagerInterface {
     }
 
     return $label;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNewContentBehavior() {
+    $behavior = $this->getConfig('new_content_behavior');
+    // Set the default to AFTER_SAVE. Preserves the original module behavior.
+    if ($behavior == NULL) {
+      return self::BEFORE_SAVE;
+    }
+    return $behavior;
   }
 
   /**

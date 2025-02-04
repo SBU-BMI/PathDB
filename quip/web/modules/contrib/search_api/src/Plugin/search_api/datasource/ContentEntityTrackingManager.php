@@ -24,6 +24,13 @@ use Drupal\search_api\Utility\Utility;
 class ContentEntityTrackingManager {
 
   /**
+   * The base ID of the datasources handled by this class.
+   *
+   * Can be overridden by subclasses to provide support for related datasources.
+   */
+  protected const DATASOURCE_BASE_ID = 'entity';
+
+  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -58,6 +65,23 @@ class ContentEntityTrackingManager {
     $this->entityTypeManager = $entityTypeManager;
     $this->languageManager = $languageManager;
     $this->taskManager = $taskManager;
+  }
+
+  /**
+   * Computes the item ID for the given entity and language.
+   *
+   * @param string $entity_type
+   *   The entity type ID.
+   * @param string|int $entity_id
+   *   The entity ID.
+   * @param string $langcode
+   *   The language ID of the entity.
+   *
+   * @return string
+   *   The datasource-specific item ID.
+   */
+  public static function formatItemId(string $entity_type, string|int $entity_id, string $langcode): string {
+    return ContentEntity::formatItemId($entity_type, $entity_id, $langcode);
   }
 
   /**
@@ -147,9 +171,9 @@ class ContentEntityTrackingManager {
     $inserted_translations = array_diff($new_translations, $old_translations);
     $updated_translations = array_diff($new_translations, $inserted_translations);
 
-    $datasource_id = 'entity:' . $entity->getEntityTypeId();
-    $get_ids = function (string $langcode) use ($entity_id): string {
-      return $entity_id . ':' . $langcode;
+    $datasource_id = static::DATASOURCE_BASE_ID . ':' . $entity->getEntityTypeId();
+    $get_ids = function (string $langcode) use ($entity): string {
+      return static::formatItemId($entity->getEntityTypeId(), $entity->id(), $langcode);
     };
     $inserted_ids = array_map($get_ids, $inserted_translations);
     $updated_ids = array_map($get_ids, $updated_translations);
@@ -210,9 +234,9 @@ class ContentEntityTrackingManager {
     $item_ids = [];
     $entity_id = $entity->id();
     foreach (array_keys($entity->getTranslationLanguages()) as $langcode) {
-      $item_ids[] = $entity_id . ':' . $langcode;
+      $item_ids[] = static::formatItemId($entity->getEntityTypeId(), $entity_id, $langcode);
     }
-    $datasource_id = 'entity:' . $entity->getEntityTypeId();
+    $datasource_id = static::DATASOURCE_BASE_ID . ':' . $entity->getEntityTypeId();
     foreach ($indexes as $index) {
       $index->trackItemsDeleted($datasource_id, $item_ids);
     }
@@ -231,7 +255,7 @@ class ContentEntityTrackingManager {
   public function getIndexesForEntity(ContentEntityInterface $entity): array {
     // @todo This is called for every single entity insert, update or deletion
     //   on the whole site. Should maybe be cached?
-    $datasource_id = 'entity:' . $entity->getEntityTypeId();
+    $datasource_id = static::DATASOURCE_BASE_ID . ':' . $entity->getEntityTypeId();
     $entity_bundle = $entity->bundle();
     $has_bundles = $entity->getEntityType()->hasKey('bundle');
 
@@ -241,8 +265,7 @@ class ContentEntityTrackingManager {
       $indexes = $this->entityTypeManager->getStorage('search_api_index')
         ->loadMultiple();
     }
-    // @todo Remove $e once we depend on PHP 8.0+.
-    catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+    catch (InvalidPluginDefinitionException | PluginNotFoundException) {
       // Can't really happen, but play it safe to appease static code analysis.
     }
 
@@ -257,7 +280,7 @@ class ContentEntityTrackingManager {
         try {
           $config = $index->getDatasource($datasource_id)->getConfiguration();
         }
-        catch (SearchApiException $e) {
+        catch (SearchApiException) {
           // Can't really happen, but play it safe to appease static code
           // analysis.
           unset($indexes[$index_id]);
@@ -299,7 +322,7 @@ class ContentEntityTrackingManager {
     }
 
     foreach ($index->getDatasources() as $datasource_id => $datasource) {
-      if ($datasource->getBaseId() != 'entity'
+      if ($datasource->getBaseId() != static::DATASOURCE_BASE_ID
           || !$original->isValidDatasource($datasource_id)) {
         continue;
       }
@@ -397,7 +420,7 @@ class ContentEntityTrackingManager {
     try {
       $config = $index->getDatasource($datasource_id)->getConfiguration();
     }
-    catch (SearchApiException $e) {
+    catch (SearchApiException) {
       // Can't really happen, but play it safe to appease static code analysis.
       return $item_ids;
     }

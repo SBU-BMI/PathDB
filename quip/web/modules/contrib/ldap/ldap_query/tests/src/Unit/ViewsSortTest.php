@@ -28,7 +28,7 @@ class ViewsSortTest extends UnitTestCase {
     parent::setUp();
     $this->view = $this->getMockBuilder(LdapQuery::class)
       ->disableOriginalConstructor()
-      ->setMethodsExcept(['addOrderBy', 'sortResults'])
+      ->onlyMethods([])
       ->getMock();
   }
 

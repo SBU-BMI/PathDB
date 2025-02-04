@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -76,7 +76,7 @@ abstract class LdapBaseManager {
     LoggerInterface $logger,
     EntityTypeManagerInterface $entity_type_manager,
     LdapBridgeInterface $ldap_bridge,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
   ) {
     $this->logger = $logger;
     $this->entityTypeManager = $entity_type_manager;
@@ -203,7 +203,7 @@ abstract class LdapBaseManager {
    *
    * @param string $filter
    *   The search filter, such as sAMAccountName=jbarclay. Attribute values
-   *   (e.g. jbarclay) should be esacaped before calling.
+   *   (e.g. jbarclay) should be escaped before calling.
    * @param array $attributes
    *   List of desired attributes. If omitted, we only return "dn".
    *

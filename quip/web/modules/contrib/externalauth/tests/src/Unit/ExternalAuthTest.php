@@ -3,9 +3,9 @@
 namespace Drupal\Tests\externalauth\Unit;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\externalauth\ExternalAuth;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
-use Drupal\externalauth\ExternalAuth;
 
 /**
  * ExternalAuth unit tests.
@@ -21,21 +21,21 @@ class ExternalAuthTest extends UnitTestCase {
   /**
    * The mocked entity type manager service.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $entityTypeManager;
 
   /**
    * The mocked authmap service.
    *
-   * @var \Drupal\externalauth\AuthmapInterface|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Drupal\externalauth\AuthmapInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $authmap;
 
   /**
    * The mocked logger instance.
    *
-   * @var \Psr\Log\LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+   * @var \Psr\Log\LoggerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $logger;
 
@@ -49,7 +49,7 @@ class ExternalAuthTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create a mock EntityTypeManager object.
@@ -82,12 +82,12 @@ class ExternalAuthTest extends UnitTestCase {
     // mocking getUid() method.
     $authmap = $this->getMockBuilder('\Drupal\externalauth\Authmap')
       ->disableOriginalConstructor()
-      ->setMethods(['getUid'])
+      ->onlyMethods(['getUid'])
       ->getMock();
 
     $authmap->expects($this->once())
       ->method('getUid')
-      ->will($this->returnValue(2));
+      ->willReturn(2);
 
     // Mock the User storage layer.
     $account = $this->createMock('Drupal\user\UserInterface');
@@ -95,10 +95,10 @@ class ExternalAuthTest extends UnitTestCase {
     // Expect the external loading method to return a user object.
     $entity_storage->expects($this->once())
       ->method('load')
-      ->will($this->returnValue($account));
+      ->willReturn($account);
     $this->entityTypeManager->expects($this->once())
       ->method('getStorage')
-      ->will($this->returnValue($entity_storage));
+      ->willReturn($entity_storage);
 
     $externalauth = new ExternalAuth(
       $this->entityTypeManager,
@@ -120,7 +120,7 @@ class ExternalAuthTest extends UnitTestCase {
     // Set up a mock for ExternalAuth class,
     // mocking load() & userLoginFinalize() methods.
     $externalauth = $this->getMockBuilder('Drupal\externalauth\ExternalAuth')
-      ->setMethods(['load', 'userLoginFinalize'])
+      ->onlyMethods(['load', 'userLoginFinalize'])
       ->setConstructorArgs([
         $this->entityTypeManager,
         $this->authmap,
@@ -132,7 +132,7 @@ class ExternalAuthTest extends UnitTestCase {
     // Mock load method.
     $externalauth->expects($this->once())
       ->method('load')
-      ->will($this->returnValue(FALSE));
+      ->willReturn(FALSE);
 
     // Expect userLoginFinalize() to not be called.
     $externalauth->expects($this->never())
@@ -159,26 +159,26 @@ class ExternalAuthTest extends UnitTestCase {
       ->method('save');
     $account->expects($this->any())
       ->method('getTimeZone')
-      ->will($this->returnValue($expected_data['timezone']));
+      ->willReturn($expected_data['timezone']);
 
     // Mock the User storage layer to create a new user.
     $entity_storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
     // Expect the external registration to return us a user object.
     $entity_storage->expects($this->any())
       ->method('create')
-      ->will($this->returnValue($account));
+      ->willReturn($account);
     $entity_storage->expects($this->any())
       ->method('loadByProperties')
-      ->will($this->returnValue([]));
+      ->willReturn([]);
     $this->entityTypeManager->expects($this->any())
       ->method('getStorage')
-      ->will($this->returnValue($entity_storage));
+      ->willReturn($entity_storage);
 
     // Set up a mock for Authmap class,
     // mocking getUid() method.
     $authmap = $this->getMockBuilder('\Drupal\externalauth\Authmap')
       ->disableOriginalConstructor()
-      ->setMethods(['save'])
+      ->onlyMethods(['save'])
       ->getMock();
 
     $authmap->expects($this->once())
@@ -190,17 +190,17 @@ class ExternalAuthTest extends UnitTestCase {
 
     $dispatched_event->expects($this->any())
       ->method('getUsername')
-      ->will($this->returnValue($expected_data['username']));
+      ->willReturn($expected_data['username']);
     $dispatched_event->expects($this->any())
       ->method('getAuthname')
-      ->will($this->returnValue($expected_data['authname']));
+      ->willReturn($expected_data['authname']);
     $dispatched_event->expects($this->any())
       ->method('getData')
-      ->will($this->returnValue($expected_data['data']));
+      ->willReturn($expected_data['data']);
 
     $this->eventDispatcher->expects($this->any())
       ->method('dispatch')
-      ->will($this->returnValue($dispatched_event));
+      ->willReturn($dispatched_event);
 
     $externalauth = new ExternalAuth(
       $this->entityTypeManager,
@@ -220,7 +220,7 @@ class ExternalAuthTest extends UnitTestCase {
    * @return array
    *   Parameters
    */
-  public function registerDataProvider() {
+  public static function registerDataProvider(): array {
     return [
       // Test basic registration.
       [
@@ -282,7 +282,7 @@ class ExternalAuthTest extends UnitTestCase {
     // Set up a mock for ExternalAuth class,
     // mocking login(), register() & userLoginFinalize() methods.
     $externalauth = $this->getMockBuilder('Drupal\externalauth\ExternalAuth')
-      ->setMethods(['login', 'register', 'userLoginFinalize'])
+      ->onlyMethods(['login', 'register', 'userLoginFinalize'])
       ->setConstructorArgs([
         $this->entityTypeManager,
         $this->authmap,
@@ -294,13 +294,13 @@ class ExternalAuthTest extends UnitTestCase {
     // Mock ExternalAuth methods.
     $externalauth->expects($this->once())
       ->method('login')
-      ->will($this->returnValue(FALSE));
+      ->willReturn(FALSE);
     $externalauth->expects($this->once())
       ->method('register')
-      ->will($this->returnValue($account));
+      ->willReturn($account);
     $externalauth->expects($this->once())
       ->method('userLoginFinalize')
-      ->will($this->returnValue($account));
+      ->willReturn($account);
 
     $result = $externalauth->loginRegister("test_authname", "test_provider");
     $this->assertInstanceOf(UserInterface::class, $result);
@@ -313,18 +313,18 @@ class ExternalAuthTest extends UnitTestCase {
     $account = $this->createMock('Drupal\user\UserInterface');
     $account->expects($this->once())
       ->method('id')
-      ->will($this->returnValue(5));
+      ->willReturn(5);
 
     // Set up a mock for Authmap class,
     // mocking get() & save() methods.
     $authmap = $this->getMockBuilder('\Drupal\externalauth\Authmap')
       ->disableOriginalConstructor()
-      ->setMethods(['save', 'get'])
+      ->onlyMethods(['save', 'get'])
       ->getMock();
 
     $authmap->expects($this->once())
       ->method('get')
-      ->will($this->returnValue(FALSE));
+      ->willReturn(FALSE);
 
     $authmap->expects($this->once())
       ->method('save');
@@ -335,17 +335,17 @@ class ExternalAuthTest extends UnitTestCase {
 
     $dispatched_event->expects($this->any())
       ->method('getUsername')
-      ->will($this->returnValue("Test username"));
+      ->willReturn("Test username");
     $dispatched_event->expects($this->any())
       ->method('getAuthname')
-      ->will($this->returnValue("Test authname"));
+      ->willReturn("Test authname");
     $dispatched_event->expects($this->any())
       ->method('getData')
-      ->will($this->returnValue("Test data"));
+      ->willReturn("Test data");
 
     $this->eventDispatcher->expects($this->any())
       ->method('dispatch')
-      ->will($this->returnValue($dispatched_event));
+      ->willReturn($dispatched_event);
 
     $externalauth = new ExternalAuth(
       $this->entityTypeManager,

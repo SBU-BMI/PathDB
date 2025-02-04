@@ -2,12 +2,12 @@
 
 namespace Drupal\jwt_path_auth\Authentication\Provider;
 
+use Drupal\Core\Authentication\AuthenticationProviderInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\PageCache\ResponsePolicy\KillSwitch;
-use Drupal\jwt\Transcoder\JwtTranscoderInterface;
 use Drupal\jwt\Transcoder\JwtDecodeException;
-use Drupal\Core\Authentication\AuthenticationProviderInterface;
+use Drupal\jwt\Transcoder\JwtTranscoderInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

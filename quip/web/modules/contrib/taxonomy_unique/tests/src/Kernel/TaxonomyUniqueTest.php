@@ -44,7 +44,9 @@ class TaxonomyUniqueTest extends KernelTestBase {
    */
   public function testDuplicateTermWithTuEnabled() {
     $vocabulary = $this->createVocabulary();
-    $GLOBALS['config']['taxonomy_unique.settings'] = [$vocabulary->id() => TRUE];
+    $vocabulary
+      ->setThirdPartySetting('taxonomy_unique', 'enabled', TRUE)
+      ->save();
 
     $t1 = $this->createTerm($vocabulary, ['name' => 'Term 1']);
     $t1_violations = $t1->validate();
@@ -66,7 +68,9 @@ class TaxonomyUniqueTest extends KernelTestBase {
    */
   public function testDuplicateTermWithTuEnabledLanguages() {
     $vocabulary = $this->createVocabulary();
-    $GLOBALS['config']['taxonomy_unique.settings'] = [$vocabulary->id() => TRUE];
+    $vocabulary
+      ->setThirdPartySetting('taxonomy_unique', 'enabled', TRUE)
+      ->save();
 
     $t1 = $this->createTerm($vocabulary, ['name' => 'Term 1', 'langcode' => 'en']);
     $t1_violations = $t1->validate();
@@ -105,9 +109,13 @@ class TaxonomyUniqueTest extends KernelTestBase {
    */
   public function testCrossVocabulary() {
     $vocabulary1 = $this->createVocabulary();
+    $vocabulary1
+      ->setThirdPartySetting('taxonomy_unique', 'enabled', TRUE)
+      ->save();
     $vocabulary2 = $this->createVocabulary();
-
-    $GLOBALS['config']['taxonomy_unique.settings'] = [$vocabulary1->id() => TRUE, $vocabulary2->id() => TRUE];
+    $vocabulary2
+      ->setThirdPartySetting('taxonomy_unique', 'enabled', TRUE)
+      ->save();
 
     $t1 = $this->createTerm($vocabulary1, ['name' => 'Term 1']);
     $t1_violations = $t1->validate();
@@ -123,7 +131,9 @@ class TaxonomyUniqueTest extends KernelTestBase {
    */
   public function testEditTerm() {
     $vocabulary = $this->createVocabulary();
-    $GLOBALS['config']['taxonomy_unique.settings'] = [$vocabulary->id() => TRUE];
+    $vocabulary
+      ->setThirdPartySetting('taxonomy_unique', 'enabled', TRUE)
+      ->save();
 
     $t1 = $this->createTerm($vocabulary, ['name' => 'Term 1']);
     $t1_violations = $t1->validate();

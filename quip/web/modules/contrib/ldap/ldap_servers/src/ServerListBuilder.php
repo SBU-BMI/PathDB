@@ -1,19 +1,57 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ldap_servers\Entity\Server;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of Server entities.
  */
 class ServerListBuilder extends ConfigEntityListBuilder {
+
+  /**
+   * The LDAP Bridge.
+   *
+   * @var \Drupal\ldap_servers\LdapBridgeInterface
+   */
+  protected $ldapBridge;
+
+  /**
+   * The Ldap Server ListBuilder.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   Entity type.
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   Entity storage.
+   * @param \Drupal\ldap_servers\LdapBridgeInterface $ldap_bridge
+   *   LDAP Bridge.
+   */
+  final public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, LdapBridgeInterface $ldap_bridge) {
+    $this->entityTypeId = $entity_type->id();
+    $this->storage = $storage;
+    $this->entityType = $entity_type;
+    $this->ldapBridge = $ldap_bridge;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    return new self(
+      $entity_type,
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('ldap.bridge')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -38,9 +76,9 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity): array {
-    /** @var \Drupal\ldap_servers\Entity\Server $entity_with_overrides */
+    /** @var \Drupal\ldap_servers\ServerInterface $entity_with_overrides */
     $entity_with_overrides = $entity;
-    /** @var \Drupal\ldap_servers\Entity\Server $entity */
+    /** @var \Drupal\ldap_servers\ServerInterface $entity */
     $entity = $this->storage->load($entity->id());
 
     $row = [];
@@ -84,12 +122,10 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    *   The status string.
    */
   private function checkStatus(Server $server): TranslatableMarkup {
-    /** @var \Drupal\ldap_servers\LdapBridge $bridge */
-    $bridge = \Drupal::service('ldap.bridge');
-    $bridge->setServer($server);
+    $this->ldapBridge->setServer($server);
 
     if ($server->get('status')) {
-      if ($bridge->bind()) {
+      if ($this->ldapBridge->bind()) {
         $result = $this->t('Server available');
       }
       else {

@@ -8,4 +8,5 @@ package: Field types
 version: '8.x-2.0'
 core: '8.x'
 project: 'computed_field'
+core_version_requirement: '8.x'
 datestamp: 1563825488

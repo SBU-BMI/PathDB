@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_query\Form;
 
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Test form for queries.
  */
-class QueryTestForm extends FormBase {
+final class QueryTestForm extends FormBase {
 
   /**
    * LDAP Query.
@@ -40,7 +40,7 @@ class QueryTestForm extends FormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): QueryTestForm {
-    return new static($container->get('ldap.query'));
+    return new self($container->get('ldap.query'));
   }
 
   /**

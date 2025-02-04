@@ -117,7 +117,7 @@ class IndexListBuilder extends ConfigEntityListBuilder {
             break;
           }
         }
-        catch (PluginException $e) {
+        catch (PluginException) {
           // This can only happen for the view, if the Views module isn't
           // installed. Ignore.
         }
@@ -169,6 +169,7 @@ class IndexListBuilder extends ConfigEntityListBuilder {
     $row = parent::buildRow($entity);
 
     $status = $entity->status();
+    $url = $entity->toUrl('canonical');
     $row = [
       'data' => [
         'type' => [
@@ -179,7 +180,9 @@ class IndexListBuilder extends ConfigEntityListBuilder {
           'data' => [
             '#type' => 'link',
             '#title' => $entity->label(),
-          ] + $entity->toUrl('canonical')->toRenderArray(),
+            '#url' => $url,
+            '#options' => $url->getOptions(),
+          ],
           'class' => ['search-api-title'],
         ],
         'status' => [

@@ -1,12 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\ldap_servers\Entity\Server;
 
 /**
  * Server form.
@@ -15,10 +14,12 @@ use Drupal\ldap_servers\Entity\Server;
  */
 class ServerForm extends EntityForm {
 
+  const SAVED_NEW = 1;
+
   /**
    * The server entity.
    *
-   * @var \Drupal\ldap_servers\Entity\Server
+   * @var \Drupal\ldap_servers\ServerInterface
    */
   protected $entity;
 
@@ -28,16 +29,12 @@ class ServerForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
 
-    /** @var \Drupal\ldap_servers\Entity\Server $server */
+    /** @var \Drupal\ldap_servers\ServerInterface $server */
     $server = $this->entity;
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = $this->config('ldap_servers.server.' . $server->id());
 
-    $form['server'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Server'),
-      '#open' => TRUE,
-    ];
-
-    $form['server']['label'] = [
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
       '#maxlength' => 255,
@@ -46,24 +43,25 @@ class ServerForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['server']['id'] = [
+    $form['id'] = [
       '#type' => 'machine_name',
       '#default_value' => $server->id(),
       '#machine_name' => [
         'exists' => '\Drupal\ldap_servers\Entity\Server::load',
+        'source' => ['label'],
       ],
       '#disabled' => !$server->isNew(),
     ];
 
     /* You will need additional form elements for your custom properties. */
-    $form['server']['status'] = [
+    $form['status'] = [
       '#title' => $this->t('Enabled'),
       '#type' => 'checkbox',
       '#default_value' => $server->get('status'),
       '#description' => $this->t('Disable in order to keep configuration without having it active.'),
     ];
 
-    $form['server']['type'] = [
+    $form['type'] = [
       '#title' => $this->t('LDAP Server type'),
       '#type' => 'select',
       '#options' => [
@@ -77,7 +75,7 @@ class ServerForm extends EntityForm {
       '#description' => $this->t("At the moment this only changes whether unicodePwd should be used for AD."),
     ];
 
-    $form['server']['address'] = [
+    $form['address'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Server address'),
       '#maxlength' => 255,
@@ -86,7 +84,7 @@ class ServerForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['server']['port'] = [
+    $form['port'] = [
       '#type' => 'number',
       '#title' => $this->t('Server port'),
       '#min' => 1,
@@ -96,7 +94,7 @@ class ServerForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['server']['timeout'] = [
+    $form['timeout'] = [
       '#type' => 'number',
       '#title' => $this->t('Timeout'),
       '#min' => -1,
@@ -106,7 +104,7 @@ class ServerForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['server']['encryption'] = [
+    $form['encryption'] = [
       '#title' => $this->t('Encryption'),
       '#type' => 'select',
       '#options' => [
@@ -117,9 +115,15 @@ class ServerForm extends EntityForm {
       '#default_value' => $server->get('encryption') ?: 'none',
     ];
 
+    $form['advanced'] = [
+      '#type' => 'vertical_tabs',
+      '#title' => $this->t('Advanced Settings'),
+      '#title_display' => 'invisible',
+    ];
     $form['bind'] = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => $this->t('Binding'),
+      '#group' => 'advanced',
     ];
 
     $form['bind']['bind_method'] = [
@@ -138,18 +142,24 @@ class ServerForm extends EntityForm {
     $form['bind']['binddn'] = [
       '#default_value' => $server->get('binddn'),
       '#type' => 'textfield',
-      '#title' => $this->t('DN for non-anonymous search'),
+      '#title' => $this->t('Distinguished Name for non-anonymous search'),
       '#size' => 80,
       '#maxlength' => 512,
       '#states' => [
         'visible' => [
           ':input[name=bind_method]' => ['value' => 'service_account'],
         ],
-        'required' => [
-          ':input[name=bind_method]' => ['value' => 'service_account'],
-        ],
       ],
     ];
+
+    if ($config->hasOverrides('binddn')) {
+      $form['bind']['binddn']['#description'] = '<em>' . $this->t('Override detected.') . '</em>';
+    }
+    else {
+      $form['bind']['binddn']['#states']['required'] = [
+        ':input[name=bind_method]' => ['value' => 'service_account'],
+      ];
+    }
 
     $form['bind']['bindpw'] = [
       '#type' => 'password',
@@ -159,19 +169,25 @@ class ServerForm extends EntityForm {
         'visible' => [
           ':input[name=bind_method]' => ['value' => 'service_account'],
         ],
-        'required' => [
-          ':input[name=bind_method]' => ['value' => 'service_account'],
-        ],
       ],
     ];
+    if ($config->hasOverrides('bindpw')) {
+      $form['bind']['bindpw']['#description'] = '<em>' . $this->t('Override detected.') . '</em>';
+    }
+    else {
+      $form['bind']['bindpw']['#states']['required'] = [
+        ':input[name=bind_method]' => ['value' => 'service_account'],
+      ];
+    }
 
     if ($server->get('bindpw')) {
       $form['bind']['bindpw']['#attributes'] = ['value' => '****'];
     }
 
     $form['users'] = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => $this->t('Users'),
+      '#group' => 'advanced',
     ];
 
     // @todo Change to "add another" pattern, to avoid linebreak handling.
@@ -190,6 +206,9 @@ class ServerForm extends EntityForm {
       '#size' => 30,
       '#title' => $this->t('Authentication name attribute'),
       '#description' => $this->t("The attribute that holds the user's login name. (eg. <code>cn</code> for eDir or <code>sAMAccountName</code> for Active Directory)."),
+      '#attributes' => [
+        'autocomplete' => 'off',
+      ],
     ];
 
     $form['users']['account_name_attr'] = [
@@ -198,6 +217,9 @@ class ServerForm extends EntityForm {
       '#size' => 30,
       '#title' => $this->t('Account name attribute'),
       '#description' => $this->t('The attribute that holds the unique account name. Defaults to the same as the authentication name attribute.'),
+      '#attributes' => [
+        'autocomplete' => 'off',
+      ],
     ];
 
     $form['users']['mail_attr'] = [
@@ -206,6 +228,9 @@ class ServerForm extends EntityForm {
       '#size' => 30,
       '#title' => $this->t('Email attribute'),
       '#description' => $this->t("The attribute that holds the user's email address. (eg. <code>mail</code>). Leave empty if no such attribute exists"),
+      '#attributes' => [
+        'autocomplete' => 'off',
+      ],
     ];
 
     $form['users']['mail_template'] = [
@@ -213,7 +238,10 @@ class ServerForm extends EntityForm {
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t('Email template'),
-      '#description' => $this->t("If no attribute contains the user's email address, but it can be derived from other attributes, enter an email \"template\" here.<br> Templates should have the user's attribute name in form such as [cn], [uin], etc. such as <code>[cn]@mycompany.com</code>.<br> See also the <a href=\"http://drupal.org/node/997082\">drupal.org documentation on LDAP tokens</a>."),
+      '#description' => $this->t("If no attribute contains the user's email address, but it can be derived from other attributes, enter an email \"template\" here.<br> Templates should have the user's attribute name in form such as [cn], [uin], etc. such as <code>[cn]@company.com</code>.<br> See also the <a href=\"http://drupal.org/node/997082\">drupal.org documentation on LDAP tokens</a>."),
+      '#attributes' => [
+        'autocomplete' => 'off',
+      ],
     ];
 
     $form['users']['picture_attr'] = [
@@ -221,7 +249,7 @@ class ServerForm extends EntityForm {
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t('Thumbnail attribute'),
-      '#description' => $this->t("The attribute that holds the user's thumnail image. (e.g. <code>thumbnailPhoto</code>). Leave empty if no such attribute exists"),
+      '#description' => $this->t("The attribute that holds the user's thumbnail image. (e.g. <code>thumbnailPhoto</code>). Leave empty if no such attribute exists"),
     ];
 
     $form['users']['unique_persistent_attr'] = [
@@ -244,7 +272,7 @@ class ServerForm extends EntityForm {
       '#type' => 'textfield',
       '#size' => 80,
       '#title' => $this->t('Expression for user DN. Required when "Bind with Users Credentials" method selected.'),
-      '#description' => $this->t('%username and %basedn are valid tokens in the expression.<br> Typically it will be: <code>cn=%username,%basedn</code> which might evaluate to <code>cn=jdoe,ou=campus accounts,dc=ad,dc=mycampus,dc=edu</code>'),
+      '#description' => $this->t('%username and %basedn are valid tokens in the expression.<br> Typically it will be: <code>cn=%username,%basedn</code> which might evaluate to <code>cn=jdoe,ou=campus accounts,dc=ad,dc=campus,dc=edu</code>'),
     ];
 
     $form['users']['testing_drupal_username'] = [
@@ -264,8 +292,9 @@ class ServerForm extends EntityForm {
     ];
 
     $form['groups'] = [
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => $this->t('Groups'),
+      '#group' => 'advanced',
     ];
 
     $form['groups']['grp_unused'] = [
@@ -293,7 +322,7 @@ class ServerForm extends EntityForm {
       '#type' => 'textfield',
       '#size' => 30,
       '#title' => $this->t("LDAP Group Entry Attribute Holding User's DN, CN, etc."),
-      '#description' => $this->t('e.g uniquemember, memberUid'),
+      '#description' => $this->t('e.g uniqueMember, memberUid'),
       '#states' => [
         'visible' => [
           ':input[name=grp_unused]' => ['checked' => FALSE],
@@ -458,9 +487,10 @@ class ServerForm extends EntityForm {
       }
       else {
         // Fetch existing password since the placeholder is present.
-        $oldConfiguration = Server::load($this->entity->id());
-        if ($oldConfiguration && $oldConfiguration->get('bindpw')) {
-          $this->entity->set('bindpw', $oldConfiguration->get('bindpw'));
+        $storage = $this->entityTypeManager->getStorage('ldap_server');
+        $old_configuration = $storage->load($this->entity->id());
+        if ($old_configuration && $old_configuration->get('bindpw')) {
+          $this->entity->set('bindpw', $old_configuration->get('bindpw'));
         }
       }
     }
@@ -492,17 +522,19 @@ class ServerForm extends EntityForm {
 
     $status = $this->entity->save();
 
-    if ($status === SAVED_NEW) {
+    if ($status === self::SAVED_NEW) {
       $this->messenger()->addMessage($this->t('Created the %label Server.', [
         '%label' => $this->entity->label(),
       ]));
+      $form_state->setRedirectUrl($this->entity->toUrl('test-form'));
     }
     else {
       $this->messenger()->addMessage($this->t('Saved the %label Server.', [
         '%label' => $this->entity->label(),
       ]));
+      $form_state->setRedirectUrl($this->entity->toUrl('collection'));
     }
-    $form_state->setRedirectUrl($this->entity->toUrl('collection'));
+
   }
 
 }

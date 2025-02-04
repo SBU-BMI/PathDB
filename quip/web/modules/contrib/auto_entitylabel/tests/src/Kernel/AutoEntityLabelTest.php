@@ -42,6 +42,7 @@ class AutoEntityLabelTest extends EntityKernelTestBase {
     'system',
     'user',
     'node',
+    'field',
     'filter',
     'token',
     'auto_entitylabel',
@@ -96,6 +97,52 @@ class AutoEntityLabelTest extends EntityKernelTestBase {
   }
 
   /**
+   * Test node creation with enabled settings, node id token and AFTER_SAVE set.
+   *
+   * Expect that the node id is filled.
+   */
+  public function testNodeId() {
+    $this->setConfiguration([
+      'status' => AutoEntityLabelManager::ENABLED,
+      'pattern' => '[node:nid]',
+      'new_content_behavior' => AutoEntityLabelManager::BEFORE_SAVE,
+    ]);
+    $user = $this->createUser();
+    $node = $this->createNode([
+      'uid' => $user->id(),
+      'type' => $this->nodeType->id(),
+    ]);
+
+    // Node ids will change every time the test is run, so assertEquals
+    // can't be used. Check that the token was replaced with something else.
+    $this->assertNotEquals('[node:nid]', $node->getTitle(), 'The token was replaced.');
+  }
+
+  /**
+   * Test that the post-insert hook doesn't affect node deletes.
+   *
+   * Note: According to the hook_post_action module the post-insert hook does
+   * run during node deletes.
+   */
+  public function testNodeDelete() {
+
+    $this->setConfiguration([
+      'status' => AutoEntityLabelManager::ENABLED,
+      'pattern' => '[node:nid]',
+      'new_content_behavior' => AutoEntityLabelManager::AFTER_SAVE,
+    ]);
+    $user = $this->createUser();
+    $node = $this->createNode([
+      'uid' => $user->id(),
+      'type' => $this->nodeType->id(),
+    ]);
+
+    // Delete the node.
+    // This should not produce any errors.
+    $node->delete();
+  }
+
+  /**
    * Tests node creation with optional settings.
    */
   public function testOptionalOption() {
@@ -135,6 +182,23 @@ class AutoEntityLabelTest extends EntityKernelTestBase {
       'type' => $this->nodeType->id(),
     ]);
     $this->assertEquals($user->getAccountName() . ' testing 123', $node->getTitle(), 'The title is set.');
+  }
+
+  /**
+   * Tests node creation with add label before first save option.
+   */
+  public function testBeforeSaveOption() {
+    $this->setConfiguration([
+      'status' => AutoEntityLabelManager::ENABLED,
+      'pattern' => '[node:author:name]',
+      'new_content_behavior' => AutoEntityLabelManager::BEFORE_SAVE,
+    ]);
+    $user = $this->createUser();
+    $node = $this->createNode([
+      'uid' => $user->id(),
+      'type' => $this->nodeType->id(),
+    ]);
+    $this->assertEquals($user->getAccountName(), $node->getTitle(), 'The title is set.');
   }
 
   /**

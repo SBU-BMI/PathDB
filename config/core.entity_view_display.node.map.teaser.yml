@@ -4,6 +4,11 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
+    - field.field.node.map.execution_id
+    - field.field.node.map.field_map
+    - field.field.node.map.field_map_type
+    - field.field.node.map.field_target_collection
+    - field.field.node.map.field_wsi
     - node.type.map
   module:
     - user
@@ -18,6 +23,7 @@ content:
     weight: 100
     region: content
 hidden:
+  execution_id: true
   field_map: true
   field_map_type: true
   field_target_collection: true

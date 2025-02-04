@@ -23,6 +23,8 @@ use Drupal\search_api_db\Tests\DatabaseTestsTrait;
 use Drupal\Tests\search_api\Kernel\BackendTestBase;
 use Drupal\Tests\search_api\Kernel\TestLogger;
 
+// cspell:ignore foob fooblob
+
 /**
  * Tests index and search capabilities using the Database search backend.
  *
@@ -55,7 +57,7 @@ class BackendTest extends BackendTestBase {
   /**
    * The test logger installed in the container.
    *
-   * Will throw expections whenever a warning or error is logged.
+   * Will throw exceptions whenever a warning or error is logged.
    *
    * @var \Drupal\Tests\search_api\Kernel\TestLogger
    */
@@ -70,7 +72,8 @@ class BackendTest extends BackendTestBase {
     // Create a dummy table that will cause a naming conflict with the backend's
     // default table names, thus testing whether it correctly reacts to such
     // conflicts.
-    \Drupal::database()->schema()->createTable('search_api_db_database_search_index', [
+    $db = \Drupal::database();
+    $db->schema()->createTable('search_api_db_database_search_index', [
       'fields' => [
         'id' => [
           'type' => 'int',
@@ -103,6 +106,15 @@ class BackendTest extends BackendTestBase {
       $index->addField($field);
     }
     $index->save();
+
+    // If the driver is MySQL, make sure the "ONLY_FULL_GROUP_BY" SQL mode is
+    // active so we can spot any problems with that.
+    if ($db->driver() === 'mysql') {
+      $sql_mode = $db->query("SELECT @@SESSION.sql_mode;")->fetchField();
+      if (!str_contains($sql_mode, 'ONLY_FULL_GROUP_BY')) {
+        $db->query("SET SESSION sql_mode = ?", ["$sql_mode,ONLY_FULL_GROUP_BY"]);
+      }
+    }
   }
 
   /**
@@ -153,6 +165,8 @@ class BackendTest extends BackendTestBase {
     $this->regressionTest3225675();
     $this->regressionTest3258802();
     $this->regressionTest3227268();
+    $this->regressionTest3397017();
+    $this->regressionTest3436123();
   }
 
   /**
@@ -592,7 +606,7 @@ class BackendTest extends BackendTestBase {
         ->execute();
       $this->fail('Unknown operator "!=" did not throw an exception.');
     }
-    catch (SearchApiException $e) {
+    catch (SearchApiException) {
       $this->assertTrue(TRUE, 'Unknown operator "!=" threw an exception.');
     }
   }
@@ -648,7 +662,7 @@ class BackendTest extends BackendTestBase {
       $second_server->search($query);
       $this->fail('Could execute a query for an index on a different server.');
     }
-    catch (SearchApiException $e) {
+    catch (SearchApiException) {
       $this->assertTrue(TRUE, 'Executing a query for an index on a different server throws an exception.');
     }
     $second_server->delete();
@@ -736,7 +750,7 @@ class BackendTest extends BackendTestBase {
 
     // Make sure to re-index the proper version of the item to avoid confusing
     // the other tests.
-    list($datasource_id, $raw_id) = Utility::splitCombinedId($item_id);
+    [$datasource_id, $raw_id] = Utility::splitCombinedId($item_id);
     $index->trackItemsUpdated($datasource_id, [$raw_id]);
     $this->indexItems($index->id());
   }
@@ -1047,6 +1061,66 @@ class BackendTest extends BackendTestBase {
   }
 
   /**
+   * Tests that bigram indexing doesn't choke on 49-characters words.
+   *
+   * @see https://www.drupal.org/node/3397017
+   */
+  protected function regressionTest3397017(): void {
+    // Index all items before adding a new one, so we can better predict the
+    // expected count.
+    $this->indexItems($this->indexId);
+
+    $entity_id = count($this->entities) + 1;
+    // @see \Drupal\search_api_db\Plugin\search_api\backend\Database::TOKEN_LENGTH_MAX
+    $long_word = str_repeat('a', 49);
+    $entity = $this->addTestEntity($entity_id, [
+      'type' => 'article',
+      'body' => "foo $long_word bar baz",
+    ]);
+
+    $count = $this->indexItems($this->indexId);
+    $this->assertEquals(1, $count);
+    $results = $this->buildSearch($long_word)
+      ->execute();
+    $this->assertResults([$entity_id], $results, 'String filter with trailing space');
+
+    $entity->delete();
+    unset($this->entities[$entity_id]);
+  }
+
+  /**
+   * Tests that AND facets work correctly with single-field partial matching.
+   *
+   * @see https://www.drupal.org/node/3436123
+   */
+  protected function regressionTest3436123(): void {
+    $this->assertEquals('words', $this->getServer()->getBackendConfig()['matching']);
+    $this->setServerMatchMode();
+
+    $query = $this->buildSearch('test', ['type,item']);
+    $query->setFulltextFields(['body']);
+    $facets['category'] = [
+      'field' => 'category',
+      'limit' => 0,
+      'min_count' => 1,
+      'missing' => TRUE,
+      'operator' => 'and',
+    ];
+    $query->setOption('search_api_facets', $facets);
+    $results = $query->execute();
+    $this->assertResults([1, 2, 3], $results, 'AND facets query');
+    $expected = [
+      ['count' => 2, 'filter' => '"item_category"'],
+      ['count' => 1, 'filter' => '!'],
+    ];
+    $category_facets = $results->getExtraData('search_api_facets')['category'];
+    usort($category_facets, [$this, 'facetCompare']);
+    $this->assertEquals($expected, $category_facets, 'Incorrect AND facets were returned');
+
+    $this->setServerMatchMode('words');
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function checkIndexWithoutFields() {
@@ -1296,7 +1370,7 @@ class BackendTest extends BackendTestBase {
 
     $id = 0;
     date_default_timezone_set('Asia/Seoul');
-    foreach ($test_values as $label => list($field_value, $expected)) {
+    foreach ($test_values as $label => [$field_value, $expected]) {
       $entity = $this->addTestEntity(++$id, [
         'name' => $field_value,
         'type' => 'item',
@@ -1324,7 +1398,7 @@ class BackendTest extends BackendTestBase {
    *
    * @dataProvider regression2949962DataProvider
    */
-  public function testRegression2949962($match_mode) {
+  public function testRegression2949962(string $match_mode): void {
     $this->insertExampleContent();
     $this->setServerMatchMode($match_mode);
     $this->indexItems($this->indexId);
@@ -1400,7 +1474,7 @@ class BackendTest extends BackendTestBase {
    * @return array
    *   An associative array of argument arrays for testRegression2949962().
    */
-  public function regression2949962DataProvider() {
+  public static function regression2949962DataProvider(): array {
     return [
       'Match mode "partial"' => ['partial'],
       'Match mode "prefix"' => ['prefix'],
@@ -1415,7 +1489,6 @@ class BackendTest extends BackendTestBase {
     $class = new \ReflectionClass(Database::class);
     /** @see \Drupal\search_api_db\Plugin\search_api\backend\Database::cleanNumericString() */
     $method = $class->getMethod('cleanNumericString');
-    $method->setAccessible(TRUE);
 
     $this->assertEquals('42', $method->invoke(NULL, '-042'));
     $this->assertEquals('42', $method->invoke(NULL, '00042'));

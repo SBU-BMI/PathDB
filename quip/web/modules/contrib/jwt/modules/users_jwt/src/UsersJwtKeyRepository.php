@@ -6,9 +6,10 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\user\UserDataInterface;
+use Firebase\JWT\Key;
 
 /**
- * Class UsersJwtKeyRepository.
+ * Provides a user key repository.
  */
 class UsersJwtKeyRepository implements UsersJwtKeyRepositoryInterface {
   use StringTranslationTrait;
@@ -150,10 +151,9 @@ class UsersJwtKeyRepository implements UsersJwtKeyRepositoryInterface {
   /**
    * {@inheritdoc}
    */
-  #[\ReturnTypeWillChange]
-  public function offsetGet($offset): ?string {
+  public function offsetGet($offset): ?Key {
     $key = $this->getKey($offset);
-    return $key ? $key->pubkey : NULL;
+    return $key ? new Key($key->pubkey, $key->alg) : NULL;
   }
 
   /**

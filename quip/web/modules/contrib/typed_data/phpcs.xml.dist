@@ -13,7 +13,7 @@
   <!-- wildcard at each end and periods and slashes must be escaped using \ -->
   <exclude-pattern>vendor</exclude-pattern>
   <exclude-pattern>\/_+ignore</exclude-pattern>
-  <exclude-pattern>interdif</exclude-pattern>
+  <exclude-pattern>interdiff</exclude-pattern>
 
   <!-- Include all Drupal and DrupalPractice sniffs by default, then adjust. -->
   <rule ref="Drupal"/>
@@ -21,11 +21,6 @@
 
   <!-- Ignore specific sniffs in all files. The following are either not
        relevant for Typed Data or we have decided not to adhere to them. -->
-  <!-- Do not force the use of Null Coalesce Operator ?? -->
-  <rule ref="SlevomatCodingStandard.ControlStructures.RequireNullCoalesceOperator.NullCoalesceOperatorNotUsed"><severity>0</severity></rule>
-  <!-- Do not force the use of short list syntax [a,b] -->
-  <rule ref="SlevomatCodingStandard.PHP.ShortList.LongListUsed"><severity>0</severity></rule>
-
   <rule ref="DrupalPractice">
     <!-- Allow empty lines after comments, we don't care. -->
     <exclude name="DrupalPractice.Commenting.CommentEmptyLine"/>

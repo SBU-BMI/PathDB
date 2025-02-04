@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -118,7 +118,7 @@ class Mapping {
     bool $enabled = FALSE,
     array $provisioning_events = [],
     string $configuration_module = '',
-    string $provisioning_module = ''
+    string $provisioning_module = '',
   ) {
     $this->id = $id;
     $this->label = $label;

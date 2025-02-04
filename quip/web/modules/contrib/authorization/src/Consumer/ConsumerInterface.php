@@ -19,8 +19,10 @@ interface ConsumerInterface extends ConfigurableAuthorizationPluginInterface {
    *   The user to act upon.
    * @param array $context
    *   Grants applied during this procedure.
+   * @param string|null $profile_id
+   *   The profile ID to act upon.
    */
-  public function revokeGrants(UserInterface $user, array $context): void;
+  public function revokeGrants(UserInterface $user, array $context, string $profile_id): void;
 
   /**
    * Grant one individual proposal.
@@ -29,8 +31,10 @@ interface ConsumerInterface extends ConfigurableAuthorizationPluginInterface {
    *   The user to act upon.
    * @param mixed $mapping
    *   What to grant.
+   * @param string|null $profile_id
+   *   The profile ID to act upon.
    */
-  public function grantSingleAuthorization(UserInterface $user, $mapping): void;
+  public function grantSingleAuthorization(UserInterface $user, $mapping, string $profile_id): void;
 
   /**
    * Are we allowed to create things.

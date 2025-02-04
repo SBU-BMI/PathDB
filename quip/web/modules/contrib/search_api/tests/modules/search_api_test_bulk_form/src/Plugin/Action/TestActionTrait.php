@@ -22,13 +22,14 @@ trait TestActionTrait {
    * {@inheritdoc}
    */
   public function execute(EntityInterface $entity = NULL) {
-    $result = \Drupal::state()->get('search_api_test_bulk_form', []);
+    $key_value = \Drupal::keyValue('search_api_test');
+    $result = $key_value->get('search_api_test_bulk_form', []);
     $result[] = [
       $this->getPluginId(),
       $entity->getEntityTypeId(),
       $entity->id(),
     ];
-    \Drupal::state()->set('search_api_test_bulk_form', $result);
+    $key_value->set('search_api_test_bulk_form', $result);
   }
 
 }

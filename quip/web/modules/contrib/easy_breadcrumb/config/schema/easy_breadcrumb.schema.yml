@@ -103,6 +103,9 @@ easy_breadcrumb.settings:
     segment_display_limit:
       type: integer
       label: 'Breadcrumb segment count'
+    segment_display_minimum:
+      type: integer
+      label: 'Breadcrumb segment minimum count'
     truncator_mode:
       type: boolean
       label: 'Enable truncation for titles.'
@@ -112,3 +115,9 @@ easy_breadcrumb.settings:
     truncator_dots:
       type: boolean
       label: 'Enable dots at the end of truncation.'
+    remove_repeated_segments_text_only:
+      type: boolean
+      label: 'Remove repeated identical segments - only validate on the text'
+    home_segment_validation_skip:
+      type: boolean
+      label: 'Do not check for path, that is duplicate of home page.'

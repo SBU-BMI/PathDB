@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_servers\Kernel;
 
@@ -40,7 +40,7 @@ class GroupManagerTest extends KernelTestBase {
 
     $this->installEntitySchema('ldap_server');
     $this->server = Server::create(['id' => 'example']);
-    $this->server->set('grp_user_memb_attr', 'memberOf');
+    $this->server->set('grp_user_memb_attr', 'Users (external)');
     $this->server->set('grp_user_memb_attr_exists', TRUE);
 
     $bridge = new FakeBridge(
@@ -67,7 +67,7 @@ class GroupManagerTest extends KernelTestBase {
         0 => 'hpotter@hogwarts.edu',
         1 => 'hpotter@students.hogwarts.edu',
       ],
-      'memberOf' => $memberships,
+      'Users (external)' => $memberships,
     ]
     );
     $group_manager->setServer($this->server);

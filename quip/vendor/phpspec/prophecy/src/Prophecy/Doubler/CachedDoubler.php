@@ -22,11 +22,11 @@ use ReflectionClass;
 class CachedDoubler extends Doubler
 {
     /**
-     * @var array<string, string>
+     * @var array<string, class-string>
      */
     private static $classes = array();
 
-    protected function createDoubleClass(ReflectionClass $class = null, array $interfaces)
+    protected function createDoubleClass(?ReflectionClass $class, array $interfaces)
     {
         $classId = $this->generateClassId($class, $interfaces);
         if (isset(self::$classes[$classId])) {
@@ -37,12 +37,12 @@ class CachedDoubler extends Doubler
     }
 
     /**
-     * @param ReflectionClass<object> $class
-     * @param ReflectionClass<object>[] $interfaces
+     * @param ReflectionClass<object>|null $class
+     * @param ReflectionClass<object>[]    $interfaces
      *
      * @return string
      */
-    private function generateClassId(ReflectionClass $class = null, array $interfaces)
+    private function generateClassId(?ReflectionClass $class, array $interfaces)
     {
         $parts = array();
         if (null !== $class) {

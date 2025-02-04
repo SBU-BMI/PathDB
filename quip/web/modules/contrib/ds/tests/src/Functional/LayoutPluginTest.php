@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\ds\Functional;
 
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
 /**
  * Tests DS layout plugins.
  *
@@ -24,8 +26,8 @@ class LayoutPluginTest extends TestBase {
 
     $assert = [
       'regions' => [
-        'left' => '<td colspan="8">' . t('Left') . '</td>',
-        'right' => '<td colspan="8">' . t('Right') . '</td>',
+        'left' => '<td colspan="8">' . $this->t('Left') . '</td>',
+        'right' => '<td colspan="8">' . $this->t('Right') . '</td>',
       ],
     ];
 
@@ -67,7 +69,7 @@ class LayoutPluginTest extends TestBase {
 
     $assert = [
       'regions' => [
-        'ds_content' => '<td colspan="8">' . t('Content') . '</td>',
+        'ds_content' => '<td colspan="8">' . $this->t('Content') . '</td>',
       ],
     ];
 
@@ -105,7 +107,7 @@ class LayoutPluginTest extends TestBase {
     // Select 1 col wrapper.
     $assert = [
       'regions' => [
-        'ds_content' => '<td colspan="8">' . t('Content') . '</td>',
+        'ds_content' => '<td colspan="8">' . $this->t('Content') . '</td>',
       ],
     ];
     $this->dsSelectLayout(['ds_layout' => 'ds_1col'], $assert);
@@ -130,7 +132,41 @@ class LayoutPluginTest extends TestBase {
     $elements = $this->xpath('//div[@class="node node--type-article node--view-mode-full ds-1col clearfix"]/div/p');
     $this->assertCount(1, $elements);
     $this->assertTrimEqual($elements[0]->getText(), $node->get('body')->value);
+  }
 
+  /**
+   * Test extended layout class.
+   */
+  public function testExtendedLayout() {
+    // Ensure schema validation passes when saving custom layout config */
+    /* @see \Drupal\Core\Config\Development\ConfigSchemaChecker::onConfigSave */
+    EntityViewDisplay::load('node.article.default')
+      ->setThirdPartySetting('ds', 'layout', [
+        'id' => 'dstest_1col_extended',
+        'library' => NULL,
+        'disable_css' => FALSE,
+        'entity_classes' => 'all_classes',
+        'settings' => [
+          'classes' => [
+            'layout_class' => [],
+          ],
+          'wrappers' => [
+            'ds_content' => 'div',
+          ],
+          'outer_wrapper' => 'div',
+          'attributes' => '',
+          'link_attribute' => '',
+          'link_custom' => '',
+          'label' => '',
+          'extra_config' => TRUE,
+        ],
+      ])
+      ->setThirdPartySetting('ds', 'regions', [
+        'ds_content' => [
+          'node_title',
+        ],
+      ])
+      ->save();
   }
 
 }

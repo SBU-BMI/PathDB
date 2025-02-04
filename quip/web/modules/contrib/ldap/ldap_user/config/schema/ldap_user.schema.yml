@@ -11,16 +11,17 @@ ldap_user.settings:
       label: 'Provision triggers to Drupal'
       type: sequence
       sequence:
-        -
-          type: string
-          label: 'Enabled trigger'
+        type: string
+        label: 'Enabled trigger'
     ldapEntryProvisionTriggers:
       type: sequence
       label: 'Provision triggers to LDAP'
       sequence:
-        -
-          type: string
-          label: 'Enabled trigger'
+        type: string
+        label: 'Enabled trigger'
+    orphanedIncludeDisabledUsers:
+      label: 'Check disabled users during orphan processing'
+      type: boolean
     orphanedDrupalAcctBehavior:
       label: 'orphanedDrupalAcctBehavior'
       type: string
@@ -51,6 +52,9 @@ ldap_user.settings:
     userUpdateCronInterval:
       label: 'The interval to use for fetching and updating users periodically.'
       type: string
+    userUpdateOnly:
+      label: 'Only update already existing Drupal Users. Do not create new users.'
+      type: boolean
     ldapUserSyncMappings:
       type: config_object
       label: 'Configured sync mappings'

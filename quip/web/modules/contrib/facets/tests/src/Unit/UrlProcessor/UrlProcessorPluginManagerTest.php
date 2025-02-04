@@ -6,7 +6,6 @@ use Drupal\Component\Plugin\Discovery\DiscoveryInterface;
 use Drupal\Component\Plugin\Factory\DefaultFactory;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\facets\UrlProcessor\UrlProcessorPluginManager;
 use Drupal\Tests\UnitTestCase;
 
@@ -56,6 +55,7 @@ class UrlProcessorPluginManagerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp(): void {
+    parent::setUp();
     $this->discovery = $this->createMock(DiscoveryInterface::class);
 
     $this->factory = $this->createMock(DefaultFactory::class);

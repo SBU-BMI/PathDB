@@ -1,6 +1,3 @@
-The current state of the LDAP module is still in-flux while the port to Drupal 8
-is ongoing. The majority of the core functionality is available and usable but
-caution should be taken for more complex scenarios such as provisioning to LDAP.
 
 Please see INSTALL.md for specific information on setting up the Drupal LDAP
 suite.
@@ -8,8 +5,6 @@ suite.
 For more information review the following resources:
 
 * [Project page](https://www.drupal.org/project/ldap)
-* [Issue for Drupal 8 port](https://www.drupal.org/node/2259385)
-
 
 ## Module overview
 
@@ -17,10 +12,8 @@ For more information review the following resources:
 | ------ | ----------- |
 | ldap_authentication | This module provides a overall authentication functionality closely tied to ldap_user and ties in with several other modules, such as ldap_sso. |
 | ldap_authorization | The module to grant roles to users based on directory criteria, relies on the externalauth module. |
-| ldap_feeds (Unported) | Feeds integration to automatically sync users. |
 | ldap_query | A module to allow you to execute custom queries, which can be display in Views or used in custom solutions. |
 | ldap_servers | The base module for communicating with a directory. |
-| ldap_sso | Provides Kerberos/NTLM single-sign-on. Note that this module is now a [separate project on drupal.org](https://www.drupal.org/project/ldap_sso). |
 | ldap_user | A base module with low-level user functionality as well as mechanisms to sync user data. |
 
 A common scenario for logging in users via LDAP, assigning groups to them and
@@ -51,7 +44,7 @@ need or help us in making that integration independent of the specific form.
 ## General LDAP resources
 
 * Documentation from the PHP project on its
-[LDAP implemtation](https://secure.php.net/manual/en/book.ldap.php)
+[LDAP implementation](https://secure.php.net/manual/en/book.ldap.php)
 * Microsoft's Active Directory
 [documentation overview](http://msdn.microsoft.com/en-us/library/aa705886(VS.85).aspx)
 * Moodle's

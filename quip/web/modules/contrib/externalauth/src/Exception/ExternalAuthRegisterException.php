@@ -3,6 +3,6 @@
 namespace Drupal\externalauth\Exception;
 
 /**
- * Class ExternalAuthRegisterException.
+ * Exception thrown when external auth user cannot be registered.
  */
 class ExternalAuthRegisterException extends \Exception {}

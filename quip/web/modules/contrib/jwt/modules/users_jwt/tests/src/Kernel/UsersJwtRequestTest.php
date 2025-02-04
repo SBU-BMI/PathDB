@@ -7,6 +7,8 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 use Firebase\JWT\JWT;
 use Symfony\Component\HttpFoundation\Request;
 
+// cspell:ignore wxyz
+
 /**
  * Tests JWT config schema.
  *
@@ -65,7 +67,7 @@ class UsersJwtRequestTest extends KernelTestBase {
       'name' => $this->testUser->getAccountName(),
     ];
     foreach ($variants as $id_type => $id_value) {
-      $this->dotestAuth($id_type, $id_value, $module_path);
+      $this->doTestAuth($id_type, $id_value, $module_path);
     }
   }
 
@@ -81,7 +83,7 @@ class UsersJwtRequestTest extends KernelTestBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function dotestAuth(string $id_type, string $id_value, string $module_path) {
+  protected function doTestAuth(string $id_type, string $id_value, string $module_path) {
     $iat = \Drupal::time()->getRequestTime();
     $good_payload = [
       'iat' => $iat,

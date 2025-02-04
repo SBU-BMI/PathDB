@@ -1,0 +1,6 @@
+entity.ldap_query_entity.collection:
+  title: 'Queries'
+  route_name: entity.ldap_query_entity.collection
+  description: 'Configured LDAP queries which can be used in bulk modifications or Views.'
+  base_route: entity.ldap_server.collection
+  weight: 50

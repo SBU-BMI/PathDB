@@ -1,13 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\http_response_headers\EventSubscriber\AddHTTPHeaders.
- */
-
 namespace Drupal\http_response_headers\EventSubscriber;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Component\Plugin\Exception\ContextException;
+use Drupal\Component\Plugin\Exception\MissingValueContextException;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Condition\ConditionAccessResolverTrait;
+use Drupal\Core\Plugin\Context\ContextHandlerInterface;
+use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
+use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -17,47 +18,107 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class AddHTTPHeaders implements EventSubscriberInterface {
 
+  use ConditionAccessResolverTrait;
+
   /**
-   * The entity storage manager for response_header entities.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityManager;
+  protected $entityTypeManager;
+
+  /**
+   * The plugin context handler.
+   *
+   * @var \Drupal\Core\Plugin\Context\ContextHandlerInterface
+   */
+  protected $contextHandler;
+
+  /**
+   * The context manager service.
+   *
+   * @var \Drupal\Core\Plugin\Context\ContextRepositoryInterface
+   */
+  protected $contextRepository;
 
   /**
    * Constructs a new Google Tag response subscriber.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory service.
+   * @param EntityTypeManagerInterface $entity_type_manager
+   * @param ContextHandlerInterface $context_handler
+   * @param ContextRepositoryInterface $context_repository
    */
-  public function __construct(ConfigFactoryInterface $configFactory) {
-    $this->entityManager = \Drupal::entityTypeManager()->getStorage('response_header');
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ContextHandlerInterface $context_handler, ContextRepositoryInterface $context_repository) {
+    $this->entityTypeManager = $entity_type_manager;
+    $this->contextHandler = $context_handler;
+    $this->contextRepository = $context_repository;
   }
 
   /**
    * Sets extra HTTP headers.
+   * @param ResponseEvent $event
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function onRespond(ResponseEvent $event) {
     if (!$event->isMainRequest()) {
       return;
     }
     $response = $event->getResponse();
+    $all_headers = $response->headers->allPreserveCaseWithoutCookies();
 
-    $headers = $this->entityManager->loadMultiple();
+    $headers = $this->entityTypeManager->getStorage('response_header')->loadMultiple();
     if (!empty($headers)) {
+
       foreach ($headers as $key => $header) {
-        if (!empty($header->get('name'))) {
-          // @TODO Add context rules to header groups to allow
-          // certain groups to only be applied in certain contexts.
-          if (!empty($header->get('value'))) {
-            // Must remove the existing header if settings a new value.
-            if ($response->headers->has($header->get('name'))) {
-              $response->headers->remove($header->get('name'));
+        if ($header->get('status')) {
+          $pass_checked = TRUE;
+          if (!empty($header->get('visibility'))) {
+            $conditions = [];
+            $missing_context = FALSE;
+            $missing_value = FALSE;
+            foreach ($header->getVisibilityConditions() as $condition_id => $condition) {
+              if ($condition instanceof ContextAwarePluginInterface) {
+                try {
+                  $contexts = $this->contextRepository->getRuntimeContexts(array_values($condition->getContextMapping()));
+                  $this->contextHandler->applyContextMapping($condition, $contexts);
+                }
+                catch (MissingValueContextException $e) {
+                  $missing_value = TRUE;
+                }
+                catch (ContextException $e) {
+                  $missing_context = TRUE;
+                }
+              }
+              $conditions[$condition_id] = $condition;
             }
-            $response->headers->set($header->get('name'), $header->get('value'));
+            if ($missing_context) {
+              $pass_checked = FALSE;
+            }
+            elseif ($missing_value) {
+              $pass_checked = FALSE;
+            }
+            elseif ($this->resolveConditions($conditions, 'and') !== FALSE) {
+              $pass_checked = TRUE;
+            }
+            else {
+              $pass_checked = FALSE;
+            }
           }
-          else {
-            $response->headers->remove($header->get('name'));
+          $header_key = $header->get('name');
+          if ($pass_checked) {
+            if (!empty($header->get('value'))) {
+              if (!empty($all_headers[$header_key])) {
+                unset($all_headers[$header_key]);
+              }
+              $all_headers[$header_key] = $header->get('value');
+              $response->headers->replace($all_headers);
+            }
+            else {
+              if (!empty($all_headers[$header_key])) {
+                unset($all_headers[$header_key]);
+                $response->headers->replace($all_headers);
+              }
+            }
           }
         }
       }
@@ -67,7 +128,7 @@ class AddHTTPHeaders implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[KernelEvents::RESPONSE][] = ['onRespond', -100];
     return $events;
   }

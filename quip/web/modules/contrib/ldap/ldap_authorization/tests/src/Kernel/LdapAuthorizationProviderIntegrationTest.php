@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_authorization\Kernel;
 
@@ -77,7 +77,9 @@ class LdapAuthorizationProviderIntegrationTest extends EntityKernelTestBase {
         ),
       ]),
     ];
-    $bridge->get()->setQueryResult($collection);
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
+    $ldap = $bridge->get();
+    $ldap->setQueryResult($collection);
     $bridge->setBindResult(TRUE);
     $this->container->set('ldap.bridge', $bridge);
   }
@@ -192,7 +194,9 @@ class LdapAuthorizationProviderIntegrationTest extends EntityKernelTestBase {
         ),
       ]),
     ];
-    $bridge->get()->setQueryResult($collection);
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
+    $ldap = $bridge->get();
+    $ldap->setQueryResult($collection);
     self::assertEquals([
       'students' => 'students',
       'wizards' => 'wizards',

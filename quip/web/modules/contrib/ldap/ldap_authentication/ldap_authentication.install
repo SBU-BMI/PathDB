@@ -5,7 +5,7 @@
  * Install, update and uninstall functions for the LDAP authentication module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -134,10 +134,10 @@ function ldap_authentication_update_8306(): TranslatableMarkup {
   if ($config->get('authenticationMode') === 'mixed') {
     $config->set('skipAdministrators', TRUE);
     $config->save();
-    return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be excluded from LDAP since mixed mode is active.');
+    return t('Custom behavior for user 1 has been removed. Your system administrator role has been set to be excluded from LDAP since mixed mode is active.');
   }
 
   $config->set('skipAdministrators', FALSE);
   $config->save();
-  return t('Custom behaviour for user 1 has been removed. Your system administrator role has been set to be included in LDAP since exclusive mode is active.');
+  return t('Custom behavior for user 1 has been removed. Your system administrator role has been set to be included in LDAP since exclusive mode is active.');
 }

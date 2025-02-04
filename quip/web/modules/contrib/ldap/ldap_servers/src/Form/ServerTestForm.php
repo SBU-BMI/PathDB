@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Form;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Renderer;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_servers\LdapBridgeInterface;
 use Drupal\ldap_servers\LdapGroupManager;
 use Drupal\ldap_servers\Processor\TokenProcessor;
@@ -23,7 +23,7 @@ use function in_array;
 /**
  * Use Drupal\Core\Form\FormBase;.
  */
-class ServerTestForm extends EntityForm {
+final class ServerTestForm extends EntityForm {
 
   /**
    * The main server to work with.
@@ -82,11 +82,11 @@ class ServerTestForm extends EntityForm {
   protected $ldapGroupManager;
 
   /**
-   * {@inheritdoc}
+   * Entity Type Manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  public function getFormId(): string {
-    return 'ldap_servers_test_form';
-  }
+  protected $entityTypeManager;
 
   /**
    * Class constructor.
@@ -103,6 +103,8 @@ class ServerTestForm extends EntityForm {
    *   LDAP Bridge.
    * @param \Drupal\ldap_servers\LdapGroupManager $ldap_group_manager
    *   LDAP Group Manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity Type Manager.
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
@@ -110,28 +112,39 @@ class ServerTestForm extends EntityForm {
     TokenProcessor $token_processor,
     Renderer $renderer,
     LdapBridgeInterface $ldap_bridge,
-    LdapGroupManager $ldap_group_manager
+    LdapGroupManager $ldap_group_manager,
+    EntityTypeManagerInterface $entity_type_manager,
   ) {
+
     $this->config = $config_factory;
     $this->moduleHandler = $module_handler;
     $this->tokenProcessor = $token_processor;
     $this->renderer = $renderer;
     $this->ldapBridge = $ldap_bridge;
     $this->ldapGroupManager = $ldap_group_manager;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): ServerTestForm {
-    return new static(
+    return new self(
       $container->get('config.factory'),
       $container->get('module_handler'),
       $container->get('ldap.token_processor'),
       $container->get('renderer'),
       $container->get('ldap.bridge'),
-      $container->get('ldap.group_manager')
+      $container->get('ldap.group_manager'),
+      $container->get('entity_type.manager')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'ldap_servers_test_form';
   }
 
   /**
@@ -308,12 +321,15 @@ class ServerTestForm extends EntityForm {
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
-    $server = Server::load($values['id']);
 
     if (!$values['id']) {
       $form_state->setErrorByName(NULL, $this->t('No server id found in form'));
+      return;
     }
-    elseif (!$server) {
+
+    $storage = $this->entityTypeManager->getStorage('ldap_server');
+    $server = $storage->load($values['id']);
+    if (!$server) {
       $form_state->setErrorByName(NULL, $this->t('Failed to create server object for server with server id=%id', [
         '%id' => $values['id'],
       ]));
@@ -328,7 +344,8 @@ class ServerTestForm extends EntityForm {
     $form_state->setRebuild();
 
     $values = $form_state->getValues();
-    $this->ldapServer = Server::load($values['id']);
+    $storage = $this->entityTypeManager->getStorage('ldap_server');
+    $this->ldapServer = $storage->load($values['id']);
     $this->ldapBridge->setServer($this->ldapServer);
 
     $this->resultsTables = [];
@@ -539,7 +556,7 @@ class ServerTestForm extends EntityForm {
    *   Escaped string.
    */
   public static function binaryCheck(string $input): string {
-    if (preg_match('~[^\x20-\x7E\t\r\n]~', $input) > 0) {
+    if (preg_match('/[^\x20-\x7E\t\r\n]/', $input) > 0) {
       $truncatedString = Unicode::truncate($input, 120, FALSE, TRUE);
       return (string) t('Binary (excerpt): @excerpt', ['@excerpt' => $truncatedString]);
     }

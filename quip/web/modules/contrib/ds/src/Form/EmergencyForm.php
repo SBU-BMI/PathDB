@@ -3,6 +3,7 @@
 namespace Drupal\ds\Form;
 
 use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -37,9 +38,11 @@ class EmergencyForm extends ConfigFormBase {
    *   The module handler.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state key value store.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager
+   *     The typed config manager.
    */
-  public function __construct(ConfigFactory $config_factory, ModuleHandlerInterface $module_handler, StateInterface $state) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactory $config_factory, ModuleHandlerInterface $module_handler, StateInterface $state, TypedConfigManagerInterface $typed_config_manager) {
+    parent::__construct($config_factory, $typed_config_manager);
     $this->moduleHandler = $module_handler;
     $this->state = $state;
   }
@@ -51,7 +54,8 @@ class EmergencyForm extends ConfigFormBase {
     return new static(
       $container->get('config.factory'),
       $container->get('module_handler'),
-      $container->get('state')
+      $container->get('state'),
+      $container->get('config.typed')
     );
   }
 
@@ -129,7 +133,7 @@ class EmergencyForm extends ConfigFormBase {
    */
   public function submitFieldAttach(array &$form, FormStateInterface $form_state) {
     $this->state->set('ds.disabled', ($this->state->get('ds.disabled', FALSE) ? FALSE : TRUE));
-    $this->messenger()->addMessage(t('The configuration options have been saved.'));
+    $this->messenger()->addMessage($this->t('The configuration options have been saved.'));
   }
 
   /**

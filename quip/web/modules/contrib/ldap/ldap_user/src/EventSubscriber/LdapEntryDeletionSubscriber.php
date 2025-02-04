@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\EventSubscriber;
 
@@ -10,6 +10,7 @@ use Drupal\ldap_servers\LdapUserManager;
 use Drupal\ldap_user\Event\LdapUserDeletedEvent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use function in_array;
 
 /**
  * Delete LDAP entry.
@@ -50,7 +51,7 @@ class LdapEntryDeletionSubscriber implements EventSubscriberInterface, LdapUserA
   public function __construct(
     ConfigFactory $config_factory,
     LoggerInterface $logger,
-    LdapUserManager $ldap_user_manager
+    LdapUserManager $ldap_user_manager,
   ) {
     $this->config = $config_factory->get('ldap_user.settings');
     $this->logger = $logger;
@@ -80,7 +81,7 @@ class LdapEntryDeletionSubscriber implements EventSubscriberInterface, LdapUserA
   public function deleteProvisionedLdapEntry(LdapUserDeletedEvent $event): void {
     if (
       $this->config->get('ldapEntryProvisionServer') &&
-      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE, $this->config->get('ldapEntryProvisionTriggers'), TRUE)
+      in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE, $this->config->get('ldapEntryProvisionTriggers'), TRUE)
     ) {
       /** @var \Drupal\user\Entity\User $account */
       $account = $event->account;

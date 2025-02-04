@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
@@ -28,7 +28,7 @@ trait LdapTransformationTraits {
       $value = self::php56PolyfillLdapEscape($value, '', 2);
     }
 
-    // Copied from Symfonfy's Adapter.php for ease of use.
+    // Copied from Symfony's Adapter.php for ease of use.
     // Per RFC 4514, leading/trailing spaces should be encoded in DNs,
     // as well as carriage returns.
     if (!empty($value) && strpos($value, ' ') === 0) {

@@ -10,7 +10,7 @@ trait FormWidgetManagerTrait {
   /**
    * The widget manager.
    *
-   * @var \Drupal\typed_data\Widget\FormWidgetManagerInterface
+   * @var \Drupal\typed_data\Widget\FormWidgetManagerInterface|null
    */
   protected $widgetManager;
 
@@ -22,7 +22,7 @@ trait FormWidgetManagerTrait {
    *
    * @return $this
    */
-  public function setFormWidgetManager(FormWidgetManagerInterface $widgetManager) {
+  public function setFormWidgetManager(FormWidgetManagerInterface $widgetManager): static {
     $this->widgetManager = $widgetManager;
     return $this;
   }
@@ -33,11 +33,10 @@ trait FormWidgetManagerTrait {
    * @return \Drupal\typed_data\Widget\FormWidgetManagerInterface
    *   The widget manager.
    */
-  public function getFormWidgetManager() {
-    if (empty($this->widgetManager)) {
+  public function getFormWidgetManager(): FormWidgetManagerInterface {
+    if (!isset($this->widgetManager)) {
       $this->widgetManager = \Drupal::service('plugin.manager.typed_data_form_widget');
     }
-
     return $this->widgetManager;
   }
 

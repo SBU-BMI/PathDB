@@ -1,27 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drush\Commands;
 
-use Drush\Log\DrushLoggerManager;
-use Drush\Log\Logger;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Consolidation\AnnotatedCommand\CommandData;
+use Consolidation\AnnotatedCommand\Hooks\HookManager;
+use Consolidation\SiteProcess\ProcessManagerAwareInterface;
+use Consolidation\SiteProcess\ProcessManagerAwareTrait;
+use Drush\Attributes as CLI;
+use Drush\Config\ConfigAwareTrait;
 use Drush\Drush;
+use Drush\Exec\ExecTrait;
+use Drush\Log\DrushLoggerManager;
 use Drush\Style\DrushStyle;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
+use JetBrains\PhpStorm\Deprecated;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Drush\Config\ConfigAwareTrait;
-use Drush\Exec\ExecTrait;
+use Psr\Log\LoggerInterface;
+use Robo\Common\IO;
 use Robo\Contract\ConfigAwareInterface;
 use Robo\Contract\IOAwareInterface;
-use Robo\Common\IO;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Path;
-use Consolidation\SiteProcess\ProcessManagerAwareTrait;
-use Consolidation\SiteProcess\ProcessManagerAwareInterface;
 
 abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, ConfigAwareInterface, ProcessManagerAwareInterface
 {
@@ -62,6 +67,17 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
     }
 
     /**
+     * Sets a logger, if none is available yet.
+     */
+    #[Deprecated('Use logger() in Drush 13+')]
+    public function setLoggerIfEmpty(LoggerInterface $logger): void
+    {
+        if ($this->logger === null) {
+            $this->setLogger($logger);
+        }
+    }
+
+    /**
      * Returns a logger object.
      */
     protected function logger(): ?DrushLoggerManager
@@ -96,11 +112,8 @@ abstract class DrushCommands implements IOAwareInterface, LoggerAwareInterface, 
 
     /**
      * Persist commandData for use in primary command callback. Used by 'topic' commands.
-     *
-     * @hook pre-command *
-     *
-     * @param CommandData $commandData
      */
+    #[CLI\Hook(type: HookManager::PRE_COMMAND_HOOK, target: '*')]
     public function preHook(CommandData $commandData)
     {
         $this->commandData = $commandData;

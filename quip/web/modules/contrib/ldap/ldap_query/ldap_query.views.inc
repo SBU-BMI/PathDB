@@ -5,7 +5,7 @@
  * Views integration for ldap_query.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * Implements hook_views_data().

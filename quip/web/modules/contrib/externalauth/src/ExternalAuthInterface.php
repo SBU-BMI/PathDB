@@ -5,9 +5,7 @@ namespace Drupal\externalauth;
 use Drupal\user\UserInterface;
 
 /**
- * Interface ExternalAuthInterface.
- *
- * @package Drupal\externalauth
+ * Interface for the ExternalAuth service.
  */
 interface ExternalAuthInterface {
 
@@ -22,10 +20,10 @@ interface ExternalAuthInterface {
    * @param string $provider
    *   The module providing external authentication.
    *
-   * @return \Drupal\user\UserInterface
+   * @return \Drupal\user\UserInterface|bool
    *   The loaded Drupal user.
    */
-  public function load($authname, $provider);
+  public function load(string $authname, string $provider);
 
   /**
    * Log a Drupal user in based on an external authname.
@@ -39,7 +37,7 @@ interface ExternalAuthInterface {
    * @return \Drupal\user\UserInterface|bool
    *   The logged in Drupal user.
    */
-  public function login($authname, $provider);
+  public function login(string $authname, string $provider);
 
   /**
    * Register a Drupal user based on an external authname.
@@ -64,7 +62,7 @@ interface ExternalAuthInterface {
    * @return \Drupal\user\UserInterface
    *   The registered Drupal user.
    */
-  public function register($authname, $provider, array $account_data = [], $authmap_data = NULL);
+  public function register(string $authname, string $provider, array $account_data = [], $authmap_data = NULL);
 
   /**
    * Login and optionally register a Drupal user based on an external authname.
@@ -82,7 +80,7 @@ interface ExternalAuthInterface {
    * @return \Drupal\user\UserInterface
    *   The logged in, and optionally registered, Drupal user.
    */
-  public function loginRegister($authname, $provider, array $account_data = [], $authmap_data = NULL);
+  public function loginRegister(string $authname, string $provider, array $account_data = [], $authmap_data = NULL);
 
   /**
    * Finalize logging in the external user.
@@ -102,7 +100,7 @@ interface ExternalAuthInterface {
    *
    * @codeCoverageIgnore
    */
-  public function userLoginFinalize(UserInterface $account, $authname, $provider);
+  public function userLoginFinalize(UserInterface $account, string $authname, string $provider): UserInterface;
 
   /**
    * Link a pre-existing Drupal user to a given authname.
@@ -115,6 +113,6 @@ interface ExternalAuthInterface {
    * @param \Drupal\user\UserInterface $account
    *   The existing Drupal account to link.
    */
-  public function linkExistingAccount($authname, $provider, UserInterface $account);
+  public function linkExistingAccount(string $authname, string $provider, UserInterface $account);
 
 }

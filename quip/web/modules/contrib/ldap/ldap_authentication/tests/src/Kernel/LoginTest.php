@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_authentication\Kernel;
 
@@ -50,7 +50,9 @@ class LoginTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('ldap_server');
     $this->installSchema('externalauth', ['authmap']);
-    $this->installSchema('system', 'sequences');
+    if (version_compare(\Drupal::VERSION, '10.2.0', '<')) {
+      $this->installSchema('system', 'sequences');
+    }
 
     /** @var \Drupal\Core\Entity\EntityTypeManager $manager */
     $manager = $this->container->get('entity_type.manager');
@@ -75,7 +77,7 @@ class LoginTest extends KernelTestBase {
       ->set('allowOnlyIfTextInDn', [])
       ->save();
     $this->config('ldap_user.settings')
-      ->set('acctCreation', LdapUserAttributesInterface::ACCOUNT_CREATION_LDAP_BEHAVIOUR)
+      ->set('acctCreation', LdapUserAttributesInterface::ACCOUNT_CREATION_LDAP_BEHAVIOR)
       ->set('drupalAcctProvisionServer', $server->id())
       ->set('ldapUserSyncMappings', [
         'drupal' => [],
@@ -93,6 +95,7 @@ class LoginTest extends KernelTestBase {
       $this->container->get('entity_type.manager')
     );
     $bridge->setServer($server);
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
     $ldap = $bridge->get();
     $collection = [
       '(cn=hpotter)' => new FakeCollection([
@@ -120,7 +123,8 @@ class LoginTest extends KernelTestBase {
       $this->container->get('ldap_authentication.servers'),
       $this->container->get('ldap.user_manager'),
       $this->container->get('messenger'),
-      $this->container->get('ldap.drupal_user_processor')
+      $this->container->get('ldap.drupal_user_processor'),
+      $this->container
       );
   }
 

@@ -1,11 +1,5 @@
-# Authorization profile menu items definition
 entity.authorization_profile.collection:
-  title: 'Authorization profile'
+  title: 'Authorization'
   route_name: entity.authorization_profile.collection
-  description: 'List Authorization profile'
+  description: 'List Authorization profiles'
   parent: user.admin_index
-entity.authorization_profile.settings:
-  title: 'Authorization settings'
-  route_name: entity.authorization_profile.configuration_form
-  description: 'List Authorization profile'
-  parent: entity.authorization_profile.collection

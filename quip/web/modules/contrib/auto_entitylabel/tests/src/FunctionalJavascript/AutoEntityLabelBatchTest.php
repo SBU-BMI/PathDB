@@ -102,11 +102,10 @@ class AutoEntityLabelBatchTest extends WebDriverTestBase {
     $webAssert->fieldExists('chunk');
     $edit = [
       'save' => TRUE,
-      'chunk' => 5,
+      'chunk' => '5',
     ];
     $this->submitForm($edit, 'Save configuration');
-    $webAssert->assertWaitOnAjaxRequest();
-    $webAssert->pageTextContains('The configuration options have been saved.');
+    $webAssert->waitForText('The configuration options have been saved.');
     $webAssert->pageTextContains('Resaved 10 labels.');
     foreach ($this->nodeStorage->loadMultiple($pagesIDs) as $page) {
       $this->assertEquals('Test node ' . $this->user->getAccountName(), $page->get('title')->value);

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_user\Kernel;
 
@@ -12,13 +12,14 @@ use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
-use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
 use Symfony\Component\Ldap\Entry;
 
 /**
  * Tests for the DrupalUserProcessor.
  *
  * @group ldap
+ * @coversDefaultClass \Drupal\ldap_user\Processor\DrupalUserProcessor
  */
 class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAttributesInterface {
 
@@ -88,6 +89,7 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
       'user_attr' => 'cn',
       'mail_attr' => 'mail',
       'picture_attr' => 'picture_field',
+      'grp_memb_attr' => 'Users (external)',
     ]);
     $this->server->save();
 
@@ -111,7 +113,9 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
         ),
       ]),
     ];
-    $bridge->get()->setQueryResult($collection);
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
+    $ldap = $bridge->get();
+    $ldap->setQueryResult($collection);
     $bridge->setBindResult(TRUE);
     $this->container->set('ldap.bridge', $bridge);
 
@@ -123,13 +127,14 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
    */
   public function testUserExclusion(): void {
     // Skip administrators, if so configured.
-    /** @var \Drupal\user\Entity\User $account */
-    $account = $this->prophesize(User::class);
-    $account->getRoles()->willReturn(['administrator']);
-    $account->id()->willReturn(1);
+    $account_1 = $this->prophesize(UserInterface::class);
+    $account_1->getRoles()
+      ->willReturn(['administrator'])
+      ->shouldBeCalled($this->once());
+    $account_1->id()->willReturn(1);
     $exclusion = new GetStringHelper();
     $exclusion->value = '';
-    $account->get('ldap_user_ldap_exclude')->willReturn($exclusion);
+    $account_1->get('ldap_user_ldap_exclude')->willReturn($exclusion);
     $this->entityTypeManager
       ->getStorage('user_role')
       ->create([
@@ -145,25 +150,25 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
       ->condition('is_admin', TRUE)
       ->execute();
     self::assertNotEmpty($admin_roles);
-    self::assertTrue($this->drupalUserProcessor->excludeUser($account->reveal()));
+    self::assertTrue($this->drupalUserProcessor->excludeUser($account_1->reveal()));
     $this->config('ldap_authentication.settings')->set('skipAdministrators', 0)->save();
-    self::assertFalse($this->drupalUserProcessor->excludeUser($account->reveal()));
+    self::assertFalse($this->drupalUserProcessor->excludeUser($account_1->reveal()));
 
     // Disallow checkbox exclusion (everyone else allowed).
-    $account = $this->prophesize(User::class);
-    $account->getRoles()->willReturn(['']);
-    $account->id()->willReturn(2);
+    $account_2 = $this->prophesize(UserInterface::class);
+    $account_2->getRoles()->willReturn(['']);
+    $account_2->id()->willReturn(2);
     $exclusion->value = 1;
-    $account->get('ldap_user_ldap_exclude')->willReturn($exclusion);
-    self::assertTrue($this->drupalUserProcessor->excludeUser($account->reveal()));
+    $account_2->get('ldap_user_ldap_exclude')->willReturn($exclusion);
+    self::assertTrue($this->drupalUserProcessor->excludeUser($account_2->reveal()));
 
     // Everyone else allowed.
-    $account = $this->prophesize(User::class);
-    $account->getRoles()->willReturn(['']);
-    $account->id()->willReturn(2);
+    $account_3 = $this->prophesize(UserInterface::class);
+    $account_3->getRoles()->willReturn(['']);
+    $account_3->id()->willReturn(2);
     $exclusion->value = 0;
-    $account->get('ldap_user_ldap_exclude')->willReturn($exclusion);
-    self::assertFalse($this->drupalUserProcessor->excludeUser($account->reveal()));
+    $account_3->get('ldap_user_ldap_exclude')->willReturn($exclusion);
+    self::assertFalse($this->drupalUserProcessor->excludeUser($account_3->reveal()));
   }
 
   /**
@@ -175,7 +180,7 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
     $result = $this->drupalUserProcessor->createDrupalUserFromLdapEntry(['name' => 'hpotter']);
     self::assertTrue($result);
     $user = $this->drupalUserProcessor->getUserAccount();
-    self::assertInstanceOf(User::class, $user);
+    self::assertInstanceOf(UserInterface::class, $user);
     self::assertEquals('hpotter@example.com', $user->getEmail());
 
     // Check picture file.

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Composer.
@@ -17,11 +17,11 @@ namespace Composer\DependencyResolver;
  */
 class GenericRule extends Rule
 {
-    /** @var int[] */
+    /** @var list<int> */
     protected $literals;
 
     /**
-     * @param int[] $literals
+     * @param list<int> $literals
      */
     public function __construct(array $literals, $reason, $reasonData)
     {
@@ -34,9 +34,9 @@ class GenericRule extends Rule
     }
 
     /**
-     * @return int[]
+     * @return list<int>
      */
-    public function getLiterals()
+    public function getLiterals(): array
     {
         return $this->literals;
     }
@@ -46,7 +46,10 @@ class GenericRule extends Rule
      */
     public function getHash()
     {
-        $data = unpack('ihash', md5(implode(',', $this->literals), true));
+        $data = unpack('ihash', (string) hash(\PHP_VERSION_ID > 80100 ? 'xxh3' : 'sha1', implode(',', $this->literals), true));
+        if (false === $data) {
+            throw new \RuntimeException('Failed unpacking: '.implode(', ', $this->literals));
+        }
 
         return $data['hash'];
     }
@@ -59,30 +62,25 @@ class GenericRule extends Rule
      * @param  Rule $rule The rule to check against
      * @return bool Whether the rules are equal
      */
-    public function equals(Rule $rule)
+    public function equals(Rule $rule): bool
     {
         return $this->literals === $rule->getLiterals();
     }
 
-    /**
-     * @return bool
-     */
-    public function isAssertion()
+    public function isAssertion(): bool
     {
         return 1 === \count($this->literals);
     }
 
     /**
      * Formats a rule as a string of the format (Literal1|Literal2|...)
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         $result = $this->isDisabled() ? 'disabled(' : '(';
 
         foreach ($this->literals as $i => $literal) {
-            if ($i != 0) {
+            if ($i !== 0) {
                 $result .= '|';
             }
             $result .= $literal;

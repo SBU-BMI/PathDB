@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\authorization\Provider;
 
-use Drupal\authorization\Annotation\AuthorizationProvider;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\authorization\Annotation\AuthorizationProvider;
 
 /**
  * Manages search Provider plugins.
@@ -33,7 +33,7 @@ class ProviderPluginManager extends DefaultPluginManager {
   public function __construct(
     \Traversable $namespaces,
     CacheBackendInterface $cache_provider,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
   ) {
     parent::__construct(
       'Plugin/authorization/Provider',

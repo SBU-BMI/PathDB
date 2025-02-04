@@ -6,9 +6,7 @@ use Drupal\Core\Database\Connection;
 use Drupal\user\UserInterface;
 
 /**
- * Class Authmap.
- *
- * @package Drupal\externalauth
+ * Service for managing authmap database records.
  */
 class Authmap implements AuthmapInterface {
 
@@ -32,7 +30,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function save(UserInterface $account, $provider, $authname, $data = NULL) {
+  public function save(UserInterface $account, string $provider, string $authname, $data = NULL) {
     if (!is_scalar($data)) {
       $data = serialize($data);
     }
@@ -56,7 +54,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function get($uid, $provider) {
+  public function get(int $uid, string $provider) {
     $authname = $this->connection->select('authmap', 'am')
       ->fields('am', ['authname'])
       ->condition('uid', $uid)
@@ -73,7 +71,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAuthData($uid, $provider) {
+  public function getAuthData(int $uid, string $provider) {
     $data = $this->connection->select('authmap', 'am')
       ->fields('am', ['authname', 'data'])
       ->condition('uid', $uid)
@@ -87,7 +85,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAll($uid) {
+  public function getAll($uid): array {
     $query = $this->connection->select('authmap', 'am')
       ->fields('am', ['provider', 'authname'])
       ->condition('uid', $uid)
@@ -105,7 +103,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUid($authname, $provider) {
+  public function getUid(string $authname, string $provider) {
     $authname = $this->connection->select('authmap', 'am')
       ->fields('am', ['uid'])
       ->condition('authname', $authname)
@@ -122,7 +120,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function delete($uid, $provider = NULL) {
+  public function delete(int $uid, ?string $provider = NULL) {
     $query = $this->connection->delete('authmap')
       ->condition('uid', $uid);
 
@@ -136,7 +134,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function deleteProvider($provider) {
+  public function deleteProvider(string $provider) {
     $this->connection->delete('authmap')
       ->condition('provider', $provider)
       ->execute();

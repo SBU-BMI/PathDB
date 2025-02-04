@@ -14,7 +14,8 @@ orphanedDrupalAcctBehavior: ldap_user_orphan_email
 orphanedDrupalAcctReportingInbox: ''
 orphanedCheckQty: 100
 orphanedAccountCheckInterval: weekly
+orphanedIncludeDisabledUsers: false
 userConflictResolve: resolve
 manualAccountConflict: conflict_reject
-acctCreation: ldap_behaviour
+acctCreation: ldap_behavior
 ldapUserSyncMappings: {  }

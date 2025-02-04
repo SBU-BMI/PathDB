@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\typed_data\Functional\TypedDataFormWidget;
 
 use Drupal\Core\Plugin\Context\ContextDefinition;

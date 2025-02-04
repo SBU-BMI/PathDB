@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_authorization\Plugin\authorization\Provider;
 
@@ -10,10 +10,15 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ldap_servers\Helper\ConversionHelper;
+use Drupal\ldap_servers\LdapGroupManager;
 use Drupal\ldap_servers\LdapTransformationTraits;
+use Drupal\ldap_servers\LdapUserManager;
+use Drupal\ldap_servers\Logger\LdapDetailLog;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
 use Drupal\user\UserInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function mb_strtolower;
 
 /**
  * The LDAP authorization provider for authorization module.
@@ -58,6 +63,34 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
   protected $drupalUserProcessor;
 
   /**
+   * LDAP User Manager.
+   *
+   * @var \Drupal\ldap_servers\LdapUserManager
+   */
+  protected $ldapUserManager;
+
+  /**
+   * LDAP Group Manager.
+   *
+   * @var \Drupal\ldap_servers\LdapGroupManager
+   */
+  protected $groupManager;
+
+  /**
+   * Logger.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * LDAP Detail Log.
+   *
+   * @var \Drupal\ldap_servers\Logger\LdapDetailLog
+   */
+  protected $ldapDetailLog;
+
+  /**
    * Constructor.
    *
    * @param array $configuration
@@ -70,34 +103,49 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
    *   Entity type manager.
    * @param \Drupal\ldap_user\Processor\DrupalUserProcessor $drupal_user_processor
    *   Drupal user processor.
+   * @param \Drupal\ldap_servers\LdapUserManager $ldap_user_manager
+   *   LDAP user manager.
+   * @param \Drupal\ldap_servers\LdapGroupManager $group_manager
+   *   LDAP group manager.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   Logger.
+   * @param \Drupal\ldap_servers\Logger\LdapDetailLog $ldap_detail_log
+   *   LDAP detail log.
    */
   public function __construct(
     array $configuration,
     string $plugin_id,
     array $plugin_definition,
     EntityTypeManagerInterface $entity_type_manager,
-    DrupalUserProcessor $drupal_user_processor
+    DrupalUserProcessor $drupal_user_processor,
+    LdapUserManager $ldap_user_manager,
+    LdapGroupManager $group_manager,
+    LoggerInterface $logger,
+    LdapDetailLog $ldap_detail_log,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->drupalUserProcessor = $drupal_user_processor;
+    $this->ldapUserManager = $ldap_user_manager;
+    $this->groupManager = $group_manager;
+    $this->logger = $logger;
+    $this->ldapDetailLog = $ldap_detail_log;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(
-    ContainerInterface $container,
-    array $configuration,
-    $plugin_id,
-    $plugin_definition
-  ) {
-    return new static(
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new self(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
-      $container->get('ldap.drupal_user_processor')
+      $container->get('ldap.drupal_user_processor'),
+      $container->get('ldap.user_manager'),
+      $container->get('ldap.group_manager'),
+      $container->get('logger.channel.ldap_authorization'),
+      $container->get('ldap.detail_log')
     );
   }
 
@@ -114,7 +162,7 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
     }
 
     $storage = $this->entityTypeManager->getStorage('ldap_server');
-    /** @var \Drupal\ldap_servers\Entity\Server[] $servers */
+    /** @var \Drupal\ldap_servers\ServerInterface[] $servers */
     $servers = $storage->loadMultiple();
 
     $form['status'] = [
@@ -235,47 +283,42 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
     // Load the correct server.
     $server_id = $config['status']['server'];
     /** @var \Drupal\ldap_servers\Entity\Server $server */
-    $server = \Drupal::service('entity_type.manager')
-      ->getStorage('ldap_server')
+    $server = $this->entityTypeManager->getStorage('ldap_server')
       ->load($server_id);
     if (!$server->status()) {
       return [];
     }
 
-    /** @var \Drupal\ldap_servers\LdapUserManager $ldap_user_manager */
-    $ldap_user_manager = \Drupal::service('ldap.user_manager');
-    $ldap_user_manager->setServer($server);
+    $this->ldapUserManager->setServer($server);
 
-    $ldap_user_data = $ldap_user_manager->getUserDataByAccount($user);
+    $ldap_user_data = $this->ldapUserManager->getUserDataByAccount($user);
 
     if (!$ldap_user_data && $user->isNew()) {
       // If we don't have a real user yet, fall back to the account name.
-      $ldap_user_data = $ldap_user_manager->getUserDataByIdentifier($user->getAccountName());
+      $ldap_user_data = $this->ldapUserManager->getUserDataByIdentifier($user->getAccountName());
     }
 
     if (!$ldap_user_data && $this->configuration['status']['only_ldap_authenticated'] === TRUE) {
       throw new AuthorizationSkipAuthorization('Not LDAP authenticated');
     }
 
-    /** @var \Drupal\ldap_servers\LdapGroupManager $group_manager */
-    $group_manager = \Drupal::service('ldap.group_manager');
-    $group_manager->setServerById($server_id);
+    $this->groupManager->setServerById($server_id);
 
     // Get user groups from DN.
-    $derive_from_dn_authorizations = $group_manager->groupUserMembershipsFromDn($user->getAccountName());
+    $derive_from_dn_authorizations = $this->groupManager->groupUserMembershipsFromDn($user->getAccountName());
     if (!$derive_from_dn_authorizations) {
       $derive_from_dn_authorizations = [];
     }
 
     // Get user groups from membership.
-    $group_dns = $group_manager->groupMembershipsFromUser($user->getAccountName());
+    $group_dns = $this->groupManager->groupMembershipsFromUser($user->getAccountName());
     if (!$group_dns) {
       $group_dns = [];
     }
 
     $proposed_ldap_authorizations = array_merge($derive_from_dn_authorizations, $group_dns);
     $proposed_ldap_authorizations = array_unique($proposed_ldap_authorizations);
-    \Drupal::service('ldap.detail_log')->log(
+    $this->ldapDetailLog->log(
         'Available authorizations to test: @authorizations',
         ['@authorizations' => implode("\n", $proposed_ldap_authorizations)],
         'ldap_authorization'
@@ -307,12 +350,13 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
               $filtered_proposals[$key] = $matches[0];
             }
             else {
+              // @todo I do not think this line can be executed.
               $filtered_proposals[$key] = $value;
             }
           }
         }
         catch (\Exception $e) {
-          \Drupal::logger('ldap')
+          $this->logger
             ->error('Error in matching regular expression @regex',
               ['@regex' => $pattern]
             );
@@ -335,7 +379,7 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
     $config = $profile->getProviderConfig();
     foreach ($proposals as $key => $authorization_id) {
       /** @var string $lowercase_key */
-      $lowercase_key = \mb_strtolower($key);
+      $lowercase_key = mb_strtolower($key);
 
       // The string check should not be necessary, it's a guard against a
       // misconfiguration such as someone setting use_first_attr_as_groupid
@@ -353,7 +397,7 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
             $authorization_id = ConversionHelper::unescapeDnValue(trim($first_part[1]));
           }
         }
-        $lowercase_key = \mb_strtolower($authorization_id);
+        $lowercase_key = mb_strtolower($authorization_id);
       }
 
       $proposals[$lowercase_key] = $authorization_id;

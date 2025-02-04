@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_user\Unit;
 
@@ -14,6 +14,7 @@ use Drupal\ldap_user\Plugin\Validation\Constraint\LdapProtectedUserFieldConstrai
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
 use Drupal\user\UserStorageInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
@@ -231,11 +232,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $account
       ->method('id')
       ->willReturn('current-user');
-    $pass = new \stdClass();
-    $pass->existing = 'existing';
-    $account->expects($this->once())
-      ->method('get')
-      ->willReturn($pass);
+
     $items = $this->createMock(FieldItemListInterface::class);
     $items
       ->method('getFieldDefinition')
@@ -249,12 +246,62 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
 
     $validator = $this->createValidator();
     $login_service = $this->createMock(LoginValidatorLoginForm::class);
-    $login_service->expects($this->any())
+    $login_service->expects($this->once())
       ->method('validateCredentialsLoggedIn')
       ->willReturn(LoginValidatorBase::AUTHENTICATION_SUCCESS);
     $validator->setLoginValidator($login_service);
     $validator->initialize($context);
     $validator->validate($items, $constraint);
+  }
+
+  /**
+   * Test create.
+   */
+  public function testCreate(): void {
+
+    $container = new ContainerBuilder();
+
+    $ldap_authentication_login_validator = $this->createMock(LoginValidatorLoginForm::class);
+    $container->set('ldap_authentication.login_validator', $ldap_authentication_login_validator);
+
+    $entity_type_manager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $container->set('entity_type.manager', $entity_type_manager);
+
+    $user_storage = $this->createMock(UserStorageInterface::class);
+    $entity_type_manager->expects($this->once())
+      ->method('getStorage')
+      ->with('user')
+      ->willReturn($user_storage);
+
+    $current_user = $this->createMock(AccountProxyInterface::class);
+    $container->set('current_user', $current_user);
+
+    \Drupal::setContainer($container);
+
+    $constraint = LdapProtectedUserFieldConstraintValidator::create($container);
+  }
+
+  /**
+   * Test items not set.
+   */
+  public function testItemsNotSet(): void {
+    $constraint = new LdapProtectedUserFieldConstraint();
+
+    $context = $this->createMock(ExecutionContextInterface::class);
+    $context->expects($this->never())->method('addViolation');
+
+    $account = $this->createMock(UserInterface::class);
+
+    $items = NULL;
+
+    $validator = $this->createValidator();
+    $login_service = $this->createMock(LoginValidatorLoginForm::class);
+
+    $validator->setLoginValidator($login_service);
+    $validator->initialize($context);
+    $result = $validator->validate($items, $constraint);
+
+    $this->assertEmpty($result);
   }
 
 }

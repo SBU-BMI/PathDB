@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Form;
 
@@ -8,11 +8,13 @@ use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for disabling a server.
  */
-class ServerEnableDisableForm extends EntityConfirmFormBase {
+final class ServerEnableDisableForm extends EntityConfirmFormBase {
 
   /**
    * The server entity.
@@ -20,6 +22,32 @@ class ServerEnableDisableForm extends EntityConfirmFormBase {
    * @var \Drupal\ldap_servers\Entity\Server
    */
   protected $entity;
+
+  /**
+   * The logger channel for ldap_servers.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * The logger channel for ldap_servers.
+   *
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger channel for ldap_servers.
+   */
+  public function __construct(LoggerInterface $logger) {
+    $this->logger = $logger;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new self(
+      $container->get('logger.channel.ldap_servers')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -69,13 +97,13 @@ class ServerEnableDisableForm extends EntityConfirmFormBase {
     if ($this->entity->get('status') === 1) {
       $this->messenger()
         ->addMessage($this->t('LDAP server configuration %name (server id = %sid) has been enabled', $tokens));
-      \Drupal::logger('ldap_servers')
+      $this->logger
         ->notice('LDAP server enabled: %name (sid = %sid) ', $tokens);
     }
     else {
       $this->messenger()
         ->addMessage($this->t('LDAP server configuration %name (server id = %sid) has been disabled', $tokens));
-      \Drupal::logger('ldap_servers')
+      $this->logger
         ->notice('LDAP server disabled: %name (sid = %sid) ', $tokens);
     }
 

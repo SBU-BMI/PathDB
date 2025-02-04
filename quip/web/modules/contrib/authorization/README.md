@@ -27,10 +27,6 @@ An authorization follows the following general steps:
 ## Limitations
 
 - Authorization evaluates each profile in isolation.
-- The *Drupal roles* submodule has only one field for grants per user. This
-  means that **you cannot use multiple *Drupal roles* profiles** and have role
-  revocation working correctly. In theory you could apply revocation only to the
-  last profile but this is untested and unsupported.
 - The *Drupal roles* submodule does not allow the mapping of the two reserved
   group names "none" and "source".
 

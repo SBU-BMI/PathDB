@@ -180,7 +180,7 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
    *
    * @see \Drupal\Tests\search_api\Kernel\ReferencedEntitiesReindexingTest::testReferencedEntityChanged()
    */
-  public function referencedEntityChangedDataProvider(): array {
+  public static function referencedEntityChangedDataProvider(): array {
     $tests = [];
     foreach (['child', 'unrelated'] as $child) {
       foreach (['indexed', 'not_indexed'] as $field) {
@@ -317,7 +317,6 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
     $tracking_helper = \Drupal::getContainer()
       ->get('search_api.tracking_helper');
     $method = new \ReflectionMethod(TrackingHelper::class, 'getForeignEntityRelationsMap');
-    $method->setAccessible(TRUE);
     /** @see \Drupal\search_api\Utility\TrackingHelper::getForeignEntityRelationsMap() */
     $map = $method->invoke($tracking_helper, $this->index);
     usort($map, function (array $a, array $b): int {

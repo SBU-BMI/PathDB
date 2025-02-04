@@ -7,6 +7,7 @@ class HookObject {
   public $nid = 0;
   public $body_field_val = '';
   public $bundle = '';
+  public $langcode = '';
   public $show_button = TRUE;
   public $markup = '';
   public $error_message = '';

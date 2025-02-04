@@ -6,5 +6,6 @@ dependencies:
     - node
 id: node.review
 label: Review
+description: ''
 targetEntityType: node
 cache: true

@@ -1,8 +1,15 @@
 uuid: 02bedb75-1658-4eae-af14-fddb01914d11
 langcode: en
 status: true
-dependencies: {  }
+dependencies:
+  module:
+    - taxonomy_unique
+third_party_settings:
+  taxonomy_unique:
+    enabled: true
+    message: 'Collection %term already exists!'
 name: Collections
 vid: collections
-description: ''
+description: null
 weight: 0
+new_revision: false

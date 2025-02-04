@@ -14,10 +14,7 @@ interface PopulateInterface {
    *   The form or form element to populate.
    * @param null|array|string $request_slice
    *   (optional) The values to populate.
-   *
-   * @return array
-   *   The populated form.
    */
-  public function populateForm(array &$form, $request_slice = NULL);
+  public function populateForm(array &$form, $request_slice = NULL): void;
 
 }

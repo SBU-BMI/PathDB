@@ -1,16 +1,29 @@
 ldap_user.admin_form:
   route_name: ldap_user.admin_form
-  title: 'User settings'
+  title: 'Users'
   weight: 30
   base_route: entity.ldap_server.collection
-# TODO: Make these two conditional on something being set.
+
+ldap_user.admin_form_sub:
+  route_name: ldap_user.admin_form
+  title: 'Settings'
+  weight: 10
+  parent_id: ldap_user.admin_form
+
 ldap_user.mappings_drupal_form:
   route_name: ldap_user.drupal_admin_form
-  title: 'Drupal mappings'
-  weight: 30
-  base_route: entity.ldap_server.collection
+  title: 'Drupal'
+  weight: 20
+  parent_id: ldap_user.admin_form
+
 ldap_user.mappings_ldap_form:
   route_name: ldap_user.ldap_admin_form
-  title: 'LDAP mappings'
+  title: 'LDAP'
   weight: 30
-  base_route: entity.ldap_server.collection
+  parent_id: ldap_user.admin_form
+
+ldap_user.test_form:
+  route_name: ldap_user.test_form
+  title: 'Test'
+  weight: 40
+  parent_id: ldap_user.admin_form

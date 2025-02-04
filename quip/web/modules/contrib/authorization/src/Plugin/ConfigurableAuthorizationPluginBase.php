@@ -30,7 +30,7 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
   public function __construct(
     array $configuration,
     string $plugin_id,
-    array $plugin_definition
+    array $plugin_definition,
   ) {
     $configuration += $this->defaultConfiguration();
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -43,7 +43,7 @@ abstract class ConfigurableAuthorizationPluginBase extends PluginBase implements
     ContainerInterface $container,
     array $configuration,
     $plugin_id,
-    $plugin_definition
+    $plugin_definition,
   ) {
     $plugin = new static($configuration, $plugin_id, $plugin_definition);
 

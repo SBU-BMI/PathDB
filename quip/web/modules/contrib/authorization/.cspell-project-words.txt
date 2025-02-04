@@ -1,0 +1,3 @@
+externalauth
+gryffindor
+hpotter

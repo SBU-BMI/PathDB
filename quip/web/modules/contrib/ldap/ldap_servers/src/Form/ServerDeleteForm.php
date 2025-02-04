@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Form;
 
@@ -8,11 +8,39 @@ use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Builds the form to delete Server entities.
  */
-class ServerDeleteForm extends EntityConfirmFormBase {
+final class ServerDeleteForm extends EntityConfirmFormBase {
+
+  /**
+   * The logger channel for ldap_servers.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * The logger channel for ldap_servers.
+   *
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger channel for ldap_servers.
+   */
+  public function __construct(LoggerInterface $logger) {
+    $this->logger = $logger;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new self(
+      $container->get('logger.channel.ldap_servers')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -41,7 +69,7 @@ class ServerDeleteForm extends EntityConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->entity->delete();
 
-    \Drupal::logger('ldap_servers')->notice('@type: deleted %title.',
+    $this->logger->notice('@type: deleted %title.',
       [
         '@type' => $this->entity->bundle(),
         '%title' => $this->entity->label(),

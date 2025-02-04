@@ -32,25 +32,51 @@ class BasicTest extends KernelTestBase {
     /** @var \Drupal\key\KeyRepositoryInterface $key_repository */
     $key_repository = $this->container->get('key.repository');
     $key_hmac = $key_repository->getKey('jwt_test_hmac');
-    $this->assertNotEmpty($key_hmac);
-    $this->assertEquals('jwt_hs', $key_hmac->getKeyType()->getPluginId());
+    self::assertNotEmpty($key_hmac);
+    self::assertSame('jwt_hs', $key_hmac->getKeyType()->getPluginId());
     $key_rsa = $key_repository->getKey('jwt_test_rsa');
     $this->assertNotEmpty($key_rsa);
-    $this->assertEquals('jwt_rs', $key_rsa->getKeyType()->getPluginId());
+    self::assertSame('jwt_rs', $key_rsa->getKeyType()->getPluginId());
     // The jwt_test module configures the jwt_test_hmac key to be used.
     /** @var \Drupal\jwt\Transcoder\JwtTranscoderInterface $transcoder */
     $transcoder = $this->container->get('jwt.transcoder');
     $reflected = new \ReflectionClass($transcoder);
     $algorithm = $reflected->getProperty('algorithm');
     $algorithm->setAccessible(TRUE);
-    $this->assertEquals('HS256', $algorithm->getValue($transcoder));
+    self::assertSame('HS256', $algorithm->getValue($transcoder));
     $jwt = new JsonWebToken();
+
     $jwt->setClaim(['drupal', 'test'], 1234);
     $encoded = $transcoder->encode($jwt);
-    $this->assertNotEmpty($encoded);
-    $this->assertTrue(is_string($encoded));
+    self::assertNotEmpty($encoded);
+    self::assertTrue(is_string($encoded));
     $decoded_jwt = $transcoder->decode($encoded);
-    $this->assertEquals(1234, $decoded_jwt->getClaim(['drupal', 'test']));
+    self::assertSame(1234, $decoded_jwt->getClaim(['drupal', 'test']));
+  }
+
+  /**
+   * Test transcoder and JWT class.
+   */
+  public function testJsonWebToken() {
+    $jwt = new JsonWebToken();
+    /** @var \Drupal\jwt\Transcoder\JwtTranscoderInterface $transcoder */
+    $transcoder = $this->container->get('jwt.transcoder');
+    $jwt->setHeader('kid', 'llama');
+    $jwt->setHeader('test', 7654);
+    $jwt->setHeader('garbage', 'can');
+    // These 2 headers should be discarded.
+    $jwt->setHeader('alg', 'Zz256');
+    $jwt->setHeader('typ', 'XWT');
+    self::assertSame('can', $jwt->getHeader('garbage'));
+    $jwt->unsetHeader('garbage');
+    self::assertNull($jwt->getHeader('garbage'));
+    $encoded = $transcoder->encode($jwt);
+    $decoded_jwt = $transcoder->decode($encoded);
+    self::assertSame('llama', $decoded_jwt->getHeader('kid'));
+    self::assertSame(7654, $decoded_jwt->getHeader('test'));
+    self::assertNull($decoded_jwt->getHeader('garbage'));
+    self::assertSame('HS256', $decoded_jwt->getHeader('alg'));
+    self::assertSame('JWT', $decoded_jwt->getHeader('typ'));
   }
 
 }

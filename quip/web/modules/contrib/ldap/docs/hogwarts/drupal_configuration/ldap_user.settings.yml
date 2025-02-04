@@ -12,7 +12,7 @@ orphanedDrupalAcctBehavior: ldap_user_orphan_email
 orphanedCheckQty: 100
 userConflictResolve: resolve
 manualAccountConflict: conflict_show_option
-acctCreation: ldap_behaviour
+acctCreation: ldap_behavior
 ldapUserSyncMappings:
   drupal:
     field-mail:

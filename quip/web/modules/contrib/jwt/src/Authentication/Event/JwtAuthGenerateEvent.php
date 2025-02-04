@@ -3,7 +3,7 @@
 namespace Drupal\jwt\Authentication\Event;
 
 /**
- * Class JwtAuthGenerateEvent.
+ * An event triggered when a new JWT token is generated.
  */
 class JwtAuthGenerateEvent extends JwtAuthBaseEvent {
 

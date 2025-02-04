@@ -209,7 +209,7 @@ class CommandHelper implements LoggerAwareInterface {
    */
   public function enableIndexCommand(array $index_ids = NULL) {
     if (!$this->getIndexCount()) {
-      throw new ConsoleException($this->t('There are no indexes defined. Please create an index before trying to enable it.'));
+      throw new ConsoleException($this->t('There are no indexes defined. Create an index before trying to enable it.'));
     }
 
     $indexes = $this->loadIndexes($index_ids);
@@ -237,7 +237,7 @@ class CommandHelper implements LoggerAwareInterface {
    */
   public function disableIndexCommand(array $index_ids = NULL) {
     if (!$this->getIndexCount()) {
-      throw new ConsoleException($this->t('There are no indexes defined. Please create an index before trying to disable it.'));
+      throw new ConsoleException($this->t('There are no indexes defined. Create an index before trying to disable it.'));
     }
 
     $indexes = $this->loadIndexes($index_ids);
@@ -283,7 +283,12 @@ class CommandHelper implements LoggerAwareInterface {
 
     $batchSet = FALSE;
     foreach ($indexes as $index) {
-      if (!$index->status() || $index->isReadOnly()) {
+      if (!$index->status()) {
+        $this->logger->warning($this->t("The index @index is disabled.", ['@index' => $index->label()]));
+        continue;
+      }
+      if ($index->isReadOnly()) {
+        $this->logger->warning($this->t("The index @index is read-only.", ['@index' => $index->label()]));
         continue;
       }
       $tracker = $index->getTrackerInstance();
@@ -334,8 +339,8 @@ class CommandHelper implements LoggerAwareInterface {
         IndexBatchHelper::create($index, $currentBatchSize, $current_limit);
         $batchSet = TRUE;
       }
-      catch (SearchApiException $e) {
-        throw new ConsoleException($this->t("Couldn't create a batch, please check the batch size and limit parameters."));
+      catch (SearchApiException) {
+        throw new ConsoleException($this->t("Couldn't create a batch, check the batch size and limit parameters."));
       }
     }
 
@@ -377,7 +382,7 @@ class CommandHelper implements LoggerAwareInterface {
             $reindexed_datasources[] = $datasource->label();
           }
         }
-        $description = 'This hook is deprecated in search_api:8.x-1.14 and is removed from search_api:2.0.0. Please use the "search_api.reindex_scheduled" event instead. See https://www.drupal.org/node/3059866';
+        $description = 'This hook is deprecated in search_api:8.x-1.14 and is removed from search_api:2.0.0. Use the "search_api.reindex_scheduled" event instead. See https://www.drupal.org/node/3059866';
         $this->moduleHandler->invokeAllDeprecated($description, 'search_api_index_reindex', [$index, FALSE]);
         $event_name = SearchApiEvents::REINDEX_SCHEDULED;
         $event = new ReindexScheduledEvent($index, FALSE);
@@ -496,7 +501,7 @@ class CommandHelper implements LoggerAwareInterface {
         $label = $item->getDatasource()
           ->getItemLabel($item->getOriginalObject());
       }
-      catch (SearchApiException $e) {
+      catch (SearchApiException) {
         $label = NULL;
       }
       $rows[] = [
@@ -730,7 +735,7 @@ class CommandHelper implements LoggerAwareInterface {
       $storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
       return $storage->loadOverrideFree($entity->id());
     }
-    catch (InvalidPluginDefinitionException $e) {
+    catch (InvalidPluginDefinitionException) {
       return NULL;
     }
   }

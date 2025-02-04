@@ -17,7 +17,7 @@ class ViewsTest extends TestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
     'field_ui',
     'taxonomy',
@@ -71,7 +71,7 @@ class ViewsTest extends TestBase {
     ];
     $node_1 = $this->drupalCreateNode($settings_1);
     $this->drupalGet('node/' . $node_1->id() . '/edit');
-    $this->submitForm($edit_tag_1, t('Save'));
+    $this->submitForm($edit_tag_1, 'Save');
     $settings_2 = [
       'type' => 'article',
       'title' => 'Article 2',
@@ -79,7 +79,7 @@ class ViewsTest extends TestBase {
     ];
     $node_2 = $this->drupalCreateNode($settings_2);
     $this->drupalGet('node/' . $node_2->id() . '/edit');
-    $this->submitForm($edit_tag_1, t('Save'));
+    $this->submitForm($edit_tag_1, 'Save');
     $settings_3 = [
       'type' => 'article',
       'title' => 'Article 3',
@@ -87,7 +87,7 @@ class ViewsTest extends TestBase {
     ];
     $node_3 = $this->drupalCreateNode($settings_3);
     $this->drupalGet('node/' . $node_3->id() . '/edit');
-    $this->submitForm($edit_tag_2, t('Save'));
+    $this->submitForm($edit_tag_2, 'Save');
 
     // Configure teaser and full layout.
     $layout = [
@@ -99,8 +99,8 @@ class ViewsTest extends TestBase {
     ];
     $assert = [
       'regions' => [
-        'left' => '<td colspan="8">' . t('Left') . '</td>',
-        'right' => '<td colspan="8">' . t('Right') . '</td>',
+        'left' => '<td colspan="8">' . $this->t('Left') . '</td>',
+        'right' => '<td colspan="8">' . $this->t('Right') . '</td>',
       ],
     ];
     $this->dsSelectLayout($layout, $assert, 'admin/structure/types/manage/article/display/teaser');
@@ -116,10 +116,10 @@ class ViewsTest extends TestBase {
     ];
     $assert = [
       'regions' => [
-        'first' => '<td colspan="8">' . t('First') . '</td>',
-        'second' => '<td colspan="8">' . t('Second') . '</td>',
-        'third' => '<td colspan="8">' . t('Third') . '</td>',
-        'fourth' => '<td colspan="8">' . t('Fourth') . '</td>',
+        'first' => '<td colspan="8">' . $this->t('First') . '</td>',
+        'second' => '<td colspan="8">' . $this->t('Second') . '</td>',
+        'third' => '<td colspan="8">' . $this->t('Third') . '</td>',
+        'fourth' => '<td colspan="8">' . $this->t('Fourth') . '</td>',
       ],
     ];
     $this->dsSelectLayout($layout, $assert);

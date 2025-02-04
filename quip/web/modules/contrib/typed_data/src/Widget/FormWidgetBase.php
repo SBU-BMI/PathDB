@@ -53,7 +53,7 @@ abstract class FormWidgetBase extends PluginBase implements FormWidgetInterface,
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration() {
+  public function defaultConfiguration(): array {
     return [];
   }
 
@@ -86,7 +86,7 @@ abstract class FormWidgetBase extends PluginBase implements FormWidgetInterface,
    * @return object
    *   A DrupalDateTime object with the required date and time values.
    */
-  public function createDefaultDateTime($date) {
+  public function createDefaultDateTime(?string $date) {
     if (!empty($date)) {
       $default = new DrupalDateTime($date);
     }

@@ -14,11 +14,16 @@ use Drupal\user\UserInterface;
 class AdminTest extends BrowserTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'starterkit_theme';
+
+  /**
    * The modules to enable.
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'redirect_after_login',
   ];
 
@@ -68,7 +73,7 @@ class AdminTest extends BrowserTestBase {
 
     $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/people/permissions');
-    $this->assertText('Administer redirect_after_login settings', 'Permission is available in the permissionsn form.');
+    $this->assertSession()->pageTextContains('Administer redirect_after_login settings');
   }
 
   /**
@@ -89,7 +94,7 @@ class AdminTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     // TODO: setup tasks here.
     $this->admin_role = Role::create([

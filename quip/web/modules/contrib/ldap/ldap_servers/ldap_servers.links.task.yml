@@ -4,8 +4,20 @@ entity.ldap_server.collection:
   weight: 20
   base_route: entity.ldap_server.collection
 
-ldap_servers.debug_settings:
+ldap_servers.debug:
   route_name: ldap_servers.debug_settings
-  title: 'Debugging'
+  title: 'Debug'
   weight: 90
   base_route: entity.ldap_server.collection
+
+ldap_servers.debug_settings:
+  route_name: ldap_servers.debug_settings
+  title: 'Settings'
+  weight: 90
+  parent_id: ldap_servers.debug
+
+ldap_servers.debug_report:
+  route_name: ldap_servers.debug_report
+  title: 'Report'
+  weight: 90
+  parent_id: ldap_servers.debug

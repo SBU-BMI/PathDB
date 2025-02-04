@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Composer.
@@ -44,13 +44,13 @@ class Transaction
     /**
      * @var array<string, PackageInterface[]>
      */
-    protected $resultPackagesByName = array();
+    protected $resultPackagesByName = [];
 
     /**
      * @param PackageInterface[] $presentPackages
      * @param PackageInterface[] $resultPackages
      */
-    public function __construct($presentPackages, $resultPackages)
+    public function __construct(array $presentPackages, array $resultPackages)
     {
         $this->presentPackages = $presentPackages;
         $this->setResultPackageMaps($resultPackages);
@@ -60,21 +60,20 @@ class Transaction
     /**
      * @return OperationInterface[]
      */
-    public function getOperations()
+    public function getOperations(): array
     {
         return $this->operations;
     }
 
     /**
      * @param PackageInterface[] $resultPackages
-     * @return void
      */
-    private function setResultPackageMaps($resultPackages)
+    private function setResultPackageMaps(array $resultPackages): void
     {
-        $packageSort = function (PackageInterface $a, PackageInterface $b) {
+        $packageSort = static function (PackageInterface $a, PackageInterface $b): int {
             // sort alias packages by the same name behind their non alias version
-            if ($a->getName() == $b->getName()) {
-                if ($a instanceof AliasPackage != $b instanceof AliasPackage) {
+            if ($a->getName() === $b->getName()) {
+                if ($a instanceof AliasPackage !== $b instanceof AliasPackage) {
                     return $a instanceof AliasPackage ? -1 : 1;
                 }
                 // if names are the same, compare version, e.g. to sort aliases reliably, actual order does not matter
@@ -84,7 +83,7 @@ class Transaction
             return strcmp($b->getName(), $a->getName());
         };
 
-        $this->resultPackageMap = array();
+        $this->resultPackageMap = [];
         foreach ($resultPackages as $package) {
             $this->resultPackageMap[spl_object_hash($package)] = $package;
             foreach ($package->getNames() as $name) {
@@ -101,14 +100,14 @@ class Transaction
     /**
      * @return OperationInterface[]
      */
-    protected function calculateOperations()
+    protected function calculateOperations(): array
     {
-        $operations = array();
+        $operations = [];
 
-        $presentPackageMap = array();
-        $removeMap = array();
-        $presentAliasMap = array();
-        $removeAliasMap = array();
+        $presentPackageMap = [];
+        $removeMap = [];
+        $presentAliasMap = [];
+        $removeAliasMap = [];
         foreach ($this->presentPackages as $package) {
             if ($package instanceof AliasPackage) {
                 $presentAliasMap[$package->getName().'::'.$package->getVersion()] = $package;
@@ -121,10 +120,10 @@ class Transaction
 
         $stack = $this->getRootPackages();
 
-        $visited = array();
-        $processed = array();
+        $visited = [];
+        $processed = [];
 
-        while (!empty($stack)) {
+        while (\count($stack) > 0) {
             $package = array_pop($stack);
 
             if (isset($processed[spl_object_hash($package)])) {
@@ -162,7 +161,7 @@ class Transaction
 
                         // do we need to update?
                         // TODO different for lock?
-                        if ($package->getVersion() != $presentPackageMap[$package->getName()]->getVersion() ||
+                        if ($package->getVersion() !== $presentPackageMap[$package->getName()]->getVersion() ||
                             $package->getDistReference() !== $presentPackageMap[$package->getName()]->getDistReference() ||
                             $package->getSourceReference() !== $presentPackageMap[$package->getName()]->getSourceReference()
                         ) {
@@ -218,7 +217,7 @@ class Transaction
      *
      * @return array<string, PackageInterface>
      */
-    protected function getRootPackages()
+    protected function getRootPackages(): array
     {
         $roots = $this->resultPackageMap;
 
@@ -244,10 +243,10 @@ class Transaction
     /**
      * @return PackageInterface[]
      */
-    protected function getProvidersInResult(Link $link)
+    protected function getProvidersInResult(Link $link): array
     {
         if (!isset($this->resultPackagesByName[$link->getTarget()])) {
-            return array();
+            return [];
         }
 
         return $this->resultPackagesByName[$link->getTarget()];
@@ -266,14 +265,14 @@ class Transaction
      * @param  OperationInterface[] $operations
      * @return OperationInterface[] reordered operation list
      */
-    private function movePluginsToFront(array $operations)
+    private function movePluginsToFront(array $operations): array
     {
-        $dlModifyingPluginsNoDeps = array();
-        $dlModifyingPluginsWithDeps = array();
-        $dlModifyingPluginRequires = array();
-        $pluginsNoDeps = array();
-        $pluginsWithDeps = array();
-        $pluginRequires = array();
+        $dlModifyingPluginsNoDeps = [];
+        $dlModifyingPluginsWithDeps = [];
+        $dlModifyingPluginRequires = [];
+        $pluginsNoDeps = [];
+        $pluginsWithDeps = [];
+        $pluginRequires = [];
 
         foreach (array_reverse($operations, true) as $idx => $op) {
             if ($op instanceof Operation\InstallOperation) {
@@ -284,17 +283,18 @@ class Transaction
                 continue;
             }
 
-            $isDownloadsModifyingPlugin = $package->getType() === 'composer-plugin' && ($extra = $package->getExtra()) && isset($extra['plugin-modifies-downloads']) && $extra['plugin-modifies-downloads'] === true;
+            $extra = $package->getExtra();
+            $isDownloadsModifyingPlugin = $package->getType() === 'composer-plugin' && isset($extra['plugin-modifies-downloads']) && $extra['plugin-modifies-downloads'] === true;
 
             // is this a downloads modifying plugin or a dependency of one?
-            if ($isDownloadsModifyingPlugin || count(array_intersect($package->getNames(), $dlModifyingPluginRequires))) {
+            if ($isDownloadsModifyingPlugin || \count(array_intersect($package->getNames(), $dlModifyingPluginRequires)) > 0) {
                 // get the package's requires, but filter out any platform requirements
-                $requires = array_filter(array_keys($package->getRequires()), function ($req) {
+                $requires = array_filter(array_keys($package->getRequires()), static function ($req): bool {
                     return !PlatformRepository::isPlatformPackage($req);
                 });
 
                 // is this a plugin with no meaningful dependencies?
-                if ($isDownloadsModifyingPlugin && !count($requires)) {
+                if ($isDownloadsModifyingPlugin && 0 === \count($requires)) {
                     // plugins with no dependencies go to the very front
                     array_unshift($dlModifyingPluginsNoDeps, $op);
                 } else {
@@ -312,14 +312,14 @@ class Transaction
             $isPlugin = $package->getType() === 'composer-plugin' || $package->getType() === 'composer-installer';
 
             // is this a plugin or a dependency of a plugin?
-            if ($isPlugin || count(array_intersect($package->getNames(), $pluginRequires))) {
+            if ($isPlugin || \count(array_intersect($package->getNames(), $pluginRequires)) > 0) {
                 // get the package's requires, but filter out any platform requirements
-                $requires = array_filter(array_keys($package->getRequires()), function ($req) {
+                $requires = array_filter(array_keys($package->getRequires()), static function ($req): bool {
                     return !PlatformRepository::isPlatformPackage($req);
                 });
 
                 // is this a plugin with no meaningful dependencies?
-                if ($isPlugin && !count($requires)) {
+                if ($isPlugin && 0 === \count($requires)) {
                     // plugins with no dependencies go to the very front
                     array_unshift($pluginsNoDeps, $op);
                 } else {
@@ -343,9 +343,9 @@ class Transaction
      * @param  OperationInterface[] $operations
      * @return OperationInterface[] reordered operation list
      */
-    private function moveUninstallsToFront(array $operations)
+    private function moveUninstallsToFront(array $operations): array
     {
-        $uninstOps = array();
+        $uninstOps = [];
         foreach ($operations as $idx => $op) {
             if ($op instanceof Operation\UninstallOperation || $op instanceof Operation\MarkAliasUninstalledOperation) {
                 $uninstOps[] = $op;

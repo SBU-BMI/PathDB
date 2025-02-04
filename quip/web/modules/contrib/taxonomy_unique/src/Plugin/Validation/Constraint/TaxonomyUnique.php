@@ -3,6 +3,7 @@
 namespace Drupal\taxonomy_unique\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
+use Drupal\taxonomy_unique\TaxonomyUniqueConstants;
 
 /**
  * Taxonomy unique constraint.
@@ -15,11 +16,11 @@ use Symfony\Component\Validator\Constraint;
 class TaxonomyUnique extends Constraint {
 
   /**
-   * The TAXONOMY_UNIQUE_DEFAULT_MESSAGE constant.
+   * The default error text to inform the term is not unique.
    *
    * @var string
    */
-  public $notUnique = TAXONOMY_UNIQUE_DEFAULT_MESSAGE;
+  public $notUnique = TaxonomyUniqueConstants::NOT_UNIQUE_DEFAULT_ERROR_MESSAGE;
 
   /**
    * Overwrites the default error message.

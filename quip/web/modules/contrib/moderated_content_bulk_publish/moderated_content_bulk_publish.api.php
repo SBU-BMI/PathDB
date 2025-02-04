@@ -18,6 +18,7 @@ function hook_moderated_content_bulk_publish_verify_archived($hookObject): void 
   $limit = 20;
   $nid = $hookObject->nid;
   $bundle = $hookObject->bundle;
+  $langcode = $hookObject->langcode;
   $show_button = $hookObject->show_button;
   $markup = $hookObject->markup;
   $error_message = $hookObject->error_message;
@@ -37,7 +38,9 @@ function hook_moderated_content_bulk_publish_verify_archived($hookObject): void 
 function hook_moderated_content_bulk_publish_verify_publish($hookObject): void {
   $state = 'publish';
   $nid = $hookObject->nid;
+  $bundle = $hookObject->bundle;
   $body_field_val = $hookObject->body_field_val;
+  $langcode = $hookObject->langcode;
   $validate_failure = $hookObject->validate_failure;
   $error_message = $hookObject->error_message;
   $msgdetail_isToken = $hookObject->msgdetail_isToken;

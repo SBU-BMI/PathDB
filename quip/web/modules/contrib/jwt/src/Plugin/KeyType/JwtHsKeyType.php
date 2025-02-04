@@ -3,8 +3,8 @@
 namespace Drupal\jwt\Plugin\KeyType;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\key\Plugin\KeyTypeBase;
 use Drupal\key\Plugin\KeyPluginFormInterface;
+use Drupal\key\Plugin\KeyTypeBase;
 
 /**
  * Defines a key type for JWT HMAC Signatures.
@@ -96,8 +96,9 @@ class JwtHsKeyType extends KeyTypeBase implements KeyPluginFormInterface {
     // Validate the key size.
     $algorithm = $form_state->getValue('algorithm');
     $bytes = self::getAlgorithmKeysize()[$algorithm] / 8;
-    if (strlen($key_value) < $bytes) {
-      $args = ['%size' => strlen($key_value) * 8, '%required' => $bytes * 8];
+    $key_length = $key_value ? strlen($key_value) : 0;
+    if ($key_length < $bytes) {
+      $args = ['%size' => $key_length * 8, '%required' => $bytes * 8];
       $form_state->setErrorByName('algorithm', $this->t('Key size (%size bits) is too small for algorithm chosen. Algorithm requires a minimum of %required bits.', $args));
     }
   }

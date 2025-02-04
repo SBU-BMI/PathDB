@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ldap_user\EventSubscriber;
 
@@ -8,7 +8,7 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Password\DefaultPasswordGenerator;
+use Drupal\Core\Password\PasswordGeneratorInterface;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\ldap_servers\Helper\ConversionHelper;
 use Drupal\ldap_servers\Helper\CredentialsStorage;
@@ -24,6 +24,7 @@ use Drupal\ldap_user\FieldProvider;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Ldap\Entry;
+use function in_array;
 
 /**
  * Event subscribers for creating and updating LDAP entries.
@@ -118,7 +119,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
   /**
    * Password generator.
    *
-   * @var \Drupal\Core\Password\DefaultPasswordGenerator
+   * @var \Drupal\Core\Password\PasswordGeneratorInterface
    */
   private $passwordGenerator;
 
@@ -148,7 +149,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
    *   Field Provider.
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   File system.
-   * @param \Drupal\Core\Password\DefaultPasswordGenerator $passwordGenerator
+   * @param \Drupal\Core\Password\PasswordGeneratorInterface $passwordGenerator
    *   Password Generator.
    * @param \Drupal\externalauth\AuthmapInterface $external_auth
    *   External auth map.
@@ -162,8 +163,9 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     LdapUserManager $ldap_user_manager,
     FieldProvider $field_provider,
     FileSystemInterface $file_system,
-    DefaultPasswordGenerator $passwordGenerator,
-    AuthmapInterface $external_auth) {
+    PasswordGeneratorInterface $passwordGenerator,
+    AuthmapInterface $external_auth,
+  ) {
     $this->config = $config_factory->get('ldap_user.settings');
     $this->logger = $logger;
     $this->detailLog = $detail_log;
@@ -197,7 +199,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     $triggers = $this->config->get('ldapEntryProvisionTriggers');
     if (
       $this->provisionLdapEntriesFromDrupalUsers() &&
-      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION, $triggers, TRUE) &&
+      in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION, $triggers, TRUE) &&
       $this->account->get('ldap_user_ldap_exclude')->getString() !== '1'
     ) {
       $this->loadServer();
@@ -222,7 +224,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     $this->account = $event->account;
     if (
       $this->provisionLdapEntriesFromDrupalUsers() &&
-      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE) &&
+      in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE) &&
       $this->account->get('ldap_user_ldap_exclude')->getString() !== '1'
     ) {
       $this->loadServer();
@@ -247,7 +249,7 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     $this->account = $event->account;
     if (
       $this->provisionLdapEntriesFromDrupalUsers() &&
-      \in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE) &&
+      in_array(self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE, $this->config->get('ldapEntryProvisionTriggers'), TRUE) &&
       $this->account->get('ldap_user_ldap_exclude')->getString() !== '1'
     ) {
       $this->loadServer();
@@ -447,6 +449,14 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
     foreach ($desired_tokens as $desired_token) {
       $this->fetchDrupalAccountAttribute($desired_token);
     }
+
+    // Tokens should be set as a result of the above foreach loop. If they're
+    // not then it bailed out on a password field and we shouldn't progress any
+    // further.
+    if (empty($this->tokens)) {
+      return NULL;
+    }
+
     // This is inelegant but otherwise we cannot support compound tokens for DN.
     if ($type === 'dn') {
       foreach ($this->tokens as $key => $value) {
