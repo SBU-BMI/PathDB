@@ -56,7 +56,8 @@ RUN chmod -R 775 /data/pathdb/files
 
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
-RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nodes -newkey rsa:2048 -keyout quip.key -out quip.crt
+#RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nodes -newkey rsa:2048 -keyout quip.key -out quip.crt
+RUN openssl genrsa 2048 > quip.key
 
 # copy over Docker initialization scripts
 EXPOSE 80
