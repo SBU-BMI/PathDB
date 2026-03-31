@@ -9,7 +9,7 @@ RUN dnf -y update && dnf clean all
 RUN yum -y install wget which zip unzip bind-utils
 RUN dnf -y install epel-release && dnf clean all
 RUN dnf module reset php -y && \
-    dnf module enable php:8.1 -y && \
+    dnf module enable php:8.4 -y && \
     dnf -y install php php-cli php-common && \
     dnf clean all
 COPY mariadb.repo /etc/yum.repos.d/mariadb.repo
