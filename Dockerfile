@@ -4,35 +4,22 @@ FROM rockylinux:9
 # QuIP - PathDB Docker Container
 #
 ### update OS
-
 RUN dnf -y update && dnf clean all
-RUN yum -y install wget which zip unzip bind-utils
-RUN dnf -y install epel-release && dnf clean all
-RUN dnf module reset php -y && \
-    dnf module enable php:8.4 -y && \
-    dnf -y install php php-cli php-common && \
-    dnf clean all
+RUN dnf -y install wget which zip unzip bind-utils
+RUN dnf install -y dnf-plugins-core
+RUN dnf config-manager --set-enabled crb -y
+RUN dnf install -y epel-release https://rpms.remirepo.net/enterprise/remi-release-9.rpm
+RUN dnf module reset php -y && dnf module enable php:remi-8.4 -y
+RUN dnf install -y php php-cli php-common php-fpm php-mysqlnd php-pecl-uploadprogress \
+    php-opcache php-xml php-gd php-intl php-mbstring php-pecl-zip php-ldap \
+    php-devel httpd telnet openssl mod_ssl procps-ng sudo
 COPY mariadb.repo /etc/yum.repos.d/mariadb.repo
-RUN dnf install -y epel-release
-RUN dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm
-RUN dnf module reset php -y
-RUN dnf module enable php:remi-8.4 -y
-RUN dnf install -y php php-fpm php-mysqlnd php-pecl-uploadprogress httpd
-RUN dnf install -y httpd telnet openssl mod_ssl php php-opcache php-xml php-mcrypt php-gd php-devel php-mysqlnd php-intl php-mbstring php-pecl-zip php-ldap
-RUN yum install -y MariaDB-server MariaDB-client git
-RUN dnf install -y procps-ng sudo
-RUN sed -i 's/;date.timezone =/date.timezone = America\/New_York/g' /etc/php.ini
-RUN sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
-
+RUN dnf install -y MariaDB-server MariaDB-client git
 # download Drupal management tools
 WORKDIR /build
-RUN wget https://getcomposer.org/installer
-RUN php installer
-RUN rm -f installer
-RUN mv composer.phar /usr/local/bin/composer
+RUN wget https://getcomposer.org/installer && php installer && rm -f installer && mv composer.phar /usr/local/bin/composer
 COPY pathdbmysql.cnf pathdbmysql.cnf
 COPY w3-theme-custom.css w3-theme-custom.css
-
 # create initial Drupal environment
 WORKDIR /
 COPY quip/ quip/
@@ -53,12 +40,9 @@ RUN sed -i 's/sys_temp_dir =/sys_temp_dir = "\/data\/tmp"/g' /etc/php.ini
 RUN mkdir -p /data/pathdb/files
 RUN chown -R apache:apache /data/pathdb/files
 RUN chmod -R 775 /data/pathdb/files
-
 # create self-signed digital keys for JWT
 WORKDIR /etc/httpd/conf
-#RUN openssl req -subj '/CN=www.mydom.com/O=My Company Name LTD./C=US' -x509 -nodes -newkey rsa:2048 -keyout quip.key -out quip.crt
 RUN openssl genrsa 2048 > quip.key
-
 # copy over Docker initialization scripts
 EXPOSE 80
 COPY run.sh /root/run.sh
@@ -79,6 +63,6 @@ ARG featureMap
 RUN if [ -z ${featureMap} ]; then git clone https://github.com/SBU-BMI/FeatureMap --branch=2.0.3; else git clone https://github.com/SBU-BMI/FeatureMap --branch=$featureMap; fi
 RUN rm /etc/httpd/conf.d/ssl.conf
 RUN chmod 755 /root/run.sh
-RUN yum update -y && yum clean all
+RUN dnf update -y && dnf clean all
 CMD ["sh", "/root/run.sh"]
 
