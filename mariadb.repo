@@ -1,6 +1,6 @@
 [mariadb]
 name = MariaDB
-baseurl = http://yum.mariadb.org/10.5/rocky9-amd64
+baseurl = http://yum.mariadb.org/10.6/rocky9-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 enabled=1
