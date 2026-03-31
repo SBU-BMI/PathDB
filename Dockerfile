@@ -16,7 +16,7 @@ COPY mariadb.repo /etc/yum.repos.d/mariadb.repo
 RUN dnf install -y epel-release
 RUN dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm
 RUN dnf module reset php -y
-RUN dnf module enable php:remi-8.1 -y
+RUN dnf module enable php:remi-8.4 -y
 RUN dnf install -y php php-fpm php-mysqlnd php-pecl-uploadprogress httpd
 RUN dnf install -y httpd telnet openssl mod_ssl php php-opcache php-xml php-mcrypt php-gd php-devel php-mysqlnd php-intl php-mbstring php-pecl-zip php-ldap
 RUN yum install -y MariaDB-server MariaDB-client git
