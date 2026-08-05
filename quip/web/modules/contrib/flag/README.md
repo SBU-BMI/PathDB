@@ -38,17 +38,21 @@ information, see
 Configuration of Flag module involves creating one or more flags.
 
 1. Go to Admin > Structure > Flags, and click "Add flag".
-
 2. Select the target entity type, and click "Continue".
-
 3. Enter the flag link text, link type, and any other options.
-
 4. Click "Save Flag".
-
 5. Under Admin > People, configure the permissions for each Flag.
 
 Once you are finished creating flags, you may choose to use Views to leverage
 your new flags.
+
+
+### Customize the flag link
+
+You can
+[customize the mark up](https://www.drupal.org/docs/develop/theming-drupal/twig-in-drupal/working-with-twig-templates)
+via the `templates/flag.html.twig` file, or change the look and behaviour of the
+flag link with CSS, for example [adding an icon](https://www.drupal.org/docs/extending-drupal/contributed-modules/contributed-module-documentation/flag/add-icon-to-flag-link).
 
 
 ## Support requests

@@ -39,10 +39,10 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 	public const CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX = 'DisallowedArrayTypeHintSyntax';
 
 	/** @var list<string> */
-	public $traversableTypeHints = [];
+	public array $traversableTypeHints = [];
 
 	/** @var array<string, int>|null */
-	private $normalizedTraversableTypeHints;
+	private ?array $normalizedTraversableTypeHints = null;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -69,10 +69,10 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 				$fix = $phpcsFile->addFixableError(
 					sprintf(
 						'Usage of array type hint syntax in "%s" is disallowed, use generic type hint syntax instead.',
-						AnnotationTypeHelper::print($arrayTypeNode)
+						AnnotationTypeHelper::print($arrayTypeNode),
 					),
 					$annotation->getStartPointer(),
-					self::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX
+					self::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX,
 				);
 
 				if (!$fix) {
@@ -81,7 +81,6 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 
 				$parsedDocComment = DocCommentHelper::parseDocComment($phpcsFile, $docCommentOpenPointer);
 
-				/** @var list<UnionTypeNode> $unionTypeNodes */
 				$unionTypeNodes = AnnotationHelper::getAnnotationNodesByType($annotation->getNode(), UnionTypeNode::class);
 
 				$unionTypeNode = $this->findUnionTypeThatContainsArrayType($arrayTypeNode, $unionTypeNodes);
@@ -91,29 +90,29 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 						$phpcsFile,
 						$docCommentOpenPointer,
 						$unionTypeNode,
-						$annotation->getValue()
+						$annotation->getValue(),
 					);
 					if ($genericIdentifier !== null) {
 						$genericTypeNode = new GenericTypeNode(
 							new IdentifierTypeNode($genericIdentifier),
-							[$this->fixArrayNode($arrayTypeNode->type)]
+							[$this->fixArrayNode($arrayTypeNode->type)],
 						);
 						$fixedDocComment = AnnotationHelper::fixAnnotation(
 							$parsedDocComment,
 							$annotation,
 							$unionTypeNode,
-							$genericTypeNode
+							$genericTypeNode,
 						);
 					} else {
 						$genericTypeNode = new GenericTypeNode(
 							new IdentifierTypeNode('array'),
-							[$this->fixArrayNode($arrayTypeNode->type)]
+							[$this->fixArrayNode($arrayTypeNode->type)],
 						);
 						$fixedDocComment = AnnotationHelper::fixAnnotation(
 							$parsedDocComment,
 							$annotation,
 							$arrayTypeNode,
-							$genericTypeNode
+							$genericTypeNode,
 						);
 					}
 				} else {
@@ -121,12 +120,12 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 						$phpcsFile,
 						$docCommentOpenPointer,
 						$arrayTypeNode,
-						$annotation->getValue()
+						$annotation->getValue(),
 					) ?? 'array';
 
 					$genericTypeNode = new GenericTypeNode(
 						new IdentifierTypeNode($genericIdentifier),
-						[$this->fixArrayNode($arrayTypeNode->type)]
+						[$this->fixArrayNode($arrayTypeNode->type)],
 					);
 					$fixedDocComment = AnnotationHelper::fixAnnotation($parsedDocComment, $annotation, $arrayTypeNode, $genericTypeNode);
 				}
@@ -137,7 +136,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 					$phpcsFile,
 					$parsedDocComment->getOpenPointer(),
 					$parsedDocComment->getClosePointer(),
-					$fixedDocComment
+					$fixedDocComment,
 				);
 
 				$phpcsFile->fixer->endChangeset();
@@ -153,47 +152,43 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 		static $visitor;
 		static $traverser;
 
-		if ($visitor === null) {
-			$visitor = new class extends AbstractNodeVisitor {
+		$visitor ??= new class extends AbstractNodeVisitor {
 
-				/** @var list<ArrayTypeNode> */
-				private $nodes = [];
+			/** @var list<ArrayTypeNode> */
+			private array $nodes = [];
 
-				/**
-				 * @return Node|list<Node>|NodeTraverser::*|null
-				 */
-				public function enterNode(Node $node)
-				{
-					if ($node instanceof ArrayTypeNode) {
-						$this->nodes[] = $node;
+			/**
+			 * @return NodeTraverser::DONT_TRAVERSE_CHILDREN|null
+			 */
+			public function enterNode(Node $node)
+			{
+				if ($node instanceof ArrayTypeNode) {
+					$this->nodes[] = $node;
 
-						if ($node->type instanceof ArrayTypeNode) {
-							return NodeTraverser::DONT_TRAVERSE_CHILDREN;
-						}
+					if ($node->type instanceof ArrayTypeNode) {
+						return NodeTraverser::DONT_TRAVERSE_CHILDREN;
 					}
-
-					return null;
 				}
 
-				public function cleanNodes(): void
-				{
-					$this->nodes = [];
-				}
+				return null;
+			}
 
-				/**
-				 * @return list<ArrayTypeNode>
-				 */
-				public function getNodes(): array
-				{
-					return $this->nodes;
-				}
+			public function cleanNodes(): void
+			{
+				$this->nodes = [];
+			}
 
-			};
-		}
+			/**
+			 * @return list<ArrayTypeNode>
+			 */
+			public function getNodes(): array
+			{
+				return $this->nodes;
+			}
 
-		if ($traverser === null) {
-			$traverser = new NodeTraverser([$visitor]);
-		}
+		};
+
+		$traverser ??= new NodeTraverser([$visitor]);
 
 		$visitor->cleanNodes();
 
@@ -237,7 +232,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 				return null;
 			}
 
-			$functionPointer = TokenHelper::findNext($phpcsFile, TokenHelper::$functionTokenCodes, $docCommentOpenPointer + 1);
+			$functionPointer = TokenHelper::findNext($phpcsFile, TokenHelper::FUNCTION_TOKEN_CODES, $docCommentOpenPointer + 1);
 
 			if ($functionPointer === null || $phpcsFile->getTokens()[$functionPointer]['code'] !== T_FUNCTION) {
 				return null;
@@ -247,7 +242,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 				$parameterTypeHints = FunctionHelper::getParametersTypeHints($phpcsFile, $functionPointer);
 				return array_key_exists(
 					$annotationValue->parameterName,
-					$parameterTypeHints
+					$parameterTypeHints,
 				) && $parameterTypeHints[$annotationValue->parameterName] !== null
 					? $parameterTypeHints[$annotationValue->parameterName]->getTypeHint()
 					: null;
@@ -265,7 +260,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 			$typeNode->types[0] instanceof ArrayTypeNode
 			&& $typeNode->types[1] instanceof IdentifierTypeNode
 			&& $this->isTraversableType(
-				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $docCommentOpenPointer, $typeNode->types[1]->name)
+				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $docCommentOpenPointer, $typeNode->types[1]->name),
 			)
 		) {
 			return $typeNode->types[1]->name;
@@ -275,7 +270,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 			$typeNode->types[1] instanceof ArrayTypeNode
 			&& $typeNode->types[0] instanceof IdentifierTypeNode
 			&& $this->isTraversableType(
-				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $docCommentOpenPointer, $typeNode->types[0]->name)
+				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $docCommentOpenPointer, $typeNode->types[0]->name),
 			)
 		) {
 			return $typeNode->types[0]->name;
@@ -294,13 +289,13 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 	 */
 	private function getNormalizedTraversableTypeHints(): array
 	{
-		if ($this->normalizedTraversableTypeHints === null) {
-			$this->normalizedTraversableTypeHints = array_flip(array_map(static function (string $typeHint): string {
-				return NamespaceHelper::isFullyQualifiedName($typeHint)
+		$this->normalizedTraversableTypeHints ??= array_flip(
+			array_map(static fn (string $typeHint): string => NamespaceHelper::isFullyQualifiedName($typeHint)
 					? $typeHint
-					: sprintf('%s%s', NamespaceHelper::NAMESPACE_SEPARATOR, $typeHint);
-			}, SniffSettingsHelper::normalizeArray($this->traversableTypeHints)));
-		}
+					: sprintf('%s%s', NamespaceHelper::NAMESPACE_SEPARATOR, $typeHint), SniffSettingsHelper::normalizeArray(
+						$this->traversableTypeHints,
+					)),
+		);
 		return $this->normalizedTraversableTypeHints;
 	}
 

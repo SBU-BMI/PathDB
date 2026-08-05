@@ -5,6 +5,7 @@
  * File replace functionality.
  */
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\file\FileInterface;
 
 /**
@@ -46,4 +47,22 @@ function file_replace_file_replace(FileInterface $file) {
       }
     }
   }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function file_replace_entity_operation(EntityInterface $entity): array {
+  $operations = [];
+  if ($entity instanceof FileInterface) {
+    $replace_url = $entity->toUrl('replace-form');
+    if ($replace_url->access()) {
+      $operations['replace'] = [
+        'title' => t('Replace'),
+        'url' => $replace_url,
+        'weight' => 100,
+      ];
+    }
+  }
+  return $operations;
 }

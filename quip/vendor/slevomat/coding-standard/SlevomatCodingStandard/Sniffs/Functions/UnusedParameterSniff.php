@@ -2,16 +2,20 @@
 
 namespace SlevomatCodingStandard\Sniffs\Functions;
 
+use Exception;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
+use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\SuppressHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use SlevomatCodingStandard\Helpers\VariableHelper;
 use function array_merge;
 use function in_array;
+use function preg_match;
 use function sprintf;
+use function substr;
 use const T_COMMA;
 use const T_VARIABLE;
 
@@ -23,12 +27,15 @@ class UnusedParameterSniff implements Sniff
 
 	private const NAME = 'SlevomatCodingStandard.Functions.UnusedParameter';
 
+	/** @var list<string> */
+	public array $allowedParameterPatterns = [];
+
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$functionTokenCodes;
+		return TokenHelper::FUNCTION_TOKEN_CODES;
 	}
 
 	/**
@@ -52,7 +59,7 @@ class UnusedParameterSniff implements Sniff
 				$phpcsFile,
 				T_VARIABLE,
 				$currentPointer,
-				$tokens[$functionPointer]['parenthesis_closer']
+				$tokens[$functionPointer]['parenthesis_closer'],
 			);
 			if ($parameterPointer === null) {
 				break;
@@ -62,7 +69,7 @@ class UnusedParameterSniff implements Sniff
 				$phpcsFile,
 				array_merge([T_COMMA], Tokens::$scopeModifiers),
 				$parameterPointer - 1,
-				$tokens[$functionPointer]['parenthesis_opener']
+				$tokens[$functionPointer]['parenthesis_opener'],
 			);
 
 			if ($previousPointer !== null && in_array($tokens[$previousPointer]['code'], Tokens::$scopeModifiers, true)) {
@@ -70,7 +77,10 @@ class UnusedParameterSniff implements Sniff
 				continue;
 			}
 
-			if (VariableHelper::isUsedInScope($phpcsFile, $functionPointer, $parameterPointer)) {
+			if (
+				$this->variableIsSuppressedViaName($tokens[$parameterPointer]['content']) ||
+				VariableHelper::isUsedInScope($phpcsFile, $functionPointer, $parameterPointer)
+			) {
 				$currentPointer = $parameterPointer + 1;
 				continue;
 			}
@@ -79,7 +89,7 @@ class UnusedParameterSniff implements Sniff
 				$phpcsFile->addError(
 					sprintf('Unused parameter %s.', $tokens[$parameterPointer]['content']),
 					$parameterPointer,
-					self::CODE_UNUSED_PARAMETER
+					self::CODE_UNUSED_PARAMETER,
 				);
 			} else {
 				$suppressUseless = false;
@@ -95,13 +105,28 @@ class UnusedParameterSniff implements Sniff
 		$phpcsFile->addError(
 			sprintf('Useless %s %s', SuppressHelper::ANNOTATION, self::NAME),
 			$functionPointer,
-			self::CODE_USELESS_SUPPRESS
+			self::CODE_USELESS_SUPPRESS,
 		);
 	}
 
 	private function getSniffName(string $sniffName): string
 	{
 		return sprintf('%s.%s', self::NAME, $sniffName);
+	}
+
+	private function variableIsSuppressedViaName(string $variableName): bool
+	{
+		foreach (SniffSettingsHelper::normalizeArray($this->allowedParameterPatterns) as $allowedParamPattern) {
+			if (!SniffSettingsHelper::isValidRegularExpression($allowedParamPattern)) {
+				throw new Exception(sprintf('%s is not valid PCRE pattern.', $allowedParamPattern));
+			}
+
+			if (preg_match($allowedParamPattern, substr($variableName, 1)) === 1) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

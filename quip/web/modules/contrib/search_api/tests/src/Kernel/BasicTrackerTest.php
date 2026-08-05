@@ -4,10 +4,12 @@ namespace Drupal\Tests\search_api\Kernel;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Transaction;
+use Drupal\Core\Database\Transaction\TransactionManagerBase;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Utility\Utility;
 use Psr\Log\LoggerInterface;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the "default" tracker plugin.
@@ -16,6 +18,7 @@ use Psr\Log\LoggerInterface;
  *
  * @coversDefaultClass \Drupal\search_api\Plugin\search_api\tracker\Basic
  */
+#[RunTestsInSeparateProcesses]
 class BasicTrackerTest extends KernelTestBase {
 
   /**
@@ -56,13 +59,6 @@ class BasicTrackerTest extends KernelTestBase {
 
     $this->installSchema('search_api', ['search_api_item']);
     $this->installConfig('search_api');
-
-    // Do not use a batch for tracking the initial items after creating an
-    // index when running the tests via the GUI. Otherwise, it seems Drupal's
-    // Batch API gets confused and the test fails.
-    if (!Utility::isRunningInCli()) {
-      \Drupal::state()->set('search_api_use_tracking_batch', FALSE);
-    }
 
     $this->index = Index::create([
       'id' => 'index',
@@ -295,7 +291,6 @@ class BasicTrackerTest extends KernelTestBase {
    * @dataProvider exceptionHandlingDataProvider
    */
   public function testExceptionHandling($tracker_method, array $args = []) {
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\Drupal\Core\Database\Connection $connection */
     $connection = $this->getMockBuilder(Connection::class)
       ->disableOriginalConstructor()
       ->getMock();
@@ -313,7 +308,18 @@ class BasicTrackerTest extends KernelTestBase {
     $connection->method('startTransaction')->willReturn($transaction);
     $this->tracker->setDatabaseConnection($connection);
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\Psr\Log\LoggerInterface $logger */
+    // Mock the transactionManager() method since otherwise the destructor of
+    // $transaction might lead to a fatal error.
+    $transaction_manager = $this->createMock(TransactionManagerBase::class);
+    $connection->method('transactionManager')->willReturn($transaction_manager);
+    // This will keep PHPUnit from resetting the invocation handler of the
+    // $connection mock object, otherwise the above two lines are useless
+    // since $transaction will not be destroyed until after the test is
+    // finished.
+    // @see \PHPUnit\Framework\TestCase::shouldInvocationMockerBeReset()
+    // @todo Remove once we can depend on the fix for #3398767.
+    $this->setDependencyInput([$connection]);
+
     $logger = $this->createMock(LoggerInterface::class);
     $log = [];
     $logger->method('log')->willReturnCallback(function () use (&$log) {

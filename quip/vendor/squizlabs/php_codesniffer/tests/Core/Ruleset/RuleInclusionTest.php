@@ -4,7 +4,7 @@
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2019 Juliette Reinders Folmer. All rights reserved.
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Ruleset;
@@ -50,7 +50,7 @@ final class RuleInclusionTest extends AbstractRulesetTestCase
      *
      * @return void
      */
-    public static function initializeConfigAndRuleset()
+    protected function initializeConfigAndRuleset()
     {
         if (self::$standard === '') {
             $standard       = __DIR__.'/'.basename(__FILE__, '.php').'.xml';

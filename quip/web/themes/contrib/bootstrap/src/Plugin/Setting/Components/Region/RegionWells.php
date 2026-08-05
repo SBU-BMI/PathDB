@@ -71,7 +71,7 @@ class RegionWells extends SettingBase {
           'class' => ['input-sm'],
         ],
         '#options' => $wells,
-        '#default_value' => isset($default_values[$name]) ? $default_values[$name] : '',
+        '#default_value' => $default_values[$name] ?? '',
       ];
     }
   }

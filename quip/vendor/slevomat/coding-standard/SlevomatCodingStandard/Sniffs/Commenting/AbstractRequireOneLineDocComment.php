@@ -70,7 +70,7 @@ abstract class AbstractRequireOneLineDocComment implements Sniff
 				$phpcsFile,
 				[T_DOC_COMMENT_WHITESPACE],
 				$startingPointer + 1,
-				$docCommentEndPointer + 1
+				$docCommentEndPointer + 1,
 			);
 
 			if ($tokens[$currentLinePointer]['line'] === $tokens[$nextEffectivePointer]['line']) {
@@ -97,7 +97,7 @@ abstract class AbstractRequireOneLineDocComment implements Sniff
 				T_DOC_COMMENT_STAR,
 			],
 			$docCommentStartPointer + 1,
-			$docCommentEndPointer
+			$docCommentEndPointer,
 		);
 		$contentEndPointer = TokenHelper::findPreviousExcluding(
 			$phpcsFile,
@@ -106,7 +106,7 @@ abstract class AbstractRequireOneLineDocComment implements Sniff
 				T_DOC_COMMENT_STAR,
 			],
 			$docCommentEndPointer - 1,
-			$docCommentStartPointer
+			$docCommentStartPointer,
 		);
 
 		if ($contentStartPointer === null) {
@@ -119,17 +119,21 @@ abstract class AbstractRequireOneLineDocComment implements Sniff
 		for ($i = $docCommentStartPointer + 1; $i < $docCommentEndPointer; $i++) {
 			if ($i >= $contentStartPointer && $i <= $contentEndPointer) {
 				if ($i === $contentEndPointer) {
-					$phpcsFile->fixer->replaceToken($i, rtrim($phpcsFile->fixer->getTokenContent($i), ' '));
+					FixerHelper::replace(
+						$phpcsFile,
+						$i,
+						rtrim($phpcsFile->fixer->getTokenContent($i), ' '),
+					);
 				}
 
 				continue;
 			}
 
-			$phpcsFile->fixer->replaceToken($i, '');
+			FixerHelper::replace($phpcsFile, $i, '');
 		}
 
-		$phpcsFile->fixer->addContentBefore($contentStartPointer, ' ');
-		$phpcsFile->fixer->addContentBefore($docCommentEndPointer, ' ');
+		FixerHelper::addBefore($phpcsFile, $contentStartPointer, ' ');
+		FixerHelper::addBefore($phpcsFile, $docCommentEndPointer, ' ');
 
 		$phpcsFile->fixer->endChangeset();
 	}

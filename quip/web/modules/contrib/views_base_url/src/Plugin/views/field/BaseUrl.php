@@ -3,6 +3,8 @@
 namespace Drupal\views_base_url\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Routing\RequestContext;
 use Drupal\path_alias\AliasManagerInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
@@ -19,6 +21,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class BaseUrl extends FieldPluginBase {
 
+  use TokenTrait;
+
   /**
    * Definition of path alias manager.
    *
@@ -27,11 +31,27 @@ class BaseUrl extends FieldPluginBase {
   protected $pathAliasManager;
 
   /**
+   * The request context.
+   *
+   * @var \Drupal\Core\Routing\RequestContext
+   */
+  protected $requestContext;
+
+  /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, AliasManagerInterface $pathAliasManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AliasManagerInterface $pathAliasManager, RequestContext $request_context, LanguageManagerInterface $language_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->pathAliasManager = $pathAliasManager;
+    $this->requestContext = $request_context;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -42,7 +62,9 @@ class BaseUrl extends FieldPluginBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('path_alias.manager')
+      $container->get('path_alias.manager'),
+      $container->get('router.request_context'),
+      $container->get('language_manager'),
     );
   }
 
@@ -168,16 +190,15 @@ class BaseUrl extends FieldPluginBase {
    * {@inheritdoc}
    */
   public function render(ResultRow $values) {
-    global $base_url;
-    global $language;
+    $base_url = $this->requestContext->getCompleteBaseUrl();
+    $language = $this->languageManager->getCurrentLanguage();
 
     if ($this->options['show_link']) {
       $tokens = $this->getRenderTokens('');
-      $link_query = [];
 
       // Link path.
       if (!empty($this->options['show_link_options']['link_path'])) {
-        $aliased_path = $this->viewsTokenReplace($this->options['show_link_options']['link_path'], $tokens);
+        $aliased_path = $this->simpleTokenReplace($this->options['show_link_options']['link_path'], $tokens);
         $aliased_path = $this->pathAliasManager->getAliasByPath($aliased_path);
         $link_path = "$base_url$aliased_path";
       }
@@ -185,10 +206,12 @@ class BaseUrl extends FieldPluginBase {
         $link_path = $base_url;
       }
 
+      $url = Url::fromUri($link_path, ['language' => $language]);
+
       // Link text.
       if (!empty($this->options['show_link_options']['link_text'])) {
         $link_text = [
-          '#plain_text' => $this->options['show_link_options']['link_text'],
+          '#markup' => $this->viewsTokenReplace($this->options['show_link_options']['link_text'], $tokens),
         ];
       }
       else {
@@ -199,29 +222,53 @@ class BaseUrl extends FieldPluginBase {
 
       // Link query.
       if (!empty($this->options['show_link_options']['link_query'])) {
-        $queries = explode(' ', $this->options['show_link_options']['link_query']);
-        foreach ($queries as $query) {
-          $param = explode('=', $query);
-          $link_query[$param[0]] = $param[1];
+        $link_query = trim($this->simpleTokenReplace($this->options['show_link_options']['link_query'], $tokens));
+        if (!empty($link_query)) {
+          $query_items = preg_split('/[ &]+/', $link_query, -1, PREG_SPLIT_NO_EMPTY);
+          $query = [];
+          foreach ($query_items as $query_item) {
+            $param = explode('=', $query_item);
+            $query[$param[0]] = $param[1];
+          }
+          $url->setOption('query', $query);
+        }
+      }
+
+      // Link fragment.
+      if (!empty($this->options['show_link_options']['link_fragment'])) {
+        $link_fragment = trim($this->simpleTokenReplace($this->options['show_link_options']['link_fragment'], $tokens));
+        if (!empty($link_fragment)) {
+          $url->setOption('fragment', $link_fragment);
         }
       }
 
       // Create link with options.
-      $url = Url::fromUri($link_path, [
-        'attributes' => [
-          'class' => explode(' ', $this->options['show_link_options']['link_class']),
-          'title' => $this->options['show_link_options']['link_title'],
-          'rel' => $this->options['show_link_options']['link_rel'],
-          'target' => $this->options['show_link_options']['link_target'],
-        ],
-        'fragment' => $this->options['show_link_options']['link_fragment'],
-        'query' => $link_query,
-        'language' => $language,
-      ]);
+      $attributes = [];
+      if (!empty($this->options['show_link_options']['link_class'])) {
+        $link_class = trim($this->simpleTokenReplace($this->options['show_link_options']['link_class'], $tokens));
+        if (!empty($link_class)) {
+          $attributes['class'] = explode(' ', $link_class);
+        }
+      }
+      if (!empty($this->options['show_link_options']['link_title'])) {
+        $link_title = trim($this->simpleTokenReplace($this->options['show_link_options']['link_title'], $tokens));
+        if (!empty($link_title)) {
+          $attributes['title'] = $link_title;
+        }
+      }
+      if (!empty($this->options['show_link_options']['link_rel'])) {
+        $attributes['rel'] = $this->options['show_link_options']['link_rel'];
+      }
+      if (!empty($this->options['show_link_options']['link_target'])) {
+        $attributes['target'] = $this->options['show_link_options']['link_target'];
+      }
+      if (!empty($attributes)) {
+        $url->setOption('attributes', $attributes);
+      }
 
-      // Replace token with values and return it as output.
+      // Generate HTML link.
       return [
-        '#markup' => $this->viewsTokenReplace(Link::fromTextAndUrl($link_text, $url)->toString(), $tokens),
+        '#markup' => Link::fromTextAndUrl($link_text, $url)->toString(),
       ];
     }
     else {
@@ -229,61 +276,6 @@ class BaseUrl extends FieldPluginBase {
         '#plain_text' => $base_url,
       ];
     }
-  }
-
-  /**
-   * Returns a list of the available fields and arguments for token replacement.
-   *
-   * @return array
-   *   Array of default help text and list of tokens.
-   */
-  protected function getReplacementTokens() {
-    // Setup the tokens for fields.
-    $previous = $this->getPreviousFieldLabels();
-    $optgroup_arguments = (string) $this->t('Arguments');
-    $optgroup_fields = (string) $this->t('Fields');
-    foreach ($previous as $id => $label) {
-      $options[$optgroup_fields]["{{ $id }}"] = substr(strrchr($label, ":"), 2);
-    }
-    // Add the field to the list of options.
-    $options[$optgroup_fields]["{{ {$this->options['id']} }}"] = substr(strrchr($this->adminLabel(), ":"), 2);
-
-    foreach ($this->view->display_handler->getHandlers('argument') as $arg => $handler) {
-      $options[$optgroup_arguments]["{{ arguments.$arg }}"] = $this->t('@argument title', [
-        '@argument' => $handler->adminLabel(),
-      ]);
-      $options[$optgroup_arguments]["{{ raw_arguments.$arg }}"] = $this->t('@argument input', [
-        '@argument' => $handler->adminLabel(),
-      ]);
-    }
-
-    $this->documentSelfTokens($options[$optgroup_fields]);
-
-    // Default text.
-    $output[] = [
-      [
-        '#markup' => '<p>' . $this->t('You must add some additional fields to this display before using this field. These fields may be marked as <em>Exclude from display</em> if you prefer. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.') . '</p>',
-      ],
-      [
-        '#markup' => '<p>' . $this->t("The following replacement tokens are available for this field. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.") . '</p>',
-      ],
-    ];
-
-    foreach (array_keys($options) as $type) {
-      if (!empty($options[$type])) {
-        $items = [];
-        foreach ($options[$type] as $key => $value) {
-          $items[] = $key . ' == ' . $value;
-        }
-        $item_list = [
-          '#theme' => 'item_list',
-          '#items' => $items,
-        ];
-        $output[] = $item_list;
-      }
-    }
-
-    return $output;
   }
 
 }

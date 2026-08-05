@@ -9,6 +9,7 @@ use Drupal\search_api\IndexInterface;
 use Drupal\search_api\SearchApiException;
 use Drupal\search_api\ServerInterface;
 use Drupal\search_api\Task\TaskInterface;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests whether the Search API task system works correctly.
@@ -17,6 +18,7 @@ use Drupal\search_api\Task\TaskInterface;
  *
  * @group search_api
  */
+#[RunTestsInSeparateProcesses]
 class TaskTest extends KernelTestBase {
 
   /**
@@ -308,7 +310,7 @@ class TaskTest extends KernelTestBase {
    * @return \Drupal\search_api\Task\TaskInterface
    *   The task returned by the task manager.
    */
-  protected function addTask($type, ServerInterface $server = NULL, IndexInterface $index = NULL, $data = NULL, bool $duplicate = FALSE) {
+  protected function addTask($type, ?ServerInterface $server = NULL, ?IndexInterface $index = NULL, $data = NULL, bool $duplicate = FALSE) {
     $type = "search_api_test_tasks.$type";
     $count_before = $this->taskManager->getTasksCount();
     $conditions = [

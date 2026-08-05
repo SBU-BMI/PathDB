@@ -29,6 +29,8 @@ parameters:
     # Skip Drupal 6 & 7 code.
     - scripts/dump-database-d?.sh
     - scripts/generate-d?-content.sh
+    # Skip update countries script for fake t() declaration.
+    - scripts/update-countries.sh
     # Skip data files.
     - lib/Drupal/Component/Transliteration/data/*.php
     # The following classes deliberately extend non-existent classes for testing.
@@ -42,5 +44,4 @@ parameters:
 
     # Ignore common errors for now.
     - "#Drupal calls should be avoided in classes, use dependency injection instead#"
-    - "#^Plugin definitions cannot be altered.#"
     - "#^Class .* extends @internal class#"

@@ -114,7 +114,7 @@ class JwtAuthConsumerSubscriber implements EventSubscriberInterface {
   public function loadUser(JwtAuthValidEvent $event) {
     $token = $event->getToken();
     [$user] = $this->loadUserForJwt($token);
-    $event->setUser($user);
+    $event->setAccount($user);
   }
 
 }

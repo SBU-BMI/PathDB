@@ -4,6 +4,7 @@ namespace Drupal\search_api_db\Plugin\search_api\backend;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Utility\Crypt;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -17,7 +18,9 @@ use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\search_api\Attribute\SearchApiBackend;
 use Drupal\search_api\Backend\BackendPluginBase;
 use Drupal\search_api\Contrib\AutocompleteBackendInterface;
 use Drupal\search_api\DataType\DataTypePluginManager;
@@ -69,13 +72,12 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * - search_api_db_autocomplete: An array containing the parameters of the
  *   getAutocompleteSuggestions() call, except "query". (Present for
  *   "search_api_db_autocomplete" queries.)
- *
- * @SearchApiBackend(
- *   id = "search_api_db",
- *   label = @Translation("Database"),
- *   description = @Translation("Indexes items in the database. Supports several advanced features, but should not be used for large sites.")
- * )
  */
+#[SearchApiBackend(
+  id: 'search_api_db',
+  label: new TranslatableMarkup('Database'),
+  description: new TranslatableMarkup('Indexes items in the database. Supports several advanced features, but should not be used for large sites.')
+)]
 class Database extends BackendPluginBase implements AutocompleteBackendInterface, PluginFormInterface {
 
   use PluginFormTrait;
@@ -651,11 +653,17 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
    * {@inheritdoc}
    */
   public function postUpdate() {
-    if (empty($this->server->original)) {
+    $original = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2',
+      fn () => $this->server->getOriginal(),
+      fn () => $this->server->original,
+    );
+    if (!$original) {
       // When in doubt, opt for the safer route and reindex.
       return TRUE;
     }
-    $original_config = $this->server->original->getBackendConfig();
+    $original_config = $original->getBackendConfig();
     $original_config += $this->defaultConfiguration();
     return $this->configuration['min_chars'] != $original_config['min_chars']
       || $this->configuration['phrase'] != $original_config['phrase'];
@@ -1935,7 +1943,7 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
    */
   protected function createDbQuery(QueryInterface $query, array $fields) {
     $keys = &$query->getKeys();
-    $keys_set = (boolean) $keys;
+    $keys_set = (bool) $keys;
     $tokenizer_active = $query->getIndex()->isValidProcessor('tokenizer');
     $keys = $this->prepareKeys($keys, $tokenizer_active);
 
@@ -2108,12 +2116,21 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         $words = static::splitIntoWords($processed_keys);
         if ($this->configuration['min_chars'] > 1) {
           $words = array_filter($words, function (string $word): bool {
-            return mb_strlen($word) >= $this->configuration['min_chars'];
+            return is_numeric($word)
+              || mb_strlen($word) >= $this->configuration['min_chars'];
           });
         }
       }
+
+      // Apply special handling of numeric tokens that is also applied at
+      // indexing time.
+      $words = array_map(
+        static fn ($word) => is_numeric($word) ? static::cleanNumericString($word) : $word,
+        $words,
+      );
+
       if (count($words) <= 1) {
-        return mb_substr($processed_keys, 0, static::TOKEN_LENGTH_MAX);
+        return $words ? mb_substr(reset($words), 0, static::TOKEN_LENGTH_MAX) : NULL;
       }
 
       if ($this->configuration['phrase'] === 'disabled') {
@@ -2269,7 +2286,7 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         $db_query->fields('t', ['item_id', 'word']);
       }
       elseif ($neg) {
-        $db_query->fields('t', ['item_id']);
+        $db_query->fields('t', ['item_id', 'word']);
       }
       elseif ($match_parts) {
         $db_query->fields('t', ['item_id']);
@@ -2365,8 +2382,15 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         if (!$db_query->getGroupBy()) {
           $db_query->groupBy('t.item_id');
         }
+        // We are inside: if ($conj == 'AND' && $subs > 1) { ... }
         if (!$match_parts) {
-          if ($mul_words) {
+          if ($subs > $word_count) {
+            // Avoiding counting in non-existing [t].[word].
+            $db_query->having('COUNT(*) >= ' . $var, [$var => $subs]);
+          }
+          elseif ($mul_words) {
+            // Plain multi-word, no nesting: preserve 'distinct words'
+            // semantics.
             $db_query->having('COUNT(DISTINCT [t].[word]) >= ' . $var, [$var => $subs]);
           }
           else {
@@ -2394,7 +2418,7 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         $db_query = $this->database->select($db_info['index_table'], 't');
         $db_query->addField('t', 'item_id', 'item_id');
         if (!$neg) {
-          $db_query->addExpression(':score', 'score', [':score' => self::SCORE_MULTIPLIER]);
+          $db_query->addExpression(self::SCORE_MULTIPLIER, 'score');
           $db_query->distinct();
         }
       }
@@ -2418,7 +2442,10 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         $condition->condition('t.item_id', $nested_query, 'NOT IN');
       }
       if (isset($old_query)) {
-        $condition->condition('t.item_id', $old_query, 'NOT IN');
+        // Ensure the IN subquery returns exactly one column.
+        $old_query = $this->database->select($old_query, 't')
+          ->fields('t', ['item_id']);
+        $condition->condition('t.item_id', $old_query, 'IN');
       }
     }
 
@@ -2500,11 +2527,11 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         // For NULL values, we can just use the single-values table, since we
         // only need to know if there's any value at all for that field.
         if ($value === NULL || empty($field_info['multi-valued'])) {
-          if (empty($tables[NULL])) {
+          if (empty($tables[''])) {
             $table = ['table' => $db_info['index_table']];
-            $tables[NULL] = $this->getTableAlias($table, $db_query);
+            $tables[''] = $this->getTableAlias($table, $db_query);
           }
-          $column = $tables[NULL] . '.' . $field_info['column'];
+          $column = $tables[''] . '.' . $field_info['column'];
           if ($value === NULL) {
             $method = $not_equals ? 'isNotNull' : 'isNull';
             $db_condition->$method($column);
@@ -2669,6 +2696,10 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
         }
 
         if ($field_name == 'search_api_random') {
+          $option = $query->getOption('search_api_random_sort');
+          if (isset($option['seed'])) {
+            $db_query->addMetaData('search_api_random_sort_seed', $option['seed']);
+          }
           $this->dbmsCompatibility->orderByRandom($db_query);
           continue;
         }
@@ -3091,7 +3122,7 @@ class Database extends BackendPluginBase implements AutocompleteBackendInterface
   /**
    * {@inheritdoc}
    */
-  protected function getSpecialFields(IndexInterface $index, ItemInterface $item = NULL) {
+  protected function getSpecialFields(IndexInterface $index, ?ItemInterface $item = NULL) {
     $fields = parent::getSpecialFields($index, $item);
     unset($fields['search_api_id']);
     return $fields;

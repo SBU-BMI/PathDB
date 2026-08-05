@@ -17,20 +17,19 @@ class RequireSingleLineMethodSignatureSniff extends AbstractMethodSignature
 
 	public const CODE_REQUIRED_SINGLE_LINE_SIGNATURE = 'RequiredSingleLineSignature';
 
-	/** @var int */
-	public $maxLineLength = 120;
+	public int $maxLineLength = 120;
 
 	/** @var list<string> */
-	public $includedMethodPatterns = [];
+	public array $includedMethodPatterns = [];
 
 	/** @var list<string>|null */
-	public $includedMethodNormalizedPatterns;
+	public ?array $includedMethodNormalizedPatterns = null;
 
 	/** @var list<string> */
-	public $excludedMethodPatterns = [];
+	public array $excludedMethodPatterns = [];
 
 	/** @var list<string>|null */
-	public $excludedMethodNormalizedPatterns;
+	public ?array $excludedMethodNormalizedPatterns = null;
 
 	/**
 	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
@@ -53,7 +52,6 @@ class RequireSingleLineMethodSignatureSniff extends AbstractMethodSignature
 		}
 
 		$signature = $this->getSignature($phpcsFile, $signatureStartPointer, $signatureEndPointer);
-		$signatureWithoutTabIndentation = $this->getSignatureWithoutTabs($phpcsFile, $signature);
 		$methodName = FunctionHelper::getName($phpcsFile, $methodPointer);
 
 		if (
@@ -70,7 +68,7 @@ class RequireSingleLineMethodSignatureSniff extends AbstractMethodSignature
 			return;
 		}
 
-		if ($this->maxLineLength !== 0 && strlen($signatureWithoutTabIndentation) > $this->maxLineLength) {
+		if ($this->maxLineLength !== 0 && strlen($signature) > $this->maxLineLength) {
 			return;
 		}
 
@@ -110,9 +108,7 @@ class RequireSingleLineMethodSignatureSniff extends AbstractMethodSignature
 	 */
 	private function getIncludedMethodNormalizedPatterns(): array
 	{
-		if ($this->includedMethodNormalizedPatterns === null) {
-			$this->includedMethodNormalizedPatterns = SniffSettingsHelper::normalizeArray($this->includedMethodPatterns);
-		}
+		$this->includedMethodNormalizedPatterns ??= SniffSettingsHelper::normalizeArray($this->includedMethodPatterns);
 		return $this->includedMethodNormalizedPatterns;
 	}
 
@@ -121,9 +117,7 @@ class RequireSingleLineMethodSignatureSniff extends AbstractMethodSignature
 	 */
 	private function getExcludedMethodNormalizedPatterns(): array
 	{
-		if ($this->excludedMethodNormalizedPatterns === null) {
-			$this->excludedMethodNormalizedPatterns = SniffSettingsHelper::normalizeArray($this->excludedMethodPatterns);
-		}
+		$this->excludedMethodNormalizedPatterns ??= SniffSettingsHelper::normalizeArray($this->excludedMethodPatterns);
 		return $this->excludedMethodNormalizedPatterns;
 	}
 

@@ -1,6 +1,74 @@
 Unreleased
 ==========
 
+1.26.1
+======
+
+**Fixed:**
+
+* Fix compatibility with `sebastian/comparator` 8.1+ (@stof)
+
+1.26.0
+======
+
+**Added:**
+
+* Add support for `phpdocumentor/reflection-docblock` v6 (@mspirkov)
+
+1.25.0
+======
+
+**Added:**
+
+* Add support for PHPUnit 13 (@Jean85)
+
+1.24.0
+======
+
+**Added:**
+
+* Add support for PHP 8.5 (@andypost)
+
+1.23.1
+======
+
+**Changed:**
+
+* Refactor the ProphecyComparator to use composition instead of extending internal comparator classes (@stof)
+
+1.23.0
+======
+
+**Removed:**
+
+* Remove support for PHP lower than 8.2 (@Nek-)
+
+**Added:**
+
+* Add support for doubling classes using intersection types and DNF types (@Nek-)
+
+**Fixed:**
+
+* Fix deprecation for `SplObjectStorage` changes in PHP 8.5 (@Nek-)
+
+**Changed:**
+
+* Improve error message for unsupported default return values (@stof)
+
+1.22.0
+======
+
+**Removed:**
+
+* Support for PHP 7.2 and 7.3 (@jean85)
+
+1.21.0
+======
+
+**Added:**
+
+* Add support for PHPUnit 12 (@jean85)
+
 1.20.0
 ======
 

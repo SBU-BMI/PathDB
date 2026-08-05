@@ -7,4 +7,5 @@ jwt_path_auth.config:
       type: sequence
       label: 'Path prefixes'
       sequence:
-        - type: string
+        type: string
+        label: Prefix

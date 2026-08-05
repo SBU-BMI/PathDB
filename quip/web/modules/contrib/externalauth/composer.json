@@ -15,5 +15,8 @@
     "support": {
         "issues": "https://www.drupal.org/project/issues/externalauth",
         "source": "https://git.drupalcode.org/project/externalauth"
+    },
+    "require": {
+      "drupal/core": "^10.1 || ^11"
     }
 }

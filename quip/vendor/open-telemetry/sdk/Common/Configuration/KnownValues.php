@@ -27,7 +27,9 @@ interface KnownValues
     public const VALUE_B3_MULTI = 'b3multi';
     public const VALUE_CLOUD_TRACE = 'cloudtrace';
     public const VALUE_CLOUD_TRACE_ONEWAY = 'cloudtrace-oneway';
+    /** @deprecated no longer supported */
     public const VALUE_JAEGER = 'jaeger';
+    /** @deprecated no longer supported */
     public const VALUE_JAEGER_BAGGAGE = 'jaeger-baggage';
     public const VALUE_XRAY = 'xray';
     public const VALUE_OTTRACE = 'ottrace';
@@ -112,8 +114,6 @@ interface KnownValues
         self::VALUE_B3_MULTI, // B3 Multi
         self::VALUE_CLOUD_TRACE, // GCP XCloudTraceContext
         self::VALUE_CLOUD_TRACE_ONEWAY, // GCP XCloudTraceContext OneWay (Extract)
-        self::VALUE_JAEGER, // Jaeger Propagator
-        self::VALUE_JAEGER_BAGGAGE, // Jaeger Baggage Propagator
         self::VALUE_XRAY, // AWS X-Ray (third party)
         self::VALUE_OTTRACE, // OT Trace (third party)
         self::VALUE_NONE, // No automatically configured propagator.
@@ -197,6 +197,7 @@ interface KnownValues
     public const VALUE_DETECTORS_SDK = 'sdk';
     public const VALUE_DETECTORS_SDK_PROVIDED = 'sdk_provided';
     public const VALUE_DETECTORS_SERVICE = 'service';
+    public const VALUE_DETECTORS_SERVICE_INSTANCE = 'service_instance';
     public const VALUE_DETECTORS_COMPOSER = 'composer';
     public const OTEL_PHP_DETECTORS = [
         self::VALUE_ALL,
@@ -217,5 +218,9 @@ interface KnownValues
         self::VALUE_PSR3,
         self::VALUE_EMPTY,
         self::VALUE_NONE,
+    ];
+
+    public const OTEL_EXPERIMENTAL_RESPONSE_PROPAGATORS = [
+        self::VALUE_NONE, // No automatically configured propagator.
     ];
 }

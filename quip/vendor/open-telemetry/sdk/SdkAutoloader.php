@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace OpenTelemetry\SDK;
 
+use function class_exists;
 use Nevay\SPI\ServiceLoader;
 use OpenTelemetry\API\Behavior\LogsMessagesTrait;
-use OpenTelemetry\API\Configuration\Noop\NoopConfigProperties;
+use OpenTelemetry\API\Configuration\ConfigEnv\EnvComponentLoader;
+use OpenTelemetry\API\Configuration\ConfigProperties;
 use OpenTelemetry\API\Globals;
+use OpenTelemetry\API\Instrumentation\AutoInstrumentation\ConfigurationRegistry;
 use OpenTelemetry\API\Instrumentation\AutoInstrumentation\Context as InstrumentationContext;
+use OpenTelemetry\API\Instrumentation\AutoInstrumentation\GeneralInstrumentationConfiguration;
 use OpenTelemetry\API\Instrumentation\AutoInstrumentation\HookManager;
 use OpenTelemetry\API\Instrumentation\AutoInstrumentation\HookManagerInterface;
 use OpenTelemetry\API\Instrumentation\AutoInstrumentation\Instrumentation;
+use OpenTelemetry\API\Instrumentation\AutoInstrumentation\InstrumentationConfiguration;
 use OpenTelemetry\API\Instrumentation\AutoInstrumentation\NoopHookManager;
 use OpenTelemetry\API\Instrumentation\Configurator;
 use OpenTelemetry\API\Logs\LateBindingLoggerProvider;
@@ -23,15 +28,24 @@ use OpenTelemetry\API\Trace\TracerProviderInterface;
 use OpenTelemetry\Config\SDK\Configuration as SdkConfiguration;
 use OpenTelemetry\Config\SDK\Instrumentation as SdkInstrumentation;
 use OpenTelemetry\Context\Context;
+use OpenTelemetry\Context\Propagation\ResponsePropagatorInterface;
 use OpenTelemetry\Context\Propagation\TextMapPropagatorInterface;
 use OpenTelemetry\SDK\Common\Configuration\Configuration;
+use OpenTelemetry\SDK\Common\Configuration\EnvComponentLoaderRegistry;
+use OpenTelemetry\SDK\Common\Configuration\EnvResolver;
 use OpenTelemetry\SDK\Common\Configuration\Variables;
+use OpenTelemetry\SDK\Common\Distribution\DistributionConfiguration;
+use OpenTelemetry\SDK\Common\Distribution\DistributionProperties;
+use OpenTelemetry\SDK\Common\Distribution\DistributionRegistry;
+use OpenTelemetry\SDK\Common\Distribution\SdkDistribution;
 use OpenTelemetry\SDK\Common\Util\ShutdownHandler;
 use OpenTelemetry\SDK\Logs\EventLoggerProviderFactory;
 use OpenTelemetry\SDK\Logs\LoggerProviderFactory;
 use OpenTelemetry\SDK\Metrics\MeterProviderFactory;
+use OpenTelemetry\SDK\Propagation\LateBindingResponsePropagator;
 use OpenTelemetry\SDK\Propagation\LateBindingTextMapPropagator;
 use OpenTelemetry\SDK\Propagation\PropagatorFactory;
+use OpenTelemetry\SDK\Propagation\ResponsePropagatorFactory;
 use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
 use OpenTelemetry\SDK\Trace\AutoRootSpan;
 use OpenTelemetry\SDK\Trace\ExporterFactory;
@@ -53,7 +67,7 @@ class SdkAutoloader
         if (!self::isEnabled() || self::isExcludedUrl()) {
             return false;
         }
-        if (Configuration::has(Variables::OTEL_EXPERIMENTAL_CONFIG_FILE)) {
+        if (Configuration::has(Variables::OTEL_CONFIG_FILE)) {
             if (!class_exists(SdkConfiguration::class)) {
                 throw new RuntimeException('File-based configuration requires open-telemetry/sdk-configuration');
             }
@@ -80,21 +94,29 @@ class SdkAutoloader
     private static function environmentBasedInitializer(Configurator $configurator): Configurator
     {
         $propagator = (new PropagatorFactory())->create();
+        $responsePropagator = (new ResponsePropagatorFactory())->create();
         if (Sdk::isDisabled()) {
             //@see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md#general-sdk-configuration
-            return $configurator->withPropagator($propagator);
+            return $configurator->withPropagator($propagator)->withResponsePropagator($responsePropagator);
         }
         $emitMetrics = Configuration::getBoolean(Variables::OTEL_PHP_INTERNAL_METRICS_ENABLED);
+
+        $distributionProperties = self::loadDistributionPropertiesFromEnv();
+        $distributionConfiguration = $distributionProperties->getDistributionConfiguration(SdkDistribution::class) ?? new SdkDistribution();
 
         $resource = ResourceInfoFactory::defaultResource();
         $exporter = (new ExporterFactory())->create();
         $meterProvider = (new MeterProviderFactory())->create($resource);
         $spanProcessor = (new SpanProcessorFactory())->create($exporter, $emitMetrics ? $meterProvider : null);
-        $tracerProvider = (new TracerProviderBuilder())
+        $builder = (new TracerProviderBuilder())
             ->addSpanProcessor($spanProcessor)
             ->setResource($resource)
             ->setSampler((new SamplerFactory())->create())
-            ->build();
+            ->setSpanSuppressionStrategy($distributionConfiguration->spanSuppressionStrategy);
+        if ($emitMetrics) {
+            $builder->setMeterProvider($meterProvider);
+        }
+        $tracerProvider = $builder->build();
 
         $loggerProvider = (new LoggerProviderFactory())->create($emitMetrics ? $meterProvider : null, $resource);
         $eventLoggerProvider = (new EventLoggerProviderFactory())->create($loggerProvider);
@@ -109,6 +131,7 @@ class SdkAutoloader
             ->withLoggerProvider($loggerProvider)
             ->withEventLoggerProvider($eventLoggerProvider)
             ->withPropagator($propagator)
+            ->withResponsePropagator($responsePropagator)
         ;
     }
 
@@ -117,7 +140,7 @@ class SdkAutoloader
      */
     private static function fileBasedInitializer(Configurator $configurator): Configurator
     {
-        $file = Configuration::getString(Variables::OTEL_EXPERIMENTAL_CONFIG_FILE);
+        $file = Configuration::getString(Variables::OTEL_CONFIG_FILE);
         $config = SdkConfiguration::parseFile($file);
 
         //disable hook manager during SDK to avoid autoinstrumenting SDK exporters.
@@ -138,6 +161,7 @@ class SdkAutoloader
             ->withLoggerProvider($sdk->getLoggerProvider())
             ->withPropagator($sdk->getPropagator())
             ->withEventLoggerProvider($sdk->getEventLoggerProvider())
+            ->withResponsePropagator($sdk->getResponsePropagator())
         ;
     }
 
@@ -147,20 +171,21 @@ class SdkAutoloader
      */
     private static function registerInstrumentations(): void
     {
-        $files = Configuration::has(Variables::OTEL_EXPERIMENTAL_CONFIG_FILE)
-            ? Configuration::getList(Variables::OTEL_EXPERIMENTAL_CONFIG_FILE)
+        $files = Configuration::has(Variables::OTEL_CONFIG_FILE)
+            ? Configuration::getList(Variables::OTEL_CONFIG_FILE)
             : [];
-        if (class_exists(SdkInstrumentation::class)) {
+        if (class_exists(SdkInstrumentation::class) && $files) {
             $configuration = SdkInstrumentation::parseFile($files)->create();
         } else {
-            $configuration = new NoopConfigProperties();
+            $configuration = self::loadConfigPropertiesFromEnv();
         }
         $hookManager = self::getHookManager();
         $tracerProvider = self::createLateBindingTracerProvider();
         $meterProvider = self::createLateBindingMeterProvider();
         $loggerProvider = self::createLateBindingLoggerProvider();
         $propagator = self::createLateBindingTextMapPropagator();
-        $context = new InstrumentationContext($tracerProvider, $meterProvider, $loggerProvider, $propagator);
+        $responsePropagator = self::createLateBindingResponsePropagator();
+        $context = new InstrumentationContext($tracerProvider, $meterProvider, $loggerProvider, $propagator, $responsePropagator);
 
         foreach (ServiceLoader::load(Instrumentation::class) as $instrumentation) {
             /** @var Instrumentation $instrumentation */
@@ -170,6 +195,45 @@ class SdkAutoloader
                 self::logError(sprintf('Unable to load instrumentation: %s', $instrumentation::class), ['exception' => $t]);
             }
         }
+    }
+
+    private static function loadDistributionPropertiesFromEnv(): DistributionProperties
+    {
+        $loaderRegistry = new EnvComponentLoaderRegistry();
+        foreach (ServiceLoader::load(EnvComponentLoader::class) as $loader) {
+            $loaderRegistry->register($loader);
+        }
+
+        $env = new EnvResolver();
+        $context = new \OpenTelemetry\API\Configuration\Context();
+
+        $configuration = new DistributionRegistry();
+        foreach ($loaderRegistry->loadAll(DistributionConfiguration::class, $env, $context) as $distribution) {
+            $configuration->add($distribution);
+        }
+
+        return $configuration;
+    }
+
+    private static function loadConfigPropertiesFromEnv(): ConfigProperties
+    {
+        $loaderRegistry = new EnvComponentLoaderRegistry();
+        foreach (ServiceLoader::load(EnvComponentLoader::class) as $loader) {
+            $loaderRegistry->register($loader);
+        }
+
+        $env = new EnvResolver();
+        $context = new \OpenTelemetry\API\Configuration\Context();
+
+        $configuration = new ConfigurationRegistry();
+        foreach ($loaderRegistry->loadAll(GeneralInstrumentationConfiguration::class, $env, $context) as $instrumentation) {
+            $configuration->add($instrumentation);
+        }
+        foreach ($loaderRegistry->loadAll(InstrumentationConfiguration::class, $env, $context) as $instrumentation) {
+            $configuration->add($instrumentation);
+        }
+
+        return $configuration;
     }
 
     private static function createLateBindingTracerProvider(): TracerProviderInterface
@@ -217,6 +281,19 @@ class SdkAutoloader
 
             try {
                 return Globals::propagator();
+            } finally {
+                $scope->detach();
+            }
+        });
+    }
+
+    private static function createLateBindingResponsePropagator(): ResponsePropagatorInterface
+    {
+        return new LateBindingResponsePropagator(static function (): ResponsePropagatorInterface {
+            $scope = Context::getRoot()->activate();
+
+            try {
+                return Globals::responsePropagator();
             } finally {
                 $scope->detach();
             }

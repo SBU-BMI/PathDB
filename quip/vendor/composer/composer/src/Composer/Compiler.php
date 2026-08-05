@@ -15,9 +15,9 @@ namespace Composer;
 use Composer\Json\JsonFile;
 use Composer\CaBundle\CaBundle;
 use Composer\Pcre\Preg;
+use Composer\Util\Git;
 use Composer\Util\ProcessExecutor;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
 use Seld\PharUtils\Timestamps;
 use Seld\PharUtils\Linter;
 
@@ -51,19 +51,21 @@ class Compiler
 
         $process = new ProcessExecutor();
 
-        if (0 !== $process->execute(['git', 'log', '--pretty=%H', '-n1', 'HEAD'], $output, dirname(dirname(__DIR__)))) {
-            throw new \RuntimeException('Can\'t run git log. You must ensure to run compile from composer git repository clone and that git binary is available.');
+        $command = Git::buildRevListCommand($process, ['-n1', '--format=%H', 'HEAD']);
+        if (0 !== $process->execute($command, $output, dirname(__DIR__, 2))) {
+            throw new \RuntimeException('Can\'t run git rev-list. You must ensure to run compile from composer git repository clone and that git binary is available.');
         }
-        $this->version = trim($output);
+        $this->version = trim(Git::parseRevListOutput($output, $process));
 
-        if (0 !== $process->execute(['git', 'log', '-n1', '--pretty=%ci', 'HEAD'], $output, dirname(dirname(__DIR__)))) {
-            throw new \RuntimeException('Can\'t run git log. You must ensure to run compile from composer git repository clone and that git binary is available.');
+        $command = Git::buildRevListCommand($process, ['-n1', '--format=%ci', 'HEAD']);
+        if (0 !== $process->execute($command, $output, dirname(__DIR__, 2))) {
+            throw new \RuntimeException('Can\'t run git rev-list. You must ensure to run compile from composer git repository clone and that git binary is available.');
         }
 
-        $this->versionDate = new \DateTime(trim($output));
+        $this->versionDate = new \DateTime(trim(Git::parseRevListOutput($output, $process)));
         $this->versionDate->setTimezone(new \DateTimeZone('UTC'));
 
-        if (0 === $process->execute(['git', 'describe', '--tags', '--exact-match', 'HEAD'], $output, dirname(dirname(__DIR__)))) {
+        if (0 === $process->execute(['git', 'describe', '--tags', '--exact-match', 'HEAD'], $output, dirname(__DIR__, 2))) {
             $this->version = trim($output);
         } else {
             // get branch-alias defined in composer.json for dev-main (if any)
@@ -120,10 +122,11 @@ class Compiler
         $finder = new Finder();
         $finder->files()
             ->ignoreVCS(true)
-            ->notPath('/\/(composer\.(json|lock)|[A-Z]+\.md(?:own)?|\.gitignore|appveyor.yml|phpunit\.xml\.dist|phpstan\.neon\.dist|phpstan-config\.neon|phpstan-baseline\.neon)$/')
+            ->notPath('/\/(composer\.(?:json|lock)|[A-Z]+\.md(?:own)?|\.gitignore|appveyor.yml|phpunit\.xml\.dist|phpstan\.neon\.dist|phpstan-config\.neon|phpstan-baseline\.neon|UPGRADE.*\.(?:md|txt))$/')
             ->notPath('/bin\/(jsonlint|validate-json|simple-phpunit|phpstan|phpstan\.phar)(\.bat)?$/')
             ->notPath('justinrainbow/json-schema/demo/')
             ->notPath('justinrainbow/json-schema/dist/')
+            ->notPath('justinrainbow/json-schema/bin/')
             ->notPath('composer/pcre/extension.neon')
             ->notPath('composer/LICENSE')
             ->exclude('Tests')
@@ -152,7 +155,7 @@ class Compiler
         foreach ($finder as $file) {
             if (false !== ($index = array_search($file->getRealPath(), $extraFiles, true))) {
                 unset($extraFiles[$index]);
-            } elseif (!Preg::isMatch('{(^LICENSE$|\.php$)}', $file->getFilename())) {
+            } elseif (!Preg::isMatch('{(^LICENSE(?:\.txt)?$|\.php$)}', $file->getFilename())) {
                 $unexpectedFiles[] = (string) $file;
             }
 
@@ -197,6 +200,11 @@ class Compiler
             'vendor/symfony/polyfill-mbstring/bootstrap80.php',
             'vendor/symfony/polyfill-php73/Resources/stubs/JsonException.php',
             'vendor/symfony/service-contracts/Attribute/SubscribedService.php',
+            'vendor/symfony/polyfill-php84/Resources/stubs/Deprecated.php',
+            'vendor/symfony/polyfill-php84/Resources/Deprecated.php',
+            'vendor/symfony/polyfill-php84/Resources/RoundingMode.php',
+            'vendor/symfony/polyfill-php84/bootstrap82.php',
+            'vendor/symfony/polyfill-intl-grapheme/bootstrap85.php',
         ]);
     }
 

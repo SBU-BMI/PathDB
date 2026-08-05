@@ -5,7 +5,7 @@
  * @author    Willington Vega <wvega@wvega.com>
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2019 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Filters\Filter;
@@ -56,7 +56,7 @@ final class AcceptTest extends AbstractFilterTestCase
         $fakeDI = new RecursiveArrayIterator($inputPaths);
         $filter = new Filter($fakeDI, '/', self::$config, self::$ruleset);
 
-        $this->assertEquals($expectedOutput, $this->getFilteredResultsAsArray($filter));
+        $this->assertSame($expectedOutput, $this->getFilteredResultsAsArray($filter));
 
     }//end testExcludePatterns()
 

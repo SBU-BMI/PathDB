@@ -262,6 +262,7 @@ class ResponseHeaderForm extends EntityForm {
       )));
     }
     $form_state->setRedirect('entity.response_header.collection');
+    return $status;
   }
 
 }

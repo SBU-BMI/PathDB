@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the jwt_oauth_ccf module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Removes every stored OAuth client credential. Credentials live in the
+ * user.data store rather than in config or a dedicated table, so they are not
+ * cleaned up automatically when the module is removed.
+ */
+function jwt_oauth_ccf_uninstall() {
+  \Drupal::service('user.data')->delete('jwt_oauth_ccf');
+}

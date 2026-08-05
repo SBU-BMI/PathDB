@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="drupal-project">
+  <description>Default PHP CodeSniffer configuration for Drupal project.</description>
+  <rule ref="vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"/>
+  <arg name="extensions" value="php,inc,module,install,info,test,profile,theme"/>
+
+  <rule ref="vendor/drupal/coder/coder_sniffer/Drupal">
+    <!-- Way to much work to maintain useful documentation for custom code. -->
+    <exclude name="Drupal.Commenting.FileComment"/>
+    <exclude name="Drupal.Commenting.ClassComment"/>
+    <exclude name="Drupal.Commenting.FunctionComment"/>
+
+    <exclude name="Squiz.CSS.EmptyClassDefinition"/>
+    <exclude name="Drupal.Classes.UseGlobalClass"/>
+  </rule>
+  <rule ref="Drupal.Arrays.Array">
+    <properties>
+      <property name="lineLimit" value="120"/>
+    </properties>
+  </rule>
+
+  <rule ref="Drupal.Commenting.DocComment">
+    <exclude name="Drupal.Commenting.DocComment.MissingShort"/>
+  </rule>
+  <rule ref="Drupal.Commenting.VariableComment">
+    <exclude name="Drupal.Commenting.VariableComment.Missing"/>
+  </rule>
+</ruleset>

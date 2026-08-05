@@ -17,7 +17,7 @@ class UpdateBase extends PluginBase implements UpdateInterface {
    * {@inheritdoc}
    */
   public function getDescription() {
-    return isset($this->pluginDefinition['description']) ? $this->pluginDefinition['description'] : NULL;
+    return $this->pluginDefinition['description'] ?? NULL;
   }
 
   /**
@@ -31,7 +31,7 @@ class UpdateBase extends PluginBase implements UpdateInterface {
    * {@inheritdoc}
    */
   public function getProvider() {
-    return isset($this->pluginDefinition['provider']) ? $this->pluginDefinition['provider'] : FALSE;
+    return $this->pluginDefinition['provider'] ?? FALSE;
   }
 
   /**
@@ -45,7 +45,7 @@ class UpdateBase extends PluginBase implements UpdateInterface {
    * {@inheritdoc}
    */
   public function getSeverity() {
-    return isset($this->pluginDefinition['severity']) ? $this->pluginDefinition['severity'] : FALSE;
+    return $this->pluginDefinition['severity'] ?? FALSE;
   }
 
   /**

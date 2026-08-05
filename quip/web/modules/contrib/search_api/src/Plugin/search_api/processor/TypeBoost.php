@@ -4,22 +4,23 @@ namespace Drupal\search_api\Plugin\search_api\processor;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\search_api\Attribute\SearchApiProcessor;
 use Drupal\search_api\Plugin\PluginFormTrait;
 use Drupal\search_api\Processor\ProcessorPluginBase;
 use Drupal\search_api\Utility\Utility;
 
 /**
  * Adds a boost to indexed items based on their datasource and/or bundle.
- *
- * @SearchApiProcessor(
- *   id = "type_boost",
- *   label = @Translation("Type-specific boosting"),
- *   description = @Translation("Adds a boost to indexed items based on their datasource and/or bundle."),
- *   stages = {
- *     "preprocess_index" = 0,
- *   }
- * )
  */
+#[SearchApiProcessor(
+  id: 'type_boost',
+  label: new TranslatableMarkup('Type-specific boosting'),
+  description: new TranslatableMarkup('Adds a boost to indexed items based on their datasource and/or bundle.'),
+  stages: [
+    'preprocess_index' => 0,
+  ],
+)]
 class TypeBoost extends ProcessorPluginBase implements PluginFormInterface {
 
   use PluginFormTrait;
@@ -129,9 +130,9 @@ class TypeBoost extends ProcessorPluginBase implements PluginFormInterface {
       $datasource_id = $item->getDatasourceId();
       $bundle = $item->getDatasource()->getItemBundle($item->getOriginalObject());
 
-      $item_boost = (double) ($boosts[$datasource_id]['datasource_boost'] ?? 1.0);
+      $item_boost = (float) ($boosts[$datasource_id]['datasource_boost'] ?? 1.0);
       if ($bundle && isset($boosts[$datasource_id]['bundle_boosts'][$bundle])) {
-        $item_boost = (double) $boosts[$datasource_id]['bundle_boosts'][$bundle];
+        $item_boost = (float) $boosts[$datasource_id]['bundle_boosts'][$bundle];
       }
 
       $item->setBoost($item->getBoost() * $item_boost);

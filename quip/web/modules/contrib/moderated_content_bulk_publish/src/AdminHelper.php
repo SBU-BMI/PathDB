@@ -76,10 +76,16 @@ class AdminHelper {
         $latest_state = $latest_revision->get('moderation_state')->getString();
       }
       if ($latest_is_valid) {
-        $latest_revision->setSyncing(TRUE);
-        $latest_revision->setRevisionTranslationAffected(TRUE);
-        $latest_revision->set('moderation_state', $moderation_state);
-        $latest_revision->save();
+        // Do not change content or moderation again here; the request already
+        // saved the correct default published revision. Limit this to alias.
+        // (If you *must* enforce state, ensure it's already the desired one.)
+        if ($latest_state !== $moderation_state) {
+          // As a belt-and-suspenders fallback you may keep the state flip:
+          $latest_revision->setSyncing(TRUE);
+          $latest_revision->setRevisionTranslationAffected(TRUE);
+          $latest_revision->set('moderation_state', $moderation_state);
+          $latest_revision->save();
+        }
         // Ensure the alias gets updated.
         if ($pathauto_enabled) {
           \Drupal::service('pathauto.generator')->updateEntityAlias($latest_revision, 'insert', array('language' => $langcode));
@@ -108,12 +114,16 @@ class AdminHelper {
     $query->latestRevision();
     $query->condition($entity->getEntityType()->getKey('id'), $id, '=');
 
-    $query->accessCheck(TRUE);
+    // We must bypass access checks here: this runs in shutdown context and
+    // must see draft revisions even if the ambient user cannot.
+    $query->accessCheck(FALSE);
     $latestRevisionResult = $query->execute();
     if (count($latestRevisionResult)) {
       $node_revision_id = key($latestRevisionResult);
       $vid = $node_revision_id;
-      $latestRevision = \Drupal::entityTypeManager()->getStorage($entity_type)->loadRevision($node_revision_id);
+      /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
+      $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+      $latestRevision = $storage->loadRevision($node_revision_id);
       if ($latestRevision->hasTranslation($lang) && $latestRevision->language()->getId() != $lang) {
         $latestRevision = $latestRevision->getTranslation($lang);
       }

@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\ControlStructures;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use function sprintf;
 use const T_INLINE_ELSE;
@@ -15,8 +16,7 @@ class DisallowShortTernaryOperatorSniff implements Sniff
 
 	public const CODE_DISALLOWED_SHORT_TERNARY_OPERATOR = 'DisallowedShortTernaryOperator';
 
-	/** @var bool */
-	public $fixable = true;
+	public bool $fixable = true;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -64,7 +64,11 @@ class DisallowShortTernaryOperatorSniff implements Sniff
 
 		$phpcsFile->fixer->beginChangeset();
 
-		$phpcsFile->fixer->addContent($inlineThenPointer, sprintf(' %s ', $tokens[$previousPointer]['content']));
+		FixerHelper::add(
+			$phpcsFile,
+			$inlineThenPointer,
+			sprintf(' %s ', $tokens[$previousPointer]['content']),
+		);
 
 		$phpcsFile->fixer->endChangeset();
 	}

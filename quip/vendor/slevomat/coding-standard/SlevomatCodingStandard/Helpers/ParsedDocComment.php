@@ -7,7 +7,6 @@ use PHPStan\PhpDocParser\Ast\Attribute;
 use PHPStan\PhpDocParser\Ast\Node;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
-use function array_merge;
 use function count;
 use function strlen;
 use function trim;
@@ -19,17 +18,13 @@ use const T_DOC_COMMENT_STRING;
 class ParsedDocComment
 {
 
-	/** @var int */
-	private $openPointer;
+	private int $openPointer;
 
-	/** @var int */
-	private $closePointer;
+	private int $closePointer;
 
-	/** @var PhpDocNode */
-	private $node;
+	private PhpDocNode $node;
 
-	/** @var TokenIterator */
-	private $tokens;
+	private TokenIterator $tokens;
 
 	public function __construct(int $openPointer, int $closePointer, PhpDocNode $node, TokenIterator $tokens)
 	{
@@ -73,7 +68,7 @@ class ParsedDocComment
 			}
 		}
 
-		return TokenHelper::findNext($phpcsFile, array_merge(TokenHelper::$annotationTokenCodes, [T_DOC_COMMENT_STRING]), $searchPointer);
+		return TokenHelper::findNext($phpcsFile, [...TokenHelper::ANNOTATION_TOKEN_CODES, T_DOC_COMMENT_STRING], $searchPointer);
 	}
 
 	public function getNodeEndPointer(File $phpcsFile, Node $node, int $nodeStartPointer): int
@@ -82,7 +77,7 @@ class ParsedDocComment
 
 		$content = trim($this->tokens->getContentBetween(
 			$node->getAttribute(Attribute::START_INDEX),
-			$node->getAttribute(Attribute::END_INDEX) + 1
+			$node->getAttribute(Attribute::END_INDEX) + 1,
 		));
 		$length = strlen($content);
 
@@ -100,8 +95,8 @@ class ParsedDocComment
 
 		return TokenHelper::findPrevious(
 			$phpcsFile,
-			array_merge(TokenHelper::$annotationTokenCodes, [T_DOC_COMMENT_STRING]),
-			$searchPointer
+			[...TokenHelper::ANNOTATION_TOKEN_CODES, T_DOC_COMMENT_STRING],
+			$searchPointer,
 		);
 	}
 

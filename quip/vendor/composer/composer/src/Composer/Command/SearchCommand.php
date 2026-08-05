@@ -12,7 +12,6 @@
 
 namespace Composer\Command;
 
-use Composer\Factory;
 use Composer\Json\JsonFile;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputInterface;
@@ -93,7 +92,7 @@ EOT
             $query = preg_quote($query);
         }
 
-        $results = $repos->search($query, $mode, $type);
+        $results = $repos->search($query, $mode, $type, $io);
 
         if (\count($results) > 0 && $format === 'text') {
             $width = $this->getTerminalWidth();

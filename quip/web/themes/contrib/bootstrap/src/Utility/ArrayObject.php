@@ -14,7 +14,7 @@ use Drupal\Core\Render\BubbleableMetadata;
  *
  * @ingroup utility
  */
-class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Serializable, \Countable, AttachmentsInterface, RefinableCacheableDependencyInterface {
+class ArrayObject implements \IteratorAggregate, \ArrayAccess, \Countable, AttachmentsInterface, RefinableCacheableDependencyInterface {
 
   /**
    * The array.

@@ -8,7 +8,6 @@ use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use SlevomatCodingStandard\Helpers\TypeHintHelper;
-use function array_merge;
 use function in_array;
 use function preg_match;
 use const T_ATTRIBUTE;
@@ -56,8 +55,8 @@ class UselessInheritDocCommentSniff implements Sniff
 		do {
 			$docCommentOwnerPointer = TokenHelper::findNext(
 				$phpcsFile,
-				array_merge(TokenHelper::$functionTokenCodes, TokenHelper::getTypeHintTokenCodes(), [T_ATTRIBUTE]),
-				$searchPointer
+				[...TokenHelper::FUNCTION_TOKEN_CODES, ...TokenHelper::TYPE_HINT_TOKEN_CODES, T_ATTRIBUTE],
+				$searchPointer,
 			);
 
 			if ($docCommentOwnerPointer === null) {
@@ -73,7 +72,7 @@ class UselessInheritDocCommentSniff implements Sniff
 
 		} while (true);
 
-		if (in_array($tokens[$docCommentOwnerPointer]['code'], TokenHelper::$functionTokenCodes, true)) {
+		if (in_array($tokens[$docCommentOwnerPointer]['code'], TokenHelper::FUNCTION_TOKEN_CODES, true)) {
 			$returnTypeHint = FunctionHelper::findReturnTypeHint($phpcsFile, $docCommentOwnerPointer);
 			if ($returnTypeHint === null) {
 				return;
@@ -98,7 +97,7 @@ class UselessInheritDocCommentSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Useless documentation comment with @inheritDoc.',
 			$docCommentOpenPointer,
-			self::CODE_USELESS_INHERIT_DOC_COMMENT
+			self::CODE_USELESS_INHERIT_DOC_COMMENT,
 		);
 
 		if (!$fix) {

@@ -47,7 +47,7 @@ class Page extends BootstrapPage {
    * {@inheritdoc}
    */
   public function preprocess(array &$variables, $hook, array $info) {
-    $value = isset($variables['element']['child']['#value']) ? $variables['element']['child']['#value'] : FALSE;
+    $value = $variables['element']['child']['#value'] ?? FALSE;
     if (_some_module_condition($value)) {
       $variables['attributes']['class'][] = 'my-theme-class';
       $variables['attributes']['class'][] = 'another-theme-class';
@@ -74,7 +74,7 @@ class Page extends BootstrapPage {
     // preprocess function. It also acts like the normal $variables array when
     // you need it to in instances of accessing nested content or in loop
     // structures like foreach.
-    $value = isset($variables['element']['child']['#value']) ? $variables['element']['child']['#value'] : FALSE;
+    $value = $variables['element']['child']['#value'] ?? FALSE;
     if (_some_module_condition($value)) {
       $variables->addClass(['my-theme-class', 'another-theme-class'])->removeClass('page');
     }

@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\Functions;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use const T_CLOSURE;
@@ -16,8 +17,7 @@ class RequireTrailingCommaInClosureUseSniff implements Sniff
 
 	public const CODE_MISSING_TRAILING_COMMA = 'MissingTrailingComma';
 
-	/** @var bool|null */
-	public $enable = null;
+	public ?bool $enable = null;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -60,7 +60,7 @@ class RequireTrailingCommaInClosureUseSniff implements Sniff
 			$phpcsFile,
 			T_WHITESPACE,
 			$useParenthesisCloserPointer - 1,
-			$useParenthesisOpenerPointer
+			$useParenthesisOpenerPointer,
 		);
 
 		if ($tokens[$pointerBeforeUseParenthesisCloser]['code'] === T_COMMA) {
@@ -70,7 +70,7 @@ class RequireTrailingCommaInClosureUseSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Multi-line "use" of closure declaration must have a trailing comma after the last inherited variable.',
 			$pointerBeforeUseParenthesisCloser,
-			self::CODE_MISSING_TRAILING_COMMA
+			self::CODE_MISSING_TRAILING_COMMA,
 		);
 
 		if (!$fix) {
@@ -78,7 +78,7 @@ class RequireTrailingCommaInClosureUseSniff implements Sniff
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->addContent($pointerBeforeUseParenthesisCloser, ',');
+		FixerHelper::add($phpcsFile, $pointerBeforeUseParenthesisCloser, ',');
 		$phpcsFile->fixer->endChangeset();
 	}
 

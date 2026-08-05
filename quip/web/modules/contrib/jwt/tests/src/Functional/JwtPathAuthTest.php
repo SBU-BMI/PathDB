@@ -105,7 +105,7 @@ class JwtPathAuthTest extends BrowserTestBase {
     // Make sure the logged-in user can access the file.
     $file_real_path = $file_system->realpath($file->getFileUri());
     $this->assertFileExists($file_real_path);
-    $this->drupalGet($file->createFileUrl());
+    $this->drupalGet($file->createFileUrl(FALSE));
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains($this->getFileContent($file));
     // Make sure the logged-in user can access the REST resource. The path
@@ -120,7 +120,7 @@ class JwtPathAuthTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
     $this->drupalLogout();
     // Expect a 403 when not authenticated.
-    $this->drupalGet($file->createFileUrl());
+    $this->drupalGet($file->createFileUrl(FALSE));
     $this->assertSession()->statusCodeEquals(403);
     // When Drupal is in a subdirectory (such as drupal.org testbot) any
     // path in the JWT other than a "/" must bre prefixed with the base
@@ -140,7 +140,7 @@ class JwtPathAuthTest extends BrowserTestBase {
       ],
     ];
     // Make a real request with the token in the query string.
-    $this->drupalGet($file->createFileUrl(), $options);
+    $this->drupalGet($file->createFileUrl(FALSE), $options);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains($this->getFileContent($file));
     // If the path claim on the JWT doesn't match, access should be denied.
@@ -153,7 +153,7 @@ class JwtPathAuthTest extends BrowserTestBase {
         'jwt' => $token,
       ],
     ];
-    $this->drupalGet($file->createFileUrl(), $options);
+    $this->drupalGet($file->createFileUrl(FALSE), $options);
     $this->assertSession()->statusCodeEquals(403);
     // Making a REST api request with no JWT should be denied.
     $options = [

@@ -1,0 +1,26 @@
+{
+  "name": "drupal/bulk_update_fields",
+  "description": "A module for those who need to bulk update fields in nodes or other entities.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "keywords": ["Drupal"],
+  "homepage": "https://www.drupal.org/project/bulk_update_fields",
+  "authors": [
+    {
+      "name": "Eliot Scott (el1_1el)",
+      "homepage": "https://www.drupal.org/u/el1_1el",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Andrii Momotov",
+      "homepage": "https://www.drupal.org/u/andrii-momotov",
+      "role": "Maintainer"
+    }
+  ],
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/bulk_update_fields",
+    "source": "https://git.drupalcode.org/project/bulk_update_fields"
+  },
+  "require": { }
+}

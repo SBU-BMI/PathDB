@@ -166,11 +166,24 @@ class IndexNameDepth extends ArgumentPluginBase {
       }
 
       $operator = (count($break->value) > 1) ? 'IN' : '=';
+      if (count($break->value) > 1) {
+        $operator = 'IN';
+      }
+      else {
+        $operator = '=';
+        $break->value = reset($break->value);
+      }
       $tids = $break->value;
+      // To pass argument value to check name.(I create a another variable for
+      // above same value because i need to make an array of $tids.).
+      $args = $break->value;
     }
     else {
-      $operator = "=";
+      $operator = "IN";
       $tids = $this->argument;
+      // To pass argument value to check name.(I create a another variable for
+      // above same value because i need to make an array of $tids.).
+      $args = $this->argument;
     }
 
     // Now build the subqueries.
@@ -186,10 +199,11 @@ class IndexNameDepth extends ArgumentPluginBase {
 
         $results = $query->execute()->fetchAll(\PDO::FETCH_OBJ);
 
+        $tids = [];
         // Iterate results.
         foreach ($results as $row) {
-          if ($this->pathautoAliasCleaner->cleanString($row->name) == $this->pathautoAliasCleaner->cleanString($tids)) {
-            $tids = $row->tid;
+          if ($this->pathautoAliasCleaner->cleanString($row->name) == $this->pathautoAliasCleaner->cleanString($args)) {
+            $tids[] = $row->tid;
           }
         }
       }
@@ -207,14 +221,18 @@ class IndexNameDepth extends ArgumentPluginBase {
         $query->condition('t.name', $argument, '=');
 
         $results = $query->execute()->fetchAll(\PDO::FETCH_OBJ);
-
+        $tids = [];
         // Iterate results.
         foreach ($results as $row) {
-          $tids = $row->tid;
+          $tids[] = $row->tid;
         }
       }
     }
-
+    // Condition to avoid error when $tids is empty because we cannot return an
+    // empty value due to (IN) clause.
+    if (empty($tids)) {
+      $tids = $args;
+    }
     // Now build the subqueries.
     $subquery = $this->database->select('taxonomy_index', 'tn');
     $subquery->addField('tn', 'nid');

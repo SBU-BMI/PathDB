@@ -1,0 +1,23 @@
+uuid: 1f77828c-e35b-451a-a20b-e75b62517bed
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.imagedvolumeheight
+    - node.type.wsi
+id: node.wsi.imagedvolumeheight
+field_name: imagedvolumeheight
+entity_type: node
+bundle: wsi
+label: 'Imaged Volume​ Height'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

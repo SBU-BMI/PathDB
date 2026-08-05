@@ -24,11 +24,9 @@ class NamespaceSpacingSniff implements Sniff
 	public const CODE_INCORRECT_LINES_COUNT_BEFORE_NAMESPACE = 'IncorrectLinesCountBeforeNamespace';
 	public const CODE_INCORRECT_LINES_COUNT_AFTER_NAMESPACE = 'IncorrectLinesCountAfterNamespace';
 
-	/** @var int */
-	public $linesCountBeforeNamespace = 1;
+	public int $linesCountBeforeNamespace = 1;
 
-	/** @var int */
-	public $linesCountAfterNamespace = 1;
+	public int $linesCountAfterNamespace = 1;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -85,10 +83,10 @@ class NamespaceSpacingSniff implements Sniff
 				'Expected %d line%s before namespace statement, found %d.',
 				$this->linesCountBeforeNamespace,
 				$this->linesCountBeforeNamespace === 1 ? '' : 's',
-				$actualLinesCountBeforeNamespace
+				$actualLinesCountBeforeNamespace,
 			),
 			$namespacePointer,
-			self::CODE_INCORRECT_LINES_COUNT_BEFORE_NAMESPACE
+			self::CODE_INCORRECT_LINES_COUNT_BEFORE_NAMESPACE,
 		);
 
 		if (!$fix) {
@@ -98,11 +96,12 @@ class NamespaceSpacingSniff implements Sniff
 		$phpcsFile->fixer->beginChangeset();
 
 		if ($tokens[$pointerBeforeNamespace]['code'] === T_OPEN_TAG) {
-			$phpcsFile->fixer->replaceToken($pointerBeforeNamespace, '<?php');
+			FixerHelper::replace($phpcsFile, $pointerBeforeNamespace, '<?php');
 		} elseif ($isInlineCommentBefore) {
-			$phpcsFile->fixer->replaceToken(
+			FixerHelper::replace(
+				$phpcsFile,
 				$pointerBeforeNamespace,
-				rtrim($tokens[$pointerBeforeNamespace]['content'], $phpcsFile->eolChar)
+				rtrim($tokens[$pointerBeforeNamespace]['content'], $phpcsFile->eolChar),
 			);
 		}
 
@@ -141,10 +140,10 @@ class NamespaceSpacingSniff implements Sniff
 				'Expected %d line%s after namespace statement, found %d.',
 				$this->linesCountAfterNamespace,
 				$this->linesCountAfterNamespace === 1 ? '' : 's',
-				$actualLinesCountAfterNamespace
+				$actualLinesCountAfterNamespace,
 			),
 			$namespacePointer,
-			self::CODE_INCORRECT_LINES_COUNT_AFTER_NAMESPACE
+			self::CODE_INCORRECT_LINES_COUNT_AFTER_NAMESPACE,
 		);
 
 		if (!$fix) {

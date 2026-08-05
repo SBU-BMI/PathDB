@@ -32,7 +32,7 @@ class HttpBrowser extends AbstractBrowser
     public function __construct(?HttpClientInterface $client = null, ?History $history = null, ?CookieJar $cookieJar = null)
     {
         if (!$client && !class_exists(HttpClient::class)) {
-            throw new LogicException(sprintf('You cannot use "%s" as the HttpClient component is not installed. Try running "composer require symfony/http-client".', __CLASS__));
+            throw new LogicException(\sprintf('You cannot use "%s" as the HttpClient component is not installed. Try running "composer require symfony/http-client".', __CLASS__));
         }
 
         $this->client = $client ?? HttpClient::create();
@@ -143,10 +143,15 @@ class HttpBrowser extends AbstractBrowser
             }
             if (!isset($file['tmp_name'])) {
                 $uploadedFiles[$name] = $this->getUploadedFiles($file);
+                continue;
             }
-            if (isset($file['tmp_name'])) {
-                $uploadedFiles[$name] = DataPart::fromPath($file['tmp_name'], $file['name']);
+
+            if ('' === $file['tmp_name']) {
+                $uploadedFiles[$name] = new DataPart('', '');
+                continue;
             }
+
+            $uploadedFiles[$name] = DataPart::fromPath($file['tmp_name'], $file['name']);
         }
 
         return $uploadedFiles;

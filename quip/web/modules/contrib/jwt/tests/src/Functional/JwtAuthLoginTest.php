@@ -4,7 +4,6 @@ namespace Drupal\Tests\jwt\Functional;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
-use Drupal\Tests\ApiRequestTrait;
 use Drupal\Tests\BrowserTestBase;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -19,7 +18,6 @@ use Symfony\Component\Serializer\Serializer;
  * @group jwt
  */
 class JwtAuthLoginTest extends BrowserTestBase {
-  use ApiRequestTrait;
 
   /**
    * Modules installed for all tests.
@@ -142,6 +140,46 @@ class JwtAuthLoginTest extends BrowserTestBase {
       'http_errors' => FALSE,
     ]);
     return $result;
+  }
+
+  /**
+   * Performs an HTTP request. Wraps the Guzzle HTTP client.
+   *
+   * In Drupal 10+ this is provided by Drupal\Tests\ApiRequestTrait. This
+   * code copied in for Drupal 9 support.
+   *
+   * Why wrap the Guzzle HTTP client? Because we want to keep the actual test
+   * code as simple as possible, and hence not require them to specify the
+   * 'http_errors = FALSE' request option, nor do we want them to have to
+   * convert Drupal Url objects to strings.
+   *
+   * We also don't want to follow redirects automatically, to ensure these tests
+   * are able to detect when redirects are added or removed.
+   *
+   * @param string $method
+   *   HTTP method.
+   * @param \Drupal\Core\Url $url
+   *   URL to request.
+   * @param array $request_options
+   *   Request options to apply.
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   *   The response.
+   *
+   * @see \GuzzleHttp\ClientInterface::request()
+   */
+  protected function makeApiRequest($method, Url $url, array $request_options) {
+    // HEAD requests do not have bodies. If one is specified, Guzzle will not
+    // ignore it and the request will be treated as GET with an overridden
+    // method string, and libcurl will expect to read a response body.
+    if ($method === 'HEAD' && array_key_exists('body', $request_options)) {
+      unset($request_options['body']);
+    }
+    $this->refreshVariables();
+    $request_options[RequestOptions::HTTP_ERRORS] = FALSE;
+    $request_options[RequestOptions::ALLOW_REDIRECTS] = FALSE;
+    $client = $this->getSession()->getDriver()->getClient()->getClient();
+    return $client->request($method, $url->setAbsolute(TRUE)->toString(), $request_options);
   }
 
 }

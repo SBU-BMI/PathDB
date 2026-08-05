@@ -69,8 +69,8 @@ class BootstrapDropdown extends PreprocessBase implements PreprocessInterface {
             $element['url'] = Url::fromRoute('<none>');
           }
 
-          $attributes = isset($element['attributes']) ? $element['attributes'] : [];
-          $wrapper_attributes = isset($element['wrapper_attributes']) ? $element['wrapper_attributes'] : [];
+          $attributes = $element['attributes'] ?? [];
+          $wrapper_attributes = $element['wrapper_attributes'] ?? [];
 
           if (isset($element['language']) && $element['language'] instanceof LanguageInterface) {
             $attributes['hreflang'] = $element['language']->getId();
@@ -93,7 +93,7 @@ class BootstrapDropdown extends PreprocessBase implements PreprocessInterface {
             '#type' => 'link',
             '#title' => $element['title'],
             '#url' => $element['url'],
-            '#ajax' => isset($element['ajax']) ? $element['ajax'] : [],
+            '#ajax' => $element['ajax'] ?? [],
             '#attributes' => $attributes,
             '#wrapper_attributes' => $wrapper_attributes,
           ];

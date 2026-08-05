@@ -10,11 +10,10 @@ class ParamLaterInvokedCallableTagValueNode implements PhpDocTagValueNode
 
 	use NodeAttributes;
 
-	/** @var string */
-	public $parameterName;
+	public string $parameterName;
 
 	/** @var string (may be empty) */
-	public $description;
+	public string $description;
 
 	public function __construct(string $parameterName, string $description)
 	{
@@ -25,6 +24,20 @@ class ParamLaterInvokedCallableTagValueNode implements PhpDocTagValueNode
 	public function __toString(): string
 	{
 		return trim("{$this->parameterName} {$this->description}");
+	}
+
+	/**
+	 * @param array<string, mixed> $properties
+	 */
+	public static function __set_state(array $properties): self
+	{
+		$instance = new self($properties['parameterName'], $properties['description']);
+		if (isset($properties['attributes'])) {
+			foreach ($properties['attributes'] as $key => $value) {
+				$instance->setAttribute($key, $value);
+			}
+		}
+		return $instance;
 	}
 
 }

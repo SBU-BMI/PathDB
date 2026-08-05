@@ -1,10 +1,13 @@
 services:
+  _defaults:
+    autowire: true
   externalauth.authmap:
     class: Drupal\externalauth\Authmap
-    arguments: ['@database']
+  Drupal\externalauth\AuthmapInterface: '@externalauth.authmap'
   externalauth.externalauth:
     class: Drupal\externalauth\ExternalAuth
-    arguments: ['@entity_type.manager', '@externalauth.authmap', '@logger.channel.externalauth', '@event_dispatcher']
+  Drupal\externalauth\ExternalAuthInterface: '@externalauth.externalauth'
   logger.channel.externalauth:
     parent: logger.channel_base
     arguments: ['externalauth']
+  Psr\Log\LoggerInterface: '@logger.channel.externalauth'

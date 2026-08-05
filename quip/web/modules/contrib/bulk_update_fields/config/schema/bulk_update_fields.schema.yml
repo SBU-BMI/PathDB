@@ -1,0 +1,10 @@
+bulk_update_fields.settings:
+  type: config_object
+  label: 'Bulk Update Fields settings'
+  mapping:
+    exclude:
+      type: sequence
+      label: 'Bulk update exclude field'
+      sequence:
+        type: string
+        label: "Field Name"

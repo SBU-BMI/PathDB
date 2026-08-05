@@ -18,11 +18,14 @@ final class FilteredAttributeProcessor implements AttributeProcessorInterface
     {
     }
 
+    #[\Override]
     public function process(AttributesInterface $attributes, ContextInterface $context): AttributesInterface
     {
         $filtered = [];
         foreach ($this->attributeKeys as $key) {
-            $filtered[$key] = $attributes->get($key);
+            if ($attributes->has($key)) {
+                $filtered[$key] = $attributes->get($key);
+            }
         }
 
         return new Attributes($filtered, 0);

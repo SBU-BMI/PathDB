@@ -21,7 +21,7 @@ error_reporting(-1);
 global $argv, $argc;
 $argv = $_SERVER['argv'] ?? [];
 $argc = $_SERVER['argc'] ?? 0;
-$getEnvVar = function ($name, $default = false) use ($argv) {
+$getEnvVar = static function ($name, $default = false) use ($argv) {
     if (false !== $value = getenv($name)) {
         return $value;
     }
@@ -29,7 +29,7 @@ $getEnvVar = function ($name, $default = false) use ($argv) {
     static $phpunitConfig = null;
     if (null === $phpunitConfig) {
         $phpunitConfigFilename = null;
-        $getPhpUnitConfig = function ($probableConfig) use (&$getPhpUnitConfig) {
+        $getPhpUnitConfig = static function ($probableConfig) use (&$getPhpUnitConfig) {
             if (!$probableConfig) {
                 return null;
             }
@@ -89,7 +89,7 @@ $getEnvVar = function ($name, $default = false) use ($argv) {
     return $default;
 };
 
-$passthruOrFail = function ($command) {
+$passthruOrFail = static function ($command) {
     passthru($command, $status);
 
     if ($status) {
@@ -135,6 +135,7 @@ $defaultEnvs = [
     'COMPOSER' => 'composer.json',
     'COMPOSER_VENDOR_DIR' => 'vendor',
     'COMPOSER_BIN_DIR' => 'bin',
+    'COMPOSER_NO_INTERACTION' => '1',
     'SYMFONY_SIMPLE_PHPUNIT_BIN_DIR' => __DIR__,
 ];
 
@@ -190,7 +191,7 @@ if (!file_exists("$PHPUNIT_DIR/$PHPUNIT_VERSION_DIR/phpunit") || $configurationH
     }
 
     $info = [];
-    foreach (explode("\n", `$COMPOSER info --no-ansi -a -n phpunit/phpunit "$PHPUNIT_VERSION.*"`) as $line) {
+    foreach (explode("\n", shell_exec("$COMPOSER info --no-ansi -a -n phpunit/phpunit \"$PHPUNIT_VERSION.*\"")) as $line) {
         $line = rtrim($line);
 
         if (!$info && preg_match('/^versions +: /', $line)) {
@@ -218,7 +219,7 @@ if (!file_exists("$PHPUNIT_DIR/$PHPUNIT_VERSION_DIR/phpunit") || $configurationH
         'requires' => ['php' => '*'],
     ];
 
-    $stableVersions = array_filter($info['versions'], function ($v) {
+    $stableVersions = array_filter($info['versions'], static function ($v) {
         return !preg_match('/-dev$|^dev-/', $v);
     });
 
@@ -231,10 +232,10 @@ if (!file_exists("$PHPUNIT_DIR/$PHPUNIT_VERSION_DIR/phpunit") || $configurationH
     @copy("$PHPUNIT_VERSION_DIR/phpunit.xsd", 'phpunit.xsd');
     chdir("$PHPUNIT_VERSION_DIR");
     if ($SYMFONY_PHPUNIT_REMOVE) {
-        $passthruOrFail("$COMPOSER remove --no-update --no-interaction ".$SYMFONY_PHPUNIT_REMOVE);
+        $passthruOrFail("$COMPOSER remove --no-update ".$SYMFONY_PHPUNIT_REMOVE);
     }
     if ($SYMFONY_PHPUNIT_REQUIRE) {
-        $passthruOrFail("$COMPOSER require --no-update --no-interaction ".$SYMFONY_PHPUNIT_REQUIRE);
+        $passthruOrFail("$COMPOSER require --no-update ".$SYMFONY_PHPUNIT_REQUIRE);
     }
     if (5.1 <= $PHPUNIT_VERSION && $PHPUNIT_VERSION < 5.4) {
         $passthruOrFail("$COMPOSER require --no-update phpunit/phpunit-mock-objects \"~3.1.0\"");
@@ -334,7 +335,7 @@ if ('\\' === \DIRECTORY_SEPARATOR) {
 chdir($oldPwd);
 
 if ($PHPUNIT_VERSION < 8.0) {
-    $argv = array_filter($argv, function ($v) use (&$argc) {
+    $argv = array_filter($argv, static function ($v) use (&$argc) {
         if ('--do-not-cache-result' !== $v) {
             return true;
         }
@@ -456,7 +457,7 @@ if ($components) {
         }
     }
 } elseif (!isset($argv[1]) || 'install' !== $argv[1] || file_exists('install')) {
-    if (!class_exists(\SymfonyExcludeListSimplePhpunit::class, false)) {
+    if (!class_exists(SymfonyExcludeListSimplePhpunit::class, false)) {
         class SymfonyExcludeListSimplePhpunit
         {
         }

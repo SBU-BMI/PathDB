@@ -28,38 +28,37 @@ class TypeNameMatchesFileNameSniff implements Sniff
 	public const CODE_NO_MATCH_BETWEEN_TYPE_NAME_AND_FILE_NAME = 'NoMatchBetweenTypeNameAndFileName';
 
 	/** @var array<string, string> */
-	public $rootNamespaces = [];
+	public array $rootNamespaces = [];
 
 	/** @var list<string> */
-	public $skipDirs = [];
+	public array $skipDirs = [];
 
 	/** @var list<string> */
-	public $ignoredNamespaces = [];
+	public array $ignoredNamespaces = [];
 
 	/** @var list<string> */
-	public $extensions = ['php'];
+	public array $extensions = ['php'];
 
 	/** @var array<string, string>|null */
-	private $normalizedRootNamespaces;
+	private ?array $normalizedRootNamespaces = null;
 
 	/** @var list<string>|null */
-	private $normalizedSkipDirs;
+	private ?array $normalizedSkipDirs = null;
 
 	/** @var list<string>|null */
-	private $normalizedIgnoredNamespaces;
+	private ?array $normalizedIgnoredNamespaces = null;
 
 	/** @var list<string>|null */
-	private $normalizedExtensions;
+	private ?array $normalizedExtensions = null;
 
-	/** @var FilepathNamespaceExtractor */
-	private $namespaceExtractor;
+	private ?FilepathNamespaceExtractor $namespaceExtractor = null;
 
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$typeKeywordTokenCodes;
+		return TokenHelper::CLASS_TYPE_TOKEN_CODES;
 	}
 
 	/**
@@ -99,10 +98,10 @@ class TypeNameMatchesFileNameSniff implements Sniff
 				'%s name %s does not match filepath %s.',
 				ucfirst($tokens[$typePointer]['content']),
 				$typeName,
-				$phpcsFile->getFilename()
+				$phpcsFile->getFilename(),
 			),
 			$namePointer,
-			self::CODE_NO_MATCH_BETWEEN_TYPE_NAME_AND_FILE_NAME
+			self::CODE_NO_MATCH_BETWEEN_TYPE_NAME_AND_FILE_NAME,
 		);
 	}
 
@@ -141,9 +140,7 @@ class TypeNameMatchesFileNameSniff implements Sniff
 	 */
 	private function getSkipDirs(): array
 	{
-		if ($this->normalizedSkipDirs === null) {
-			$this->normalizedSkipDirs = SniffSettingsHelper::normalizeArray($this->skipDirs);
-		}
+		$this->normalizedSkipDirs ??= SniffSettingsHelper::normalizeArray($this->skipDirs);
 
 		return $this->normalizedSkipDirs;
 	}
@@ -153,9 +150,7 @@ class TypeNameMatchesFileNameSniff implements Sniff
 	 */
 	private function getIgnoredNamespaces(): array
 	{
-		if ($this->normalizedIgnoredNamespaces === null) {
-			$this->normalizedIgnoredNamespaces = SniffSettingsHelper::normalizeArray($this->ignoredNamespaces);
-		}
+		$this->normalizedIgnoredNamespaces ??= SniffSettingsHelper::normalizeArray($this->ignoredNamespaces);
 
 		return $this->normalizedIgnoredNamespaces;
 	}
@@ -165,22 +160,18 @@ class TypeNameMatchesFileNameSniff implements Sniff
 	 */
 	private function getExtensions(): array
 	{
-		if ($this->normalizedExtensions === null) {
-			$this->normalizedExtensions = SniffSettingsHelper::normalizeArray($this->extensions);
-		}
+		$this->normalizedExtensions ??= SniffSettingsHelper::normalizeArray($this->extensions);
 
 		return $this->normalizedExtensions;
 	}
 
 	private function getNamespaceExtractor(): FilepathNamespaceExtractor
 	{
-		if ($this->namespaceExtractor === null) {
-			$this->namespaceExtractor = new FilepathNamespaceExtractor(
-				$this->getRootNamespaces(),
-				$this->getSkipDirs(),
-				$this->getExtensions()
-			);
-		}
+		$this->namespaceExtractor ??= new FilepathNamespaceExtractor(
+			$this->getRootNamespaces(),
+			$this->getSkipDirs(),
+			$this->getExtensions(),
+		);
 
 		return $this->namespaceExtractor;
 	}

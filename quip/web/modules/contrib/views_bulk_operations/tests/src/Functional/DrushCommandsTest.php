@@ -1,16 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_bulk_operations\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\views_bulk_operations\WatchdogTestTrait;
+use Drupal\views_bulk_operations\Drush\Commands\ViewsBulkOperationsCommands;
 use Drush\TestTraits\DrushTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\views_bulk_operations\Commands\ViewsBulkOperationsCommands
- * @group views_bulk_operations
+ * Test Drush commands.
  */
-class DrushCommandsTest extends BrowserTestBase {
+#[CoversClass(ViewsBulkOperationsCommands::class)]
+#[Group('views_bulk_operations')]
+final class DrushCommandsTest extends BrowserTestBase {
   use DrushTestTrait;
+  use WatchdogTestTrait;
 
   private const TEST_NODE_COUNT = 15;
 
@@ -27,11 +35,10 @@ class DrushCommandsTest extends BrowserTestBase {
   protected array $testNodes = [];
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
+    'dblog',
     'node',
     'views',
     'views_bulk_operations',
@@ -76,18 +83,18 @@ class DrushCommandsTest extends BrowserTestBase {
     // Basic test.
     $this->drush('vbo-exec', $arguments);
     for ($i = 0; $i < self::TEST_NODE_COUNT; $i++) {
-      $this->assertStringContainsString("Test action (label: Title $i)", $this->getErrorOutput());
+      self::assertStringContainsString("Test action (label: Title $i)", $this->getErrorOutput());
     }
 
     // Exposed filters test.
     $this->drush('vbo-exec', $arguments, ['exposed' => 'sticky=1']);
     for ($i = 0; $i < self::TEST_NODE_COUNT; $i++) {
       $test_string = "Test action (label: Title $i)";
-      if ($i % 2) {
-        $this->assertStringContainsString($test_string, $this->getErrorOutput());
+      if ($i % 2 !== 0) {
+        self::assertStringContainsString($test_string, $this->getErrorOutput());
       }
       else {
-        $this->assertStringNotContainsString($test_string, $this->getErrorOutput());
+        self::assertStringNotContainsString($test_string, $this->getErrorOutput());
       }
     }
   }

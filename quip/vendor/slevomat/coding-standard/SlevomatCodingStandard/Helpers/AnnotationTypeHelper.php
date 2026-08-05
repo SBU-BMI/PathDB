@@ -22,6 +22,7 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use function count;
 use function in_array;
+use function preg_match;
 use function strtolower;
 
 /**
@@ -123,7 +124,7 @@ class AnnotationTypeHelper
 	}
 
 	/**
-	 * @param array<int, string> $traversableTypeHints
+	 * @param list<string> $traversableTypeHints
 	 */
 	public static function containsTraversableType(TypeNode $typeNode, File $phpcsFile, int $pointer, array $traversableTypeHints): bool
 	{
@@ -170,7 +171,7 @@ class AnnotationTypeHelper
 	}
 
 	/**
-	 * @param array<int, string> $traversableTypeHints
+	 * @param list<string> $traversableTypeHints
 	 */
 	public static function containsItemsSpecificationForTraversable(
 		TypeNode $typeNode,
@@ -190,14 +191,14 @@ class AnnotationTypeHelper
 			return true;
 		}
 
-		if ($typeNode instanceof ArrayShapeNode) {
-			foreach ($typeNode->items as $arrayShapeItemNode) {
+		if ($typeNode instanceof ArrayShapeNode || $typeNode instanceof ObjectShapeNode) {
+			foreach ($typeNode->items as $innerItemNode) {
 				if (!self::containsItemsSpecificationForTraversable(
-					$arrayShapeItemNode->valueType,
+					$innerItemNode->valueType,
 					$phpcsFile,
 					$pointer,
 					$traversableTypeHints,
-					true
+					true,
 				)) {
 					return false;
 				}
@@ -222,7 +223,7 @@ class AnnotationTypeHelper
 
 			return !TypeHintHelper::isTraversableType(
 				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $pointer, $typeNode->name),
-				$traversableTypeHints
+				$traversableTypeHints,
 			);
 		}
 
@@ -256,7 +257,7 @@ class AnnotationTypeHelper
 					$phpcsFile,
 					$pointer,
 					$traversableTypeHints,
-					$inTraversable
+					$inTraversable,
 				)) {
 					return true;
 				}
@@ -271,7 +272,7 @@ class AnnotationTypeHelper
 					$phpcsFile,
 					$pointer,
 					$traversableTypeHints,
-					$inTraversable
+					$inTraversable,
 				);
 		}
 
@@ -303,16 +304,33 @@ class AnnotationTypeHelper
 				return $enableUnionTypeHint || $enableStandaloneNullTrueFalseTypeHints ? 'false' : 'bool';
 			}
 
-			if (in_array(strtolower($typeNode->name), ['positive-int', 'negative-int'], true)) {
+			if (in_array(
+				strtolower($typeNode->name),
+				['positive-int', 'non-positive-int', 'negative-int', 'non-negative-int', 'literal-int', 'int-mask'],
+				true,
+			)) {
 				return 'int';
 			}
 
 			if (in_array(
 				strtolower($typeNode->name),
-				['class-string', 'trait-string', 'callable-string', 'numeric-string', 'non-empty-string', 'non-falsy-string', 'literal-string'],
-				true
+				['callable-array', 'callable-string'],
+				true,
 			)) {
+				return 'callable';
+			}
+
+			// See https://psalm.dev/docs/annotating_code/type_syntax/scalar_types/#class-string-interface-string
+			if (preg_match('~-string$~i', $typeNode->name) === 1) {
 				return 'string';
+			}
+
+			if (in_array(
+				strtolower($typeNode->name),
+				['non-empty-array', 'list', 'non-empty-list'],
+				true,
+			)) {
+				return 'array';
 			}
 
 			return $typeNode->name;
@@ -353,7 +371,7 @@ class AnnotationTypeHelper
 
 	/**
 	 * @param UnionTypeNode|IntersectionTypeNode $typeNode
-	 * @param array<int, string> $traversableTypeHints
+	 * @param list<string> $traversableTypeHints
 	 * @return list<string>
 	 */
 	public static function getTraversableTypeHintsFromType(
@@ -383,7 +401,7 @@ class AnnotationTypeHelper
 		foreach ($typeHints as $typeHint) {
 			if (!TypeHintHelper::isTraversableType(
 				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $pointer, $typeHint),
-				$traversableTypeHints
+				$traversableTypeHints,
 			)) {
 				return [];
 			}

@@ -3,8 +3,8 @@
  * Abstract Testcase class for testing Filters.
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
- * @copyright 2023 PHPCSStandards Contributors
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @copyright 2023 PHPCSStandards and contributors
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Filters;
@@ -223,10 +223,10 @@ abstract class AbstractFilterTestCase extends TestCase
      * These type of tests should be able to run and pass on both *nix as well as Windows
      * based dev systems. This method is a helper to allow for this.
      *
-     * @param array<string|array> $paths A single or multi-dimensional array containing
-     *                                   file paths.
+     * @param array<string|array<string>> $paths A single or multi-dimensional array containing
+     *                                           file paths.
      *
-     * @return array<string|array>
+     * @return array<string|array<string>>
      */
     protected static function mapPathsToRuntimeOs(array $paths)
     {

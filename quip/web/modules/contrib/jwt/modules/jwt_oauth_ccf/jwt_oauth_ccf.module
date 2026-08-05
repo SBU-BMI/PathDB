@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Client credentials grant (machine-to-machine) JWT issuance.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_help().
+ */
+function jwt_oauth_ccf_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name === 'help.page.jwt_oauth_ccf') {
+    $output = '';
+    $output .= '<h3>' . t('About') . '</h3>';
+    $output .= '<p>' . t('Issues short-lived JWTs for the OAuth 2.0 client credentials grant. Each Drupal account can hold one or more client credentials and act as a machine-to-machine service account.') . '</p>';
+    return $output;
+  }
+  return NULL;
+}
+
+/**
+ * Implements hook_user_delete().
+ *
+ * Removes any OAuth client credentials belonging to a deleted account.
+ */
+function jwt_oauth_ccf_user_delete(UserInterface $account) {
+  \Drupal::service('jwt_oauth_ccf.client_repository')
+    ->deleteUserClients((int) $account->id());
+}

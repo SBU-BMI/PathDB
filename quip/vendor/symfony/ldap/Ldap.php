@@ -49,6 +49,13 @@ final class Ldap implements LdapInterface
         return $this->adapter->escape($subject, $ignore, $flags);
     }
 
+    public function reset(): void
+    {
+        if (method_exists($this->adapter, 'reset')) {
+            $this->adapter->reset();
+        }
+    }
+
     /**
      * Creates a new Ldap instance.
      *
@@ -58,7 +65,7 @@ final class Ldap implements LdapInterface
     public static function create(string $adapter, array $config = []): static
     {
         if ('ext_ldap' !== $adapter) {
-            throw new DriverNotFoundException(sprintf('Adapter "%s" not found. Only "ext_ldap" is supported at the moment.', $adapter));
+            throw new DriverNotFoundException(\sprintf('Adapter "%s" not found. Only "ext_ldap" is supported at the moment.', $adapter));
         }
 
         return new self(new Adapter($config));

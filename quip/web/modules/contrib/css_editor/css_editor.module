@@ -32,6 +32,14 @@ function css_editor_page_attachments(array &$page) {
 }
 
 /**
+ * Implements hook_cache_flush().
+ */
+function css_editor_cache_flush() {
+  // Regenerate all CSS files when cache is cleared.
+  \Drupal::service('css_editor.css_generator')->regenerateAllCssFiles();
+}
+
+/**
  * Implements hook_form_FORM_ID_alter() for `system_theme_settings`.
  */
 function css_editor_form_system_theme_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
@@ -110,21 +118,17 @@ function css_editor_form_system_theme_settings_alter(&$form, FormStateInterface 
 function _css_editor_theme_settings_form_submit($form, FormStateInterface $form_state) {
   $theme = _css_editor_get_edited_theme($form_state);
   if ($theme) {
-    // Save file.
-    $path = 'public://css_editor';
-    $file = $path . DIRECTORY_SEPARATOR . $theme . '.css';
-    if (\Drupal::service('file_system')->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
-      \Drupal::service('file_system')->saveData($form_state->getValue(['css_editor', 'css']), $file, FileSystemInterface::EXISTS_REPLACE);
-      \Drupal::service('file_system')->chmod($file);
-    }
-    // Save settings.
+    // Save settings to configuration.
     \Drupal::configFactory()->getEditable('css_editor.theme.' . $theme)
       ->set('enabled', $form_state->getValue(['css_editor', 'enabled']))
       ->set('plaintext_enabled', $form_state->getValue(['css_editor', 'plaintext_enabled']))
       ->set('autopreview_enabled', $form_state->getValue(['css_editor', 'autopreview_enabled']))
       ->set('css', $form_state->getValue(['css_editor', 'css']))
-      ->set('path', $file)
       ->save();
+
+    // Generate CSS file using the service.
+    \Drupal::service('css_editor.css_generator')->generateCssFile($theme);
+
     // Clear cache.
     drupal_flush_all_caches();
   }

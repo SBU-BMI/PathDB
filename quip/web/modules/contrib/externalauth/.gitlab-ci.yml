@@ -57,7 +57,7 @@ variables:
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
   OPT_IN_TEST_MAX_PHP: 1
-  _CSPELL_WORDS: 'authdata, AUTHMAP, Authmap, authmap, Authname, authname, authnames, MQNAY, varchar'
+  _CSPELL_WORDS: 'authdata, AUTHMAP, Authmap, authmap, Authname, authname, authnames, MQNAY, samlauth, varchar'
 
 ###################################################################################
 #

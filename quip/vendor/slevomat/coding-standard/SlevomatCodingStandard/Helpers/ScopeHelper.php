@@ -21,7 +21,7 @@ class ScopeHelper
 			$scope = 0;
 
 			foreach (array_reverse($tokens[$pointer]['conditions'], true) as $conditionPointer => $conditionTokenCode) {
-				if (!in_array($conditionTokenCode, TokenHelper::$functionTokenCodes, true)) {
+				if (!in_array($conditionTokenCode, TokenHelper::FUNCTION_TOKEN_CODES, true)) {
 					continue;
 				}
 
@@ -55,9 +55,7 @@ class ScopeHelper
 	 */
 	public static function getAllRootPointers(File $phpcsFile): array
 	{
-		$lazyValue = static function () use ($phpcsFile): array {
-			return TokenHelper::findNextAll($phpcsFile, T_OPEN_TAG, 0);
-		};
+		$lazyValue = static fn (): array => TokenHelper::findNextAll($phpcsFile, T_OPEN_TAG, 0);
 
 		return SniffLocalCache::getAndSetIfNotCached($phpcsFile, 'openTagPointers', $lazyValue);
 	}

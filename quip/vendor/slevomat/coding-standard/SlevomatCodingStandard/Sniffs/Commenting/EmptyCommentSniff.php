@@ -80,7 +80,7 @@ class EmptyCommentSniff implements Sniff
 
 		FixerHelper::removeBetween($phpcsFile, $pointerBeforeWhitespaceBeforeComment, $commentStartPointer);
 
-		$phpcsFile->fixer->addContent($pointerBeforeWhitespaceBeforeComment, $fixedWhitespaceBeforeComment);
+		FixerHelper::add($phpcsFile, $pointerBeforeWhitespaceBeforeComment, $fixedWhitespaceBeforeComment);
 
 		FixerHelper::removeBetweenIncluding($phpcsFile, $commentStartPointer, $commentEndPointer);
 
@@ -97,9 +97,9 @@ class EmptyCommentSniff implements Sniff
 			$fixedWhitespaceAfterComment = preg_replace(
 				'~^[ \\t]*' . $phpcsFile->eolChar . '~',
 				'',
-				$tokens[$whitespacePointerAfterComment]['content']
+				$tokens[$whitespacePointerAfterComment]['content'],
 			);
-			$phpcsFile->fixer->replaceToken($whitespacePointerAfterComment, $fixedWhitespaceAfterComment);
+			FixerHelper::replace($phpcsFile, $whitespacePointerAfterComment, $fixedWhitespaceAfterComment);
 		}
 
 		$phpcsFile->fixer->endChangeset();
@@ -120,7 +120,7 @@ class EmptyCommentSniff implements Sniff
 			return TokenHelper::getContent($phpcsFile, $commentStartPointer + 1, $commentEndPointer - 1);
 		}
 
-		if (preg_match('~^(?://|#)(.*)~', $tokens[$commentStartPointer]['content'], $matches) !== 0) {
+		if (preg_match('~^(?://|#)(.*)~', $tokens[$commentStartPointer]['content'], $matches) === 1) {
 			return $matches[1];
 		}
 

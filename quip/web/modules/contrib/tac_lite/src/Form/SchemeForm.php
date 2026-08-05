@@ -21,12 +21,14 @@ class SchemeForm extends ConfigFormBase {
   public function getEditableConfigNames() {
     return ['tac_lite.settings'];
   }
+  
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
     return 'tac_lite_admin_scheme_form';
   }
+
   /**
    * {@inheritdoc}
    */
@@ -37,7 +39,7 @@ class SchemeForm extends ConfigFormBase {
     $roles = user_roles();
     $config = self::tacLiteConfig($scheme);
     $form['#tac_lite_config'] = $config;
-    if (count($vids)) {
+    if ($vids) {
       $form['tac_lite_config_scheme_' . $scheme] = ['#tree' => TRUE];
       $form['tac_lite_config_scheme_' . $scheme]['name'] = [
         '#type' => 'textfield',
@@ -128,6 +130,7 @@ class SchemeForm extends ConfigFormBase {
 
     return parent::buildForm($form, $form_state);
   }
+
   /**
    * {@inheritdoc}
    */
@@ -145,8 +148,11 @@ class SchemeForm extends ConfigFormBase {
     else {
       $this->messenger()->addWarning($this->t('Do not forget to <a href=:url>rebuild node access permissions</a> after you have configured taxonomy-based access.', [':url' => Url::fromRoute('node.configure_rebuild_confirm')->toString()]));
     }
+    
     parent::submitForm($form, $form_state);
+    drupal_flush_all_caches();
   }
+
   /**
    * Helper function to get configuration of scheme.
    */

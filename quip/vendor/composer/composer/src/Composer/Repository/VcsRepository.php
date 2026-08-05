@@ -83,6 +83,7 @@ class VcsRepository extends ArrayRepository implements ConfigurableRepositoryInt
             'gitlab' => 'Composer\Repository\Vcs\GitLabDriver',
             'bitbucket' => 'Composer\Repository\Vcs\GitBitbucketDriver',
             'git-bitbucket' => 'Composer\Repository\Vcs\GitBitbucketDriver',
+            'forgejo' => 'Composer\Repository\Vcs\ForgejoDriver',
             'git' => 'Composer\Repository\Vcs\GitDriver',
             'hg' => 'Composer\Repository\Vcs\HgDriver',
             'perforce' => 'Composer\Repository\Vcs\PerforceDriver',
@@ -189,7 +190,7 @@ class VcsRepository extends ArrayRepository implements ConfigurableRepositoryInt
 
         $driver = $this->getDriver();
         if (!$driver) {
-            throw new \InvalidArgumentException('No driver found to handle VCS repository '.$this->url);
+            throw new \InvalidArgumentException('No driver found to handle VCS repository '.Url::sanitize($this->url));
         }
 
         $this->versionParser = new VersionParser;
@@ -216,7 +217,7 @@ class VcsRepository extends ArrayRepository implements ConfigurableRepositoryInt
 
         foreach ($driver->getTags() as $tag => $identifier) {
             $tag = (string) $tag;
-            $msg = 'Reading composer.json of <info>' . ($this->packageName ?: $this->url) . '</info> (<comment>' . $tag . '</comment>)';
+            $msg = 'Reading composer.json of <info>' . ($this->packageName ?: Url::sanitize($this->url)) . '</info> (<comment>' . $tag . '</comment>)';
 
             // strip the release- prefix from tags if present
             $tag = str_replace('release-', '', $tag);
@@ -326,7 +327,7 @@ class VcsRepository extends ArrayRepository implements ConfigurableRepositoryInt
 
         foreach ($branches as $branch => $identifier) {
             $branch = (string) $branch;
-            $msg = 'Reading composer.json of <info>' . ($this->packageName ?: $this->url) . '</info> (<comment>' . $branch . '</comment>)';
+            $msg = 'Reading composer.json of <info>' . ($this->packageName ?: Url::sanitize($this->url)) . '</info> (<comment>' . $branch . '</comment>)';
             if ($isVeryVerbose) {
                 $this->io->writeError($msg);
             } elseif ($isVerbose) {
@@ -419,7 +420,7 @@ class VcsRepository extends ArrayRepository implements ConfigurableRepositoryInt
         }
 
         if (!$this->getPackages()) {
-            throw new InvalidRepositoryException('No valid composer.json was found in any branch or tag of '.$this->url.', could not load a package from it.');
+            throw new InvalidRepositoryException('No valid composer.json was found in any branch or tag of '.Url::sanitize($this->url).', could not load a package from it.');
         }
     }
 
@@ -501,7 +502,7 @@ class VcsRepository extends ArrayRepository implements ConfigurableRepositoryInt
         }
 
         if ($cachedPackage) {
-            $msg = 'Found cached composer.json of <info>' . ($this->packageName ?: $this->url) . '</info> (<comment>' . $version . '</comment>)';
+            $msg = 'Found cached composer.json of <info>' . ($this->packageName ?: Url::sanitize($this->url)) . '</info> (<comment>' . $version . '</comment>)';
             if ($isVeryVerbose) {
                 $this->io->writeError($msg);
             } elseif ($isVerbose) {

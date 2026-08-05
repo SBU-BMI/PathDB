@@ -3,12 +3,11 @@
     attach: function (context, settings) {
       if (context == document) {
         if ($('body').hasClass('user-logged-in') && typeof settings.moderated_content_bulk_publish !== 'undefined') {
+          // In the admin/content listing, add a confirmation dialog to all bulk operations.
           if (settings.moderated_content_bulk_publish.enable_dialog_admin_content) {
-            // In the admin/content listing, add a confirmation dialog to all bulk operations.
-            //using id contains selector id*= because id sometimes has a --2 atatched to end (edit-node-bulk-form--2)
+            // Using id contains selector id*= because id sometimes has a --2 attached.
             $('.view-content div[id*="edit-node-bulk-form"] .js-form-submit, .view-content form[id*="views-form-moderated-content-moderated-content"] input#edit-submit').bind('click.moderated_content_bulk_publish',function(e) {
               // For automated testing purposes you can unbind this click event as follows:
-              // jQuery('*').unbind('click.moderated_content_bulk_publish'); // Disables confirm dialog.
               var titles = [];
               $('.views-table tbody .form-checkbox:checked').each(function() {
                 titles.push($(this).closest('tr').find('.views-field-title a').text());
@@ -22,7 +21,7 @@
               if (cnt > 1) {
                 prompt += "<br/><br/>+ " + (cnt-1) + ' more';
               }
-              // build a Drupal modal dialog window
+              // Build a Drupal modal dialog window.
               var content  = '<div><p id="version-confirm-form-text">' + prompt + '</p></div>';
               var modalwindowtitle = action + "?";
               confirmationDialog = Drupal.dialog(content, {
@@ -55,6 +54,7 @@
                 },
                 beforeClose: false,
                 close: function (event) {
+                  confirmationDialog.close();
                   $(event.target).remove();
                 }
               });
@@ -110,6 +110,7 @@
                 },
                 beforeClose: false,
                 close: function (event) {
+                  confirmationDialog.close();
                   $(event.target).parent().parent().find('.ui-widget-overlay').remove();
                   $(event.target).remove();
                 }
@@ -124,6 +125,9 @@
             // When editing any type of node, display a confirmation dialog any time the state is changing from
             // non-published to published.
             if ($('body').hasClass('path-node')) {
+              // Minimal single-dialog guards.
+              var mcbpDialogOpen = window.mcbpDialogOpen || false;
+              var mcbpBypass     = window.mcbpBypass || false;
               $('#edit-submit').unbind('click.moderated_content_bulk_publish').bind('click.moderated_content_bulk_publish', function(e) {
                 // For automated testing purposes you can unbind this click event as follows:
                 // jQuery('*').unbind('click.moderated_content_bulk_publish'); // Disables confirm dialog.
@@ -138,10 +142,21 @@
                 var new_state = $('#edit-moderation-state-0-state option:selected').text();
                 new_state = Drupal.t(new_state);
                 // If changing from un-published to published...
+                // If we just confirmed, allow the next submit to pass without dialog.
+                if (window.mcbpBypass) {
+                  window.mcbpBypass = false;
+                  return true;
+                }
 
                 // build a Drupal modal dialog window
                 var msg =  Drupal.t('Are you sure you want to publish this item?');
                 var content  = '<div><p id="version-confirm-form-text">' + msg + '</p></div>';
+                // Prevent multiple dialogs if one is already open.
+                if (window.mcbpDialogOpen) {
+                  e.preventDefault();
+                  return false;
+                }
+
                 confirmationDialog_publish = Drupal.dialog(content, {
                   dialogClass: 'confirm-dialog',
                   resizable: false,
@@ -152,6 +167,8 @@
                     text: Drupal.t('Yes'),
                     class: 'button button--primary',
                     click: function click(e) {
+                      // On confirm, mark bypass so the next click/submit doesn't re-open.
+                      window.mcbpBypass = true;
                       confirmationDialog_publish.close();
                       $(".node-form #edit-submit, .node-layout-builder-form  #edit-submit, .gin-sticky-form-actions #edit-submit").unbind('click.moderated_content_bulk_publish');
                       $(".node-form #edit-submit, .node-layout-builder-form  #edit-submit, .gin-sticky-form-actions #edit-submit").trigger('click.moderated_content_bulk_publish');
@@ -163,6 +180,8 @@
                     text: Drupal.t('Cancel'),
                     class: 'button',
                     click: function click() {
+                      // Always clear the "open" flag and clean up overlays.
+                      window.mcbpDialogOpen = false;
                       confirmationDialog_publish.close();
                     }
                   }],
@@ -170,18 +189,23 @@
                   },
                   beforeClose: false,
                   close: function (event) {
+                    confirmationDialog_publish.close();
                     $(event.target).parent().parent().find('.ui-widget-overlay').remove();
                     $(event.target).remove();
+                    // Clear the dialog open flag so the modal can be reopened.
+                    window.mcbpDialogOpen = false;
                   }
                 });
 
                 if ((cur_state == '' || cur_state == Drupal.t('Draft')) && (new_state == Drupal.t('Published'))) {
                   e.preventDefault();
+                  window.mcbpDialogOpen = true;
                   confirmationDialog_publish.showModal();
                   return false;
                 }
                 else if ((cur_state == Drupal.t('Published')) && (new_state == Drupal.t('Published'))) {
                   e.preventDefault();
+                  window.mcbpDialogOpen = true;
                   confirmationDialog_publish.showModal();
                   return false;
                 }

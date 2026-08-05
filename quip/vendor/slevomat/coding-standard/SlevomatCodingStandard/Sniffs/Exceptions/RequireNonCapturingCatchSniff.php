@@ -26,8 +26,7 @@ class RequireNonCapturingCatchSniff implements Sniff
 
 	public const CODE_NON_CAPTURING_CATCH_REQUIRED = 'NonCapturingCatchRequired';
 
-	/** @var bool|null */
-	public $enable = null;
+	public ?bool $enable = null;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -57,7 +56,7 @@ class RequireNonCapturingCatchSniff implements Sniff
 			$phpcsFile,
 			T_VARIABLE,
 			$tokens[$catchPointer]['parenthesis_opener'],
-			$tokens[$catchPointer]['parenthesis_closer']
+			$tokens[$catchPointer]['parenthesis_closer'],
 		);
 		if ($variablePointer === null) {
 			return;
@@ -69,7 +68,7 @@ class RequireNonCapturingCatchSniff implements Sniff
 			$phpcsFile,
 			$tokens[$catchPointer]['scope_opener'],
 			$tokens[$catchPointer]['scope_closer'],
-			$variableName
+			$variableName,
 		)) {
 			return;
 		}
@@ -83,7 +82,7 @@ class RequireNonCapturingCatchSniff implements Sniff
 				$phpcsFile,
 				$tokens[$possibleFinallyPointer]['scope_opener'],
 				$tokens[$possibleFinallyPointer]['scope_closer'],
-				$variableName
+				$variableName,
 			)
 		) {
 			return;
@@ -92,7 +91,7 @@ class RequireNonCapturingCatchSniff implements Sniff
 		$nextScopeEnd = count($tokens) - 1;
 
 		foreach (array_reverse($tokens[$tryEndPointer]['conditions'], true) as $conditionPointer => $conditionCode) {
-			if (in_array($conditionCode, TokenHelper::$functionTokenCodes, true)) {
+			if (in_array($conditionCode, TokenHelper::FUNCTION_TOKEN_CODES, true)) {
 				$nextScopeEnd = $tokens[$conditionPointer]['scope_closer'];
 				break;
 			}
@@ -114,11 +113,9 @@ class RequireNonCapturingCatchSniff implements Sniff
 			T_WHITESPACE,
 			$phpcsFile->eolChar,
 			$variablePointer + 1,
-			$tokens[$catchPointer]['parenthesis_closer']
+			$tokens[$catchPointer]['parenthesis_closer'],
 		);
-		if ($fixEndPointer === null) {
-			$fixEndPointer = $tokens[$catchPointer]['parenthesis_closer'];
-		}
+		$fixEndPointer ??= $tokens[$catchPointer]['parenthesis_closer'];
 
 		$phpcsFile->fixer->beginChangeset();
 

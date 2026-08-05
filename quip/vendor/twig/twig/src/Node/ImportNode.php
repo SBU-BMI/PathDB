@@ -14,8 +14,8 @@ namespace Twig\Node;
 use Twig\Attribute\YieldReady;
 use Twig\Compiler;
 use Twig\Node\Expression\AbstractExpression;
-use Twig\Node\Expression\NameExpression;
 use Twig\Node\Expression\Variable\AssignTemplateVariable;
+use Twig\Node\Expression\Variable\ContextVariable;
 
 /**
  * Represents an import node.
@@ -23,7 +23,7 @@ use Twig\Node\Expression\Variable\AssignTemplateVariable;
  * @author Fabien Potencier <fabien@symfony.com>
  */
 #[YieldReady]
-class ImportNode extends Node
+class ImportNode extends Node implements CoercesChildrenToStringInterface
 {
     public function __construct(AbstractExpression $expr, AbstractExpression|AssignTemplateVariable $var, int $lineno)
     {
@@ -44,14 +44,12 @@ class ImportNode extends Node
     {
         $compiler->subcompile($this->getNode('var'));
 
-        if ($this->getNode('expr') instanceof NameExpression && '_self' === $this->getNode('expr')->getAttribute('name')) {
+        if ($this->getNode('expr') instanceof ContextVariable && '_self' === $this->getNode('expr')->getAttribute('name')) {
             $compiler->raw('$this');
         } else {
             $compiler
-                ->raw('$this->loadTemplate(')
+                ->raw('$this->load(')
                 ->subcompile($this->getNode('expr'))
-                ->raw(', ')
-                ->repr($this->getTemplateName())
                 ->raw(', ')
                 ->repr($this->getTemplateLine())
                 ->raw(')->unwrap()')
@@ -59,5 +57,11 @@ class ImportNode extends Node
         }
 
         $compiler->raw(";\n");
+    }
+
+    public function getStringCoercedChildNames(): array
+    {
+        // the loader resolves the template-name expression by coercing it to a string
+        return ['expr'];
     }
 }

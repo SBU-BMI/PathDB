@@ -6,13 +6,17 @@ use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\Factory\DefaultFactory;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\PluginDependencyTrait;
 use Drupal\views\Entity\Render\EntityTranslationRenderTrait;
 use Drupal\views\Plugin\DependentWithRemovalPluginInterface;
@@ -82,6 +86,27 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
   protected $languageManager;
 
   /**
+   * The entity display repository.
+   *
+   * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
+   */
+  protected $entityDisplayRepository;
+
+  /**
+   * The messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
+   * The entity repository.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
    * Constructs a new EditQuantity object.
    *
    * @param array $configuration
@@ -98,14 +123,38 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
    *   The field widget plugin manager.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager.
+   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entity_display_repository
+   *   The entity display repository.
+   * @param \Drupal\Core\Field\FieldTypePluginManagerInterface $field_type_manager
+   *   The field type plugin manager.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager, EntityTypeManagerInterface $entity_type_manager, WidgetPluginManager $field_widget_manager, LanguageManagerInterface $language_manager) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityFieldManagerInterface $entity_field_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    WidgetPluginManager $field_widget_manager,
+    LanguageManagerInterface $language_manager,
+    EntityDisplayRepositoryInterface $entity_display_repository,
+    FieldTypePluginManagerInterface $field_type_manager,
+    MessengerInterface $messenger,
+    EntityRepositoryInterface $entity_repository,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityFieldManager = $entity_field_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->fieldWidgetManager = $field_widget_manager;
     $this->languageManager = $language_manager;
+    $this->entityDisplayRepository = $entity_display_repository;
+    $this->fieldTypeManager = $field_type_manager;
+    $this->messenger = $messenger;
+    $this->entityRepository = $entity_repository;
   }
 
   /**
@@ -119,7 +168,11 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
       $container->get('entity_field.manager'),
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.field.widget'),
-      $container->get('language_manager')
+      $container->get('language_manager'),
+      $container->get('entity_display.repository'),
+      $container->get('plugin.manager.field.field_type'),
+      $container->get('messenger'),
+      $container->get('entity.repository')
     );
   }
 
@@ -131,21 +184,6 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
    */
   protected function getEntityTypeManager() {
     return $this->entityTypeManager;
-  }
-
-  /**
-   * The field type plugin manager.
-   *
-   * This is loaded on-demand, since it's only needed during configuration.
-   *
-   * @return \Drupal\Core\Field\FieldTypePluginManagerInterface
-   *   The field type plugin manager.
-   */
-  protected function getFieldTypeManager() {
-    if (is_null($this->fieldTypeManager)) {
-      $this->fieldTypeManager = \Drupal::service('plugin.manager.field.field_type');
-    }
-    return $this->fieldTypeManager;
   }
 
   /**
@@ -207,7 +245,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
    *   The default field widget ID. Null otherwise.
    */
   protected function getPluginDefaultOption($field_type) {
-    $definition = $this->getFieldTypeManager()->getDefinition($field_type, FALSE);
+    $definition = $this->fieldTypeManager->getDefinition($field_type, FALSE);
     return ($definition && isset($definition['default_widget'])) ? $definition['default_widget'] : NULL;
   }
 
@@ -351,6 +389,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
 
     $options['plugin']['contains']['hide_title']['default'] = TRUE;
     $options['plugin']['contains']['hide_description']['default'] = TRUE;
+    $options['plugin']['contains']['fallback_view_mode']['default'] = FALSE;
     $options['plugin']['contains']['type']['default'] = [];
     $options['plugin']['contains']['settings']['default'] = [];
     $options['plugin']['contains']['third_party_settings']['default'] = [];
@@ -366,38 +405,60 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
 
     $field_definition = $this->getBundleFieldDefinition();
 
-    $form['plugin'] = [
-      'type' => [
-        '#type' => 'select',
-        '#title' => $this->t('Widget type'),
-        '#options' => $this->getPluginApplicableOptions($field_definition),
-        '#default_value' => $this->options['plugin']['type'],
-        '#attributes' => ['class' => ['field-plugin-type']],
-        '#ajax' => [
-          'url' => views_ui_build_form_url($form_state),
+    // Check if the external procedural function exists before using it.
+    // This prevents static analysis errors (PHPCS/PHPStan) and avoids runtime
+    // fatal errors if the Views UI module is disabled
+    // or the .inc file is not loaded.
+    // @todo Update when views_ui_build_form_url() is removed in Drupal 13.0.
+    if (function_exists('views_ui_build_form_url')) {
+      $form['plugin'] = [
+        'type' => [
+          '#type' => 'select',
+          '#title' => $this->t('Widget type'),
+          '#options' => $this->getPluginApplicableOptions($field_definition),
+          '#default_value' => $this->options['plugin']['type'],
+          '#attributes' => ['class' => ['field-plugin-type']],
+          '#ajax' => [
+            'url' => views_ui_build_form_url($form_state),
+          ],
+          '#submit' => [[$this, 'submitTemporaryForm']],
+          '#executes_submit_callback' => TRUE,
         ],
-        '#submit' => [[$this, 'submitTemporaryForm']],
-        '#executes_submit_callback' => TRUE,
-      ],
-      'hide_title' => [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Hide widget title'),
-        '#default_value' => $this->options['plugin']['hide_title'],
-      ],
-      'hide_description' => [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Hide widget description'),
-        '#default_value' => $this->options['plugin']['hide_description'],
-      ],
-      'settings_edit_form' => [],
-    ];
+        'hide_title' => [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Hide widget title'),
+          '#default_value' => $this->options['plugin']['hide_title'],
+        ],
+        'hide_description' => [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Hide widget description'),
+          '#default_value' => $this->options['plugin']['hide_description'],
+        ],
+        'fallback_view_mode' => [
+          '#type' => 'select',
+          '#title' => $this->t('Fallback view mode'),
+          '#description' => $this->t('By default, this field will be completely hidden if the user does not have access to edit this field. Choose a fallback view mode to render the field instead.'),
+          '#default_value' => $this->options['plugin']['fallback_view_mode'],
+          '#options' => [$this->t('- Disabled -')] + $this->entityDisplayRepository->getViewModeOptions($this->getEntityTypeId()),
+        ],
+        'settings_edit_form' => [],
+      ];
+    }
+    else {
+      $form['warning'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Plugin warning'),
+        '#description' => $this->t('views_ui module is not enabled.'),
+        '#open' => TRUE,
+      ];
+    }
 
     // Generate the settings form and allow other modules to alter it.
     if ($plugin = $this->getPluginInstance()) {
       $settings_form = $plugin->settingsForm($form, $form_state);
 
       // Adds the widget third party settings forms.
-      //https://www.drupal.org/node/3000490
+      // https://www.drupal.org/node/3000490
       $third_party_settings_form = [];
       $this->moduleHandler->invokeAllWith('field_widget_third_party_settings_form', function (callable $hook, string $module) use ($form_state, $form, $field_definition, $plugin, &$third_party_settings_form) {
         $third_party_settings_form[$module] = $this->moduleHandler->invoke($module, 'field_widget_third_party_settings_form', [
@@ -446,7 +507,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
 
     $options = &$form_state->getValue('options');
     $options['plugin']['settings'] = isset($options['plugin']['settings_edit_form']['settings']) ? array_intersect_key($options['plugin']['settings_edit_form']['settings'], $this->fieldWidgetManager->getDefaultSettings($options['plugin']['type'])) : [];
-    $options['plugin']['third_party_settings'] = isset($options['plugin']['settings_edit_form']['third_party_settings']) ? $options['plugin']['settings_edit_form']['third_party_settings'] : [];
+    $options['plugin']['third_party_settings'] = $options['plugin']['settings_edit_form']['third_party_settings'] ?? [];
     unset($options['plugin']['settings_edit_form']);
   }
 
@@ -476,46 +537,84 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
     $form['#tree'] = TRUE;
     $form += ['#parents' => []];
 
+    // Hide the submit button if the user can't edit anything.
+    $can_edit_any = FALSE;
+
     // Only add the buttons if there are results.
     if (!empty($this->getView()->result)) {
       $form[$this->options['id']]['#tree'] = TRUE;
       $form[$this->options['id']]['#entity_form_field'] = TRUE;
       foreach ($this->getView()->result as $row_index => $row) {
-        $entity_id = $row->_entity->id();
+        // Get the entity for this field (from relationship if
+        // available, otherwise base entity).
+        // This ensures we use the correct entity ID for form
+        // field names when using relationships, instead of the
+        // base entity ID which would cause all rows to share
+        // the same field names.
+        $entity_for_field = $this->getEntity($row);
+        if (!$entity_for_field) {
+          // Fallback to base entity if relationship entity is not available.
+          $entity_for_field = $row->_entity;
+        }
+
+        // Use the relationship entity ID for form field names,
+        // not the base entity ID.
+        // This fixes the issue where all rows share the same
+        // form field names when the view uses a relationship to
+        // access entities from a base entity.
+        $entity_id = $entity_for_field ? $entity_for_field->id() : $row->_entity->id();
+
         // Initialize this row and column.
         $form[$this->options['id']][$row_index]['#parents'] = [$this->options['id'], $entity_id];
         $form[$this->options['id']][$row_index]['#tree'] = TRUE;
 
         // Make sure there's an entity for this row (relationships can be null).
-        if ($this->getEntity($row)) {
+        if ($entity_for_field) {
           // Load field definition based on current entity bundle.
           $entity = $this->getEntityTranslationByRelationship($this->getEntity($row), $row);
           if ($entity->hasField($field_name) && $this->getBundleFieldDefinition($entity->bundle())->isDisplayConfigurable('form')) {
             $items = $entity->get($field_name)->filterEmptyItems();
+            $can_edit_row = ($entity->access('update') && $items->access('edit'));
+            $can_edit_any = $can_edit_any || $can_edit_row;
 
-            // Add widget to form and add field overrides.
-            $form[$this->options['id']][$row_index][$field_name] = $this->getPluginInstance()->form($items, $form[$this->options['id']][$row_index], $form_state);
-            $form[$this->options['id']][$row_index][$field_name]['#access'] = ($entity->access('update') && $items->access('edit'));
+            // Use fallback view mode if user does not have edit access.
+            if ($this->options['plugin']['fallback_view_mode'] && !$can_edit_row) {
+              $form[$this->options['id']][$row_index][$field_name] = $items->view($this->options['plugin']['fallback_view_mode']);
+            }
+            else {
+              // Add widget to form and add field overrides.
+              $form[$this->options['id']][$row_index][$field_name] = $this->getPluginInstance()
+                ->form($items, $form[$this->options['id']][$row_index], $form_state);
+
+              $form[$this->options['id']][$row_index][$field_name]['#access'] = $can_edit_row;
+
+              $form[$this->options['id']][$row_index][$field_name]['#parents'] = [
+                $this->options['id'],
+                $entity_id,
+                $field_name,
+              ];
+
+              // Hide field widget title.
+              if ($this->options['plugin']['hide_title']) {
+                $form[$this->options['id']][$row_index][$field_name]['#attributes']['class'][] = 'views-entity-form-field-field-label-hidden';
+              }
+
+              // Hide field widget description.
+              if ($this->options['plugin']['hide_description']) {
+                $form[$this->options['id']][$row_index][$field_name]['#attributes']['class'][] = 'views-entity-form-field-field-description-hidden';
+              }
+            }
+
             $form[$this->options['id']][$row_index][$field_name]['#cache']['contexts'] = $entity->getCacheContexts();
             $form[$this->options['id']][$row_index][$field_name]['#cache']['tags'] = $entity->getCacheTags();
-            $form[$this->options['id']][$row_index][$field_name]['#parents'] = [
-              $this->options['id'],
-              $entity_id,
-              $field_name,
-            ];
-
-            // Hide field widget title.
-            if ($this->options['plugin']['hide_title']) {
-              $form[$this->options['id']][$row_index][$field_name]['#attributes']['class'][] = 'views-entity-form-field-field-label-hidden';
-            }
-
-            // Hide field widget description.
-            if ($this->options['plugin']['hide_description']) {
-              $form[$this->options['id']][$row_index][$field_name]['#attributes']['class'][] = 'views-entity-form-field-field-description-hidden';
-            }
           }
         }
       }
+    }
+
+    // Hide submit button if there's no results or can not edit.
+    if (empty($this->getView()->result) || (!$can_edit_any)) {
+      $form['actions']['submit']['#access'] = FALSE;
     }
   }
 
@@ -607,23 +706,27 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
 
         if ($entity) {
           $entity = $this->getEntityTranslationByRelationship($entity, $row);
-          $original_entity = $this->getEntityTranslationByRelationship($storage->loadUnchanged($entity->id()), $row);
+          $old = $storage->loadUnchanged($entity->id());
 
-          try {
-            if ($this->entityShouldBeSaved($entity, $original_entity)) {
-              $storage->save($entity);
-              $rows_saved[$row_index] = $entity->label();
+          if ($old) {
+            $original_entity = $this->getEntityTranslationByRelationship($old, $row);
+
+            try {
+              if ($this->entityShouldBeSaved($entity, $original_entity)) {
+                $storage->save($entity);
+                $rows_saved[$row_index] = $entity->label();
+              }
             }
-          } catch (\Exception $exception) {
-            $rows_failed[$row_index] = $entity->label();
+            catch (\Exception $exception) {
+              $rows_failed[$row_index] = $entity->label();
+            }
           }
         }
       }
 
       // Let the user know how many entities were saved.
-      $messenger = \Drupal::messenger();
       $entity_type_definition = $this->entityTypeManager->getDefinition($this->getEntityTypeId());
-      $messenger->addStatus($this->formatPlural(count($rows_saved), '@count @singular_label saved.', '@count @plural_label saved.', [
+      $this->messenger->addStatus($this->formatPlural(count($rows_saved), '@count @singular_label saved.', '@count @plural_label saved.', [
         '@count' => count($rows_saved),
         '@singular_label' => $entity_type_definition->getSingularLabel(),
         '@plural_label' => $entity_type_definition->getPluralLabel(),
@@ -631,7 +734,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
 
       // Let the user know which entities couldn't be saved.
       if (count($rows_failed) > 0) {
-        $messenger->addWarning($this->formatPlural(count($rows_failed), '@count @singular_label failed to save: @labels', '@count @plural_label failed to save: @labels', [
+        $this->messenger->addWarning($this->formatPlural(count($rows_failed), '@count @singular_label failed to save: @labels', '@count @plural_label failed to save: @labels', [
           '@count' => count($rows_failed),
           '@singular_label' => $entity_type_definition->getSingularLabel(),
           '@plural_label' => $entity_type_definition->getPluralLabel(),
@@ -647,9 +750,9 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
   /**
    * Determines if an entity should be saved.
    *
-   * @param EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The possibly modified entity in question.
-   * @param EntityInterface $original_entity
+   * @param \Drupal\Core\Entity\EntityInterface $original_entity
    *   The original unmodified entity.
    *
    * @return bool
@@ -682,7 +785,7 @@ class EntityFormField extends FieldPluginBase implements CacheableDependencyInte
    *   The entity repository.
    */
   protected function getEntityRepository() {
-    return \Drupal::service('entity.repository');
+    return $this->entityRepository;
   }
 
 }

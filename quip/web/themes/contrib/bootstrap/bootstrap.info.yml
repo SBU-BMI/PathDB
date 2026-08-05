@@ -1,6 +1,6 @@
 type: theme
 base theme: false
-core_version_requirement: ^10.3 || ^11
+core_version_requirement: ^10.4 || ^11
 
 name: 'Bootstrap'
 description: 'Built to use Bootstrap, a sleek, intuitive, and powerful front-end framework for faster and easier web development.'
@@ -81,7 +81,7 @@ libraries-override:
       theme:
         css/node.preview.css: false
 
-# Information added by Drupal.org packaging script on 2025-01-24
-version: '8.x-3.35'
+# Information added by Drupal.org packaging script on 2026-04-05
+version: '8.x-3.40'
 project: 'bootstrap'
-datestamp: 1737687355
+datestamp: 1775420245

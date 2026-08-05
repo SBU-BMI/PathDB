@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Provides hook implementations for Views Entity Form Field tests.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function views_entity_form_field_test_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, ?FieldItemListInterface $items = NULL) {
+  if ($operation === 'edit' && $field_definition->getTargetEntityTypeId() === 'node' && $field_definition->getName() === 'body') {
+    return AccessResult::forbiddenIf(!$account->hasPermission('edit protected views entity form field'))->cachePerPermissions();
+  }
+
+  return AccessResult::neutral();
+}

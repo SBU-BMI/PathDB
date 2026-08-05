@@ -4,7 +4,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PEAR\Sniffs\Functions;
@@ -66,8 +66,6 @@ class FunctionDeclarationSniff implements Sniff
 
         if (isset($tokens[$stackPtr]['parenthesis_opener']) === false
             || isset($tokens[$stackPtr]['parenthesis_closer']) === false
-            || $tokens[$stackPtr]['parenthesis_opener'] === null
-            || $tokens[$stackPtr]['parenthesis_closer'] === null
         ) {
             return;
         }
@@ -103,11 +101,10 @@ class FunctionDeclarationSniff implements Sniff
         // enforced by the previous check because there is no content between the keywords
         // and the opening parenthesis.
         // Unfinished closures are tokenized as T_FUNCTION however, and can be excluded
-        // by checking for the scope_opener.
+        // by checking if the function has a name.
         $methodProps = $phpcsFile->getMethodProperties($stackPtr);
-        if ($tokens[$stackPtr]['code'] === T_FUNCTION
-            && (isset($tokens[$stackPtr]['scope_opener']) === true || $methodProps['has_body'] === false)
-        ) {
+        $methodName  = $phpcsFile->getDeclarationName($stackPtr);
+        if ($tokens[$stackPtr]['code'] === T_FUNCTION && $methodName !== null) {
             if ($tokens[($openBracket - 1)]['content'] === $phpcsFile->eolChar) {
                 $spaces = 'newline';
             } else if ($tokens[($openBracket - 1)]['code'] === T_WHITESPACE) {

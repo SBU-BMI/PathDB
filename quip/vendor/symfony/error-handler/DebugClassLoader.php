@@ -18,6 +18,7 @@ use Mockery\MockInterface;
 use Phake\IMock;
 use PHPUnit\Framework\MockObject\Matcher\StatelessInvocation;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Prophecy\Prophecy\ProphecySubjectInterface;
 use ProxyManager\Proxy\ProxyInterface;
 use Symfony\Component\DependencyInjection\Argument\LazyClosure;
@@ -126,6 +127,21 @@ class DebugClassLoader
     private static array $internalMethods = [];
     private static array $annotatedParameters = [];
     private static array $darwinCache = ['/' => ['/', []]];
+    /**
+     * @var array<string, list<array{0: string, 1: bool, 2: string, 3: string, 4: string|null}>>
+     *
+     * Maps an interface FQCN (or an abstract class accumulating entries from its interfaces) to the list of
+     * "@method" annotations declared on it. For interfaces, the entry is populated directly by parsing the
+     * annotations from the interface's docblock. For abstract classes, the information from all implemented
+     * interfaces is merged together, so that the check can later be applied to the first concrete subclass.
+     *
+     * Each entry is a tuple of:
+     *   [0] string      $interface   - FQCN of the interface that carries the "@method" annotation
+     *   [1] bool        $static      - whether the method is declared static
+     *   [2] string      $returnType  - return type from the annotation, or '' if absent
+     *   [3] string      $name        - method name plus its parameter signature, e.g. "foo($arg, int $n)"
+     *   [4] string|null $description - description text (period-normalised), or null if absent
+     */
     private static array $method = [];
     private static array $returnTypes = [];
     private static array $methodTraits = [];
@@ -181,7 +197,7 @@ class DebugClassLoader
     public static function enable(): void
     {
         // Ensures we don't hit https://bugs.php.net/42098
-        class_exists(\Symfony\Component\ErrorHandler\ErrorHandler::class);
+        class_exists(ErrorHandler::class);
         class_exists(\Psr\Log\LogLevel::class);
 
         if (!\is_array($functions = spl_autoload_functions())) {
@@ -253,6 +269,7 @@ class DebugClassLoader
 
             for (; $i < \count($symbols); ++$i) {
                 if (!is_subclass_of($symbols[$i], MockObject::class)
+                    && !is_subclass_of($symbols[$i], Stub::class)
                     && !is_subclass_of($symbols[$i], ProphecySubjectInterface::class)
                     && !is_subclass_of($symbols[$i], Proxy::class)
                     && !is_subclass_of($symbols[$i], ProxyInterface::class)
@@ -330,7 +347,7 @@ class DebugClassLoader
             $name = $refl->getName();
 
             if ($name !== $class && 0 === strcasecmp($name, $class)) {
-                throw new \RuntimeException(sprintf('Case mismatch between loaded and declared class names: "%s" vs "%s".', $class, $name));
+                throw new \RuntimeException(\sprintf('Case mismatch between loaded and declared class names: "%s" vs "%s".', $class, $name));
             }
 
             $deprecations = $this->checkAnnotations($refl, $name);
@@ -346,14 +363,14 @@ class DebugClassLoader
 
         if (!$exists) {
             if (str_contains($class, '/')) {
-                throw new \RuntimeException(sprintf('Trying to autoload a class with an invalid name "%s". Be careful that the namespace separator is "\" in PHP, not "/".', $class));
+                throw new \RuntimeException(\sprintf('Trying to autoload a class with an invalid name "%s". Be careful that the namespace separator is "\" in PHP, not "/".', $class));
             }
 
-            throw new \RuntimeException(sprintf('The autoloader expected class "%s" to be defined in file "%s". The file was found but the class was not in it, the class name or namespace probably has a typo.', $class, $file));
+            throw new \RuntimeException(\sprintf('The autoloader expected class "%s" to be defined in file "%s". The file was found but the class was not in it, the class name or namespace probably has a typo.', $class, $file));
         }
 
         if (self::$caseCheck && $message = $this->checkCase($refl, $file, $class)) {
-            throw new \RuntimeException(sprintf('Case mismatch between class and real file names: "%s" vs "%s" in "%s".', $message[0], $message[1], $message[2]));
+            throw new \RuntimeException(\sprintf('Case mismatch between class and real file names: "%s" vs "%s" in "%s".', $message[0], $message[1], $message[2]));
         }
     }
 
@@ -396,6 +413,14 @@ class DebugClassLoader
 
             if ($refl->isInterface() && isset($doc['method'])) {
                 foreach ($doc['method'] as $name => [$static, $returnType, $signature, $description]) {
+                    if ($refl->hasMethod($static ? '__callStatic' : '__call')) {
+                        // When the interface has "virtual" @method declarations but at the same time contains a __call/__callStatic magic method,
+                        // do not trigger a deprecation notice. This is to address special use cases like in Predis' ClientInterface where the
+                        // "@method" annotations never intend to actually add the method to the interface, but are used to document the "virtual"
+                        // API provided by the interface through the technical implementation of magic calls. This might cause false negatives
+                        // (missing notices) in the case that such interfaces are later amended with actual (real) methods.
+                        continue;
+                    }
                     self::$method[$class][] = [$class, $static, $returnType, $name.$signature, $description];
 
                     if ('' !== $returnType) {
@@ -414,9 +439,18 @@ class DebugClassLoader
             }
 
             if (isset(self::$final[$parent])) {
-                $deprecations[] = sprintf('The "%s" class is considered final%s It may change without further notice as of its next major version. You should not extend it from "%s".', $parent, self::$final[$parent], $className);
+                $deprecations[] = \sprintf('The "%s" class is considered final%s It may change without further notice as of its next major version. You should not extend it from "%s".', $parent, self::$final[$parent], $className);
             }
         }
+
+        // When the parent is a concrete class, we will trigger deprecation notices to make it aware that it needs
+        // to add the new methods announced with @method. The parent will have to provide all those methods.
+        // For child classes this means they will not need to deal with @method coming from any of the interfaces
+        // the parent implements.
+        // Put those interfaces that we can ignore into $parentInterfaces.
+        // The ternary makes use of the fact that abstract parent classes will accumulate the methods in self::$method,
+        // so !isset(self::$method[$parent]) indicates a concrete parent class.
+        $parentInterfaces = ($parent && !isset(self::$method[$parent])) ? class_implements($parent, false) : [];
 
         // Detect if the parent is annotated
         foreach ($parentAndOwnInterfaces + class_uses($class, false) as $use) {
@@ -427,19 +461,21 @@ class DebugClassLoader
                 $type = class_exists($class, false) ? 'class' : (interface_exists($class, false) ? 'interface' : 'trait');
                 $verb = class_exists($use, false) || interface_exists($class, false) ? 'extends' : (interface_exists($use, false) ? 'implements' : 'uses');
 
-                $deprecations[] = sprintf('The "%s" %s %s "%s" that is deprecated%s', $className, $type, $verb, $use, self::$deprecated[$use]);
+                $deprecations[] = \sprintf('The "%s" %s %s "%s" that is deprecated%s', $className, $type, $verb, $use, self::$deprecated[$use]);
             }
             if (isset(self::$internal[$use]) && strncmp($vendor, str_replace('_', '\\', $use), $vendorLen)) {
-                $deprecations[] = sprintf('The "%s" %s is considered internal%s It may change without further notice. You should not use it from "%s".', $use, class_exists($use, false) ? 'class' : (interface_exists($use, false) ? 'interface' : 'trait'), self::$internal[$use], $className);
+                $deprecations[] = \sprintf('The "%s" %s is considered internal%s It may change without further notice. You should not use it from "%s".', $use, class_exists($use, false) ? 'class' : (interface_exists($use, false) ? 'interface' : 'trait'), self::$internal[$use], $className);
             }
             if (isset(self::$method[$use])) {
-                if ($refl->isAbstract()) {
+                if ($refl->isAbstract() || $refl->isInterface()) {
+                    // Abstract classes and interfaces inherit @method from interfaces they
+                    // implement directly or through inheritance.
                     if (isset(self::$method[$class])) {
                         self::$method[$class] = array_merge(self::$method[$class], self::$method[$use]);
                     } else {
                         self::$method[$class] = self::$method[$use];
                     }
-                } elseif (!$refl->isInterface()) {
+                } else {
                     if (!strncmp($vendor, str_replace('_', '\\', $use), $vendorLen)
                         && str_starts_with($className, 'Symfony\\')
                         && (!class_exists(InstalledVersions::class)
@@ -448,15 +484,15 @@ class DebugClassLoader
                         // skip "same vendor" @method deprecations for Symfony\* classes unless symfony/symfony is being tested
                         continue;
                     }
-                    $hasCall = $refl->hasMethod('__call');
-                    $hasStaticCall = $refl->hasMethod('__callStatic');
                     foreach (self::$method[$use] as [$interface, $static, $returnType, $name, $description]) {
-                        if ($static ? $hasStaticCall : $hasCall) {
+                        if (isset($parentInterfaces[$interface])) {
+                            // The @method annotation comes from an interface that has already been implemented by a concrete parent class,
+                            // so we can ignore it here.
                             continue;
                         }
                         $realName = substr($name, 0, strpos($name, '('));
-                        if (!$refl->hasMethod($realName) || !($methodRefl = $refl->getMethod($realName))->isPublic() || ($static && !$methodRefl->isStatic()) || (!$static && $methodRefl->isStatic())) {
-                            $deprecations[] = sprintf('Class "%s" should implement method "%s::%s%s"%s', $className, ($static ? 'static ' : '').$interface, $name, $returnType ? ': '.$returnType : '', null === $description ? '.' : ': '.$description);
+                        if (!$refl->hasMethod($realName) || !($methodRefl = $refl->getMethod($realName))->isPublic() || ($static xor $methodRefl->isStatic())) {
+                            $deprecations[] = \sprintf('Class "%s" should implement method "%s::%s%s"%s', $className, ($static ? 'static ' : '').$interface, $name, $returnType ? ': '.$returnType : '', null === $description ? '.' : ': '.$description);
                         }
                     }
                 }
@@ -520,13 +556,13 @@ class DebugClassLoader
 
             if ($parent && isset(self::$finalMethods[$parent][$method->name])) {
                 [$declaringClass, $message] = self::$finalMethods[$parent][$method->name];
-                $deprecations[] = sprintf('The "%s::%s()" method is considered final%s It may change without further notice as of its next major version. You should not extend it from "%s".', $declaringClass, $method->name, $message, $className);
+                $deprecations[] = \sprintf('The "%s::%s()" method is considered final%s It may change without further notice as of its next major version. You should not extend it from "%s".', $declaringClass, $method->name, $message, $className);
             }
 
             if (isset(self::$internalMethods[$class][$method->name])) {
                 [$declaringClass, $message] = self::$internalMethods[$class][$method->name];
                 if (strncmp($ns, $declaringClass, $len)) {
-                    $deprecations[] = sprintf('The "%s::%s()" method is considered internal%s It may change without further notice. You should not extend it from "%s".', $declaringClass, $method->name, $message, $className);
+                    $deprecations[] = \sprintf('The "%s::%s()" method is considered internal%s It may change without further notice. You should not extend it from "%s".', $declaringClass, $method->name, $message, $className);
                 }
             }
 
@@ -545,7 +581,7 @@ class DebugClassLoader
 
                 foreach (self::$annotatedParameters[$class][$method->name] as $parameterName => $deprecation) {
                     if (!isset($definedParameters[$parameterName]) && !isset($doc['param'][$parameterName])) {
-                        $deprecations[] = sprintf($deprecation, $className);
+                        $deprecations[] = \sprintf($deprecation, $className);
                     }
                 }
             }
@@ -583,7 +619,7 @@ class DebugClassLoader
                     if ('docblock' === $this->patchTypes['force']) {
                         $this->patchMethod($method, $returnType, $declaringFile, $normalizedType);
                     } elseif ('' !== $declaringClass && $this->patchTypes['deprecations']) {
-                        $deprecations[] = sprintf('Method "%s::%s()" might add "%s" as a native return type declaration in the future. Do the same in %s "%s" now to avoid errors or add an explicit @return annotation to suppress this message.', $declaringClass, $method->name, $normalizedType, interface_exists($declaringClass) ? 'implementation' : 'child class', $className);
+                        $deprecations[] = \sprintf('Method "%s::%s()" might add "%s" as a native return type declaration in the future. Do the same in %s "%s" now to avoid errors or add an explicit @return annotation to suppress this message.', $declaringClass, $method->name, $normalizedType, interface_exists($declaringClass) ? 'implementation' : 'child class', $className);
                     }
                 }
             }
@@ -632,7 +668,7 @@ class DebugClassLoader
             }
             foreach ($doc['param'] as $parameterName => $parameterType) {
                 if (!isset($definedParameters[$parameterName])) {
-                    self::$annotatedParameters[$class][$method->name][$parameterName] = sprintf('The "%%s::%s()" method will require a new "%s$%s" argument in the next major version of its %s "%s", not defining it is deprecated.', $method->name, $parameterType ? $parameterType.' ' : '', $parameterName, interface_exists($className) ? 'interface' : 'parent class', $className);
+                    self::$annotatedParameters[$class][$method->name][$parameterName] = \sprintf('The "%%s::%s()" method will require a new "%s$%s" argument in the next major version of its %s "%s", not defining it is deprecated.', $method->name, $parameterType ? $parameterType.' ' : '', $parameterName, interface_exists($className) ? 'interface' : 'parent class', $className);
                 }
             }
         }
@@ -652,7 +688,7 @@ class DebugClassLoader
                 foreach ($parentAndOwnInterfaces as $use) {
                     if (isset(self::${$type}[$use][$r->name]) && !isset($doc['deprecated']) && ('finalConstants' === $type || substr($use, 0, strrpos($use, '\\')) !== substr($use, 0, strrpos($class, '\\')))) {
                         $msg = 'finalConstants' === $type ? '%s" constant' : '$%s" property';
-                        $deprecations[] = sprintf('The "%s::'.$msg.' is considered final. You should not override it in "%s".', self::${$type}[$use][$r->name], $r->name, $class);
+                        $deprecations[] = \sprintf('The "%s::'.$msg.' is considered final. You should not override it in "%s".', self::${$type}[$use][$r->name], $r->name, $class);
                     }
                 }
 
@@ -893,8 +929,8 @@ class DebugClassLoader
             }
         }
 
-        $phpType = sprintf($nullable ? (1 < \count($phpTypes) ? '%s|null' : '?%s') : '%s', implode($glue, $phpTypes));
-        $docType = sprintf($nullable ? '%s|null' : '%s', implode($glue, $docTypes));
+        $phpType = \sprintf($nullable ? (1 < \count($phpTypes) ? '%s|null' : '?%s') : '%s', implode($glue, $phpTypes));
+        $docType = \sprintf($nullable ? '%s|null' : '%s', implode($glue, $docTypes));
 
         self::$returnTypes[$class][$method] = [$phpType, $docType, $class, $filename];
     }
@@ -1026,7 +1062,7 @@ class DebugClassLoader
                 ++$fileOffset;
             }
 
-            $returnType[$i] = null !== $format ? sprintf($format, $alias) : $alias;
+            $returnType[$i] = null !== $format ? \sprintf($format, $alias) : $alias;
         }
 
         if ('docblock' === $this->patchTypes['force'] || ('object' === $normalizedType && '7.1' === $this->patchTypes['php'])) {
@@ -1040,11 +1076,11 @@ class DebugClassLoader
                 $code[$startLine] = "     * @return $returnType\n".$code[$startLine];
             } else {
                 $code[$startLine] .= <<<EOTXT
-    /**
-     * @return $returnType
-     */
+                        /**
+                         * @return $returnType
+                         */
 
-EOTXT;
+                    EOTXT;
             }
 
             $fileOffset += substr_count($code[$startLine], "\n") - 1;
@@ -1135,7 +1171,7 @@ EOTXT;
         $braces = 0;
         for (; $i < $end; ++$i) {
             if (!$inClosure) {
-                $inClosure = false !== strpos($code[$i], 'function (');
+                $inClosure = str_contains($code[$i], 'function (');
             }
 
             if ($inClosure) {
@@ -1214,7 +1250,7 @@ EOTXT;
             $static = 'static' === $parts[0];
 
             for ($i = $static ? 2 : 0; null !== $p = $parts[$i] ?? null; $i += 2) {
-                if (\in_array($p, ['', '|', '&', 'callable'], true) || \in_array(substr($returnType, -1), ['|', '&'], true)) {
+                if (\in_array($p, ['', 'callable'], true) || \in_array(substr($returnType, -1), ['|', '&'], true) || \in_array($p[0], ['|', '&'], true)) {
                     $returnType .= trim($parts[$i - 1] ?? '').$p;
                     continue;
                 }

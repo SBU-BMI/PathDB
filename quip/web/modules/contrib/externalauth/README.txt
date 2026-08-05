@@ -15,6 +15,36 @@ authentication Drupal module. Module authors that provide external
 authentication methods can use this helper service to provide a consistent API
 for storing and retrieving external authentication data.
 
+Links / views support:
+======================
+
+admin/people/authmap shows a list of all "Authentication names" that are
+registered by external authentication methods for each user login.
+
+The list facilitates deleting links to 'wrong' / outdated authentication names.
+There is explicitly no add/edit facility for these links; they should only be
+added through logins (or, depending on the method, prepopulated by a system
+administrator to allow a specific set of users to use login).
+
+The list does not show the "provider" (i.e. the method) by default, because
+in most situations, this is an internal name that is always the same and not
+useful to administrators. If multiple authentication methods are active in your
+site, the list could start showing duplicate entries, and you may need to
+distinguish between the different methods by changing configuration, e.g. by:
+
+* editing the view at admin/structure/views/view/authmap, and adding the
+  "provider" field.
+* denying access to the main view (admin/people/authmap) somehow, and only
+  accessing lists specific to a provider (e.g. admin/people/authmap/samlauth)
+* editing the view at admin/structure/views/view/authmap, and changing the
+  "Contextual filter" to be "Display a summary". This shows the URLs for all
+  appropriate provider-specific lists.
+
+Authentication names can be added to any other views in your site that include
+user information. These can then also start showing duplicate entries when
+a user logs in through multiple authentication methods, which will need similar
+adjustments as suggested above.
+
 Installation:
 =============
 

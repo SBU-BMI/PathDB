@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\Namespaces;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\NamespaceHelper;
 use SlevomatCodingStandard\Helpers\ReferencedName;
 use SlevomatCodingStandard\Helpers\ReferencedNameHelper;
@@ -28,16 +29,16 @@ abstract class AbstractFullyQualifiedGlobalReference implements Sniff
 	public const CODE_NON_FULLY_QUALIFIED = 'NonFullyQualified';
 
 	/** @var list<string> */
-	public $exclude = [];
+	public array $exclude = [];
 
 	/** @var list<string> */
-	public $include = [];
+	public array $include = [];
 
 	/** @var list<string>|null */
-	private $normalizedExclude;
+	private ?array $normalizedExclude = null;
 
 	/** @var list<string>|null */
-	private $normalizedInclude;
+	private ?array $normalizedInclude = null;
 
 	abstract protected function getNotFullyQualifiedMessage(): string;
 
@@ -118,14 +119,14 @@ abstract class AbstractFullyQualifiedGlobalReference implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				sprintf($this->getNotFullyQualifiedMessage(), $tokens[$namePointer]['content']),
 				$namePointer,
-				self::CODE_NON_FULLY_QUALIFIED
+				self::CODE_NON_FULLY_QUALIFIED,
 			);
 			if (!$fix) {
 				continue;
 			}
 
 			$phpcsFile->fixer->beginChangeset();
-			$phpcsFile->fixer->addContentBefore($namePointer, NamespaceHelper::NAMESPACE_SEPARATOR);
+			FixerHelper::addBefore($phpcsFile, $namePointer, NamespaceHelper::NAMESPACE_SEPARATOR);
 			$phpcsFile->fixer->endChangeset();
 		}
 	}
@@ -135,9 +136,7 @@ abstract class AbstractFullyQualifiedGlobalReference implements Sniff
 	 */
 	protected function getNormalizedInclude(): array
 	{
-		if ($this->normalizedInclude === null) {
-			$this->normalizedInclude = $this->normalizeNames($this->include);
-		}
+		$this->normalizedInclude ??= $this->normalizeNames($this->include);
 		return $this->normalizedInclude;
 	}
 
@@ -146,9 +145,7 @@ abstract class AbstractFullyQualifiedGlobalReference implements Sniff
 	 */
 	private function getNormalizedExclude(): array
 	{
-		if ($this->normalizedExclude === null) {
-			$this->normalizedExclude = $this->normalizeNames($this->exclude);
-		}
+		$this->normalizedExclude ??= $this->normalizeNames($this->exclude);
 		return $this->normalizedExclude;
 	}
 
@@ -161,9 +158,7 @@ abstract class AbstractFullyQualifiedGlobalReference implements Sniff
 		$names = SniffSettingsHelper::normalizeArray($names);
 
 		if (!$this->isCaseSensitive()) {
-			$names = array_map(static function (string $name): string {
-				return strtolower($name);
-			}, $names);
+			$names = array_map(static fn (string $name): string => strtolower($name), $names);
 		}
 
 		return $names;

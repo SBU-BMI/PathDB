@@ -4,7 +4,7 @@
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2024 PHPCSStandards and contributors
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Util\Timing;
@@ -41,7 +41,7 @@ final class TimingTest extends TestCase
 
 
     /**
-     * Verify that getDuration() returns 0 when the timer wasn't started.
+     * Verify that getDuration() returns the time in milliseconds.
      *
      * @return void
      */
@@ -52,8 +52,6 @@ final class TimingTest extends TestCase
         $duration = Timing::getDuration();
 
         $this->assertTrue(is_float($duration));
-        $this->assertGreaterThan(1, $duration);
-        $this->assertLessThan(15, $duration);
 
     }//end testGetDurationWithStartReturnsMilliseconds()
 

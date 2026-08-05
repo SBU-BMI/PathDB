@@ -8,7 +8,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Reports;
@@ -149,7 +149,12 @@ class Cbf implements Report
         array_pop($lines);
 
         if (empty($lines) === true) {
-            echo PHP_EOL.'No fixable errors were found'.PHP_EOL;
+            if (($totalErrors + $totalWarnings) === 0) {
+                echo PHP_EOL.'No violations were found'.PHP_EOL;
+            } else {
+                echo PHP_EOL.'No fixable errors were found'.PHP_EOL;
+            }
+
             return;
         }
 

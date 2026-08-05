@@ -3,7 +3,7 @@
 namespace Drupal\bootstrap\Plugin\Provider;
 
 /**
- * Class ProviderException.
+ * Class ProviderException retrieves the provider instance during exceptions.
  */
 class ProviderException extends \RuntimeException {
 
@@ -23,10 +23,10 @@ class ProviderException extends \RuntimeException {
    *   The exception message.
    * @param int $code
    *   The exception code.
-   * @param \Throwable $previous
+   * @param \Throwable|null $previous
    *   A previous exception.
    */
-  public function __construct(ProviderInterface $provider, $message = "", $code = 0, \Throwable $previous = NULL) {
+  public function __construct(ProviderInterface $provider, $message = "", $code = 0, ?\Throwable $previous = NULL) {
     parent::__construct($message, $code, $previous);
     $this->provider = $provider;
   }

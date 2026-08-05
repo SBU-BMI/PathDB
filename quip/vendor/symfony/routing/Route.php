@@ -17,7 +17,7 @@ namespace Symfony\Component\Routing;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Tobias Schultze <http://tobion.de>
  */
-class Route implements \Serializable
+class Route
 {
     private string $path = '/';
     private string $host = '';
@@ -35,7 +35,7 @@ class Route implements \Serializable
      * Available options:
      *
      *  * compiler_class: A class name able to compile this route instance (RouteCompiler by default)
-     *  * utf8:           Whether UTF-8 matching is enforced ot not
+     *  * utf8:           Whether UTF-8 matching is enforced or not
      *
      * @param string                    $path         The path pattern to match
      * @param array                     $defaults     An array of default parameter values
@@ -73,16 +73,15 @@ class Route implements \Serializable
         ];
     }
 
-    /**
-     * @internal
-     */
-    final public function serialize(): string
-    {
-        throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
-    }
-
     public function __unserialize(array $data): void
     {
+        if (($data['path'] ?? null) instanceof \Stringable
+            || ($data['host'] ?? null) instanceof \Stringable
+            || ($data['condition'] ?? null) instanceof \Stringable
+        ) {
+            throw new \BadMethodCallException('Cannot unserialize '.self::class);
+        }
+
         $this->path = $data['path'];
         $this->host = $data['host'];
         $this->defaults = $data['defaults'];
@@ -97,14 +96,6 @@ class Route implements \Serializable
         if (isset($data['compiled'])) {
             $this->compiled = $data['compiled'];
         }
-    }
-
-    /**
-     * @internal
-     */
-    final public function unserialize(string $serialized): void
-    {
-        $this->__unserialize(unserialize($serialized));
     }
 
     public function getPath(): string
@@ -445,7 +436,7 @@ class Route implements \Serializable
         }
 
         if ('' === $regex) {
-            throw new \InvalidArgumentException(sprintf('Routing requirement for "%s" cannot be empty.', $key));
+            throw new \InvalidArgumentException(\sprintf('Routing requirement for "%s" cannot be empty.', $key));
         }
 
         return $regex;

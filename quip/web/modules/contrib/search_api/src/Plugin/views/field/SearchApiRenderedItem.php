@@ -2,6 +2,7 @@
 
 namespace Drupal\search_api\Plugin\views\field;
 
+use Drupal\views\Attribute\ViewsField;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\ComplexDataInterface;
 use Drupal\search_api\Plugin\views\query\SearchApiQuery;
@@ -16,9 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Handles rendering an entity in a certain view mode in Search API Views.
  *
  * @ingroup views_field_handlers
- *
- * @ViewsField("search_api_rendered_item")
  */
+#[ViewsField('search_api_rendered_item')]
 class SearchApiRenderedItem extends FieldPluginBase {
 
   use SearchApiFieldTrait;
@@ -46,7 +46,7 @@ class SearchApiRenderedItem extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
     $base_table = $view->storage->get('base_table');
     $this->index = SearchApiQuery::getIndexFromTable($base_table, $this->getEntityTypeManager());
@@ -144,7 +144,7 @@ class SearchApiRenderedItem extends FieldPluginBase {
     }
     // Always use the default view mode if it was not set explicitly in the
     // options.
-    $bundle = $this->index->getDatasource($datasource_id)->getItemBundle($row->_object);
+    $bundle = $this->index->getDatasourceIfAvailable($datasource_id)->getItemBundle($row->_object);
     $view_mode = $this->options['view_modes'][$datasource_id][$bundle] ?? 'default';
     if ($view_mode === '') {
       return '';

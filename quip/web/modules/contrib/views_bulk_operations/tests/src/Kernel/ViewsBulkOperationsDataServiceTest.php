@@ -1,14 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_bulk_operations\Kernel;
 
 use Drupal\views\Views;
+use Drupal\views_bulk_operations\Service\ViewsBulkOperationsViewData;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\views_bulk_operations\Service\ViewsBulkOperationsViewData
- * @group views_bulk_operations
+ * VBO Views Data service test.
  */
-class ViewsBulkOperationsDataServiceTest extends ViewsBulkOperationsKernelTestBase {
+#[CoversClass(ViewsBulkOperationsViewData::class)]
+#[Group('views_bulk_operations')]
+final class ViewsBulkOperationsDataServiceTest extends ViewsBulkOperationsKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -26,10 +32,8 @@ class ViewsBulkOperationsDataServiceTest extends ViewsBulkOperationsKernelTestBa
 
   /**
    * Tests the getEntityDefault() method.
-   *
-   * @covers ::getEntityDefault
    */
-  public function testViewsbulkOperationsViewDataEntityGetter(): void {
+  public function testViewsBulkOperationsViewDataEntityGetter(): void {
     // Initialize and execute the test view with all items displayed.
     $view = Views::getView('views_bulk_operations_test');
     $view->setDisplay('page_1');
@@ -43,16 +47,16 @@ class ViewsBulkOperationsDataServiceTest extends ViewsBulkOperationsKernelTestBa
 
       $expected_label = $test_data[$entity->id()][$entity->language()->getId()];
 
-      $this->assertEquals($expected_label, $entity->label(), 'Title matches');
+      self::assertEquals($expected_label, $entity->label(), 'Title matches');
       if ($expected_label === $entity->label()) {
         unset($test_data[$entity->id()][$entity->language()->getId()]);
-        if (empty($test_data[$entity->id()])) {
+        if (\count($test_data[$entity->id()]) === 0) {
           unset($test_data[$entity->id()]);
         }
       }
     }
 
-    $this->assertEmpty($test_data, 'All created entities and their translations were returned.');
+    self::assertEmpty($test_data, 'All created entities and their translations were returned.');
   }
 
 }

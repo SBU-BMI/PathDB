@@ -1,0 +1,11 @@
+{
+    "name": "drupal/views_taxonomy_term_name_depth",
+    "description": "The module provides the Views plugin for Contextual filter with Taxonomy Term Name Depth.",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/views_taxonomy_term_name_depth",
+    "require": {
+        "drupal/core": "^9 || ^10 || ^11",
+        "drupal/pathauto": "*"
+    },
+    "license": "GPL-2.0-or-later"
+}

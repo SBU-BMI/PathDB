@@ -1,0 +1,23 @@
+uuid: e64973db-09f1-47ef-a663-bd0ca4ab0441
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_processed_images
+    - node.type.bulk_csv_upload
+id: node.bulk_csv_upload.field_processed_images
+field_name: field_processed_images
+entity_type: node
+bundle: bulk_csv_upload
+label: 'Processed Images'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

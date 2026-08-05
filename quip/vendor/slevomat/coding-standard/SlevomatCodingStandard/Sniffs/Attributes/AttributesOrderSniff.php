@@ -10,6 +10,7 @@ use SlevomatCodingStandard\Helpers\IndentationHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use UnexpectedValueException;
 use function array_keys;
+use function array_map;
 use function asort;
 use function count;
 use function ltrim;
@@ -27,10 +28,9 @@ class AttributesOrderSniff implements Sniff
 	public const CODE_INCORRECT_ORDER = 'IncorrectOrder';
 
 	/** @var list<string> */
-	public $order = [];
+	public array $order = [];
 
-	/** @var bool */
-	public $orderAlphabetically = false;
+	public bool $orderAlphabetically = false;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -89,15 +89,19 @@ class AttributesOrderSniff implements Sniff
 			$actualOrder = $attributesGroups;
 			$expectedOrder = $actualOrder;
 
-			uasort($expectedOrder, static function (array $attributesGroup1, array $attributesGroup2): int {
-				return strnatcmp($attributesGroup1[0]->getName(), $attributesGroup2[0]->getName());
-			});
+			uasort(
+				$expectedOrder,
+				static fn (array $attributesGroup1, array $attributesGroup2): int => strnatcmp(
+					$attributesGroup1[0]->getName(),
+					$attributesGroup2[0]->getName(),
+				),
+			);
 
 		} else {
 			$actualOrder = [];
 
 			foreach ($attributesGroups as $attributesGroupNo => $attributesGroup) {
-				$attributeName = $this->normalizeAttributeName($attributesGroup[0]->getName());
+				$attributeName = $this->normalizeAttributeName($attributesGroup[0]->getFullyQualifiedName());
 
 				foreach ($this->order as $orderPosition => $attributeNameOnPosition) {
 					if (
@@ -139,7 +143,7 @@ class AttributesOrderSniff implements Sniff
 			$attributesGroupsContent[$attributesGroupNo] = TokenHelper::getContent(
 				$phpcsFile,
 				$attributesGroup[0]->getAttributePointer(),
-				$tokens[$attributesGroup[0]->getAttributePointer()]['attribute_closer']
+				$tokens[$attributesGroup[0]->getAttributePointer()]['attribute_closer'],
 			);
 		}
 
@@ -156,16 +160,16 @@ class AttributesOrderSniff implements Sniff
 		foreach (array_keys($expectedOrder) as $position => $attributesGroupNo) {
 			if ($areOnSameLine) {
 				if ($position !== 0) {
-					$phpcsFile->fixer->addContent($attributesStartPointer, ' ');
+					FixerHelper::add($phpcsFile, $attributesStartPointer, ' ');
 				}
 
-				$phpcsFile->fixer->addContent($attributesStartPointer, $attributesGroupsContent[$attributesGroupNo]);
+				FixerHelper::add($phpcsFile, $attributesStartPointer, $attributesGroupsContent[$attributesGroupNo]);
 			} else {
 				if ($position !== 0) {
-					$phpcsFile->fixer->addContent($attributesStartPointer, $indentation);
+					FixerHelper::add($phpcsFile, $attributesStartPointer, $indentation);
 				}
 
-				$phpcsFile->fixer->addContent($attributesStartPointer, $attributesGroupsContent[$attributesGroupNo]);
+				FixerHelper::add($phpcsFile, $attributesStartPointer, $attributesGroupsContent[$attributesGroupNo]);
 
 				if ($position !== count($attributesGroups) - 1) {
 					$phpcsFile->fixer->addNewline($attributesStartPointer);
@@ -182,11 +186,7 @@ class AttributesOrderSniff implements Sniff
 	 */
 	private function normalizeOrder(array $order): array
 	{
-		foreach ($order as $itemNo => $item) {
-			$order[$itemNo] = $this->normalizeAttributeName(trim($item));
-		}
-
-		return $order;
+		return array_map(fn (string $item): string => $this->normalizeAttributeName(trim($item)), $order);
 	}
 
 	private function normalizeAttributeName(string $name): string

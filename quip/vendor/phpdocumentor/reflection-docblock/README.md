@@ -1,9 +1,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Qa workflow](https://github.com/phpDocumentor/ReflectionDocBlock/workflows/Qa%20workflow/badge.svg)
+[![Integrate](https://github.com/phpDocumentor/ReflectionDocBlock/actions/workflows/integrate.yaml/badge.svg)](https://github.com/phpDocumentor/ReflectionDocBlock/actions/workflows/integrate.yaml)
 [![Scrutinizer Code Coverage](https://img.shields.io/scrutinizer/coverage/g/phpDocumentor/ReflectionDocBlock.svg)](https://scrutinizer-ci.com/g/phpDocumentor/ReflectionDocBlock/?branch=master)
 [![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/phpDocumentor/ReflectionDocBlock.svg)](https://scrutinizer-ci.com/g/phpDocumentor/ReflectionDocBlock/?branch=master)
-[![Stable Version](https://img.shields.io/packagist/v/phpdocumentor/reflection-docblock.svg)](https://packagist.org/packages/phpdocumentor/reflection-docblock)
-[![Unstable Version](https://img.shields.io/packagist/vpre/phpdocumentor/reflection-docblock.svg)](https://packagist.org/packages/phpdocumentor/reflection-docblock)
+[![Stable Version](https://img.shields.io/packagist/v/phpdocumentor/reflection-docblock.svg?label=stable)](https://packagist.org/packages/phpdocumentor/reflection-docblock)
+[![Unstable Version](https://img.shields.io/packagist/v/phpdocumentor/reflection-docblock.svg?include_prereleases&label=unstable)](https://packagist.org/packages/phpdocumentor/reflection-docblock)
 
 ReflectionDocBlock 
 ==================
@@ -71,4 +71,4 @@ $description = (string) $docblock->getDescription();
 $description = $docblock->getDescription()->render();
 ```
 
-> For more examples it would be best to review the scripts in the [`/examples` folder](/examples).
+> For more examples it would be best to review the scripts in the [`/docs/examples` folder](/docs/examples).

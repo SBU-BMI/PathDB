@@ -2,8 +2,8 @@
 
 namespace Drupal\file_replace\Plugin\views\field;
 
-use Drupal\views\ResultRow;
 use Drupal\views\Plugin\views\field\EntityLink;
+use Drupal\views\ResultRow;
 
 /**
  * Field handler to present a link to replace a file.

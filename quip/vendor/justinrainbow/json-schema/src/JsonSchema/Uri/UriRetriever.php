@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the JsonSchema package.
  *
@@ -9,6 +11,7 @@
 
 namespace JsonSchema\Uri;
 
+use JsonSchema\DraftIdentifiers;
 use JsonSchema\Exception\InvalidSchemaMediaTypeException;
 use JsonSchema\Exception\JsonDecodingException;
 use JsonSchema\Exception\ResourceNotFoundException;
@@ -27,18 +30,19 @@ class UriRetriever implements BaseUriRetrieverInterface
     /**
      * @var array Map of URL translations
      */
-    protected $translationMap = array(
+    protected $translationMap = [
         // use local copies of the spec schemas
-        '|^https?://json-schema.org/draft-(0[34])/schema#?|' => 'package://dist/schema/json-schema-draft-$1.json'
-    );
+        '|^https?://json-schema.org/draft-(0[3467])/schema#?|' => 'package://dist/schema/json-schema-draft-$1.json',
+        '|^https://json-schema.org/draft/2019-09/schema#?|' => 'package://dist/schema/json-schema-draft-2019-09.json'
+    ];
 
     /**
      * @var array A list of endpoints for media type check exclusion
      */
-    protected $allowedInvalidContentTypeEndpoints = array(
+    protected $allowedInvalidContentTypeEndpoints = [
         'http://json-schema.org/',
         'https://json-schema.org/'
-    );
+    ];
 
     /**
      * @var null|UriRetrieverInterface
@@ -50,7 +54,7 @@ class UriRetriever implements BaseUriRetrieverInterface
      *
      * @see loadSchema
      */
-    private $schemaCache = array();
+    private $schemaCache = [];
 
     /**
      * Adds an endpoint to the media type validation exclusion list
@@ -79,17 +83,17 @@ class UriRetriever implements BaseUriRetrieverInterface
             return;
         }
 
-        if (in_array($contentType, array(Validator::SCHEMA_MEDIA_TYPE, 'application/json'))) {
+        if (in_array($contentType, [Validator::SCHEMA_MEDIA_TYPE, 'application/json'])) {
             return;
         }
 
         foreach ($this->allowedInvalidContentTypeEndpoints as $endpoint) {
-            if (strpos($uri, $endpoint) === 0) {
+            if (!\is_null($uri) && strpos($uri, $endpoint) === 0) {
                 return true;
             }
         }
 
-        throw new InvalidSchemaMediaTypeException(sprintf('Media type %s expected', Validator::SCHEMA_MEDIA_TYPE));
+        throw new InvalidSchemaMediaTypeException(sprintf('Media type %s expected, but %s given', Validator::SCHEMA_MEDIA_TYPE, $contentType));
     }
 
     /**
@@ -180,11 +184,17 @@ class UriRetriever implements BaseUriRetrieverInterface
 
         $jsonSchema = $this->loadSchema($fetchUri);
 
+        // Detect dialect from the root schema's $schema keyword before
+        // resolvePointer() may walk into a sub-schema.
+        $dialect = isset($jsonSchema->{'$schema'}) ? rtrim($jsonSchema->{'$schema'}, '#') : null;
+        $usesDollarId = !in_array($dialect, [DraftIdentifiers::DRAFT_3()->withoutFragment(), DraftIdentifiers::DRAFT_4()->withoutFragment()], true);
+
         // Use the JSON pointer if specified
         $jsonSchema = $this->resolvePointer($jsonSchema, $resolvedUri);
 
         if ($jsonSchema instanceof \stdClass) {
-            $jsonSchema->id = $resolvedUri;
+            $idKeyword = $usesDollarId ? '$id' : 'id';
+            $jsonSchema->{$idKeyword} = $resolvedUri;
         }
 
         return $jsonSchema;
@@ -243,13 +253,13 @@ class UriRetriever implements BaseUriRetrieverInterface
     {
         preg_match('|^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?|', $uri, $match);
 
-        $components = array();
+        $components = [];
         if (5 < count($match)) {
-            $components =  array(
+            $components =  [
                 'scheme'    => $match[2],
                 'authority' => $match[4],
                 'path'      => $match[5]
-            );
+            ];
         }
 
         if (7 < count($match)) {

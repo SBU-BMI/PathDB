@@ -2,8 +2,6 @@
 
 namespace Drupal\moderated_content_bulk_publish\Plugin\Action;
 
-//use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
-//use Drupal\views_bulk_operations\Action\ViewsBulkOperationsPreconfigurationInterface;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -24,11 +22,8 @@ use Drupal\Core\Access\AccessResult;
  *   confirm = TRUE,
  * )
  */
-//only need to add "implements" keywords below if we are goign to add configuration forms to the confirmation step.... not the case here!
 class UnpinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase implements ViewsBulkOperationsPreconfigurationInterface, PluginFormInterface*/
 {
-    
-    
 
   /**
    * {@inheritdoc}
@@ -117,7 +112,7 @@ class UnpinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBa
    * Submit handler for the action configuration form.
    *
    * If not implemented, the cleaned form values will be
-   * passed direclty to the action $configuration parameter.
+   * passed directly to the action $configuration parameter.
    *
    * @param array $form
    *   Form array.
@@ -136,7 +131,7 @@ class UnpinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBa
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if ($object->getEntityTypeId() === 'node') {
       $moderation_info = \Drupal::service('content_moderation.moderation_information');
       // Moderated Entities will return AccessResult::forbidden for attemps

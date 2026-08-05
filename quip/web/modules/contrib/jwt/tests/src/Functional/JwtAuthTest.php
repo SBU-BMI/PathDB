@@ -4,6 +4,7 @@ namespace Drupal\Tests\jwt\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
+use Drupal\jwt_test\EventSubscriber\JwtTestAuthIssuerSubscriber;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -54,6 +55,7 @@ class JwtAuthTest extends BrowserTestBase {
     $token = $auth->generateToken();
     $decoded_jwt = $transcoder->decode($token);
     $this->assertEquals($account->id(), $decoded_jwt->getClaim(['drupal', 'uid']));
+    $expected_cache_header = version_compare(\Drupal::VERSION, '10.4.0', '>=') ? 'UNCACHEABLE (request policy)' : NULL;
     foreach (['jwt_test.11.1', 'jwt_test.11.2'] as $route_name) {
       $url = Url::fromRoute($route_name);
       foreach (['Authorization', 'JWT-Authorization'] as $header_name) {
@@ -63,7 +65,7 @@ class JwtAuthTest extends BrowserTestBase {
         $this->drupalGet($url, [], $headers);
         $this->assertSession()->statusCodeEquals(200);
         $this->assertSession()->pageTextContains($account->getAccountName());
-        self::assertNull($this->getSession()->getResponseHeader('X-Drupal-Cache'));
+        self::assertEquals($expected_cache_header, $this->getSession()->getResponseHeader('X-Drupal-Cache'));
         self::assertFalse(strpos($this->getSession()->getResponseHeader('Cache-Control'), 'public'), 'Cache-Control is not set to public');
         $account->block()->save();
         $this->drupalGet($url, [], $headers);
@@ -82,6 +84,32 @@ class JwtAuthTest extends BrowserTestBase {
         $this->mink->resetSessions();
       }
     }
+    // Test the 300 seconds of default leeway on nbf, iat, and exp values.
+    $url = Url::fromRoute('jwt_test.11.2');
+    $time = time();
+    $test_cases = [
+      ['claims' => ['iat' => $time + 250], 'code' => 200],
+      ['claims' => ['nbf' => $time + 250], 'code' => 200],
+      ['claims' => ['exp' => $time - 250], 'code' => 200],
+      ['claims' => ['iat' => $time + 350], 'code' => 403],
+      ['claims' => ['nbf' => $time + 350], 'code' => 403],
+      ['claims' => ['iat' => $time, 'nbf' => $time + 350], 'code' => 403],
+      ['claims' => ['exp' => $time - 350], 'code' => 403],
+    ];
+    foreach ($test_cases as $case) {
+      JwtTestAuthIssuerSubscriber::$modifications = $case['claims'];
+      $token = $auth->generateToken();
+      $headers = [
+        'Authorization' => 'Bearer ' . $token,
+      ];
+      $this->drupalGet($url, [], $headers);
+      $this->assertSession()->statusCodeEquals($case['code']);
+      if ($case['code'] === 200) {
+        $this->assertSession()->pageTextContains($account->getAccountName());
+      }
+      $this->mink->resetSessions();
+    }
+    JwtTestAuthIssuerSubscriber::$modifications = [];
     // The front page should return a 200 even for an invalid JWT.
     foreach (['Authorization', 'JWT-Authorization'] as $header_name) {
       $headers = [
@@ -100,13 +128,14 @@ class JwtAuthTest extends BrowserTestBase {
     $this->assertEquals($this->getSession()->getResponseHeader('X-Drupal-Cache'), 'MISS');
     $this->drupalGet($url);
     $this->assertEquals($this->getSession()->getResponseHeader('X-Drupal-Cache'), 'HIT');
+    $token = $auth->generateToken();
     foreach (['Authorization', 'JWT-Authorization'] as $header_name) {
       $headers = [
         $header_name => 'Bearer ' . $token,
       ];
       $this->drupalGet($url, [], $headers);
       $this->assertSession()->statusCodeEquals(200);
-      $this->assertNull($this->getSession()->getResponseHeader('X-Drupal-Cache'));
+      self::assertEquals($expected_cache_header, $this->getSession()->getResponseHeader('X-Drupal-Cache'));
       $this->assertFalse(strpos($this->getSession()->getResponseHeader('Cache-Control'), 'public'), 'No page cache response when requesting a cached page with jwt credentials.');
       // This is needed to prevent the Authorization header from the last loop
       // being sent again by the mink session.
@@ -133,6 +162,7 @@ class JwtAuthTest extends BrowserTestBase {
     $code = (int) $this->getSession()->getStatusCode();
     $this->assertTrue(in_array($code, [401, 403], TRUE), 'Access is not granted.');
     $this->mink->resetSessions();
+    $token = $auth->generateToken();
     $headers += ['JWT-Authorization' => 'Bearer ' . $token];
     $this->drupalGet($url, [], $headers);
     $this->assertSession()->statusCodeEquals(200);

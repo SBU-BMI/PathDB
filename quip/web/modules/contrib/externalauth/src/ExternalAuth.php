@@ -3,6 +3,7 @@
 namespace Drupal\externalauth;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\Element\Email;
 use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
 use Drupal\externalauth\Event\ExternalAuthEvents;
 use Drupal\externalauth\Event\ExternalAuthLoginEvent;
@@ -10,7 +11,7 @@ use Drupal\externalauth\Event\ExternalAuthRegisterEvent;
 use Drupal\externalauth\Exception\ExternalAuthRegisterException;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Service to handle external authentication logic.
@@ -41,7 +42,7 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * The event dispatcher.
    *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface
    */
   protected $eventDispatcher;
 
@@ -54,7 +55,7 @@ class ExternalAuth implements ExternalAuthInterface {
    *   The authmap service.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, AuthmapInterface $authmap, LoggerInterface $logger, EventDispatcherInterface $event_dispatcher) {
@@ -89,7 +90,21 @@ class ExternalAuth implements ExternalAuthInterface {
    * {@inheritdoc}
    */
   public function register(string $authname, string $provider, array $account_data = [], $authmap_data = NULL) {
-    if (!empty($account_data['name'])) {
+    $explicit_username_provided = array_key_exists('name', $account_data);
+    if ($explicit_username_provided) {
+      if (!is_string($account_data['name'])) {
+        throw new ExternalAuthRegisterException('The username must be a string.');
+      }
+
+      if ($account_data['name'] === '') {
+        throw new ExternalAuthRegisterException('The username cannot be empty.');
+      }
+    }
+
+    // An explicitly provided username must be a non-empty string.
+    // Otherwise, fall back to a derived username only when no username was
+    // provided at all.
+    if ($explicit_username_provided) {
       $username = $account_data['name'];
       unset($account_data['name']);
     }
@@ -115,6 +130,9 @@ class ExternalAuth implements ExternalAuthInterface {
       ],
       $account_data
     );
+    $this->validateRegistrationData($provider, $authmap_event->getAuthname(), $account_data);
+
+    /** @var \Drupal\user\UserInterface $account */
     $account = $entity_storage->create($account_data);
 
     $account->enforceIsNew();
@@ -145,6 +163,32 @@ class ExternalAuth implements ExternalAuthInterface {
   }
 
   /**
+   * Validates registration data before creating the user entity.
+   *
+   * @param string $provider
+   *   The name of the service providing external authentication.
+   * @param string $authname
+   *   The external authentication name to store in authmap.
+   * @param array $account_data
+   *   The data to create the Drupal user with.
+   *
+   * @throws \Drupal\externalauth\Exception\ExternalAuthRegisterException
+   *   Thrown when one of the values exceeds a supported storage limit.
+   */
+  private function validateRegistrationData(string $provider, string $authname, array $account_data): void {
+    ExternalAuthValidation::validateAuthmapData($provider, $authname);
+    ExternalAuthValidation::validateValueLength($account_data['name'], UserInterface::USERNAME_MAX_LENGTH, 'username');
+
+    if (isset($account_data['mail']) && is_string($account_data['mail'])) {
+      ExternalAuthValidation::validateValueLength($account_data['mail'], Email::EMAIL_MAX_LENGTH, 'email address');
+    }
+
+    if (isset($account_data['init']) && is_string($account_data['init'])) {
+      ExternalAuthValidation::validateValueLength($account_data['init'], Email::EMAIL_MAX_LENGTH, 'initial account value');
+    }
+  }
+
+  /**
    * {@inheritdoc}
    *
    * @codeCoverageIgnore
@@ -159,12 +203,12 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * {@inheritdoc}
    */
-  public function linkExistingAccount(string $authname, string $provider, UserInterface $account) {
+  public function linkExistingAccount(string $authname, string $provider, UserInterface $account, $authmap_data = NULL) {
     // If a mapping (for the same provider) to this account already exists, and
     // the authname is the same, we silently skip saving this auth mapping.
     $current_authname = $this->authmap->get($account->id(), $provider);
     if ($current_authname === $authname) {
-      return;
+      return FALSE;
     }
 
     // If we update the authmap entry, let's log the change.
@@ -178,8 +222,10 @@ class ExternalAuth implements ExternalAuthInterface {
       ]);
     }
 
-    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), NULL), ExternalAuthEvents::AUTHMAP_ALTER);
+    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), $authmap_data), ExternalAuthEvents::AUTHMAP_ALTER);
+    ExternalAuthValidation::validateAuthmapData($provider, $authmap_event->getAuthname());
     $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
+    return TRUE;
   }
 
 }

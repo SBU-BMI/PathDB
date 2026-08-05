@@ -9,7 +9,6 @@ use PHPStan\PhpDocParser\Ast\Node;
 use PHPStan\PhpDocParser\Ast\NodeTraverser;
 use PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine\DoctrineArgument;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
@@ -68,86 +67,83 @@ class AnnotationHelper
 							$annotations[] = new Annotation(
 								$node,
 								$annotationStartPointer,
-								$parsedDocComment->getNodeEndPointer($phpcsFile, $node, $annotationStartPointer)
+								$parsedDocComment->getNodeEndPointer($phpcsFile, $node, $annotationStartPointer),
 							);
 						}
 					}
 				}
 
 				return $annotations;
-			}
+			},
 		);
 	}
 
 	/**
-	 * @param class-string $type
-	 * @return list<Node>
+	 * @template T
+	 * @param class-string<T> $type
+	 * @return list<T>
 	 */
 	public static function getAnnotationNodesByType(Node $node, string $type): array
 	{
 		static $visitor;
 		static $traverser;
 
-		if ($visitor === null) {
-			$visitor = new class extends AbstractNodeVisitor {
+		$visitor ??= new class extends AbstractNodeVisitor {
 
-				/** @var class-string */
-				private $type;
+			/** @var class-string */
+			private string $type;
 
-				/** @var list<Node> */
-				private $nodes = [];
+			/** @var list<Node> */
+			private array $nodes = [];
 
-				/** @var list<Node> */
-				private $nodesToIgnore = [];
+			/** @var list<Node> */
+			private array $nodesToIgnore = [];
 
-				/**
-				 * @return Node|list<Node>|NodeTraverser::*|null
-				 */
-				public function enterNode(Node $node)
-				{
-					if ($this->type === IdentifierTypeNode::class) {
-						if ($node instanceof ArrayShapeItemNode || $node instanceof ObjectShapeItemNode) {
-							$this->nodesToIgnore[] = $node->keyName;
-						} elseif ($node instanceof DoctrineArgument) {
-							$this->nodesToIgnore[] = $node->key;
-						}
+			/**
+			 * @return Node|list<Node>|NodeTraverser::*|null
+			 */
+			public function enterNode(Node $node)
+			{
+				if ($this->type === IdentifierTypeNode::class) {
+					if ($node instanceof ArrayShapeItemNode || $node instanceof ObjectShapeItemNode) {
+						$this->nodesToIgnore[] = $node->keyName;
+					} elseif ($node instanceof DoctrineArgument) {
+						$this->nodesToIgnore[] = $node->key;
 					}
-
-					if ($node instanceof $this->type && !in_array($node, $this->nodesToIgnore, true)) {
-						$this->nodes[] = $node;
-					}
-
-					return null;
 				}
 
-				/**
-				 * @param class-string $type
-				 */
-				public function setType(string $type): void
-				{
-					$this->type = $type;
+				if ($node instanceof $this->type && !in_array($node, $this->nodesToIgnore, true)) {
+					$this->nodes[] = $node;
 				}
 
-				public function clean(): void
-				{
-					$this->nodes = [];
-					$this->nodesToIgnore = [];
-				}
+				return null;
+			}
 
-				/**
-				 * @return list<Node>
-				 */
-				public function getNodes(): array
-				{
-					return $this->nodes;
-				}
+			/**
+			 * @param class-string $type
+			 */
+			public function setType(string $type): void
+			{
+				$this->type = $type;
+			}
 
-			};
-		}
+			public function clean(): void
+			{
+				$this->nodes = [];
+				$this->nodesToIgnore = [];
+			}
 
-		if ($traverser === null) {
-			$traverser = new NodeTraverser([$visitor]);
-		}
+			/**
+			 * @return list<Node>
+			 */
+			public function getNodes(): array
+			{
+				return $this->nodes;
+			}
+
+		};
+
+		$traverser ??= new NodeTraverser([$visitor]);
 
 		$visitor->setType($type);
 		$visitor->clean();
@@ -166,7 +162,6 @@ class AnnotationHelper
 	{
 		$originalNode = $annotation->getNode();
 
-		/** @var PhpDocNode $newPhpDocNode */
 		$newPhpDocNode = PhpDocParserHelper::cloneNode($parsedDocComment->getNode());
 
 		foreach ($newPhpDocNode->getTags() as $node) {
@@ -179,12 +174,12 @@ class AnnotationHelper
 		return PhpDocParserHelper::getPrinter()->printFormatPreserving(
 			$newPhpDocNode,
 			$parsedDocComment->getNode(),
-			$parsedDocComment->getTokens()
+			$parsedDocComment->getTokens(),
 		);
 	}
 
 	/**
-	 * @param array<int, string> $traversableTypeHints
+	 * @param list<string> $traversableTypeHints
 	 */
 	public static function isAnnotationUseless(
 		File $phpcsFile,
@@ -221,7 +216,7 @@ class AnnotationHelper
 		if (
 			TypeHintHelper::isTraversableType(
 				TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $functionPointer, $typeHint->getTypeHintWithoutNullabilitySymbol()),
-				$traversableTypeHints
+				$traversableTypeHints,
 			)
 			&& !(
 				$annotationType instanceof IdentifierTypeNode
@@ -257,7 +252,7 @@ class AnnotationHelper
 				$phpcsFile,
 				$functionPointer,
 				$typeHint->getTypeHint(),
-				$annotationTypeHint
+				$annotationTypeHint,
 			);
 		}
 
@@ -289,16 +284,15 @@ class AnnotationHelper
 			if (in_array(
 				strtolower($annotationType->name),
 				['true', 'false', 'null'],
-				true
+				true,
 			)) {
 				return $enableStandaloneNullTrueFalseTypeHints;
 			}
 
-			if (in_array(
+			if (TypeHintHelper::isSimpleUnofficialTypeHints(
 				strtolower($annotationType->name),
-				['class-string', 'trait-string', 'callable-string', 'numeric-string', 'non-empty-string', 'non-falsy-string', 'literal-string', 'positive-int', 'negative-int'],
-				true
-			)) {
+			) && !in_array($annotationType->name, ['object', 'mixed'], true)
+			) {
 				return false;
 			}
 		}
@@ -308,7 +302,7 @@ class AnnotationHelper
 			$phpcsFile,
 			$functionPointer,
 			$typeHint->getTypeHintWithoutNullabilitySymbol(),
-			$annotationTypeHint
+			$annotationTypeHint,
 		);
 	}
 
@@ -317,43 +311,34 @@ class AnnotationHelper
 		static $visitor;
 		static $traverser;
 
-		if ($visitor === null) {
-			$visitor = new class extends AbstractNodeVisitor {
+		$visitor ??= new class extends AbstractNodeVisitor {
 
-				/** @var Node */
-				private $nodeToChange;
+			private Node $nodeToChange;
 
-				/** @var Node */
-				private $changedNode;
+			private Node $changedNode;
 
-				/**
-				 * @return Node|list<Node>|NodeTraverser::*|null
-				 */
-				public function enterNode(Node $node)
-				{
-					if ($node->getAttribute(Attribute::ORIGINAL_NODE) === $this->nodeToChange) {
-						return $this->changedNode;
-					}
-
-					return null;
+			public function enterNode(Node $node): ?Node
+			{
+				if ($node->getAttribute(Attribute::ORIGINAL_NODE) === $this->nodeToChange) {
+					return $this->changedNode;
 				}
 
-				public function setNodeToChange(Node $nodeToChange): void
-				{
-					$this->nodeToChange = $nodeToChange;
-				}
+				return null;
+			}
 
-				public function setChangedNode(Node $changedNode): void
-				{
-					$this->changedNode = $changedNode;
-				}
+			public function setNodeToChange(Node $nodeToChange): void
+			{
+				$this->nodeToChange = $nodeToChange;
+			}
 
-			};
-		}
+			public function setChangedNode(Node $changedNode): void
+			{
+				$this->changedNode = $changedNode;
+			}
 
-		if ($traverser === null) {
-			$traverser = new NodeTraverser([$visitor]);
-		}
+		};
+
+		$traverser ??= new NodeTraverser([$visitor]);
 
 		$visitor->setNodeToChange($nodeToChange);
 		$visitor->setChangedNode($changedNode);

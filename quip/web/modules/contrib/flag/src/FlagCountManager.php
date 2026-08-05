@@ -197,20 +197,22 @@ class FlagCountManager implements FlagCountManagerInterface, EventSubscriberInte
     $flag = $flagging->getFlag();
     $entity = $flagging->getFlaggable();
 
-    $this->connection->merge('flag_counts')
-      ->keys([
-        'flag_id' => $flag->id(),
-        'entity_id' => $entity->id(),
-        'entity_type' => $entity->getEntityTypeId(),
-      ])
-      ->fields([
-        'last_updated' => $this->dateTime->getRequestTime(),
-        'count' => 1,
-      ])
-      ->expression('count', 'count + :inc', [':inc' => 1])
-      ->execute();
+    if ($entity) {
+      $this->connection->merge('flag_counts')
+        ->keys([
+          'flag_id' => $flag->id(),
+          'entity_id' => $entity->id(),
+          'entity_type' => $entity->getEntityTypeId(),
+        ])
+        ->fields([
+          'last_updated' => $this->dateTime->getRequestTime(),
+          'count' => 1,
+        ])
+        ->expression('count', 'count + :inc', [':inc' => 1])
+        ->execute();
 
-    $this->resetLoadedCounts($entity, $flag);
+      $this->resetLoadedCounts($entity, $flag);
+    }
   }
 
   /**
@@ -297,7 +299,7 @@ class FlagCountManager implements FlagCountManagerInterface, EventSubscriberInte
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events = [];
     $events[FlagEvents::ENTITY_FLAGGED][] = ['incrementFlagCounts', -100];
     $events[FlagEvents::ENTITY_UNFLAGGED][] = [

@@ -78,7 +78,7 @@ class PlatformRepository extends ArrayRepository
         $this->hhvmDetector = $hhvmDetector ?: new HhvmDetector();
         foreach ($overrides as $name => $version) {
             if (!is_string($version) && false !== $version) { // @phpstan-ignore-line
-                throw new \UnexpectedValueException('config.platform.'.$name.' should be a string or false, but got '.gettype($version).' '.var_export($version, true));
+                throw new \UnexpectedValueException('config.platform.'.$name.' should be a string or false, but got '.get_debug_type($version).' '.var_export($version, true));
             }
             if ($name === 'php' && $version === false) {
                 throw new \UnexpectedValueException('config.platform.'.$name.' cannot be set to false as you cannot disable php entirely.');
@@ -240,12 +240,14 @@ class PlatformRepository extends ArrayRepository
                             $parsedVersion = Version::parseOpenssl($sslMatches['version'], $isFips);
                             $this->addLibrary($libraries, $name.'-openssl'.($isFips ? '-fips' : ''), $parsedVersion, 'curl OpenSSL version ('.$parsedVersion.')', [], $isFips ? ['curl-openssl'] : []);
                         } else {
-                            if ($library === '(securetransport) openssl') {
+                            if (str_starts_with($library, '(securetransport)') && Preg::isMatch('{^\(securetransport\) ([a-z0-9]+)}', $library, $securetransportMatches)) {
                                 $shortlib = 'securetransport';
+                                $sslLib = 'curl-'.$securetransportMatches[1];
                             } else {
                                 $shortlib = $library;
+                                $sslLib = 'curl-openssl';
                             }
-                            $this->addLibrary($libraries, $name.'-'.$shortlib, $sslMatches['version'], 'curl '.$library.' version ('.$sslMatches['version'].')', ['curl-openssl']);
+                            $this->addLibrary($libraries, $name.'-'.$shortlib, $sslMatches['version'], 'curl '.$library.' version ('.$sslMatches['version'].')', [$sslLib]);
                         }
                     }
 
@@ -489,7 +491,7 @@ class PlatformRepository extends ArrayRepository
                          * pre-release ID in practice is always 0xff even for RCs etc, so we ignore it
                          */
                         $libRdKafkaVersionInt = $this->runtime->getConstant('RD_KAFKA_VERSION');
-                        $this->addLibrary($libraries, $name.'-librdkafka', sprintf('%d.%d.%d', ($libRdKafkaVersionInt & 0xFF000000) >> 24, ($libRdKafkaVersionInt & 0x00FF0000) >> 16, ($libRdKafkaVersionInt & 0x0000FF00) >> 8), 'librdkafka for '.$name);
+                        $this->addLibrary($libraries, $name.'-librdkafka', sprintf('%d.%d.%d', ($libRdKafkaVersionInt & 0x7F000000) >> 24, ($libRdKafkaVersionInt & 0x00FF0000) >> 16, ($libRdKafkaVersionInt & 0x0000FF00) >> 8), 'librdkafka for '.$name);
                     }
                     break;
 

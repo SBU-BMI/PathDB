@@ -2,9 +2,11 @@
 
 namespace Drupal\search_api\Plugin\views\cache;
 
+use Drupal\views\Attribute\ViewsCache;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\views\Plugin\views\cache\Tag;
 use Drupal\views\ResultRow;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,13 +22,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * database search backend and does not index any external datasources.
  *
  * @ingroup views_cache_plugins
- *
- * @ViewsCache(
- *   id = "search_api_tag",
- *   title = @Translation("Search API (tag-based)"),
- *   help = @Translation("Cache results until the associated cache tags are invalidated. Useful for small sites that use the database search backend. <strong>Caution:</strong> Can lead to stale results and might harm performance for complex search pages.")
- * )
  */
+#[ViewsCache(
+  id: 'search_api_tag',
+  title: new TranslatableMarkup('Search API (tag-based)'),
+  help: new TranslatableMarkup('Cache results until the associated cache tags are invalidated. Useful for small sites that use the database search backend. <strong>Caution:</strong> Can lead to stale results and might harm performance for complex search pages.'),
+)]
 class SearchApiTagCache extends Tag {
 
   use SearchApiCachePluginTrait;
@@ -85,6 +86,11 @@ class SearchApiTagCache extends Tag {
    */
   public function getRowCacheTags(ResultRow $row) {
     $tags = [];
+
+    /** @var \Drupal\search_api\Plugin\views\ResultRow $row */
+    if (!empty($row->search_api_has_fields_from_server)) {
+      $tags[] = 'search_api_list:' . $row->_item->getIndex()->id();
+    }
 
     foreach ($row->_relationship_objects as $objects) {
       /** @var \Drupal\Core\TypedData\ComplexDataInterface $object */

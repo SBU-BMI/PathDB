@@ -12,19 +12,16 @@ class TemplateTagValueNode implements PhpDocTagValueNode
 	use NodeAttributes;
 
 	/** @var non-empty-string */
-	public $name;
+	public string $name;
 
-	/** @var TypeNode|null */
-	public $bound;
+	public ?TypeNode $bound;
 
-	/** @var TypeNode|null */
-	public $lowerBound;
+	public ?TypeNode $default;
 
-	/** @var TypeNode|null */
-	public $default;
+	public ?TypeNode $lowerBound;
 
 	/** @var string (may be empty) */
-	public $description;
+	public string $description;
 
 	/**
 	 * @param non-empty-string $name
@@ -38,13 +35,26 @@ class TemplateTagValueNode implements PhpDocTagValueNode
 		$this->description = $description;
 	}
 
-
 	public function __toString(): string
 	{
 		$upperBound = $this->bound !== null ? " of {$this->bound}" : '';
 		$lowerBound = $this->lowerBound !== null ? " super {$this->lowerBound}" : '';
 		$default = $this->default !== null ? " = {$this->default}" : '';
 		return trim("{$this->name}{$upperBound}{$lowerBound}{$default} {$this->description}");
+	}
+
+	/**
+	 * @param array<string, mixed> $properties
+	 */
+	public static function __set_state(array $properties): self
+	{
+		$instance = new self($properties['name'], $properties['bound'], $properties['description'], $properties['default'] ?? null, $properties['lowerBound'] ?? null);
+		if (isset($properties['attributes'])) {
+			foreach ($properties['attributes'] as $key => $value) {
+				$instance->setAttribute($key, $value);
+			}
+		}
+		return $instance;
 	}
 
 }

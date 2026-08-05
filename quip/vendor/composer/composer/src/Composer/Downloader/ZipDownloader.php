@@ -16,7 +16,6 @@ use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Util\IniHelper;
 use Composer\Util\Platform;
-use Composer\Util\ProcessExecutor;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 use React\Promise\PromiseInterface;
@@ -45,17 +44,18 @@ class ZipDownloader extends ArchiveDownloader
         if (null === self::$unzipCommands) {
             self::$unzipCommands = [];
             $finder = new ExecutableFinder;
-            if (Platform::isWindows() && ($cmd = $finder->find('7z', null, ['C:\Program Files\7-Zip']))) {
+            if (Platform::isWindows() && null !== ($cmd = $finder->find('7z', null, ['C:\Program Files\7-Zip']))) {
                 self::$unzipCommands[] = ['7z', $cmd, 'x', '-bb0', '-y', '%file%', '-o%path%'];
             }
-            if ($cmd = $finder->find('unzip')) {
+            if (null !== ($cmd = $finder->find('unzip'))) {
                 self::$unzipCommands[] = ['unzip', $cmd, '-qq', '%file%', '-d', '%path%'];
             }
-            if (!Platform::isWindows() && ($cmd = $finder->find('7z'))) { // 7z linux/macOS support is only used if unzip is not present
+            if (!Platform::isWindows() && null !== ($cmd = $finder->find('7z'))) { // 7z linux/macOS support is only used if unzip is not present
                 self::$unzipCommands[] = ['7z', $cmd, 'x', '-bb0', '-y', '%file%', '-o%path%'];
-            }
-            if (!Platform::isWindows() && ($cmd = $finder->find('7zz'))) { // 7zz linux/macOS support is only used if unzip is not present
+            } elseif (!Platform::isWindows() && null !== ($cmd = $finder->find('7zz'))) { // 7zz linux/macOS support is only used if unzip is not present
                 self::$unzipCommands[] = ['7zz', $cmd, 'x', '-bb0', '-y', '%file%', '-o%path%'];
+            } elseif (!Platform::isWindows() && null !== ($cmd = $finder->find('7za'))) { // 7za linux/macOS support is only used if unzip is not present
+                self::$unzipCommands[] = ['7za', $cmd, 'x', '-bb0', '-y', '%file%', '-o%path%'];
             }
         }
 
@@ -133,7 +133,7 @@ class ZipDownloader extends ArchiveDownloader
             return strtr($value, $map);
         }, $command);
 
-        if (!$warned7ZipLinux && !Platform::isWindows() && in_array($executable, ['7z', '7zz'], true)) {
+        if (!$warned7ZipLinux && !Platform::isWindows() && in_array($executable, ['7z', '7zz', '7za'], true)) {
             $warned7ZipLinux = true;
             if (0 === $this->process->execute([$commandSpec[1]], $output)) {
                 if (Preg::isMatchStrictGroups('{^\s*7-Zip(?: \[64\])? ([0-9.]+)}', $output, $match) && version_compare($match[1], '21.01', '<')) {
@@ -143,7 +143,7 @@ class ZipDownloader extends ArchiveDownloader
         }
 
         $io = $this->io;
-        $tryFallback = function (\Throwable $processError) use ($isLastChance, $io, $file, $path, $package, $executable): \React\Promise\PromiseInterface {
+        $tryFallback = function (\Throwable $processError) use ($isLastChance, $io, $file, $path, $package, $executable): PromiseInterface {
             if ($isLastChance) {
                 throw $processError;
             }
@@ -222,18 +222,23 @@ class ZipDownloader extends ArchiveDownloader
                 $archiveSize = filesize($file);
                 $totalFiles = $zipArchive->count();
                 if ($totalFiles > 0) {
-                    for ($i = 0; $i < min($totalFiles, 5); $i++) {
-                        $stat = $zipArchive->statIndex(random_int(0, $totalFiles - 1));
+                    $inspectAll = false;
+                    $filesToInspect = min($totalFiles, 5);
+                    for ($i = 0; $i < $filesToInspect; $i++) {
+                        $stat = $zipArchive->statIndex($inspectAll ? $i : random_int(0, $totalFiles - 1));
                         if ($stat === false) {
                             continue;
                         }
                         $totalSize += $stat['size'];
-                        if ($stat['size'] > $stat['comp_size'] * 200) {
-                            throw new \RuntimeException('Invalid zip file with compression ratio >99% (possible zip bomb)');
+                        if (!$inspectAll && $stat['size'] > $stat['comp_size'] * 200) {
+                            $totalSize = 0;
+                            $inspectAll = true;
+                            $i = -1;
+                            $filesToInspect = $totalFiles;
                         }
                     }
-                    if ($archiveSize !== false && $totalSize > $archiveSize * 100 && $totalSize > 50*1024*1024) {
-                        throw new \RuntimeException('Invalid zip file with compression ratio >99% (possible zip bomb)');
+                    if ($archiveSize !== false && $totalSize > $archiveSize * 100 && $totalSize > 50 * 1024 * 1024) {
+                        throw new \RuntimeException('Invalid zip file for "'.$package->getName().'" with compression ratio >99% (possible zip bomb)');
                     }
                 }
 
@@ -245,12 +250,12 @@ class ZipDownloader extends ArchiveDownloader
                     return \React\Promise\resolve(null);
                 }
 
-                $processError = new \RuntimeException(rtrim("There was an error extracting the ZIP file, it is either corrupted or using an invalid format.\n"));
+                $processError = new \RuntimeException(rtrim("There was an error extracting the ZIP file for \"{$package->getName()}\", it is either corrupted or using an invalid format.\n"));
             } else {
                 $processError = new \UnexpectedValueException(rtrim($this->getErrorMessage($retval, $file)."\n"), $retval);
             }
         } catch (\ErrorException $e) {
-            $processError = new \RuntimeException('The archive may contain identical file names with different capitalization (which fails on case insensitive filesystems): '.$e->getMessage(), 0, $e);
+            $processError = new \RuntimeException('The archive for "'.$package->getName().'" may contain identical file names with different capitalization (which fails on case insensitive filesystems): '.$e->getMessage(), 0, $e);
         } catch (\Throwable $e) {
             $processError = $e;
         }

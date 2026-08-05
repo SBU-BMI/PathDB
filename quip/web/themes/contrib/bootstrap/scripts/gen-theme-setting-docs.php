@@ -22,7 +22,8 @@ $kernel = require_once __DIR__ . '/bootstrap.php';
 
 $bootstrap = Bootstrap::getTheme('bootstrap');
 
-/** @var \Drupal\bootstrap\Plugin\Setting\SettingInterface[] $settings */
+/**
+ * @var \Drupal\bootstrap\Plugin\Setting\SettingInterface[] $settings */
 $settings = array_filter($bootstrap->getSettingPlugin(NULL, TRUE), function (SettingInterface $setting) {
   return !!$setting->getGroups();
 });

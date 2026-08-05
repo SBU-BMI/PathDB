@@ -50,7 +50,7 @@ class SvnDriver extends VcsDriver
     protected $cacheCredentials = true;
 
     /**
-     * @var \Composer\Util\Svn
+     * @var SvnUtil
      */
     private $util;
 
@@ -141,7 +141,7 @@ class SvnDriver extends VcsDriver
                 // and fix outdated invalid cache files
                 if ($res === '""') {
                     $res = 'null';
-                    $this->cache->write($identifier.'.json', json_encode(null));
+                    $this->cache->write($identifier.'.json', $res);
                 }
 
                 return $this->infoCache[$identifier] = JsonFile::parseJson($res);
@@ -159,7 +159,7 @@ class SvnDriver extends VcsDriver
             }
 
             if ($this->shouldCache($identifier)) {
-                $this->cache->write($identifier.'.json', json_encode($composer));
+                $this->cache->write($identifier.'.json', JsonFile::encode($composer, \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES));
             }
 
             $this->infoCache[$identifier] = $composer;
@@ -387,11 +387,11 @@ class SvnDriver extends VcsDriver
             return $this->util->execute($command, $url);
         } catch (\RuntimeException $e) {
             if (null === $this->util->binaryVersion()) {
-                throw new \RuntimeException('Failed to load '.$this->url.', svn was not found, check that it is installed and in your PATH env.' . "\n\n" . $this->process->getErrorOutput());
+                throw new \RuntimeException('Failed to load '.Url::sanitize($this->url).', svn was not found, check that it is installed and in your PATH env.' . "\n\n" . $this->process->getErrorOutput());
             }
 
             throw new \RuntimeException(
-                'Repository '.$this->url.' could not be processed, '.$e->getMessage()
+                'Repository '.Url::sanitize($this->url).' could not be processed, '.Url::sanitize($e->getMessage())
             );
         }
     }

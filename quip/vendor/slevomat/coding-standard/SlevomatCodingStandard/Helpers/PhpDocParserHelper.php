@@ -9,6 +9,7 @@ use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TypeParser;
+use PHPStan\PhpDocParser\ParserConfig;
 use PHPStan\PhpDocParser\Printer\Printer;
 
 /**
@@ -21,9 +22,7 @@ class PhpDocParserHelper
 	{
 		static $lexer;
 
-		if ($lexer === null) {
-			$lexer = new Lexer(true);
-		}
+		$lexer ??= new Lexer(self::getConfig());
 
 		return $lexer;
 	}
@@ -33,17 +32,12 @@ class PhpDocParserHelper
 		static $parser;
 
 		if ($parser === null) {
-			$usedAttributes = ['lines' => true, 'indexes' => true];
-
-			$constantExpressionParser = new ConstExprParser(true, true, $usedAttributes);
+			$config = self::getConfig();
+			$constantExpressionParser = new ConstExprParser($config);
 			$parser = new PhpDocParser(
-				new TypeParser($constantExpressionParser, true, $usedAttributes),
+				$config,
+				new TypeParser($config, $constantExpressionParser),
 				$constantExpressionParser,
-				true,
-				true,
-				$usedAttributes,
-				true,
-				true
 			);
 		}
 
@@ -54,9 +48,7 @@ class PhpDocParserHelper
 	{
 		static $printer;
 
-		if ($printer === null) {
-			$printer = new Printer();
-		}
+		$printer ??= new Printer();
 
 		return $printer;
 	}
@@ -70,13 +62,20 @@ class PhpDocParserHelper
 	{
 		static $cloningTraverser;
 
-		if ($cloningTraverser === null) {
-			$cloningTraverser = new NodeTraverser([new CloningVisitor()]);
-		}
+		$cloningTraverser ??= new NodeTraverser([new CloningVisitor()]);
 
 		[$cloneNode] = $cloningTraverser->traverse([$node]);
 
 		return $cloneNode;
+	}
+
+	private static function getConfig(): ParserConfig
+	{
+		static $config;
+
+		$config ??= new ParserConfig(['lines' => true, 'indexes' => true]);
+
+		return $config;
 	}
 
 }

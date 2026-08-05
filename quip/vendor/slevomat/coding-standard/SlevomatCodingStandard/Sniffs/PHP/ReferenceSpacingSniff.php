@@ -27,8 +27,7 @@ class ReferenceSpacingSniff implements Sniff
 
 	public const CODE_INCORRECT_SPACES_AFTER_REFERENCE = 'IncorrectSpacesAfterReference';
 
-	/** @var int */
-	public $spacesCountAfterReference = 0;
+	public int $spacesCountAfterReference = 0;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -67,7 +66,7 @@ class ReferenceSpacingSniff implements Sniff
 			: sprintf(
 				'There must be exactly %d whitespace%s after reference.',
 				$this->spacesCountAfterReference,
-				$this->spacesCountAfterReference !== 1 ? 's' : ''
+				$this->spacesCountAfterReference !== 1 ? 's' : '',
 			);
 
 		$fix = $phpcsFile->addFixableError($errorMessage, $referencePointer, self::CODE_INCORRECT_SPACES_AFTER_REFERENCE);
@@ -78,7 +77,7 @@ class ReferenceSpacingSniff implements Sniff
 
 		$phpcsFile->fixer->beginChangeset();
 
-		$phpcsFile->fixer->addContent($referencePointer, str_repeat(' ', $this->spacesCountAfterReference));
+		FixerHelper::add($phpcsFile, $referencePointer, str_repeat(' ', $this->spacesCountAfterReference));
 
 		FixerHelper::removeBetween($phpcsFile, $referencePointer, $pointerAfterWhitespace);
 
@@ -90,7 +89,7 @@ class ReferenceSpacingSniff implements Sniff
 		$tokens = $phpcsFile->getTokens();
 
 		$previousPointer = TokenHelper::findPreviousEffective($phpcsFile, $referencePointer - 1);
-		if (in_array($tokens[$previousPointer]['code'], TokenHelper::$functionTokenCodes, true)) {
+		if (in_array($tokens[$previousPointer]['code'], TokenHelper::FUNCTION_TOKEN_CODES, true)) {
 			return true;
 		}
 
@@ -101,7 +100,7 @@ class ReferenceSpacingSniff implements Sniff
 		) {
 			if (array_key_exists('parenthesis_owner', $tokens[$previousParenthesisOpenerPointer])) {
 				$parenthesisOwnerPointer = $tokens[$previousParenthesisOpenerPointer]['parenthesis_owner'];
-				if (in_array($tokens[$parenthesisOwnerPointer]['code'], TokenHelper::$functionTokenCodes, true)) {
+				if (in_array($tokens[$parenthesisOwnerPointer]['code'], TokenHelper::FUNCTION_TOKEN_CODES, true)) {
 					return true;
 				}
 			}

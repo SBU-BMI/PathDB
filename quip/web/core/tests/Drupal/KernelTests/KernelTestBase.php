@@ -18,10 +18,12 @@ use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Test\TestDatabase;
+use Drupal\Tests\BrowserHtmlDebugTrait;
 use Drupal\Tests\ConfigTestTrait;
 use Drupal\Tests\ExtensionListTestTrait;
-use Drupal\Tests\RandomGeneratorTrait;
+use Drupal\Tests\HttpKernelUiHelperTrait;
 use Drupal\Tests\PhpUnitCompatibilityTrait;
+use Drupal\Tests\RandomGeneratorTrait;
 use Drupal\Tests\TestRequirementsTrait;
 use Drupal\Tests\Traits\PhpUnitWarnings;
 use Drupal\TestTools\Comparator\MarkupInterfaceComparator;
@@ -96,6 +98,8 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
   use PhpUnitCompatibilityTrait;
   use ProphecyTrait;
   use ExpectDeprecationTrait;
+  use BrowserHtmlDebugTrait;
+  use HttpKernelUiHelperTrait;
 
   /**
    * {@inheritdoc}
@@ -717,6 +721,15 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
       }
     }
 
+    // If the test used the regular file system, remove any files created.
+    if (!str_starts_with($this->siteDirectory, 'vfs://')) {
+      // Delete test site directory.
+      $callback = function (string $path) {
+        @chmod($path, 0700);
+      };
+      \Drupal::service('file_system')->deleteRecursive($this->siteDirectory, $callback);
+    }
+
     // Free up memory: Own properties.
     $this->classLoader = NULL;
     $this->vfsRoot = NULL;
@@ -1033,7 +1046,7 @@ abstract class KernelTestBase extends TestCase implements ServiceProviderInterfa
    *
    * @return array
    */
-  private static function getModulesToEnable($class) {
+  protected static function getModulesToEnable($class) {
     $modules = [];
     while ($class) {
       if (property_exists($class, 'modules')) {

@@ -1,6 +1,30 @@
 Changelog
 ==========
 
+#### 1.17.7
+* Fixed deprecation warning about null array index on PHP 8.5 when parsing trailing comments
+
+#### 1.17.6
+* Fixed bug where single BlockStatement where wrongly expanded removing brackets
+
+#### 1.17.5
+* Fixed bug when parsing SpreadElement followed by NewExpression between parenthesis
+
+#### 1.17.4
+* Fixed warning on PHP 8.5 when handling large numbers
+
+#### 1.17.3
+* Fixed compatibility with PHP 8.5
+
+#### 1.17.2
+* Fixed bug where `const` declarations were allowed without an initializer
+
+#### 1.17.1
+* Fixed bug where `continue` and `break` were allowed outside iteration and `break` statements
+
+#### 1.17.0
+* Implemented ES2025 parser with import attributes
+
 #### 1.16.3
 * Removed implicitly nullable parameter declarations for PHP 8.4 compatibility
 

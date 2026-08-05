@@ -90,7 +90,15 @@ class ThemeSuggestions extends PluginBase implements AlterInterface {
     $this->processSuggestions();
 
     // Ensure the list of suggestions is unique.
-    $suggestions = array_unique($this->suggestions);
+    $processedSuggestions = $this->suggestions;
+    $deprecations = array_key_exists('__DEPRECATED', $processedSuggestions) ? $processedSuggestions['__DEPRECATED'] : NULL;
+    unset($processedSuggestions['__DEPRECATED']);
+    $suggestions = array_unique($processedSuggestions);
+    // Make sure all deprecations still exist.
+    $deprecations = $deprecations ? array_intersect_key($suggestions, $deprecations) : NULL;
+    if ($deprecations) {
+      $suggestions['__DEPRECATED'] = $deprecations;
+    }
   }
 
   /***************************************************************************

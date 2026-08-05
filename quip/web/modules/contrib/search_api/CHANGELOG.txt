@@ -1,3 +1,156 @@
+Search API 1.41 (2026-06-08):
+-----------------------------
+- ci: #3594097 Fixed failing pipelines.
+- ci: #3592865 Fixed failing pipelines.
+- fix: #3490247 Fixed error in Bulk Operations views when results include
+  translated entities.
+- ci: #3575070 Fixed failing pipelines.
+- fix: #3556955 Fixed bug in exception handling in PHP 8.3 due to change in
+  error message.
+- fix: #3327645 Fixed view being recalculated with wrong data from cache.
+- feat: #3122003 Added options to control the number of displayed values in
+  Views fields.
+- chore: #3562994 Adapted to the deprecation of hook_requirements().
+- fix: #3558624 Fixed compatibility with PHP 8.5.
+- chore: #3556850 Moved tests from src/Tests/ to tests/src.
+- fix: #3558388 Fixed saving of “Format plural” settings in numeric Views
+  fields.
+- ci: #3560524 Updated ignored deprecations with the latest from Core.
+- fix: #2896419 Fixed broken Views data definitions if an exception occurs
+  inside search_api_views_data().
+- ci: #3553016 Fixed pipelines for Drupal 10 and Drupal 11.3.x
+- docs: #3549072 Improved documentation and discoverability of task events.
+- feat: #3547199 Added option to add the "Custom value" token property to a
+  specific datasource.
+
+Search API 1.40 (2025-11-01):
+-----------------------------
+- [#2891393] fix: Fixed wrong base language used for transliteration on
+  multilingual sites.
+- [#3552849] fix: Fixed bug when a processor defines both datasource-independent
+  and datasource-specific properties.
+- [#3489482] chore: Switched to OOP hook implementations.
+- [#3547428] feat: Added a token browser link for the “Custom value” field.
+- [#3551144] feat: Made IndexBatchHelper a service so it can be overridden.
+- [#3552912] fix: Fixed use of deprecated REQUIREMENT_* constants.
+- [#3552821] chore: Added the #[RunTestsInSeparateProcesses] attribute to all
+  non-Unit tests.
+- [#3552650] fix: Fixed missing dependencies of the
+  "drupal.search_api.processors" library.
+- [#3550113] fix: Fixed warning when adding the NumberFieldBoost processor.
+- [#3549688] fix: Fixed TypeError when creating excerpts.
+- [#3542808] feat: Added variants of plugin getters to our entity classes that
+  don’t throw exceptions.
+- [#3547098] fix: Fixed the config schema of the HTML Filter processor.
+- [#3549460] fix: Fixed hidden bug when entity properties are updated via
+  ConfigEntityBase::set().
+- [#3528597] feat: Added Views option to not sanitize indexed data on display.
+- [#3542807] chore: Moved all methods from the Basic tracker plugin to
+  TrackerPluginBase.
+- [#3546439] feat: Added an option to restrict the number of words in Views
+  fulltext searches.
+- [#3545235] fix: Fixed indexing when batch size -1 ("all") is selected.
+- [#3543230] fix: Fixed infinite loop for some backends after updateIndex()
+  fails.
+- [#3543806] feat: Added Option attributes to our Drush commands.
+- [#3542573] fix: Fixed the “Rendered entity” Views row style to properly handle
+  datasources that do not support viewing items.
+
+Search API 1.39 (2025-09-27):
+-----------------------------
+- [#3547811] fix: Fixed complex keywords queries in Postgres.
+- [#3530660] feat: Added the "time-limit" option to the "search-api:index" Drush
+  command.
+- [#3221854] feat: Added integration with the "Configuration Read-only mode"
+  module.
+- [#3547028] feat: Added a config action to trigger reindexing.
+- [#3537045] feat: Added the Complex (“Keywords with operators”) parse mode
+  plugin.
+- [#3539930] chore: Improved the specificity of type hints given in doc comments
+  in a few of our classes.
+- [#3545312] fix: Fixed our Views row plugins to use plugin attributes.
+- [#3527173] feat: Added the option to disable execution of tasks during config
+  import.
+- [#3532193] feat: Added the ability to skip the Highlight processor for
+  specific search pages via a query tag.
+- [#3544047] fix: Fixed failing pipelines.
+- [#3542815] chore: Cleaned up some of our (service) constructors.
+- [#3533214] feat: Added the "search_api_processor" custom value to the
+  temporary user used in the RenderedItem processor.
+- [#3031390] fix: Fixed excerpt to not include snippets from fields that did not
+  match.
+- [#3528042] feat: Added autowiring and aliases to our services.
+- [#3541714] fix: Fixed Index::setProcessors() to not assume $processors is
+  keyed by plugin ID.
+- [#3521070] fix: Fixed Drush indexing batch size default when cron indexing is
+  disabled.
+- [#3541712] ci: Fixed failing pipelines.
+- [#3431162] chore: Switched "use" statement of Yaml class throughout the module.
+- [#3540579] feat: Added links to table of contents in README.md.
+- [#3110348] fix: Fixed highlighted values for multiple aggregated fields.
+- [#3529324] fix: Fixed fatal error on indexing with some backends.
+- [#3540758] fix: Fixed deprecated trigger_error() call in PHP 8.4.
+- [#3531256] fix: Fixed errors when creating a view if the REST module is
+  disabled.
+- [#3539549] feat: Added attribute discovery support for our plugin types.
+- [#3524812] chore: Removed reference to deprecated
+  ContainerAwareEventDispatcher.
+- [#3522064] fix: Fixed return type of DatasourceInterface::getViewModes().
+- [#3523808] ci: Fixed failing pipelines.
+- [#3520657] fix: Fixed Composer issues due to missing branch alias.
+- [#3526572] feat: Added request time information for batch indexing.
+- [#3520656] chore: Removed dead code from ContentAccess::addFieldValues().
+- [#3511293] fix: Fixed behavior of Views fulltext filter when no valid fields
+  are selected.
+- [#3519499] fix: Fixed unnecessary initialization of plugins in
+  Index::getDatasourceIds().
+- [#3520427] ci: Fixed test failures under Drupal 10.
+- [#3520249] ci: Fixed wrong version of test dependencies being used.
+- [#3516711] fix: Fixed Server::setBackendConfig() to always call
+  $backend->setConfiguration().
+- [#3517059] fix: Fixed error when accessing search view of disabled index.
+- [#3517587] ci: Fixed failing pipelines.
+
+Search API 1.38 (2025-02-23):
+-----------------------------
+- #3505734 by drunken monkey: Fixed inconsistent processing of numbers in
+  database backend.
+- #3505316 by drunken monkey: Fixed reliance on deprecated .MODULE.inc files for
+  hooks.
+- #3274158 by drunken monkey: Fixed handling of exceptions in RenderedItem
+  processor during immediate indexing.
+- #3489598 by drunken monkey: Fixed incompatibility with older Drush versions.
+- #2874641 by drunken monkey, knurg, manuel.adan, ressa, joshmiller, Grayside,
+  borisson_: Added option to pick filter type for text fields in Views.
+- #3030868 by acbramley, drunken monkey: Fixed problems due to item tracking
+  during config sync.
+- #3497469 by drunken monkey: Fixed inconsistency in handling of HTML in entity
+  descriptions.
+- #3497473 by drunken monkey, scott_euser: Fixed failing pipelines.
+- #3495139 by tobias märz, drunken monkey: Added support for seeds to random
+  sorting with the Database backend.
+- #3495876 by dieterholvoet, drunken monkey: Removed VERSION from libraries.yml.
+- #3488844 by drunken monkey: Added improvement for properties with a single
+  child to the "Add fields" UI.
+- #3305392 by bradjones1, berdir, drunken monkey: Added the new getOriginal()
+  and setOriginal() interface methods to UnsavedIndexConfiguration.
+- #3492380 by nickdickinsonwilde, drunken monkey: Fixed implicit deprecation
+  warnings about nullable types in PHP 8.4.
+- #3494226 by drunken monkey: Fixed PHPStan warning.
+- #3486765 by drunken monkey: Fixed superfluous “Expand” buttons in “Add
+  fields” form.
+- #3472847 by drunken monkey: Removed our custom
+  ViewsDisplayCachingTest::assertViewsCacheTags() override.
+- #3492854 by borisson_, drunken monkey: Fixed GitLab CI configuration.
+- #3485287 by mably, drunken monkey: Fixed Views cache plugins to not include
+  the full serialized view.
+- #3414725 by prudloff, drunken monkey, kasperg: Added the “Time and
+  tag-based” Views cache plugin.
+- #3485260 by drunken monkey: Deprecated negative item scores/boosts.
+- #3483959 by drunken monkey: Fixed some deprecation warnings.
+- #3313569 by drunken monkey, dieterholvoet: Fixed warnings that items could not
+  be loaded when using “Index items immediately” on a multilingual site.
+
 Search API 1.37 (2024-11-27):
 -----------------------------
 - #3483584 by drunken monkey: Fixed Index::setDatasources() to match its

@@ -80,7 +80,7 @@ class ServicesConfigurator extends AbstractConfigurator
                 throw new \LogicException('Anonymous services must have a class name.');
             }
 
-            $id = sprintf('.%d_%s', ++$this->anonymousCount, preg_replace('/^.*\\\\/', '', $class).'~'.$this->anonymousHash);
+            $id = \sprintf('.%d_%s', ++$this->anonymousCount, preg_replace('/^.*\\\\/', '', $class).'~'.$this->anonymousHash);
         } elseif (!$defaults->isPublic() || !$defaults->isPrivate()) {
             $definition->setPublic($defaults->isPublic() && !$defaults->isPrivate());
         }
@@ -88,7 +88,7 @@ class ServicesConfigurator extends AbstractConfigurator
         $definition->setAutowired($defaults->isAutowired());
         $definition->setAutoconfigured($defaults->isAutoconfigured());
         // deep clone, to avoid multiple process of the same instance in the passes
-        $definition->setBindings(unserialize(serialize($defaults->getBindings())));
+        $definition->setBindings(unserialize(serialize($defaults->getBindings()), ['allowed_classes' => true]));
         $definition->setChanges([]);
 
         $configurator = new ServiceConfigurator($this->container, $this->instanceof, true, $this, $definition, $id, $defaults->getTags(), $this->path);
@@ -163,7 +163,7 @@ class ServicesConfigurator extends AbstractConfigurator
 
                 $services[$i] = $definition;
             } elseif (!$service instanceof ReferenceConfigurator) {
-                throw new InvalidArgumentException(sprintf('"%s()" expects a list of definitions as returned by "%s()" or "%s()", "%s" given at index "%s" for service "%s".', __METHOD__, InlineServiceConfigurator::FACTORY, ReferenceConfigurator::FACTORY, $service instanceof AbstractConfigurator ? $service::FACTORY.'()' : get_debug_type($service), $i, $id));
+                throw new InvalidArgumentException(\sprintf('"%s()" expects a list of definitions as returned by "%s()" or "%s()", "%s" given at index "%s" for service "%s".', __METHOD__, InlineServiceConfigurator::FACTORY, ReferenceConfigurator::FACTORY, $service instanceof AbstractConfigurator ? $service::FACTORY.'()' : get_debug_type($service), $i, $id));
             }
         }
 

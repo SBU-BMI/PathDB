@@ -3,6 +3,7 @@
 namespace SlevomatCodingStandard\Sniffs\TypeHints;
 
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Sniffs\DeprecatedSniff;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
@@ -10,7 +11,6 @@ use SlevomatCodingStandard\Helpers\PropertyHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use SlevomatCodingStandard\Helpers\TypeHint;
-use function array_merge;
 use function explode;
 use function implode;
 use function sprintf;
@@ -22,7 +22,10 @@ use const T_TYPE_UNION;
 use const T_VARIABLE;
 use const T_WHITESPACE;
 
-class UnionTypeHintFormatSniff implements Sniff
+/**
+ * @deprecated
+ */
+class UnionTypeHintFormatSniff implements Sniff, DeprecatedSniff
 {
 
 	public const CODE_DISALLOWED_WHITESPACE = 'DisallowedWhitespace';
@@ -38,27 +41,47 @@ class UnionTypeHintFormatSniff implements Sniff
 	private const FIRST = 'first';
 	private const LAST = 'last';
 
-	/** @var bool|null */
-	public $enable = null;
+	public ?bool $enable = null;
 
-	/** @var string|null */
-	public $withSpaces = null;
+	public ?string $withSpaces = null;
 
-	/** @var string|null */
-	public $shortNullable = null;
+	public ?string $shortNullable = null;
 
-	/** @var string|null */
-	public $nullPosition = null;
+	public ?string $nullPosition = null;
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDeprecationVersion(): string
+	{
+		return 'Slevomat Coding Standard 8.16.0';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getRemovalVersion(): string
+	{
+		return 'Slevomat Coding Standard 9.0.0';
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDeprecationMessage(): string
+	{
+		return 'Use SlevomatCodingStandard.TypeHints.DNFTypeHintFormat instead.';
+	}
 
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		return array_merge(
-			[T_VARIABLE],
-			TokenHelper::$functionTokenCodes
-		);
+		return [
+			T_VARIABLE,
+			...TokenHelper::FUNCTION_TOKEN_CODES,
+		];
 	}
 
 	/**
@@ -112,14 +135,14 @@ class UnionTypeHintFormatSniff implements Sniff
 					$phpcsFile,
 					T_WHITESPACE,
 					$typeHint->getStartPointer() + 1,
-					$typeHint->getEndPointer()
+					$typeHint->getEndPointer(),
 				);
 				if ($whitespacePointer !== null) {
 					$originalTypeHint = TokenHelper::getContent($phpcsFile, $typeHint->getStartPointer(), $typeHint->getEndPointer());
 					$fix = $phpcsFile->addFixableError(
 						sprintf('Spaces in type hint "%s" are disallowed.', $originalTypeHint),
 						$typeHint->getStartPointer(),
-						self::CODE_DISALLOWED_WHITESPACE
+						self::CODE_DISALLOWED_WHITESPACE,
 					);
 					if ($fix) {
 						$this->fixTypeHint($phpcsFile, $typeHint, $typeHint->getTypeHint());
@@ -131,7 +154,7 @@ class UnionTypeHintFormatSniff implements Sniff
 					$phpcsFile,
 					[T_TYPE_UNION],
 					$typeHint->getStartPointer(),
-					$typeHint->getEndPointer()
+					$typeHint->getEndPointer(),
 				) as $unionSeparator) {
 					if ($tokens[$unionSeparator - 1]['content'] !== ' ') {
 						$error = true;
@@ -148,7 +171,7 @@ class UnionTypeHintFormatSniff implements Sniff
 					$fix = $phpcsFile->addFixableError(
 						sprintf('One space required before and after each "|" in type hint "%s".', $originalTypeHint),
 						$typeHint->getStartPointer(),
-						self::CODE_REQUIRED_WHITESPACE
+						self::CODE_REQUIRED_WHITESPACE,
 					);
 					if ($fix) {
 						$fixedTypeHint = implode(' | ', explode('|', $typeHint->getTypeHint()));
@@ -168,7 +191,7 @@ class UnionTypeHintFormatSniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				sprintf('Short nullable type hint in "%s" is required.', $typeHint->getTypeHint()),
 				$typeHint->getStartPointer(),
-				self::CODE_REQUIRED_SHORT_NULLABLE
+				self::CODE_REQUIRED_SHORT_NULLABLE,
 			);
 			if ($fix) {
 				$typeHintWithoutNull = self::getTypeHintContentWithoutNull($phpcsFile, $typeHint);
@@ -178,7 +201,7 @@ class UnionTypeHintFormatSniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				sprintf('Usage of short nullable type hint in "%s" is disallowed.', $typeHint->getTypeHint()),
 				$typeHint->getStartPointer(),
-				self::CODE_DISALLOWED_SHORT_NULLABLE
+				self::CODE_DISALLOWED_SHORT_NULLABLE,
 			);
 			if ($fix) {
 				$this->fixTypeHint($phpcsFile, $typeHint, substr($typeHint->getTypeHint(), 1) . '|null');
@@ -193,7 +216,7 @@ class UnionTypeHintFormatSniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				sprintf('Null type hint should be on first position in "%s".', $typeHint->getTypeHint()),
 				$typeHint->getStartPointer(),
-				self::CODE_NULL_TYPE_HINT_NOT_ON_FIRST_POSITION
+				self::CODE_NULL_TYPE_HINT_NOT_ON_FIRST_POSITION,
 			);
 			if ($fix) {
 				$this->fixTypeHint($phpcsFile, $typeHint, 'null|' . self::getTypeHintContentWithoutNull($phpcsFile, $typeHint));
@@ -202,7 +225,7 @@ class UnionTypeHintFormatSniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				sprintf('Null type hint should be on last position in "%s".', $typeHint->getTypeHint()),
 				$typeHint->getStartPointer(),
-				self::CODE_NULL_TYPE_HINT_NOT_ON_LAST_POSITION
+				self::CODE_NULL_TYPE_HINT_NOT_ON_LAST_POSITION,
 			);
 			if ($fix) {
 				$this->fixTypeHint($phpcsFile, $typeHint, self::getTypeHintContentWithoutNull($phpcsFile, $typeHint) . '|null');
@@ -217,8 +240,8 @@ class UnionTypeHintFormatSniff implements Sniff
 		if (strtolower($tokens[$typeHint->getEndPointer()]['content']) === 'null') {
 			$previousTypeHintPointer = TokenHelper::findPrevious(
 				$phpcsFile,
-				TokenHelper::getOnlyTypeHintTokenCodes(),
-				$typeHint->getEndPointer() - 1
+				TokenHelper::ONLY_TYPE_HINT_TOKEN_CODES,
+				$typeHint->getEndPointer() - 1,
 			);
 			return TokenHelper::getContent($phpcsFile, $typeHint->getStartPointer(), $previousTypeHintPointer);
 		}
@@ -227,7 +250,7 @@ class UnionTypeHintFormatSniff implements Sniff
 
 		for ($i = $typeHint->getStartPointer(); $i <= $typeHint->getEndPointer(); $i++) {
 			if (strtolower($tokens[$i]['content']) === 'null') {
-				$i = TokenHelper::findNext($phpcsFile, TokenHelper::getOnlyTypeHintTokenCodes(), $i + 1);
+				$i = TokenHelper::findNext($phpcsFile, TokenHelper::ONLY_TYPE_HINT_TOKEN_CODES, $i + 1);
 			}
 
 			$content .= $tokens[$i]['content'];

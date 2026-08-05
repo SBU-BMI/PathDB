@@ -1,0 +1,5 @@
+jwt_oauth_ccf.client_generate:
+  title: 'Generate client credentials'
+  route_name: jwt_oauth_ccf.client_generate
+  appears_on:
+    - jwt_oauth_ccf.client_list

@@ -59,7 +59,7 @@ class JwtPathAuth implements AuthenticationProviderInterface {
     JwtTranscoderInterface $transcoder,
     ConfigFactoryInterface $config_factory,
     EntityTypeManagerInterface $entity_type_manager,
-    KillSwitch $killSwitch
+    KillSwitch $killSwitch,
   ) {
     $this->transcoder = $transcoder;
     $this->configFactory = $config_factory;

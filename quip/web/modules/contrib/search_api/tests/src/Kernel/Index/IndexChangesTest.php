@@ -2,7 +2,9 @@
 
 namespace Drupal\Tests\search_api\Kernel\Index;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\entity_test\Entity\EntityTestMulRevChanged;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
@@ -12,12 +14,14 @@ use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Utility\Utility;
 use Drupal\search_api_test\PluginTestTrait;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests correct reactions to changes for the index.
  *
  * @group search_api
  */
+#[RunTestsInSeparateProcesses]
 class IndexChangesTest extends KernelTestBase {
 
   use PluginTestTrait;
@@ -187,6 +191,7 @@ class IndexChangesTest extends KernelTestBase {
     $info = [
       'datasource_id' => 'entity:entity_test_mulrev_changed',
       'property_path' => 'id',
+      'type' => 'string',
     ];
     $field = \Drupal::getContainer()
       ->get('search_api.fields_helper')
@@ -331,10 +336,12 @@ class IndexChangesTest extends KernelTestBase {
     $info = [
       'datasource_id' => 'entity:entity_test_mulrev_changed',
       'property_path' => 'id',
+      'type' => 'string',
     ];
     $this->index->addField($fields_helper->createField($this->index, 'id', $info));
     $info = [
       'property_path' => 'search_api_url',
+      'type' => 'string',
     ];
     $this->index->addField($fields_helper->createField($this->index, 'url', $info));
 
@@ -354,8 +361,18 @@ class IndexChangesTest extends KernelTestBase {
    * Tests correct reaction when a bundle containing a property is removed.
    */
   public function testPropertyBundleRemoved() {
-    entity_test_create_bundle('bundle1', NULL, 'entity_test_mulrev_changed');
-    entity_test_create_bundle('bundle2', NULL, 'entity_test_mulrev_changed');
+    DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2.0',
+      fn () => EntityTestHelper::createBundle('bundle1', NULL, 'entity_test_mulrev_changed'),
+      fn () => entity_test_create_bundle('bundle1', NULL, 'entity_test_mulrev_changed'),
+    );
+    DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2.0',
+      fn () => EntityTestHelper::createBundle('bundle2', NULL, 'entity_test_mulrev_changed'),
+      fn () => entity_test_create_bundle('bundle2', NULL, 'entity_test_mulrev_changed'),
+    );
 
     $this->enableModules(['field', 'text']);
     $this->installEntitySchema('field_storage_config');
@@ -399,11 +416,13 @@ class IndexChangesTest extends KernelTestBase {
     $info = [
       'datasource_id' => $datasource_id,
       'property_path' => 'field1',
+      'type' => 'string',
     ];
     $this->index->addField($fields_helper->createField($this->index, 'field1', $info));
     $info = [
       'datasource_id' => $datasource_id,
       'property_path' => 'field2',
+      'type' => 'string',
     ];
     $this->index->addField($fields_helper->createField($this->index, 'field2', $info));
 
@@ -433,6 +452,7 @@ class IndexChangesTest extends KernelTestBase {
     $info = [
       'datasource_id' => $datasource_id,
       'property_path' => 'name',
+      'type' => 'string',
     ];
     $field = \Drupal::getContainer()
       ->get('search_api.fields_helper')

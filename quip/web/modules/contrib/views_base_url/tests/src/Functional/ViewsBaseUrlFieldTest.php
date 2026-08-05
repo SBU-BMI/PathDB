@@ -19,6 +19,11 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A user with various administrative privileges.
    *
    * @var \Drupal\user\UserInterface
@@ -41,7 +46,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
    *
    * @var int
    */
-  protected $nodeCount = 5;
+  protected $nodeCount = 3;
 
   /**
    * Nodes.
@@ -97,7 +102,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->pathAliasStorage = $this->container->get('entity_type.manager')->getStorage('path_alias');
     /** @var \Drupal\path_alias\AliasManager $pathAliasManager */
     $this->pathAliasManager = $this->container->get('path_alias.manager');
-    /** @var \Drupal\Core\File\FileSystemInterface $fileSystem */;
+    /** @var \Drupal\Core\File\FileSystemInterface $fileSystem */
     $this->fileSystem = $this->container->get('file_system');
     // Create $this->nodeCount nodes.
     $this->drupalLogin($this->adminUser);
@@ -116,7 +121,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
       $this->nodes[$i] = $this->drupalGetNodeByTitle($title);
       $path_alias = $this->pathAliasStorage->create([
         'path' => '/node/' . $this->nodes[$i]->id(),
-        'alias' => "/content/" . $title,
+        'alias' => '/content/' . $title,
       ]);
       $path_alias->save();
     }
@@ -132,8 +137,8 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-link-no-settings-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-link-no-settings-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
@@ -143,7 +148,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
       ':path' => $link_path,
       ':text' => $link_text,
     ]);
-    $this->assertEquals(count($elements), $this->nodeCount, 'Views base url rendered as link with no settings set');
+    $this->assertEquals($this->nodeCount, count($elements), 'Views base url rendered as link with no settings set');
   }
 
   /**
@@ -155,15 +160,15 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-nolink-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-no-link-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
     $elements = $this->xpath('//div[contains(@class,"views-field-base-url")]/span[@class="field-content" and text()=:value]', [
       ':value' => $base_url,
     ]);
-    $this->assertEquals(count($elements), $this->nodeCount, t('Base url is displayed @count times', [
+    $this->assertEquals($this->nodeCount, count($elements), t('Base url is displayed @count times', [
       '@count' => $this->nodeCount,
     ]));
   }
@@ -177,8 +182,8 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-link-all-settings-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-link-all-settings-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
@@ -209,7 +214,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
         ':target' => $link_target,
         ':text' => $link_text,
       ]);
-      $this->assertEquals(count($elements), 1, 'Views base url rendered as link with all settings');
+      $this->assertEquals(1, count($elements), 'Views base url rendered as link with all settings');
     }
   }
 
@@ -222,8 +227,8 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-link-link-path-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-link-link-path-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
@@ -235,7 +240,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
         ':path' => $link_path,
         ':text' => $link_text,
       ]);
-      $this->assertEquals(count($elements), 1, 'Views base url rendered as link with link path set');
+      $this->assertEquals(1, count($elements), 'Views base url rendered as link with link path set');
     }
   }
 
@@ -255,8 +260,8 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-link-link-text-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-link-link-text-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
@@ -268,7 +273,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
         ':path' => $link_path,
         ':text' => $link_text,
       ]);
-      $this->assertEquals(count($elements), 1, 'Views base url rendered as link with link text set');
+      $this->assertEquals(1, count($elements), 'Views base url rendered as link with link text set');
     }
   }
 
@@ -288,8 +293,8 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-link-link-query-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-link-link-query-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
@@ -304,7 +309,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
       ])->toUriString(),
       ':text' => $link_text,
     ]);
-    $this->assertEquals(count($elements), $this->nodeCount, 'Views base url rendered as link with link query set');
+    $this->assertEquals($this->nodeCount, count($elements), 'Views base url rendered as link with link query set');
   }
 
   /**
@@ -323,8 +328,8 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
     $this->drupalGet('views-base-url-image-test');
     $this->assertSession()->statusCodeEquals(200);
 
-    $elements = $this->xpath('//div[contains(@class,"view-views-base-url-image-test")]/div[@class="view-content"]/div[contains(@class,"views-row")]');
-    $this->assertEquals(count($elements), $this->nodeCount, t('There are @count rows', [
+    $elements = $this->xpath('//div[contains(@class,"views-element-container")]/div/div[contains(@class,"views-row")]');
+    $this->assertEquals($this->nodeCount, count($elements), t('There are @count rows', [
       '@count' => $this->nodeCount,
     ]));
 
@@ -365,7 +370,7 @@ class ViewsBaseUrlFieldTest extends BrowserTestBase {
         ':height' => $image_height,
         ':alt' => $image_alt,
       ]);
-      $this->assertEquals(count($elements), 1, 'Views base url rendered as link image');
+      $this->assertEquals(1, count($elements), 'Views base url rendered as link image');
     }
   }
 

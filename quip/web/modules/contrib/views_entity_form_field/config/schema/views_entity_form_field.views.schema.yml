@@ -1,0 +1,32 @@
+views.field.entity_form_field:
+  type: views_field
+  label: 'Entity form field'
+  mapping:
+    field_name:
+      type: string
+      label: 'Field name'
+    plugin:
+      type: mapping
+      label: 'Plugin configuration'
+      mapping:
+        hide_title:
+          type: boolean
+          label: 'Hide title'
+        hide_description:
+          type: boolean
+          label: 'Hide description'
+        fallback_view_mode:
+          type: string
+          label: 'Fallback view mode'
+        type:
+          type: string
+          label: 'Widget type'
+        settings:
+          requiredKey: false
+          type: field.widget.settings.[%parent.type]
+        third_party_settings:
+          requiredKey: false
+          type: sequence
+          label: 'Third party settings'
+          sequence:
+            type: field.widget.third_party.[%key]

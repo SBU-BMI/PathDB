@@ -1,0 +1,5 @@
+services:
+  jwt_test_auth_issuer.subscriber:
+    class: Drupal\jwt_test\EventSubscriber\JwtTestAuthIssuerSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -3,7 +3,7 @@
 namespace Drupal\file_replace\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class FileReplaceForm extends ContentEntityForm {
 
   /**
+   * The file system service.
+   *
    * @var \Drupal\Core\File\FileSystemInterface
    */
   protected $fileSystem;
@@ -36,7 +38,7 @@ class FileReplaceForm extends ContentEntityForm {
 
     $form['original'] = [
       '#type' => 'fieldset',
-      '#title' => t('Original'),
+      '#title' => $this->t('Original'),
     ];
     $form['original']['link'] = [
       '#theme' => 'file_link',
@@ -50,8 +52,9 @@ class FileReplaceForm extends ContentEntityForm {
 
     $form['replacement'] = [
       '#type' => 'fieldset',
-      '#title' => t('Replacement'),
+      '#title' => $this->t('Replacement'),
     ];
+
     $form['replacement']['replacement'] = [
       '#type' => 'file',
       '#description' => $this->t('Select a file with extension .%extension and mimetype %mimetype to replace this file with.',
@@ -60,7 +63,7 @@ class FileReplaceForm extends ContentEntityForm {
           '%mimetype' => $file->getMimeType(),
         ]),
       '#upload_validators' => [
-        'file_validate_extensions' => [$extension],
+        'FileExtension' => ['extensions' => $extension],
       ],
       '#attributes' => [
         'accept' => $file->getMimeType(),
@@ -81,23 +84,25 @@ class FileReplaceForm extends ContentEntityForm {
     /** @var \Drupal\file\FileInterface $replacement */
     $replacement = file_save_upload('replacement', $form['replacement']['replacement']['#upload_validators'], FALSE, 0);
     if (!$replacement) {
-      $this->messenger()->addError(t('The replacement file was not saved'));
+      $this->messenger()->addError($this->t('The replacement file was not saved'));
       return;
     }
 
-    if (!$this->fileSystem->copy($replacement->getFileUri(), $file_uri, FileSystemInterface::EXISTS_REPLACE)) {
-      $this->messenger()->addError(t('The file could not be replaced'));
+    if (!$this->fileSystem->copy($replacement->getFileUri(), $file_uri, FileExists::Replace)) {
+      $this->messenger()->addError($this->t('The file could not be replaced'));
       return;
     }
 
     // Recalculate file size and change date.
-    $file->save();
+    $return = $file->save();
 
-    $this->messenger()->addStatus(t('The file was replaced.'));
+    $this->messenger()->addStatus($this->t('The file was replaced.'));
     $this->moduleHandler->invokeAll('file_replace', [$file]);
 
     // Clean up the temporary file.
     $replacement->delete();
+
+    return $return;
   }
 
 }

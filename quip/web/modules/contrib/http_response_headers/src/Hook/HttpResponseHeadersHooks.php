@@ -1,0 +1,88 @@
+<?php
+
+namespace Drupal\http_response_headers\Hook;
+
+use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\Core\Link;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\http_response_headers\Entity\ResponseHeader;
+use Drupal\language\ConfigurableLanguageInterface;
+
+/**
+ * Hook implementations for http_response_headers.
+ */
+class HttpResponseHeadersHooks {
+
+  /**
+   * Constructs the hook implementations object.
+   *
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
+   */
+  public function __construct(
+    protected RendererInterface $renderer,
+  ) {}
+
+  /**
+   * Implements hook_help().
+   */
+  #[Hook('help')]
+  public function help($route_name, RouteMatchInterface $route_match) {
+    if ($route_name !== 'help.page.http_response_headers') {
+      return '';
+    }
+    $output = 'This module provides basic security headers by default.
+    But in most cases will require further configuration based on your requirements.';
+    $help = [
+      '#theme' => 'item_list',
+      '#list_type' => 'ul',
+      '#title' => 'For more information about security headers visit:',
+      '#items' => [
+        Link::fromTextAndUrl('Test your HTTP response headers (securityheaders.io)', Url::fromUri('https://securityheaders.io/')),
+        Link::fromTextAndUrl('HTTP Security', Url::fromUri('https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP')),
+        Link::fromTextAndUrl('Content Security Policy Level 2', Url::fromUri('https://www.w3.org/TR/CSP2/')),
+        Link::fromTextAndUrl('HTTP Security Response Headers Cheat Sheet', Url::fromUri('https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html')),
+        Link::fromTextAndUrl('What are HTTP security headers?', Url::fromUri('https://www.invicti.com/blog/web-security/http-security-headers/')),
+      ],
+      '#attributes' => ['class' => 'help-resources'],
+      '#wrapper_attributes' => ['class' => 'container'],
+    ];
+    $output .= $this->renderer->render($help);
+    return $output;
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_delete().
+   */
+  #[Hook('user_role_delete')]
+  public function userRoleDelete($role) {
+    foreach (ResponseHeader::loadMultiple() as $response_header) {
+      /** @var \Drupal\http_response_headers\Entity\ResponseHeader $response_header */
+      $visibility = $response_header->getVisibility();
+      if (isset($visibility['user_role']['roles'][$role->id()])) {
+        unset($visibility['user_role']['roles'][$role->id()]);
+        $response_header->setVisibilityConfig('user_role', $visibility['user_role']);
+        $response_header->save();
+      }
+    }
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_delete().
+   */
+  #[Hook('configurable_language_delete')]
+  public function configurableLanguageDelete(ConfigurableLanguageInterface $language) {
+    foreach (ResponseHeader::loadMultiple() as $response_header) {
+      /** @var \Drupal\http_response_headers\Entity\ResponseHeader $response_header */
+      $visibility = $response_header->getVisibility();
+      if (isset($visibility['language']['langcodes'][$language->id()])) {
+        unset($visibility['language']['langcodes'][$language->id()]);
+        $response_header->setVisibilityConfig('language', $visibility['language']);
+        $response_header->save();
+      }
+    }
+  }
+
+}

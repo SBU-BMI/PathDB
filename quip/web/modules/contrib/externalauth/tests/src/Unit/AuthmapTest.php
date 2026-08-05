@@ -3,6 +3,8 @@
 namespace Drupal\Tests\externalauth\Unit;
 
 use Drupal\externalauth\Authmap;
+use Drupal\externalauth\ExternalAuthStorageLimits;
+use Drupal\externalauth\Exception\ExternalAuthRegisterException;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -133,6 +135,44 @@ class AuthmapTest extends UnitTestCase {
     $authmap = new Authmap($this->connection);
 
     $authmap->save($account, "test_provider", "test_authname");
+  }
+
+  /**
+   * Tests save() validation failures before database writes.
+   *
+   * @covers ::save
+   *
+   * @dataProvider saveValidationDataProvider
+   */
+  public function testSaveRejectsOversizedValues(string $provider, string $authname, string $expected_message) {
+    $account = $this->createMock('Drupal\user\UserInterface');
+
+    $this->connection->expects($this->never())
+      ->method('merge');
+
+    $authmap = new Authmap($this->connection);
+
+    $this->expectException(ExternalAuthRegisterException::class);
+    $this->expectExceptionMessage($expected_message);
+    $authmap->save($account, $provider, $authname);
+  }
+
+  /**
+   * Provides oversized authmap values for save() validation tests.
+   */
+  public static function saveValidationDataProvider(): array {
+    return [
+      'provider too long' => [
+        str_repeat('p', ExternalAuthStorageLimits::AUTHMAP_PROVIDER_MAX_LENGTH + 1),
+        'test_authname',
+        sprintf('The authentication provider exceeds the maximum length of %d characters.', ExternalAuthStorageLimits::AUTHMAP_PROVIDER_MAX_LENGTH),
+      ],
+      'authname too long' => [
+        'test_provider',
+        str_repeat('a', ExternalAuthStorageLimits::AUTHMAP_AUTHNAME_MAX_LENGTH + 1),
+        sprintf('The external authentication name exceeds the maximum length of %d characters.', ExternalAuthStorageLimits::AUTHMAP_AUTHNAME_MAX_LENGTH),
+      ],
+    ];
   }
 
   /**

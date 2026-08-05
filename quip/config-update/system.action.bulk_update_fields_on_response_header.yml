@@ -1,0 +1,11 @@
+uuid: 13d86576-cc4a-42cc-92bc-a549424489ce
+langcode: en
+status: true
+dependencies:
+  module:
+    - bulk_update_fields
+id: bulk_update_fields_on_response_header
+label: 'Bulk Update Response Header Fields'
+type: response_header
+plugin: bulk_update_fields_action_base
+configuration: {  }

@@ -86,11 +86,12 @@ class VariableHelper
 
 		$stringContent = $tokens[$stringPointer]['content'];
 
-		if (preg_match('~(\\\\)?(' . preg_quote($variableName, '~') . ')\b~', $stringContent, $matches) !== 0) {
+		if (preg_match('~(\\\\)?(' . preg_quote($variableName, '~') . ')\b~', $stringContent, $matches) === 1) {
 			if ($matches[1] === '') {
 				return true;
 			}
 
+			/** @phpstan-ignore-next-line */
 			if (strlen($matches[1]) % 2 === 1) {
 				return true;
 			}
@@ -125,9 +126,7 @@ class VariableHelper
 			$firstPointerInScope = $tokens[$scopeOwnerPointer]['scope_opener'] + 1;
 		}
 
-		if ($startCheckPointer === null) {
-			$startCheckPointer = $firstPointerInScope;
-		}
+		$startCheckPointer ??= $firstPointerInScope;
 
 		for ($i = $startCheckPointer; $i <= $scopeCloserPointer; $i++) {
 			if (!ScopeHelper::isInSameScope($phpcsFile, $i, $firstPointerInScope)) {

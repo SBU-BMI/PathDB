@@ -5,7 +5,7 @@
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2020-2021 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Tokenizers\PHP;
@@ -462,16 +462,16 @@ final class BackfillMatchTokenTest extends AbstractTokenizerTestCase
      * Helper function to verify that all scope related array indexes for a control structure
      * are set correctly.
      *
-     * @param string $token                The control structure token to check.
-     * @param int    $openerOffset         The expected offset of the scope opener in relation to
-     *                                     the control structure token.
-     * @param int    $closerOffset         The expected offset of the scope closer in relation to
-     *                                     the control structure token.
-     * @param bool   $skipScopeCloserCheck Whether to skip the scope closer check.
-     *                                     This should be set to "true" when testing nested arrow functions,
-     *                                     where the "inner" arrow function shares a scope closer with the
-     *                                     "outer" arrow function, as the 'scope_condition' for the scope closer
-     *                                     of the "inner" arrow function will point to the "outer" arrow function.
+     * @param int  $token                The control structure token to check.
+     * @param int  $openerOffset         The expected offset of the scope opener in relation to
+     *                                   the control structure token.
+     * @param int  $closerOffset         The expected offset of the scope closer in relation to
+     *                                   the control structure token.
+     * @param bool $skipScopeCloserCheck Whether to skip the scope closer check.
+     *                                   This should be set to "true" when testing nested arrow functions,
+     *                                   where the "inner" arrow function shares a scope closer with the
+     *                                   "outer" arrow function, as the 'scope_condition' for the scope closer
+     *                                   of the "inner" arrow function will point to the "outer" arrow function.
      *
      * @return void
      */

@@ -29,7 +29,7 @@ class OptimizedFunctionsWithoutUnpackingSniff implements Sniff
 	 */
 	public function register(): array
 	{
-		return TokenHelper::getOnlyNameTokenCodes();
+		return TokenHelper::ONLY_NAME_TOKEN_CODES;
 	}
 
 	/**
@@ -50,7 +50,7 @@ class OptimizedFunctionsWithoutUnpackingSniff implements Sniff
 			return;
 		}
 		/** @var int $tokenBeforeInvocationPointer */
-		$tokenBeforeInvocationPointer = TokenHelper::findPreviousExcluding($phpcsFile, TokenHelper::getNameTokenCodes(), $pointer);
+		$tokenBeforeInvocationPointer = TokenHelper::findPreviousExcluding($phpcsFile, TokenHelper::NAME_TOKEN_CODES, $pointer);
 		$invokedName = TokenHelper::getContent($phpcsFile, $tokenBeforeInvocationPointer + 1, $pointer);
 		$useName = sprintf('function %s', $invokedName);
 
@@ -84,15 +84,13 @@ class OptimizedFunctionsWithoutUnpackingSniff implements Sniff
 			&& $tokens[$lastArgumentSeparatorPointer]['level'] !== $tokens[$openBracketPointer]['level']
 		);
 
-		if ($lastArgumentSeparatorPointer === null) {
-			$lastArgumentSeparatorPointer = $openBracketPointer;
-		}
+		$lastArgumentSeparatorPointer ??= $openBracketPointer;
 
 		/** @var int $nextTokenAfterSeparatorPointer */
 		$nextTokenAfterSeparatorPointer = TokenHelper::findNextEffective(
 			$phpcsFile,
 			$lastArgumentSeparatorPointer + 1,
-			$closeBracketPointer
+			$closeBracketPointer,
 		);
 
 		if ($tokens[$nextTokenAfterSeparatorPointer]['code'] !== T_ELLIPSIS) {
@@ -107,7 +105,7 @@ class OptimizedFunctionsWithoutUnpackingSniff implements Sniff
 		$phpcsFile->addError(
 			sprintf('Function %s is specialized by PHP and should not use argument unpacking.', $invokedName),
 			$nextTokenAfterSeparatorPointer,
-			self::CODE_UNPACKING_USED
+			self::CODE_UNPACKING_USED,
 		);
 	}
 

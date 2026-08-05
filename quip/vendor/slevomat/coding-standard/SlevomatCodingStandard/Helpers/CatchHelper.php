@@ -3,7 +3,6 @@
 namespace SlevomatCodingStandard\Helpers;
 
 use PHP_CodeSniffer\Files\File;
-use function array_merge;
 use function in_array;
 use const T_BITWISE_OR;
 use const T_CATCH;
@@ -46,17 +45,15 @@ class CatchHelper
 		/** @var int $catchParenthesisCloserPointer */
 		$catchParenthesisCloserPointer = $catchToken['parenthesis_closer'];
 
-		$nameTokenCodes = TokenHelper::getNameTokenCodes();
-
 		$nameEndPointer = $catchParenthesisOpenerPointer;
 		$tokens = $phpcsFile->getTokens();
 		$caughtTypes = [];
 		do {
 			$nameStartPointer = TokenHelper::findNext(
 				$phpcsFile,
-				array_merge([T_BITWISE_OR], $nameTokenCodes),
+				[T_BITWISE_OR, ...TokenHelper::NAME_TOKEN_CODES],
 				$nameEndPointer + 1,
-				$catchParenthesisCloserPointer
+				$catchParenthesisCloserPointer,
 			);
 			if ($nameStartPointer === null) {
 				break;
@@ -67,13 +64,13 @@ class CatchHelper
 				$nameStartPointer = TokenHelper::findNextEffective($phpcsFile, $nameStartPointer + 1, $catchParenthesisCloserPointer);
 			}
 
-			$pointerAfterNameEndPointer = TokenHelper::findNextExcluding($phpcsFile, $nameTokenCodes, $nameStartPointer + 1);
+			$pointerAfterNameEndPointer = TokenHelper::findNextExcluding($phpcsFile, TokenHelper::NAME_TOKEN_CODES, $nameStartPointer + 1);
 			$nameEndPointer = $pointerAfterNameEndPointer === null ? $nameStartPointer : $pointerAfterNameEndPointer - 1;
 
 			$caughtTypes[] = NamespaceHelper::resolveClassName(
 				$phpcsFile,
 				TokenHelper::getContent($phpcsFile, $nameStartPointer, $nameEndPointer),
-				$catchParenthesisOpenerPointer
+				$catchParenthesisOpenerPointer,
 			);
 		} while (true);
 

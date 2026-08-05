@@ -3,8 +3,8 @@
     "description": "Global views field that provides site's base url",
     "type": "drupal-module",
     "homepage": "https://www.drupal.org/project/views_base_url",
+    "license": "GPL-2.0-or-later",
     "require": {
-        "drupal/core": "^8 || ^9 || ^10"
-    },
-    "license": "GPL-2.0-or-later"
+        "php": ">=7.3.0"
+    }
 }

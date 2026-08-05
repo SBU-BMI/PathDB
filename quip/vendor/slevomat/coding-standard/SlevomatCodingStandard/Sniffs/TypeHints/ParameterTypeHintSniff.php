@@ -22,6 +22,7 @@ use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use SlevomatCodingStandard\Helpers\Annotation;
 use SlevomatCodingStandard\Helpers\AnnotationHelper;
 use SlevomatCodingStandard\Helpers\AnnotationTypeHelper;
+use SlevomatCodingStandard\Helpers\AttributeHelper;
 use SlevomatCodingStandard\Helpers\DocCommentHelper;
 use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
@@ -35,7 +36,7 @@ use function array_filter;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
-use function array_merge;
+use function array_push;
 use function array_unique;
 use function array_values;
 use function count;
@@ -69,26 +70,21 @@ class ParameterTypeHintSniff implements Sniff
 
 	private const NAME = 'SlevomatCodingStandard.TypeHints.ParameterTypeHint';
 
-	/** @var bool|null */
-	public $enableObjectTypeHint = null;
+	public ?bool $enableObjectTypeHint = null;
 
-	/** @var bool|null */
-	public $enableMixedTypeHint = null;
+	public ?bool $enableMixedTypeHint = null;
 
-	/** @var bool|null */
-	public $enableUnionTypeHint = null;
+	public ?bool $enableUnionTypeHint = null;
 
-	/** @var bool|null */
-	public $enableIntersectionTypeHint = null;
+	public ?bool $enableIntersectionTypeHint = null;
 
-	/** @var bool|null */
-	public $enableStandaloneNullTrueFalseTypeHints = null;
+	public ?bool $enableStandaloneNullTrueFalseTypeHints = null;
 
 	/** @var list<string> */
-	public $traversableTypeHints = [];
+	public array $traversableTypeHints = [];
 
-	/** @var array<int, string>|null */
-	private $normalizedTraversableTypeHints;
+	/** @var list<string>|null */
+	private ?array $normalizedTraversableTypeHints = null;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -112,7 +108,7 @@ class ParameterTypeHintSniff implements Sniff
 		$this->enableIntersectionTypeHint = SniffSettingsHelper::isEnabledByPhpVersion($this->enableIntersectionTypeHint, 80100);
 		$this->enableStandaloneNullTrueFalseTypeHints = SniffSettingsHelper::isEnabledByPhpVersion(
 			$this->enableStandaloneNullTrueFalseTypeHints,
-			80200
+			80200,
 		);
 
 		if (SuppressHelper::isSniffSuppressed($phpcsFile, $functionPointer, self::NAME)) {
@@ -133,7 +129,7 @@ class ParameterTypeHintSniff implements Sniff
 			$functionPointer,
 			$parametersTypeHints,
 			$parametersAnnotations,
-			$prefixedParametersAnnotations
+			$prefixedParametersAnnotations,
 		);
 		$this->checkUselessAnnotations($phpcsFile, $functionPointer, $parametersTypeHints, $parametersAnnotations);
 	}
@@ -160,9 +156,7 @@ class ParameterTypeHintSniff implements Sniff
 		$suppressedErrors = 0;
 
 		$parametersWithoutTypeHint = array_keys(
-			array_filter($parametersTypeHints, static function (?TypeHint $parameterTypeHint = null): bool {
-				return $parameterTypeHint === null;
-			})
+			array_filter($parametersTypeHints, static fn (?TypeHint $parameterTypeHint = null): bool => $parameterTypeHint === null),
 		);
 
 		$tokens = $phpcsFile->getTokens();
@@ -179,7 +173,7 @@ class ParameterTypeHintSniff implements Sniff
 					T_VARIABLE,
 					$parameterName,
 					$tokens[$functionPointer]['parenthesis_opener'],
-					$tokens[$functionPointer]['parenthesis_closer']
+					$tokens[$functionPointer]['parenthesis_closer'],
 				);
 
 				$pointerBeforeParameter = TokenHelper::findPrevious($phpcsFile, [T_COMMA, T_OPEN_PARENTHESIS], $parameterPointer - 1);
@@ -207,12 +201,16 @@ class ParameterTypeHintSniff implements Sniff
 						'%s %s() does not have parameter type hint nor @param annotation for its parameter %s.',
 						FunctionHelper::getTypeLabel($phpcsFile, $functionPointer),
 						FunctionHelper::getFullyQualifiedName($phpcsFile, $functionPointer),
-						$parameterName
+						$parameterName,
 					),
 					$functionPointer,
-					self::CODE_MISSING_ANY_TYPE_HINT
+					self::CODE_MISSING_ANY_TYPE_HINT,
 				);
 
+				continue;
+			}
+
+			if (AttributeHelper::hasAttribute($phpcsFile, $functionPointer, '\Override')) {
 				continue;
 			}
 
@@ -243,7 +241,7 @@ class ParameterTypeHintSniff implements Sniff
 				$typeHints[] = AnnotationTypeHelper::getTypeHintFromOneType(
 					$parameterTypeNode,
 					false,
-					$this->enableStandaloneNullTrueFalseTypeHints
+					$this->enableStandaloneNullTrueFalseTypeHints,
 				);
 
 			} elseif (
@@ -268,7 +266,7 @@ class ParameterTypeHintSniff implements Sniff
 
 					$isTraversable = TypeHintHelper::isTraversableType(
 						TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $functionPointer, $typeHint),
-						$this->getTraversableTypeHints()
+						$this->getTraversableTypeHints(),
 					);
 
 					if (
@@ -301,7 +299,7 @@ class ParameterTypeHintSniff implements Sniff
 						$phpcsFile,
 						$functionPointer,
 						$this->getTraversableTypeHints(),
-						$canTryUnionTypeHint
+						$canTryUnionTypeHint,
 					);
 				}
 			}
@@ -314,9 +312,9 @@ class ParameterTypeHintSniff implements Sniff
 			foreach ($typeHints as $typeHint) {
 				if ($this->enableUnionTypeHint && TypeHintHelper::isUnofficialUnionTypeHint($typeHint)) {
 					$canTryUnionTypeHint = true;
-					$typeHintsWithConvertedUnion = array_merge(
+					array_push(
 						$typeHintsWithConvertedUnion,
-						TypeHintHelper::convertUnofficialUnionTypeHintToOfficialTypeHints($typeHint)
+						...TypeHintHelper::convertUnofficialUnionTypeHintToOfficialTypeHints($typeHint),
 					);
 				} else {
 					$typeHintsWithConvertedUnion[] = $typeHint;
@@ -348,7 +346,7 @@ class ParameterTypeHintSniff implements Sniff
 					$this->enableObjectTypeHint,
 					false,
 					$this->enableMixedTypeHint,
-					$this->enableStandaloneNullTrueFalseTypeHints
+					$this->enableStandaloneNullTrueFalseTypeHints,
 				)) {
 					continue 2;
 				}
@@ -375,10 +373,10 @@ class ParameterTypeHintSniff implements Sniff
 					FunctionHelper::getTypeLabel($phpcsFile, $functionPointer),
 					FunctionHelper::getFullyQualifiedName($phpcsFile, $functionPointer),
 					$parameterName,
-					AnnotationTypeHelper::print($parameterTypeNode)
+					AnnotationTypeHelper::print($parameterTypeNode),
 				),
 				$functionPointer,
-				self::CODE_MISSING_NATIVE_TYPE_HINT
+				self::CODE_MISSING_NATIVE_TYPE_HINT,
 			);
 			if (!$fix) {
 				continue;
@@ -406,7 +404,7 @@ class ParameterTypeHintSniff implements Sniff
 				T_VARIABLE,
 				$parameterName,
 				$tokens[$functionPointer]['parenthesis_opener'],
-				$tokens[$functionPointer]['parenthesis_closer']
+				$tokens[$functionPointer]['parenthesis_closer'],
 			);
 
 			$beforeParameterPointer = $parameterPointer;
@@ -414,7 +412,7 @@ class ParameterTypeHintSniff implements Sniff
 				$previousPointer = TokenHelper::findPreviousEffective(
 					$phpcsFile,
 					$beforeParameterPointer - 1,
-					$tokens[$functionPointer]['parenthesis_opener'] + 1
+					$tokens[$functionPointer]['parenthesis_opener'] + 1,
 				);
 				if (
 					$previousPointer === null
@@ -428,9 +426,10 @@ class ParameterTypeHintSniff implements Sniff
 			} while (true);
 
 			$phpcsFile->fixer->beginChangeset();
-			$phpcsFile->fixer->addContentBefore(
+			FixerHelper::addBefore(
+				$phpcsFile,
 				$beforeParameterPointer,
-				sprintf('%s ', $parameterTypeHint)
+				sprintf('%s ', $parameterTypeHint),
 			);
 			$phpcsFile->fixer->endChangeset();
 		}
@@ -475,7 +474,7 @@ class ParameterTypeHintSniff implements Sniff
 				$parameterTypeHint !== null
 				&& TypeHintHelper::isTraversableType(
 					TypeHintHelper::getFullyQualifiedTypeHint($phpcsFile, $functionPointer, $parameterTypeHint->getTypeHint()),
-					$this->getTraversableTypeHints()
+					$this->getTraversableTypeHints(),
 				)
 			) {
 				$hasTraversableTypeHint = true;
@@ -486,7 +485,7 @@ class ParameterTypeHintSniff implements Sniff
 					$parametersAnnotations[$parameterName]->getValue()->type,
 					$phpcsFile,
 					$functionPointer,
-					$this->getTraversableTypeHints()
+					$this->getTraversableTypeHints(),
 				)
 			) {
 				$hasTraversableTypeHint = true;
@@ -501,10 +500,10 @@ class ParameterTypeHintSniff implements Sniff
 							'%s %s() does not have @param annotation for its traversable parameter %s.',
 							FunctionHelper::getTypeLabel($phpcsFile, $functionPointer),
 							FunctionHelper::getFullyQualifiedName($phpcsFile, $functionPointer),
-							$parameterName
+							$parameterName,
 						),
 						$functionPointer,
-						self::CODE_MISSING_TRAVERSABLE_TYPE_HINT_SPECIFICATION
+						self::CODE_MISSING_TRAVERSABLE_TYPE_HINT_SPECIFICATION,
 					);
 				}
 
@@ -528,14 +527,14 @@ class ParameterTypeHintSniff implements Sniff
 						$parameterTypeNode,
 						$phpcsFile,
 						$functionPointer,
-						$this->getTraversableTypeHints()
+						$this->getTraversableTypeHints(),
 					)
 				)
 				|| AnnotationTypeHelper::containsItemsSpecificationForTraversable(
 					$parameterTypeNode,
 					$phpcsFile,
 					$functionPointer,
-					$this->getTraversableTypeHints()
+					$this->getTraversableTypeHints(),
 				)
 			) {
 				continue;
@@ -552,10 +551,10 @@ class ParameterTypeHintSniff implements Sniff
 					'@param annotation of %s %s() does not specify type hint for items of its traversable parameter %s.',
 					lcfirst(FunctionHelper::getTypeLabel($phpcsFile, $functionPointer)),
 					FunctionHelper::getFullyQualifiedName($phpcsFile, $functionPointer),
-					$parameterName
+					$parameterName,
 				),
 				$parametersAnnotations[$parameterName]->getStartPointer(),
-				self::CODE_MISSING_TRAVERSABLE_TYPE_HINT_SPECIFICATION
+				self::CODE_MISSING_TRAVERSABLE_TYPE_HINT_SPECIFICATION,
 			);
 		}
 
@@ -598,7 +597,7 @@ class ParameterTypeHintSniff implements Sniff
 				$this->getTraversableTypeHints(),
 				$this->enableUnionTypeHint,
 				$this->enableIntersectionTypeHint,
-				$this->enableStandaloneNullTrueFalseTypeHints
+				$this->enableStandaloneNullTrueFalseTypeHints,
 			)) {
 				continue;
 			}
@@ -614,10 +613,10 @@ class ParameterTypeHintSniff implements Sniff
 					'%s %s() has useless @param annotation for parameter %s.',
 					FunctionHelper::getTypeLabel($phpcsFile, $functionPointer),
 					FunctionHelper::getFullyQualifiedName($phpcsFile, $functionPointer),
-					$parameterName
+					$parameterName,
 				),
 				$parameterAnnotation->getStartPointer(),
-				self::CODE_USELESS_ANNOTATION
+				self::CODE_USELESS_ANNOTATION,
 			);
 			if (!$fix) {
 				continue;
@@ -631,7 +630,7 @@ class ParameterTypeHintSniff implements Sniff
 				$phpcsFile,
 				T_DOC_COMMENT_STAR,
 				$parameterAnnotation->getStartPointer() - 1,
-				$docCommentOpenPointer
+				$docCommentOpenPointer,
 			);
 
 			$changeStart = $starPointer ?? $parameterAnnotation->getStartPointer();
@@ -639,7 +638,7 @@ class ParameterTypeHintSniff implements Sniff
 			$changeEnd = TokenHelper::findNext(
 				$phpcsFile,
 				[T_DOC_COMMENT_CLOSE_TAG, T_DOC_COMMENT_STAR],
-				$parameterAnnotation->getEndPointer()
+				$parameterAnnotation->getEndPointer(),
 			) - 1;
 
 			$phpcsFile->fixer->beginChangeset();
@@ -657,7 +656,7 @@ class ParameterTypeHintSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			sprintf('Useless %s %s', SuppressHelper::ANNOTATION, $suppressName),
 			$pointer,
-			self::CODE_USELESS_SUPPRESS
+			self::CODE_USELESS_SUPPRESS,
 		);
 
 		if ($fix) {
@@ -675,13 +674,12 @@ class ParameterTypeHintSniff implements Sniff
 	 */
 	private function getTraversableTypeHints(): array
 	{
-		if ($this->normalizedTraversableTypeHints === null) {
-			$this->normalizedTraversableTypeHints = array_map(static function (string $typeHint): string {
-				return NamespaceHelper::isFullyQualifiedName($typeHint)
+		$this->normalizedTraversableTypeHints ??= array_map(
+			static fn (string $typeHint): string => NamespaceHelper::isFullyQualifiedName($typeHint)
 					? $typeHint
-					: sprintf('%s%s', NamespaceHelper::NAMESPACE_SEPARATOR, $typeHint);
-			}, SniffSettingsHelper::normalizeArray($this->traversableTypeHints));
-		}
+					: sprintf('%s%s', NamespaceHelper::NAMESPACE_SEPARATOR, $typeHint),
+			SniffSettingsHelper::normalizeArray($this->traversableTypeHints),
+		);
 		return $this->normalizedTraversableTypeHints;
 	}
 

@@ -61,7 +61,7 @@ class CacheWarmerAggregate implements CacheWarmerInterface
 
         if ($collectDeprecations = $this->debug && !\defined('PHPUNIT_COMPOSER_INSTALL')) {
             $collectedLogs = [];
-            $previousHandler = set_error_handler(function ($type, $message, $file, $line) use (&$collectedLogs, &$previousHandler) {
+            $previousHandler = set_error_handler(static function ($type, $message, $file, $line) use (&$collectedLogs, &$previousHandler) {
                 if (\E_USER_DEPRECATED !== $type && \E_DEPRECATED !== $type) {
                     return $previousHandler ? $previousHandler($type, $message, $file, $line) : false;
                 }
@@ -107,13 +107,13 @@ class CacheWarmerAggregate implements CacheWarmerInterface
                 $start = microtime(true);
                 foreach ((array) $warmer->warmUp($cacheDir, $buildDir) as $item) {
                     if (is_dir($item) || (str_starts_with($item, \dirname($cacheDir)) && !is_file($item)) || ($buildDir && str_starts_with($item, \dirname($buildDir)) && !is_file($item))) {
-                        throw new \LogicException(sprintf('"%s::warmUp()" should return a list of files or classes but "%s" is none of them.', $warmer::class, $item));
+                        throw new \LogicException(\sprintf('"%s::warmUp()" should return a list of files or classes but "%s" is none of them.', $warmer::class, $item));
                     }
                     $preload[] = $item;
                 }
 
                 if ($io?->isDebug()) {
-                    $io->info(sprintf('"%s" completed in %0.2fms.', $warmer::class, 1000 * (microtime(true) - $start)));
+                    $io->info(\sprintf('"%s" completed in %0.2fms.', $warmer::class, 1000 * (microtime(true) - $start)));
                 }
             }
         } finally {
@@ -121,7 +121,7 @@ class CacheWarmerAggregate implements CacheWarmerInterface
                 restore_error_handler();
 
                 if (is_file($this->deprecationLogsFilepath)) {
-                    $previousLogs = unserialize(file_get_contents($this->deprecationLogsFilepath));
+                    $previousLogs = unserialize(file_get_contents($this->deprecationLogsFilepath), ['allowed_classes' => false]);
                     if (\is_array($previousLogs)) {
                         $collectedLogs = array_merge($previousLogs, $collectedLogs);
                     }

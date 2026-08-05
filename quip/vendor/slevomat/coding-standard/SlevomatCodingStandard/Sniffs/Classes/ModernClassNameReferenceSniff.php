@@ -27,18 +27,17 @@ class ModernClassNameReferenceSniff implements Sniff
 	public const CODE_CLASS_NAME_REFERENCED_VIA_MAGIC_CONSTANT = 'ClassNameReferencedViaMagicConstant';
 	public const CODE_CLASS_NAME_REFERENCED_VIA_FUNCTION_CALL = 'ClassNameReferencedViaFunctionCall';
 
-	/** @var bool|null */
-	public $enableOnObjects = null;
+	public ?bool $enableOnObjects = null;
 
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		$tokens = TokenHelper::getOnlyNameTokenCodes();
-		$tokens[] = T_CLASS_C;
-
-		return $tokens;
+		return [
+			T_CLASS_C,
+			...TokenHelper::ONLY_NAME_TOKEN_CODES,
+		];
 	}
 
 	/**
@@ -64,7 +63,7 @@ class ModernClassNameReferenceSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Class name referenced via magic constant.',
 			$pointer,
-			self::CODE_CLASS_NAME_REFERENCED_VIA_MAGIC_CONSTANT
+			self::CODE_CLASS_NAME_REFERENCED_VIA_MAGIC_CONSTANT,
 		);
 
 		if (!$fix) {
@@ -72,7 +71,7 @@ class ModernClassNameReferenceSniff implements Sniff
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->replaceToken($pointer, 'self::class');
+		FixerHelper::replace($phpcsFile, $pointer, 'self::class');
 		$phpcsFile->fixer->endChangeset();
 	}
 
@@ -105,7 +104,7 @@ class ModernClassNameReferenceSniff implements Sniff
 		$parameterPointer = TokenHelper::findNextEffective(
 			$phpcsFile,
 			$openParenthesisPointer + 1,
-			$tokens[$openParenthesisPointer]['parenthesis_closer']
+			$tokens[$openParenthesisPointer]['parenthesis_closer'],
 		);
 
 		$isObjectParameter = static function () use ($phpcsFile, $tokens, $openParenthesisPointer, $parameterPointer): bool {
@@ -143,9 +142,8 @@ class ModernClassNameReferenceSniff implements Sniff
 					return;
 				}
 
-				/** @var int $classPointer */
 				$classPointer = FunctionHelper::findClassPointer($phpcsFile, $functionPointer);
-				if (!ClassHelper::isFinal($phpcsFile, $classPointer)) {
+				if ($classPointer === null || !ClassHelper::isFinal($phpcsFile, $classPointer)) {
 					return;
 				}
 			}
@@ -158,7 +156,7 @@ class ModernClassNameReferenceSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			sprintf('Class name referenced via call of function %s().', $functionName),
 			$functionPointer,
-			self::CODE_CLASS_NAME_REFERENCED_VIA_FUNCTION_CALL
+			self::CODE_CLASS_NAME_REFERENCED_VIA_FUNCTION_CALL,
 		);
 
 		if (!$fix) {
@@ -167,7 +165,7 @@ class ModernClassNameReferenceSniff implements Sniff
 
 		$phpcsFile->fixer->beginChangeset();
 		if ($tokens[$functionPointer - 1]['code'] === T_NS_SEPARATOR) {
-			$phpcsFile->fixer->replaceToken($functionPointer - 1, '');
+			FixerHelper::replace($phpcsFile, $functionPointer - 1, '');
 		}
 
 		FixerHelper::change($phpcsFile, $functionPointer, $tokens[$openParenthesisPointer]['parenthesis_closer'], $fixedContent);

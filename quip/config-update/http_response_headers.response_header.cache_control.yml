@@ -1,0 +1,10 @@
+uuid: 4e911145-da7f-4b3d-b28f-0107be25a37b
+langcode: en
+status: true
+dependencies: {  }
+id: cache_control
+label: Cache-Control
+description: ''
+group: ''
+name: Cache-Control
+value: 'no-cache, no-store, must-revalidate'

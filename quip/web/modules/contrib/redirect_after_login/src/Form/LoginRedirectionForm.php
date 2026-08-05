@@ -3,8 +3,13 @@
 namespace Drupal\redirect_after_login\Form;
 
 use Drupal;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\RoleInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class LoginRedirectionForm.
@@ -12,6 +17,44 @@ use Drupal\Core\Form\FormStateInterface;
  * @package Drupal\redirect_after_login\Form
  */
 class LoginRedirectionForm extends ConfigFormBase {
+
+  /**
+   * The Entity Type Manager service property.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * LoginRedirectionForm constructor.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
+   *   The typed config service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Core entity type manager service.
+   */
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    EntityTypeManagerInterface $entity_type_manager
+  ) {
+    parent::__construct($config_factory, $typedConfigManager);
+    $this->typedConfigManager = $typedConfigManager;
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -31,18 +74,15 @@ class LoginRedirectionForm extends ConfigFormBase {
       '#type'  => 'fieldset',
       '#title' => $this->t('All roles'),
     ];
-    foreach (user_role_names(TRUE) as $user => $name) {
-      if ($user != "anonymous") {
-        $form['roles'][$user] = [
-          '#type'          => 'textfield',
-          '#title'         => $name,
-          '#size'          => 60,
-          '#maxlength'     => 128,
-          '#description'   => $this->t('Add a valid url or &ltfront> for main page'),
-          '#required'      => TRUE,
-          '#default_value' => isset($savedPathRoles[$user]) ? $savedPathRoles[$user] : '',
-        ];
-      }
+    foreach ($this->getRoles() as $user => $role) {
+      $form['roles'][$user] = [
+        '#type'          => 'textfield',
+        '#title'         => $role->label(),
+        '#size'          => 60,
+        '#maxlength'     => 128,
+        '#description'   => $this->t('Add a valid url or &ltfront> for main page'),
+        '#default_value' => isset($savedPathRoles[$user]) ? $savedPathRoles[$user] : '',
+      ];
     }
 
     $form['exclude_urls'] = [
@@ -67,20 +107,17 @@ class LoginRedirectionForm extends ConfigFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
 
-    foreach (user_role_names() as $user => $name) {
-      if ($user == "anonymous") {
-        continue;
-      }
-      if (!(preg_match('/^[#?\/]+/', $form_state->getValue($user)) || $form_state->getValue($user) == '<front>')) {
-        $form_state->setErrorByName($user, $this->t('This URL %url is not valid for role %role.', [
-          '%url'  => $form_state->getValue($user),
-          '%role' => $name,
+    foreach ($this->getRoles() as $role_id => $role) {
+      $path = $form_state->getValue($role_id);
+      if ($path !== '' && !(preg_match('/^[#?\/]+/', $form_state->getValue($role_id)) || $form_state->getValue($role_id) == '<front>')) {
+        $form_state->setErrorByName($role_id, $this->t('This URL %url is not valid for role %role.', [
+          '%url'  => $form_state->getValue($role_id),
+          '%role' => $role->label(),
         ]));
       }
-      $path = $form_state->getValue($user);
       $is_valid = Drupal::service('path.validator')->isValid($path);
       if ($is_valid == NULL) {
-        $form_state->setErrorByName($user, $this->t('Path does not exists.'));
+        $form_state->setErrorByName($role_id, $this->t('Path does not exists.'));
       }
     }
   }
@@ -90,14 +127,19 @@ class LoginRedirectionForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $loginUrls = [];
-    foreach (user_role_names() as $user => $name) {
-      if ($form_state->getValue($user) == '<front>') {
-        $loginUrls[$user] = '/';
+
+    foreach ($this->getRoles() as $role_id => $role) {
+      if ($form_state->getValue($role_id) == '<front>') {
+        $loginUrls[$role_id] = '/';
       }
       else {
-        $loginUrls[$user] = $form_state->getValue($user);
-        $form_state->getValue($user);
+        $loginUrls[$role_id] = $form_state->getValue($role_id);
+        $form_state->getValue($role_id);
       }
+      // Remove empty values, but we allow something like 0, if that's a thing.
+      $loginUrls = array_filter($loginUrls, function ($path) {
+        return $path !== '';
+      });
     }
     $this->config('redirect_after_login.settings')
       ->set('login_redirection', $loginUrls)
@@ -114,6 +156,12 @@ class LoginRedirectionForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return ['redirect_after_login.settings'];
+  }
+
+  protected function getRoles() {
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
+    unset($roles[RoleInterface::ANONYMOUS_ID]);
+    return $roles;
   }
 
 }

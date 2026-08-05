@@ -100,7 +100,7 @@ class ProviderManager extends PluginManager implements FallbackPluginManagerInte
    */
   public static function load($theme = NULL, $provider = NULL, array $configuration = []) {
     $theme = Bootstrap::getTheme($theme);
-    return (new static($theme))->get(isset($provider) ? $provider : $theme->getSetting('cdn_provider'), $configuration + ['theme' => $theme]);
+    return (new static($theme))->get($provider ?? $theme->getSetting('cdn_provider'), $configuration + ['theme' => $theme]);
   }
 
 }

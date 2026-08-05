@@ -1,0 +1,11 @@
+uuid: 18db2c7d-d4ea-43c2-8764-971d6c29b1bb
+langcode: en
+status: true
+dependencies:
+  module:
+    - bulk_update_fields
+id: bulk_update_fields_on_editor
+label: 'Bulk Update Text Editor Fields'
+type: editor
+plugin: bulk_update_fields_action_base
+configuration: {  }

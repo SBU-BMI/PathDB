@@ -1,0 +1,13 @@
+name: 'JWT OAuth Client Credentials'
+type: module
+description: 'Issues short-lived JWTs via the OAuth 2.0 client credentials grant (machine-to-machine), with per-user client credential management for service accounts.'
+core_version_requirement: ^9.0 || ^10.0 || ^11.0
+package: Web services
+dependencies:
+  - 'jwt:jwt'
+  - 'drupal:user'
+
+# Information added by Drupal.org packaging script on 2026-07-08
+version: '2.4.0'
+project: 'jwt'
+datestamp: 1783538797

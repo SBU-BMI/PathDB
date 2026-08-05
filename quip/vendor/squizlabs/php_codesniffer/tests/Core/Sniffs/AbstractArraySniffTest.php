@@ -4,7 +4,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2020 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Sniffs;
@@ -25,7 +25,7 @@ final class AbstractArraySniffTest extends AbstractMethodUnitTest
      * This extends the \PHP_CodeSniffer\Sniffs\AbstractArraySniff class to make the
      * internal workings of the sniff observable.
      *
-     * @var \PHP_CodeSniffer\Sniffs\AbstractArraySniffTestable
+     * @var \PHP_CodeSniffer\Tests\Core\Sniffs\AbstractArraySniffTestable
      */
     protected static $sniff;
 

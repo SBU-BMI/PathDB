@@ -6,6 +6,7 @@ namespace OpenTelemetry\SDK\Trace\SpanProcessor;
 
 use OpenTelemetry\Context\ContextInterface;
 use OpenTelemetry\SDK\Common\Future\CancellationInterface;
+use OpenTelemetry\SDK\Trace\ExtendedSpanProcessorInterface;
 use OpenTelemetry\SDK\Trace\ReadableSpanInterface;
 use OpenTelemetry\SDK\Trace\ReadWriteSpanInterface;
 use OpenTelemetry\SDK\Trace\SpanProcessorInterface;
@@ -14,7 +15,7 @@ use OpenTelemetry\SDK\Trace\SpanProcessorInterface;
  * Class SpanMultiProcessor is a SpanProcessor that forwards all events to an
  * array of SpanProcessors.
  */
-final class MultiSpanProcessor implements SpanProcessorInterface
+final class MultiSpanProcessor implements ExtendedSpanProcessorInterface
 {
     /** @var list<SpanProcessorInterface> */
     private array $processors = [];
@@ -38,6 +39,7 @@ final class MultiSpanProcessor implements SpanProcessorInterface
     }
 
     /** @inheritDoc */
+    #[\Override]
     public function onStart(ReadWriteSpanInterface $span, ContextInterface $parentContext): void
     {
         foreach ($this->processors as $processor) {
@@ -46,6 +48,18 @@ final class MultiSpanProcessor implements SpanProcessorInterface
     }
 
     /** @inheritDoc */
+    #[\Override]
+    public function onEnding(ReadWriteSpanInterface $span): void
+    {
+        foreach ($this->processors as $processor) {
+            if ($processor instanceof ExtendedSpanProcessorInterface) {
+                $processor->onEnding($span);
+            }
+        }
+    }
+
+    /** @inheritDoc */
+    #[\Override]
     public function onEnd(ReadableSpanInterface $span): void
     {
         foreach ($this->processors as $processor) {
@@ -54,6 +68,7 @@ final class MultiSpanProcessor implements SpanProcessorInterface
     }
 
     /** @inheritDoc */
+    #[\Override]
     public function shutdown(?CancellationInterface $cancellation = null): bool
     {
         $result = true;
@@ -66,6 +81,7 @@ final class MultiSpanProcessor implements SpanProcessorInterface
     }
 
     /** @inheritDoc */
+    #[\Override]
     public function forceFlush(?CancellationInterface $cancellation = null): bool
     {
         $result = true;

@@ -27,5 +27,5 @@ to configure this functionality you'll want to add "Node operations bulk" field 
 
  There is an optional modal dialog confirmation box for confirming publishing can be configured in settings /admin/config/content/moderated-content-bulk-publish
 
-Check the release notes for the upcomming changes in each release.
+Check the release notes for the upcoming changes in each release.
 

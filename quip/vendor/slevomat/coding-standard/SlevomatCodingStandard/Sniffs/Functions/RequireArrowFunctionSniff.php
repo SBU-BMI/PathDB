@@ -23,11 +23,9 @@ class RequireArrowFunctionSniff implements Sniff
 
 	public const CODE_REQUIRED_ARROW_FUNCTION = 'RequiredArrowFunction';
 
-	/** @var bool */
-	public $allowNested = true;
+	public bool $allowNested = true;
 
-	/** @var bool|null */
-	public $enable = null;
+	public ?bool $enable = null;
 
 	/**
 	 * @return array<int, (int|string)>
@@ -65,7 +63,7 @@ class RequireArrowFunctionSniff implements Sniff
 				$phpcsFile,
 				T_BITWISE_AND,
 				$useOpenParenthesisPointer + 1,
-				$tokens[$useOpenParenthesisPointer]['parenthesis_closer']
+				$tokens[$useOpenParenthesisPointer]['parenthesis_closer'],
 			) !== null) {
 				return;
 			}
@@ -76,7 +74,7 @@ class RequireArrowFunctionSniff implements Sniff
 				$phpcsFile,
 				[T_CLOSURE, T_FN],
 				$tokens[$closurePointer]['scope_opener'] + 1,
-				$tokens[$closurePointer]['scope_closer']
+				$tokens[$closurePointer]['scope_closer'],
 			);
 			if ($closureOrArrowFunctionPointer !== null) {
 				return;
@@ -94,12 +92,12 @@ class RequireArrowFunctionSniff implements Sniff
 			$phpcsFile,
 			T_USE,
 			$tokens[$closurePointer]['parenthesis_closer'] + 1,
-			$tokens[$closurePointer]['scope_opener']
+			$tokens[$closurePointer]['scope_opener'],
 		);
 		$nonWhitespacePointerBeforeScopeOpener = TokenHelper::findPreviousExcluding(
 			$phpcsFile,
 			T_WHITESPACE,
-			$tokens[$closurePointer]['scope_opener'] - 1
+			$tokens[$closurePointer]['scope_opener'] - 1,
 		);
 
 		$nonWhitespacePointerAfterUseParenthesisCloser = null;
@@ -108,24 +106,24 @@ class RequireArrowFunctionSniff implements Sniff
 			$nonWhitespacePointerAfterUseParenthesisCloser = TokenHelper::findNextExcluding(
 				$phpcsFile,
 				T_WHITESPACE,
-				$useParenthesiCloserPointer + 1
+				$useParenthesiCloserPointer + 1,
 			);
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->replaceToken($closurePointer, 'fn');
+		FixerHelper::replace($phpcsFile, $closurePointer, 'fn');
 
 		if ($nonWhitespacePointerAfterUseParenthesisCloser !== null) {
 			FixerHelper::removeBetween(
 				$phpcsFile,
 				$tokens[$closurePointer]['parenthesis_closer'],
-				$nonWhitespacePointerAfterUseParenthesisCloser
+				$nonWhitespacePointerAfterUseParenthesisCloser,
 			);
 		}
 
 		FixerHelper::removeBetween($phpcsFile, $nonWhitespacePointerBeforeScopeOpener, $pointerAfterReturn);
 
-		$phpcsFile->fixer->addContent($nonWhitespacePointerBeforeScopeOpener, ' => ');
+		FixerHelper::add($phpcsFile, $nonWhitespacePointerBeforeScopeOpener, ' => ');
 
 		FixerHelper::removeBetweenIncluding($phpcsFile, $semicolonAfterReturn, $tokens[$closurePointer]['scope_closer']);
 

@@ -1,0 +1,8 @@
+manage own oauth client credentials:
+  title: 'Manage own OAuth client credentials'
+  description: 'Create, view and delete OAuth client credentials on your own account. Each credential can mint short-lived JWTs that act as your account.'
+
+administer oauth client credentials:
+  title: 'Administer OAuth client credentials'
+  description: 'Create, view and delete OAuth client credentials on any user account. This is a security-sensitive permission: a credential can mint tokens that fully impersonate the account it belongs to.'
+  restrict access: true

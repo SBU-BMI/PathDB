@@ -28,14 +28,29 @@
     "source": "https://git.drupalcode.org/project/bootstrap"
   },
   "require": {
-    "drupal/core": "^10 || ^11",
-    "drupal/jquery_ui": "^1.6.0",
-    "drupal/jquery_ui_draggable": "^2.1.0",
-    "drupal/jquery_ui_resizable": "^2.1.0"
+    "drupal/core": "^10.4 || ^11.1",
+    "drupal/jquery_ui": "^1.7",
+    "drupal/jquery_ui_draggable": "^2.1",
+    "drupal/jquery_ui_resizable": "^2.1"
   },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Drupal\\bootstrap\\": "src"
+    }
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+    "drupal/coder": "^8.3"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }
 }

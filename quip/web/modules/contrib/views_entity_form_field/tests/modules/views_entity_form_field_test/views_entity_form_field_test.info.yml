@@ -1,0 +1,11 @@
+name: 'Views Entity Form Field Test'
+type: module
+description: 'Provides support code for Views Entity Form Field tests.'
+package: Testing
+dependencies:
+  - drupal:node
+
+# Information added by Drupal.org packaging script on 2026-07-17
+version: '8.x-1.2'
+project: 'views_entity_form_field'
+datestamp: 1784282269

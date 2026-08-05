@@ -1,0 +1,8 @@
+uuid: d7451d92-e26a-4309-9c0b-9dae03eebe9e
+langcode: en
+status: true
+dependencies: {  }
+id: quip-admin
+label: 'QuIP Admin'
+description: ''
+locked: false

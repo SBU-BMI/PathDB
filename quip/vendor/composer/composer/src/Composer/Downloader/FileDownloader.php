@@ -205,12 +205,12 @@ class FileDownloader implements DownloaderInterface, ChangeReportInterface
                 }
 
                 if (!file_exists($fileName)) {
-                    throw new \UnexpectedValueException($url['base'].' could not be saved to '.$fileName.', make sure the'
+                    throw new \UnexpectedValueException(UrlUtil::sanitize($url['base']).' could not be saved to '.$fileName.', make sure the'
                         .' directory is writable and you have internet connectivity');
                 }
 
                 if ($checksum !== null && $checksum !== '' && hash_file('sha1', $fileName) !== $checksum) {
-                    throw new \UnexpectedValueException('The checksum verification of the file failed (downloaded from '.$url['base'].')');
+                    throw new \UnexpectedValueException('The checksum verification of the file failed (downloaded from '.UrlUtil::sanitize($url['base']).')');
                 }
 
                 if ($this->eventDispatcher !== null) {
@@ -503,7 +503,7 @@ class FileDownloader implements DownloaderInterface, ChangeReportInterface
             }
 
             $promise = $this->download($package, $targetDir.'_compare', null, false);
-            $promise->then(null, function ($ex) use (&$e) {
+            $promise->then(null, static function ($ex) use (&$e) {
                 $e = $ex;
             });
             $this->httpDownloader->wait();
@@ -511,7 +511,7 @@ class FileDownloader implements DownloaderInterface, ChangeReportInterface
                 throw $e;
             }
             $promise = $this->install($package, $targetDir.'_compare', false);
-            $promise->then(null, function ($ex) use (&$e) {
+            $promise->then(null, static function ($ex) use (&$e) {
                 $e = $ex;
             });
             $this->process->wait();

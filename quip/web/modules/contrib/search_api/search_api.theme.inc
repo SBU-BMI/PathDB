@@ -7,7 +7,9 @@
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Url;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\SearchApiException;
@@ -140,7 +142,7 @@ function template_preprocess_search_api_server(array &$variables) {
 
   if (($description = $server->getDescription())) {
     // Sanitize the description and append to the output.
-    $variables['description'] = $description;
+    $variables['description'] = Markup::create(Xss::filterAdmin($description));
   }
 
   // Initialize the $rows variable which will hold the different parts of server
@@ -177,8 +179,8 @@ function template_preprocess_search_api_server(array &$variables) {
   $classes = [];
 
   // Check if the backend used by the server is valid and get its label.
-  if ($server->hasValidBackend()) {
-    $backend = $server->getBackend();
+  $backend = $server->getBackendIfAvailable();
+  if ($backend) {
     $info = Html::escape($backend->label());
   }
   else {
@@ -253,12 +255,12 @@ function template_preprocess_search_api_index(array &$variables) {
   // Get the index.
   /** @var \Drupal\search_api\IndexInterface $index */
   $index = $variables['index'];
-  $server = $index->hasValidServer() ? $index->getServerInstance() : NULL;
-  $tracker = $index->hasValidTracker() ? $index->getTrackerInstance() : NULL;
+  $server = $index->getServerInstanceIfAvailable();
+  $tracker = $index->getTrackerInstanceIfAvailable();
 
   if (($description = $index->getDescription())) {
     // Sanitize the description and append to the output.
-    $variables['description'] = $description;
+    $variables['description'] = Markup::create(Xss::filterAdmin($description));
   }
 
   // Initialize the $rows variable which will hold the different parts of server

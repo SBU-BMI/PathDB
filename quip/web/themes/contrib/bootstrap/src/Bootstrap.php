@@ -68,7 +68,7 @@ class Bootstrap {
    *
    * @var string
    */
-  const FRAMEWORK_VERSION = '3.4.5';
+  const FRAMEWORK_VERSION = '3.4.8';
 
   /**
    * The Bootstrap Framework documentation site.
@@ -398,7 +398,7 @@ class Bootstrap {
     ];
 
     // Determine if a custom TTL value was set.
-    $ttl = isset($options['ttl']) ? $options['ttl'] : NULL;
+    $ttl = $options['ttl'] ?? NULL;
     unset($options['ttl']);
 
     $cache = \Drupal::keyValueExpirable('theme:' . static::getTheme()->getName() . ':http');
@@ -426,7 +426,7 @@ class Bootstrap {
       }
 
       // Only cache if a maximum age has been detected.
-      $maxAge = (int) isset($ttl) ? $ttl : $response->getMaxAge();
+      $maxAge = isset($ttl) ? $ttl : $response->getMaxAge();
       if ($response->getStatusCode() == 200 && $maxAge > 0) {
         // Due to key_value_expire setting the "expire" field to "INT(11)", it
         // is technically limited to a 32bit max value (Y2K38 bug).
@@ -574,11 +574,11 @@ class Bootstrap {
    *   force show the message. If FALSE, it will only log the message. If not
    *   set, the message will be shown based on whether the current user is an
    *   administrator and if the theme has suppressed deprecated warnings.
-   * @param \Drupal\Core\StringTranslation\TranslatableMarkup $message
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $message
    *   Optional. The message to show/log. If not set, it will be determined
    *   automatically based on the caller.
    */
-  public static function deprecated($caller = NULL, $show_message = NULL, TranslatableMarkup $message = NULL) {
+  public static function deprecated($caller = NULL, $show_message = NULL, ?TranslatableMarkup $message = NULL) {
     $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
     // Extrapolate the caller.
@@ -660,13 +660,13 @@ class Bootstrap {
    *
    * @param string $name
    *   The machine name of a theme. If omitted, the active theme will be used.
-   * @param \Drupal\Core\Extension\ThemeHandlerInterface $theme_handler
+   * @param \Drupal\Core\Extension\ThemeHandlerInterface|null $theme_handler
    *   The theme handler object.
    *
    * @return \Drupal\bootstrap\Theme
    *   A theme object.
    */
-  public static function getTheme($name = NULL, ThemeHandlerInterface $theme_handler = NULL) {
+  public static function getTheme($name = NULL, ?ThemeHandlerInterface $theme_handler = NULL) {
     // Immediately return if theme passed is already instantiated.
     if ($name instanceof Theme) {
       return $name;
@@ -1210,7 +1210,11 @@ class Bootstrap {
       $versions['3.3.7'] = $versions['3.3.6'];
       $versions['3.4.0'] = $versions['3.3.7'];
       $versions['3.4.1'] = $versions['3.4.0'];
+      $versions['3.4.4'] = $versions['3.4.1'];
       $versions['3.4.5'] = $versions['3.4.1'];
+      $versions['3.4.6'] = $versions['3.4.1'];
+      $versions['3.4.7'] = $versions['3.4.1'];
+      $versions['3.4.8'] = $versions['3.4.1'];
     }
 
     // Return a specific versions icon set.
@@ -1266,14 +1270,14 @@ class Bootstrap {
   /**
    * Checks whether a user is an administrator.
    *
-   * @param \Drupal\Core\Session\AccountInterface $account
+   * @param \Drupal\Core\Session\AccountInterface|null $account
    *   Optional. A specific account to check. If not set, the currently logged
    *   in user account will be used.
    *
    * @return bool
    *   TRUE or FALSE
    */
-  public static function isAdmin(AccountInterface $account = NULL) {
+  public static function isAdmin(?AccountInterface $account = NULL) {
     static $admins = [];
 
     // Use the currently logged in user if no account was explicitly specified.
@@ -1454,7 +1458,7 @@ class Bootstrap {
    *   The path to the template.
    * @param array $variables
    *   The variables to pass to the template.
-   * @param \Drupal\Core\Render\RenderContext $renderContext
+   * @param \Drupal\Core\Render\RenderContext|null $renderContext
    *   Optional. A RenderContext object to pass to the renderer.
    *
    * @return \Drupal\Component\Render\MarkupInterface
@@ -1466,7 +1470,7 @@ class Bootstrap {
    *   If $path references a Twig template already registered in the theme
    *   system.
    */
-  public static function renderCustomTemplate($path, array $variables = [], RenderContext $renderContext = NULL) {
+  public static function renderCustomTemplate($path, array $variables = [], ?RenderContext $renderContext = NULL) {
     $realpath = realpath($path);
     if (!file_exists($realpath)) {
       throw new \RuntimeException(sprintf('Template does not exist: %s', $realpath));

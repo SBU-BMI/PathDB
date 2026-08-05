@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<!-- See https://github.com/pfrenssen/coder#store-settings-in-a-phpcsxmldist-file -->
+
+<ruleset name="Drupal">
+  <description>The coding standard for our project.</description>
+  <rule ref="Drupal"/>
+
+  <!-- Check all files in the current directory and below. -->
+  <file>.</file>
+  <arg name="extensions" value="php,module,inc,install,test,profile,theme,css,info,txt,md,yml"/>
+
+  <!-- Exclude some directories globally if needed. -->
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+
+  <!-- Exclude specific sniffs -->
+  <exclude name="Drupal.Commenting.Deprecated.IncorrectTextLayout"/>
+  <exclude name="Drupal.Commenting.Deprecated.DeprecatedWrongSeeUrlFormat"/>
+  <exclude name="Drupal.Commenting.Deprecated.DeprecatedMissingSeeTag"/>
+
+  <!-- Change this value to 7 if you want to check Drupal 7 code. -->
+  <config name="drupal_core_version" value="11"/>
+
+  <!-- Show progression -->
+  <arg value="p"/>
+
+  <!-- Customizations -->
+  <rule ref="Drupal.Files.LineLength">
+    <properties>
+      <property name="lineLimit" value="120"/>
+        <property name="absoluteLineLimit" value="130"/>
+      </properties>
+  </rule>
+</ruleset>

@@ -7,9 +7,12 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\views\Plugin\views\field\LinkBase;
 use Drupal\views\ResultRow;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Field handler to present a link to delete an authmap entry.
+ *
+ * Depends on "additional fields = [uid, provider]" being defined in views data.
  *
  * @ingroup views_field_handlers
  *
@@ -18,16 +21,41 @@ use Drupal\views\ResultRow;
 class AuthmapDeleteLink extends LinkBase {
 
   /**
+   * The redirect destination service.
+   *
+   * @var \Drupal\Core\Routing\RedirectDestinationInterface
+   */
+  protected $redirectDestination;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->redirectDestination = $container->get('redirect.destination');
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function query() {
-    // This is overridden to not call $this->getEntityTranslationRenderer()
-    // which will break because we don't have an entity type. (And we assume
-    // we can skip calling it because we never need to add extra tables/fields
-    // in order to translate this link. As an aside: this class would be much
-    // smaller if LinkBase didn't contain entity related code and if all non
-    // entity related code was actually in LinkBase so we didn't need to copy
-    // it from EntityLinkBase.)
+    // Do not call $this->getEntityTranslationRenderer(), as parent does, which
+    // breaks because there's no entity type for this table. (Assume we never
+    // need to add extra tables/fields in order to translate this link. As an
+    // aside: this could be made into a Core patch + less ugly, but ideally
+    // that would need extra work to
+    // - move all entity related code out of LinkBase or make it optional;
+    // - move all non entity related code from EntityLink into LinkBase.
+    // That would make this plugin much smaller.)
+    //
+    // Set $this->tableAlias; addAdditionalFields() depends on this.
+    $this->ensureMyTable();
+    // Add 'additional fields' (from views data definition) to the query and
+    // record their aliases in $this->aliases. This likely means that those
+    // fields are double-added to the query, but otherwise we'd have to
+    // hardcode assumptions about other Views code (for deriving/guessing the
+    // already-existing fields' aliases).
     $this->addAdditionalFields();
   }
 
@@ -52,24 +80,15 @@ class AuthmapDeleteLink extends LinkBase {
    * {@inheritdoc}
    */
   protected function getUrlInfo(ResultRow $row): ?Url {
-    if (!empty($row->authmap_provider)) {
-      // Cater for possible changes in views data definitions. (authmap_uid
-      // has changed to uid at some point.)
-      $properties = [
-        'uid',
-        'users_field_data_authmap_uid',
-        'authmap_uid',
-      ];
-      foreach ($properties as $property) {
-        if (!empty($row->$property)) {
-          return Url::fromRoute('externalauth.authmap_delete_form', [
-            'provider' => $row->authmap_provider,
-            'uid' => $row->$property,
-          ]);
-        }
-      }
-    }
-    return NULL;
+    $provider_alias = $this->aliases['provider'];
+    $uid_alias = $this->aliases['uid'];
+    return empty($row->$provider_alias) || empty($row->$uid_alias) ? NULL
+      : Url::fromRoute('externalauth.authmap_delete_form', [
+        'provider' => $row->$provider_alias,
+        'uid' => $row->$uid_alias,
+      ],
+      ['query' => $this->redirectDestination->getAsArray()]
+    );
   }
 
   /**

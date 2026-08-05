@@ -9,7 +9,6 @@
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Implements hook_help().
@@ -90,13 +89,18 @@ function redirect_after_login_user_login($account) {
 
   if (!in_array($current_route, ['user.reset', 'user.reset.login'])) {
     // Redirect user on login.
-    $current_user = Drupal::currentUser();
-    $username = $current_user->getRoles();
     $login_redirection = Drupal::config('redirect_after_login.settings')
       ->get('login_redirection');
-
-    $url = (isset($login_redirection[array_reverse($username)[0]])) ? $login_redirection[array_reverse($username)[0]] : '/';
-    \Drupal::service('request_stack')
-      ->getCurrentRequest()->query->set('destination', URL::fromUserInput($url)->toString());
+    if (!empty($login_redirection)) {
+      $roles = \Drupal::currentUser()->getRoles();
+      // Find the first configured role that the user has, and set that as the
+      // redirect.
+      foreach (array_reverse($login_redirection) as $role_id => $path) {
+        if (in_array($role_id, $roles)) {
+          \Drupal::service('request_stack')->getCurrentRequest()->query->set('destination', Url::fromUserInput($path)->toString());
+          break;
+        }
+      }
+    }
   }
 }

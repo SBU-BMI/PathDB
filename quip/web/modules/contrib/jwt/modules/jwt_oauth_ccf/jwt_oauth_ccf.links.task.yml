@@ -1,0 +1,5 @@
+jwt_oauth_ccf.client_list:
+  title: 'OAuth clients'
+  route_name: jwt_oauth_ccf.client_list
+  base_route: entity.user.canonical
+  weight: 100

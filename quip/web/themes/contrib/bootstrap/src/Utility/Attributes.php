@@ -64,7 +64,7 @@ class Attributes extends ArrayObject {
   public function &getClasses() {
     $classes = &$this->offsetGet('class', []);
 
-    if(!is_array($classes)) {
+    if (!is_array($classes)) {
       $classes = [$classes];
     }
 
@@ -181,7 +181,7 @@ class Attributes extends ArrayObject {
    */
   public function setAttributes(array $values) {
     // Handle class attribute differently.
-    $classes = isset($values['class']) ? $values['class'] : [];
+    $classes = $values['class'] ?? [];
     unset($values['class']);
     if ($classes) {
       $this->addClass($classes);

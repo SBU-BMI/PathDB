@@ -124,10 +124,8 @@ class DateTimePlus {
 
   /**
    * The DateTime object.
-   *
-   * @var \DateTime
    */
-  protected $dateTimeObject = NULL;
+  protected ?\DateTimeInterface $dateTimeObject = NULL;
 
   /**
    * Creates a date object from an input date object.
@@ -516,7 +514,7 @@ class DateTimePlus {
    *   otherwise.
    */
   public function hasErrors() {
-    return (boolean) count($this->errors);
+    return (bool) count($this->errors);
   }
 
   /**

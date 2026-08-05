@@ -19,7 +19,6 @@ use Prophecy\Doubler\LazyDouble;
 use Prophecy\Argument\ArgumentsWildcard;
 use Prophecy\Call\CallCenter;
 use Prophecy\Exception\Prophecy\ObjectProphecyException;
-use Prophecy\Exception\Prophecy\MethodProphecyException;
 use Prophecy\Exception\Prediction\AggregateException;
 use Prophecy\Exception\Prediction\PredictionException;
 
@@ -125,8 +124,8 @@ class ObjectProphecy implements ProphecyInterface
 
         if (!$double instanceof ProphecySubjectInterface) {
             throw new ObjectProphecyException(
-                "Generated double must implement ProphecySubjectInterface, but it does not.\n".
-                'It seems you have wrongly configured doubler without required ClassPatch.',
+                "Generated double must implement ProphecySubjectInterface, but it does not.\n"
+                .'It seems you have wrongly configured doubler without required ClassPatch.',
                 $this
             );
         }
@@ -148,7 +147,7 @@ class ObjectProphecy implements ProphecyInterface
         $methodName = strtolower($methodProphecy->getMethodName());
 
         if (!isset($this->methodProphecies[$methodName])) {
-            $this->methodProphecies[$methodName] = array();
+            $this->methodProphecies[$methodName] = [];
         }
 
         $this->methodProphecies[$methodName][] = $methodProphecy;
@@ -172,7 +171,7 @@ class ObjectProphecy implements ProphecyInterface
         $methodName = strtolower($methodName);
 
         if (!isset($this->methodProphecies[$methodName])) {
-            return array();
+            return [];
         }
 
         return $this->methodProphecies[$methodName];

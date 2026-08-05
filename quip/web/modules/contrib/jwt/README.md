@@ -58,3 +58,12 @@ the allowed paths and include the path prefix or full filepath in the JWT
 claims. The JWT must be in the "jwt" query string. This JWT must be signed
 using the same side-wide key as a JWT that would be sent in the *Authorization*
 header.
+
+## CI
+
+For the 2.x branch, the composer.json file has:
+
+    "block-insecure": false
+
+This is only to allow testing against Drupal 9 and should not be applied to
+other branches.

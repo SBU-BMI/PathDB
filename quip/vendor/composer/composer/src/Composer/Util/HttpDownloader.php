@@ -108,7 +108,7 @@ class HttpDownloader
             throw new \InvalidArgumentException('$url must not be an empty string');
         }
         [$job, $promise] = $this->addJob(['url' => $url, 'options' => $options, 'copyTo' => null], true);
-        $promise->then(null, function (\Throwable $e) {
+        $promise->then(null, static function (\Throwable $e) {
             // suppress error as it is rethrown to the caller by getResponse() a few lines below
         });
         $this->wait($job['id']);
@@ -126,7 +126,7 @@ class HttpDownloader
      *                                     although not all options are supported when using the default curl downloader
      * @throws TransportException
      * @return PromiseInterface
-     * @phpstan-return PromiseInterface<Http\Response>
+     * @phpstan-return PromiseInterface<Response>
      */
     public function add(string $url, array $options = [])
     {
@@ -153,7 +153,10 @@ class HttpDownloader
         if ('' === $url) {
             throw new \InvalidArgumentException('$url must not be an empty string');
         }
-        [$job] = $this->addJob(['url' => $url, 'options' => $options, 'copyTo' => $to], true);
+        [$job, $promise] = $this->addJob(['url' => $url, 'options' => $options, 'copyTo' => $to], true);
+        $promise->then(null, static function (\Throwable $e) {
+            // suppress error as it is rethrown to the caller by getResponse() a few lines below
+        });
         $this->wait($job['id']);
 
         return $this->getResponse($job['id']);
@@ -168,7 +171,7 @@ class HttpDownloader
      *                                     although not all options are supported when using the default curl downloader
      * @throws TransportException
      * @return PromiseInterface
-     * @phpstan-return PromiseInterface<Http\Response>
+     * @phpstan-return PromiseInterface<Response>
      */
     public function addCopy(string $url, string $to, array $options = [])
     {
@@ -204,7 +207,7 @@ class HttpDownloader
     /**
      * @phpstan-param Request $request
      * @return array{Job, PromiseInterface}
-     * @phpstan-return array{Job, PromiseInterface<Http\Response>}
+     * @phpstan-return array{Job, PromiseInterface<Response>}
      */
     private function addJob(array $request, bool $sync = false): array
     {
@@ -248,13 +251,13 @@ class HttpDownloader
                     $rfs->copy($job['origin'], $url, $job['request']['copyTo'], false /* TODO progress */, $options);
 
                     $headers = $rfs->getLastHeaders();
-                    $response = new Http\Response($job['request'], $rfs->findStatusCode($headers), $headers, $job['request']['copyTo'].'~');
+                    $response = new Response($job['request'], $rfs->findStatusCode($headers), $headers, $job['request']['copyTo'].'~');
 
                     $resolve($response);
                 } else {
                     $body = $rfs->getContents($job['origin'], $url, false /* TODO progress */, $options);
                     $headers = $rfs->getLastHeaders();
-                    $response = new Http\Response($job['request'], $rfs->findStatusCode($headers), $headers, $body);
+                    $response = new Response($job['request'], $rfs->findStatusCode($headers), $headers, $body);
 
                     $resolve($response);
                 }
@@ -437,9 +440,12 @@ class HttpDownloader
      * @internal
      *
      * @param  array{warning?: string, info?: string, warning-versions?: string, info-versions?: string, warnings?: array<array{versions: string, message: string}>, infos?: array<array{versions: string, message: string}>} $data
+     *
+     * @return bool whether any warning/info was actually written to the output
      */
-    public static function outputWarnings(IOInterface $io, string $url, $data): void
+    public static function outputWarnings(IOInterface $io, string $url, $data): bool
     {
+        $wrote = false;
         $cleanMessage = static function ($msg) use ($io) {
             if (!$io->isDecorated()) {
                 $msg = Preg::replace('{'.chr(27).'\\[[;\d]*m}u', '', $msg);
@@ -464,6 +470,7 @@ class HttpDownloader
             }
 
             $io->writeError('<'.$type.'>'.ucfirst($type).' from '.Url::sanitize($url).': '.$cleanMessage($data[$type]).'</'.$type.'>');
+            $wrote = true;
         }
 
         // modern Composer 2.2+ format with support for multiple warning/info messages
@@ -482,8 +489,11 @@ class HttpDownloader
                 }
 
                 $io->writeError('<'.$type.'>'.ucfirst($type).' from '.Url::sanitize($url).': '.$cleanMessage($spec['message']).'</'.$type.'>');
+                $wrote = true;
             }
         }
+
+        return $wrote;
     }
 
     /**

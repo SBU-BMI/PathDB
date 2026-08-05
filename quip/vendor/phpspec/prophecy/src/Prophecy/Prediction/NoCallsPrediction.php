@@ -11,7 +11,6 @@
 
 namespace Prophecy\Prediction;
 
-use Prophecy\Call\Call;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophecy\MethodProphecy;
 use Prophecy\Util\StringUtil;
@@ -40,9 +39,9 @@ class NoCallsPrediction implements PredictionInterface
         $verb = count($calls) === 1 ? 'was' : 'were';
 
         throw new UnexpectedCallsException(sprintf(
-            "No calls expected that match:\n".
-            "  %s->%s(%s)\n".
-            "but %d %s made:\n%s",
+            "No calls expected that match:\n"
+            ."  %s->%s(%s)\n"
+            ."but %d %s made:\n%s",
             get_class($object->reveal()),
             $method->getMethodName(),
             $method->getArgumentsWildcard(),

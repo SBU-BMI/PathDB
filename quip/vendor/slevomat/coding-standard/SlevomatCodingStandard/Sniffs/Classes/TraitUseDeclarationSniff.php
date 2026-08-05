@@ -7,6 +7,7 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 use SlevomatCodingStandard\Helpers\ClassHelper;
 use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
+use function sprintf;
 use const T_ANON_CLASS;
 use const T_CLASS;
 use const T_COMMA;
@@ -61,7 +62,7 @@ class TraitUseDeclarationSniff implements Sniff
 			$phpcsFile->addError(
 				'Multiple traits per use statement are forbidden.',
 				$usePointer,
-				self::CODE_MULTIPLE_TRAITS_PER_DECLARATION
+				self::CODE_MULTIPLE_TRAITS_PER_DECLARATION,
 			);
 			return;
 		}
@@ -69,7 +70,7 @@ class TraitUseDeclarationSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Multiple traits per use statement are forbidden.',
 			$usePointer,
-			self::CODE_MULTIPLE_TRAITS_PER_DECLARATION
+			self::CODE_MULTIPLE_TRAITS_PER_DECLARATION,
 		);
 
 		if (!$fix) {
@@ -92,7 +93,12 @@ class TraitUseDeclarationSniff implements Sniff
 		foreach ($otherCommaPointers as $otherCommaPointer) {
 			$pointerAfterComma = TokenHelper::findNextEffective($phpcsFile, $otherCommaPointer + 1);
 
-			FixerHelper::change($phpcsFile, $otherCommaPointer, $pointerAfterComma - 1, ';' . $phpcsFile->eolChar . $indentation . 'use ');
+			FixerHelper::change(
+				$phpcsFile,
+				$otherCommaPointer,
+				$pointerAfterComma - 1,
+				sprintf(';%s%suse ', $phpcsFile->eolChar, $indentation),
+			);
 		}
 
 		$phpcsFile->fixer->endChangeset();

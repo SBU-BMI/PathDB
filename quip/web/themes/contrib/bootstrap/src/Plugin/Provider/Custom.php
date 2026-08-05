@@ -32,7 +32,7 @@ class Custom extends ProviderBase {
    */
   protected function discoverCdnAssets($version, $theme = NULL) {
     $themes = $this->getCdnThemes($version);
-    return isset($themes[$theme]) ? $themes[$theme] : new CdnAssets();
+    return $themes[$theme] ?? new CdnAssets();
   }
 
   /**

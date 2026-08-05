@@ -78,4 +78,11 @@ abstract class FlagConfirmFormBase extends ConfirmFormBase {
     return $this->flag;
   }
 
+  /**
+   * Returns the confirm form's flaggable entity.
+   */
+  public function getEntity() {
+    return $this->entity;
+  }
+
 }

@@ -153,6 +153,13 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	public $allowUnusedVariablesBeforeRequire = false;
 
+	/**
+	 * A cache for getPassByReferenceFunctions
+	 *
+	 * @var array<array<int|string>>|null
+	 */
+	private $passByRefFunctionsCache = null;
+
 	public function __construct()
 	{
 		$this->scopeManager = new ScopeManager();
@@ -195,6 +202,18 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function getPassByReferenceFunction($functionName)
 	{
+		$passByRefFunctions = $this->getPassByReferenceFunctions();
+		return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : [];
+	}
+
+	/**
+	 * @return array<array<int|string>>
+	 */
+	private function getPassByReferenceFunctions()
+	{
+		if (! is_null($this->passByRefFunctionsCache)) {
+			return $this->passByRefFunctionsCache;
+		}
 		$passByRefFunctions = Constants::getPassByReferenceFunctions();
 		if (!empty($this->sitePassByRefFunctions)) {
 			$lines = Helpers::splitStringToArray('/\s+/', trim($this->sitePassByRefFunctions));
@@ -206,7 +225,8 @@ class VariableAnalysisSniff implements Sniff
 		if ($this->allowWordPressPassByRefFunctions) {
 			$passByRefFunctions = array_merge($passByRefFunctions, Constants::getWordPressPassByReferenceFunctions());
 		}
-		return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : [];
+		$this->passByRefFunctionsCache = $passByRefFunctions;
+		return $passByRefFunctions;
 	}
 
 	/**
@@ -1483,9 +1503,44 @@ class VariableAnalysisSniff implements Sniff
 
 		// Is our function a known pass-by-reference function?
 		$functionName = $tokens[$functionPtr]['content'];
-		$refArgs = $this->getPassByReferenceFunction($functionName);
-		if (! $refArgs) {
+
+		// In PHPCS 4.x, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, and T_NAME_RELATIVE
+		// tokens contain the full namespaced name. Extract just the base name for the
+		// first check so that 'my_function' in the config can match '\My\Namespace\my_function'.
+		$functionBaseName = $functionName;
+		if ($tokens[$functionPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
+			$lastBackslashPos = strrpos($functionName, '\\');
+			if ($lastBackslashPos !== false) {
+				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
+			}
+		} elseif ($tokens[$functionPtr]['code'] === T_NAME_QUALIFIED) {
+			$lastBackslashPos = strrpos($functionName, '\\');
+			if ($lastBackslashPos !== false) {
+				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
+			}
+		} elseif ($tokens[$functionPtr]['code'] === T_NAME_RELATIVE) {
+			$lastBackslashPos = strrpos($functionName, '\\');
+			if ($lastBackslashPos !== false) {
+				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
+			}
+		}
+
+		// Ensure we have a string (should always be true, but helps static analyzers).
+		if (! is_string($functionBaseName) || $functionBaseName === '') {
 			return false;
+		}
+
+		$refArgs = $this->getPassByReferenceFunction($functionBaseName);
+		if (! $refArgs) {
+			// Check again with the fully namespaced function name.
+			$functionName = Helpers::getFunctionNameWithNamespace($phpcsFile, $functionPtr);
+			if (! $functionName) {
+				return false;
+			}
+			$refArgs = $this->getPassByReferenceFunction($functionName);
+			if (! $refArgs) {
+				return false;
+			}
 		}
 
 		$argPtrs = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);

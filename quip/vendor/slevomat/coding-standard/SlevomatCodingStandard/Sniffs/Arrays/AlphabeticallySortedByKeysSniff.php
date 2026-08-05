@@ -24,7 +24,7 @@ class AlphabeticallySortedByKeysSniff implements Sniff
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$arrayTokenCodes;
+		return TokenHelper::ARRAY_TOKEN_CODES;
 	}
 
 	/**
@@ -51,7 +51,7 @@ class AlphabeticallySortedByKeysSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Keyed multi-line arrays must be sorted alphabetically.',
 			$stackPointer,
-			self::CODE_INCORRECT_KEY_ORDER
+			self::CODE_INCORRECT_KEY_ORDER,
 		);
 		if ($fix) {
 			$this->fix($phpcsFile, $keyValues);
@@ -66,16 +66,18 @@ class AlphabeticallySortedByKeysSniff implements Sniff
 		$pointerStart = $keyValues[0]->getPointerStart();
 		$pointerEnd = $keyValues[count($keyValues) - 1]->getPointerEnd();
 
-		// determine indent to use
+		// Determine indent to use
 		$indent = ArrayHelper::getIndentation($keyValues);
 
-		usort($keyValues, static function ($a1, $a2) {
-			return strnatcasecmp((string) $a1->getKey(), (string) $a2->getKey());
-		});
+		usort($keyValues, static fn ($a1, $a2) => strnatcasecmp((string) $a1->getKey(), (string) $a2->getKey()));
 
-		$content = implode('', array_map(static function (ArrayKeyValue $keyValue) use ($phpcsFile, $indent) {
-			return $keyValue->getContent($phpcsFile, true, $indent) . $phpcsFile->eolChar;
-		}, $keyValues));
+		$content = implode(
+			'',
+			array_map(
+				static fn (ArrayKeyValue $keyValue) => $keyValue->getContent($phpcsFile, true, $indent) . $phpcsFile->eolChar,
+				$keyValues,
+			),
+		);
 
 		$phpcsFile->fixer->beginChangeset();
 		FixerHelper::change($phpcsFile, $pointerStart, $pointerEnd, $content);

@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\Arrays;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use const T_CLOSE_SQUARE_BRACKET;
 use const T_OPEN_SQUARE_BRACKET;
@@ -44,7 +45,7 @@ class ArrayAccessSniff implements Sniff
 				$phpcsFile,
 				$stackPointer,
 				'There should be no space between array variable and array access operator.',
-				self::CODE_NO_SPACE_BEFORE_BRACKETS
+				self::CODE_NO_SPACE_BEFORE_BRACKETS,
 			);
 		}
 
@@ -56,7 +57,7 @@ class ArrayAccessSniff implements Sniff
 			$phpcsFile,
 			$stackPointer,
 			'There should be no space between array access operators.',
-			self::CODE_NO_SPACE_BETWEEN_BRACKETS
+			self::CODE_NO_SPACE_BETWEEN_BRACKETS,
 		);
 	}
 
@@ -69,7 +70,7 @@ class ArrayAccessSniff implements Sniff
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->replaceToken($stackPointer - 1, '');
+		FixerHelper::replace($phpcsFile, $stackPointer - 1, '');
 		$phpcsFile->fixer->endChangeset();
 	}
 

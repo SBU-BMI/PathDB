@@ -2,8 +2,7 @@
 
 namespace Drupal\jwt\Authentication\Event;
 
-use Drupal\jwt\JsonWebToken\JsonWebTokenInterface;
-use Drupal\user\Entity\User;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -12,18 +11,30 @@ use Drupal\user\UserInterface;
 class JwtAuthValidEvent extends JwtAuthBaseEvent {
 
   /**
-   * Variable holding the user authenticated by the token in the payload.
+   * Variable holding the account authenticated by the token in the payload.
    *
-   * @var \Drupal\user\UserInterface
+   * @var \Drupal\Core\Session\AccountInterface
    */
-  protected UserInterface $user;
+  protected AccountInterface $account;
 
   /**
-   * {@inheritdoc}
+   * Sets the account that will be used for this request.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   An account object.
    */
-  public function __construct(JsonWebTokenInterface $token) {
-    $this->user = User::getAnonymousUser();
-    parent::__construct($token);
+  public function setAccount(AccountInterface $user) {
+    $this->account = $user;
+  }
+
+  /**
+   * Returns an account to use if the token is validated.
+   *
+   * @return \Drupal\Core\Session\AccountInterface|null
+   *   An account object or NULL if no account was set.
+   */
+  public function getAccount() {
+    return $this->account;
   }
 
   /**
@@ -33,17 +44,19 @@ class JwtAuthValidEvent extends JwtAuthBaseEvent {
    *   A loaded user object.
    */
   public function setUser(UserInterface $user) {
-    $this->user = $user;
+    @trigger_error('Calling ' . __METHOD__ . '() is deprecated in jwt:2.1.0 and is removed from jwt:3.0.0. Use \Drupal\jwt\Authentication\Event\JwtAuthValidEvent::setAccount() instead. See https://www.drupal.org/node/3431432', E_USER_DEPRECATED);
+    $this->setAccount($user);
   }
 
   /**
    * Returns a loaded user to use if the token is validated.
    *
-   * @return \Drupal\user\UserInterface
+   * @return \Drupal\Core\Session\AccountInterface|null
    *   A loaded user object
    */
   public function getUser() {
-    return $this->user;
+    @trigger_error('Calling ' . __METHOD__ . '() is deprecated in jwt:2.1.0 and is removed from jwt:3.0.0. Use \Drupal\jwt\Authentication\Event\JwtAuthValidEvent::getAccount() instead. See https://www.drupal.org/node/3431432', E_USER_DEPRECATED);
+    return $this->getAccount();
   }
 
 }

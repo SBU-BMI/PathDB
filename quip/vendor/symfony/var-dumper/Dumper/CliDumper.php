@@ -479,18 +479,18 @@ class CliDumper extends AbstractDumper
         $map = static::$controlCharsMap;
         $startCchr = $this->colors ? "\033[m\033[{$this->styles['default']}m" : '';
         $endCchr = $this->colors ? "\033[m\033[{$this->styles[$style]}m" : '';
-        $value = preg_replace_callback(static::$controlCharsRx, function ($c) use ($map, $startCchr, $endCchr) {
+        $value = preg_replace_callback(static::$controlCharsRx, static function ($c) use ($map, $startCchr, $endCchr) {
             $s = $startCchr;
             $c = $c[$i = 0];
             do {
-                $s .= $map[$c[$i]] ?? sprintf('\x%02X', \ord($c[$i]));
+                $s .= $map[$c[$i]] ?? \sprintf('\x%02X', \ord($c[$i]));
             } while (isset($c[++$i]));
 
             return $s.$endCchr;
         }, $value, -1, $cchrCount);
 
         if (!($attr['binary'] ?? false)) {
-            $value = preg_replace_callback(static::$unicodeCharsRx, function ($c) use (&$cchrCount, $startCchr, $endCchr) {
+            $value = preg_replace_callback(static::$unicodeCharsRx, static function ($c) use (&$cchrCount, $startCchr, $endCchr) {
                 ++$cchrCount;
 
                 return $startCchr.'\u{'.strtoupper(dechex(mb_ord($c[0]))).'}'.$endCchr;
@@ -583,7 +583,7 @@ class CliDumper extends AbstractDumper
         }
 
         if ($this->colors) {
-            $this->line = sprintf("\033[%sm%s\033[m", $this->styles['default'], $this->line);
+            $this->line = \sprintf("\033[%sm%s\033[m", $this->styles['default'], $this->line);
         }
         parent::dumpLine($depth);
     }
@@ -666,7 +666,7 @@ class CliDumper extends AbstractDumper
             || 'Hyper' === getenv('TERM_PROGRAM');
 
         if (!$result) {
-            $version = sprintf(
+            $version = \sprintf(
                 '%s.%s.%s',
                 PHP_WINDOWS_VERSION_MAJOR,
                 PHP_WINDOWS_VERSION_MINOR,

@@ -45,7 +45,7 @@ class ByteString extends AbstractString
     public static function fromRandom(int $length = 16, ?string $alphabet = null): self
     {
         if ($length <= 0) {
-            throw new InvalidArgumentException(sprintf('A strictly positive length is expected, "%d" given.', $length));
+            throw new InvalidArgumentException(\sprintf('A strictly positive length is expected, "%d" given.', $length));
         }
 
         $alphabet ??= self::ALPHABET_ALPHANUMERIC;
@@ -178,7 +178,11 @@ class ByteString extends AbstractString
             return null;
         }
 
-        $i = $this->ignoreCase ? stripos($this->string, $needle, $offset) : strpos($this->string, $needle, $offset);
+        try {
+            $i = $this->ignoreCase ? stripos($this->string, $needle, $offset) : strpos($this->string, $needle, $offset);
+        } catch (\ValueError) {
+            return null;
+        }
 
         return false === $i ? null : $i;
     }
@@ -195,7 +199,11 @@ class ByteString extends AbstractString
             return null;
         }
 
-        $i = $this->ignoreCase ? strripos($this->string, $needle, $offset) : strrpos($this->string, $needle, $offset);
+        try {
+            $i = $this->ignoreCase ? strripos($this->string, $needle, $offset) : strrpos($this->string, $needle, $offset);
+        } catch (\ValueError) {
+            return null;
+        }
 
         return false === $i ? null : $i;
     }
@@ -436,7 +444,7 @@ class ByteString extends AbstractString
         }
 
         if (!$validEncoding) {
-            throw new InvalidArgumentException(sprintf('Invalid "%s" string.', $fromEncoding ?? 'Windows-1252'));
+            throw new InvalidArgumentException(\sprintf('Invalid "%s" string.', $fromEncoding ?? 'Windows-1252'));
         }
 
         $u->string = mb_convert_encoding($this->string, 'UTF-8', $fromEncoding ?? 'Windows-1252');

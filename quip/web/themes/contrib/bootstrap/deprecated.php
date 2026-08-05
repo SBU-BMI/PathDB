@@ -387,7 +387,7 @@ function &_bootstrap_get_classes(array &$element, $property = 'attributes') {
 function _bootstrap_glyphicon($name, $default = [], array $attributes = []) {
   Bootstrap::deprecated();
   $icon = Bootstrap::glyphicon($name, ['#markup' => $default]);
-  $icon_attributes = isset($icon['#attributes']) ? $icon['#attributes'] : [];
+  $icon_attributes = $icon['#attributes'] ?? [];
   unset($icon['#attributes']);
   return Element::createStandalone($icon)->setAttributes($attributes)->setAttributes($icon_attributes)->getArray();
 }
@@ -477,7 +477,7 @@ function _bootstrap_glyphicons_supported() {
 function _bootstrap_icon($name, $default = NULL, array $attributes = []) {
   Bootstrap::deprecated();
   $icon = Bootstrap::glyphicon($name, ['#markup' => $default]);
-  $icon_attributes = isset($icon['#attributes']) ? $icon['#attributes'] : [];
+  $icon_attributes = $icon['#attributes'] ?? [];
   unset($icon['#attributes']);
   return (string) Element::createStandalone($icon)->setAttributes($attributes)->setAttributes($icon_attributes)->renderPlain();
 }
@@ -715,7 +715,7 @@ function bootstrap_cdn_provider($provider = NULL, $reset = FALSE) {
  *
  * @see \Drupal\bootstrap\Utility\Element::smartDescription()
  */
-function bootstrap_element_smart_description(array &$element, array &$target = NULL, $input_only = TRUE, $length = NULL) {
+function bootstrap_element_smart_description(array &$element, ?array &$target = NULL, $input_only = TRUE, $length = NULL) {
   Bootstrap::deprecated();
   Element::create($element)->smartDescription($target, $input_only, $length);
 }

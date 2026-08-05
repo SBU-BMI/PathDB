@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\Operators;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use function sprintf;
 use const T_IS_EQUAL;
 use const T_IS_NOT_EQUAL;
@@ -37,21 +38,21 @@ class DisallowEqualOperatorsSniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				'Operator == is disallowed, use === instead.',
 				$operatorPointer,
-				self::CODE_DISALLOWED_EQUAL_OPERATOR
+				self::CODE_DISALLOWED_EQUAL_OPERATOR,
 			);
 			if ($fix) {
 				$phpcsFile->fixer->beginChangeset();
-				$phpcsFile->fixer->replaceToken($operatorPointer, '===');
+				FixerHelper::replace($phpcsFile, $operatorPointer, '===');
 				$phpcsFile->fixer->endChangeset();
 			}
 		} else {
 			$fix = $phpcsFile->addFixableError(sprintf(
 				'Operator %s is disallowed, use !== instead.',
-				$tokens[$operatorPointer]['content']
+				$tokens[$operatorPointer]['content'],
 			), $operatorPointer, self::CODE_DISALLOWED_NOT_EQUAL_OPERATOR);
 			if ($fix) {
 				$phpcsFile->fixer->beginChangeset();
-				$phpcsFile->fixer->replaceToken($operatorPointer, '!==');
+				FixerHelper::replace($phpcsFile, $operatorPointer, '!==');
 				$phpcsFile->fixer->endChangeset();
 			}
 		}

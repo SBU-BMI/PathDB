@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use function in_array;
 use const T_ABSTRACT;
@@ -47,7 +48,7 @@ class RequireAbstractOrFinalSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'All classes should be declared using either the "abstract" or "final" keyword.',
 			$classPointer,
-			self::CODE_NO_ABSTRACT_OR_FINAL
+			self::CODE_NO_ABSTRACT_OR_FINAL,
 		);
 
 		if (!$fix) {
@@ -55,7 +56,7 @@ class RequireAbstractOrFinalSniff implements Sniff
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->addContentBefore($classPointer, 'final ');
+		FixerHelper::addBefore($phpcsFile, $classPointer, 'final ');
 		$phpcsFile->fixer->endChangeset();
 	}
 

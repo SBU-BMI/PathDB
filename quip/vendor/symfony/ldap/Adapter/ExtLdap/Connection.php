@@ -39,15 +39,12 @@ class Connection extends AbstractConnection
     private bool $bound = false;
     private ?LDAPConnection $connection = null;
 
-    public function __sleep(): array
+    public function __serialize(): array
     {
         throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
     }
 
-    /**
-     * @return void
-     */
-    public function __wakeup()
+    public function __unserialize(array $data): void
     {
         throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
     }
@@ -103,7 +100,7 @@ class Connection extends AbstractConnection
     public function setOption(string $name, array|string|int|bool $value)
     {
         if (!@ldap_set_option($this->connection, ConnectionOptions::getOption($name), $value)) {
-            throw new LdapException(sprintf('Could not set value "%s" for option "%s".', $value, $name));
+            throw new LdapException(\sprintf('Could not set value "%s" for option "%s".', $value, $name));
         }
     }
 
@@ -113,7 +110,7 @@ class Connection extends AbstractConnection
     public function getOption(string $name)
     {
         if (!@ldap_get_option($this->connection, ConnectionOptions::getOption($name), $ret)) {
-            throw new LdapException(sprintf('Could not retrieve value for option "%s".', $name));
+            throw new LdapException(\sprintf('Could not retrieve value for option "%s".', $name));
         }
 
         return $ret;
@@ -130,7 +127,7 @@ class Connection extends AbstractConnection
         $resolver->setAllowedTypes('debug', 'bool');
         $resolver->setDefault('referrals', false);
         $resolver->setAllowedTypes('referrals', 'bool');
-        $resolver->setDefault('options', function (OptionsResolver $options, Options $parent) {
+        $resolver->setDefault('options', static function (OptionsResolver $options, Options $parent) {
             $options->setDefined(array_map('strtolower', array_keys((new \ReflectionClass(ConnectionOptions::class))->getConstants())));
 
             if (true === $parent['debug']) {
@@ -138,7 +135,7 @@ class Connection extends AbstractConnection
             }
 
             if (!isset($parent['network_timeout'])) {
-                $options->setDefault('network_timeout', \ini_get('default_socket_timeout'));
+                $options->setDefault('network_timeout', (int) \ini_get('default_socket_timeout'));
             }
 
             $options->setDefaults([
@@ -162,9 +159,8 @@ class Connection extends AbstractConnection
 
         if (false === $connection = ldap_connect($this->config['connection_string'])) {
             throw new LdapException('Invalid connection string: '.$this->config['connection_string']);
-        } else {
-            $this->connection = $connection;
         }
+        $this->connection = $connection;
 
         foreach ($this->config['options'] as $name => $value) {
             if (!\in_array(ConnectionOptions::getOption($name), self::PRECONNECT_OPTIONS, true)) {

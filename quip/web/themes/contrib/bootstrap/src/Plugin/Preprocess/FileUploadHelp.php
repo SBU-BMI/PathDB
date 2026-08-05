@@ -2,6 +2,8 @@
 
 namespace Drupal\bootstrap\Plugin\Preprocess;
 
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Utility\Variables;
 use Drupal\Component\Render\FormattableMarkup;
@@ -53,7 +55,7 @@ class FileUploadHelp extends PreprocessBase implements PreprocessInterface {
     }
     if ($unformatted_size) {
       $descriptions[] = t('@size limit.', [
-        '@size' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($unformatted_size), fn() => format_size($unformatted_size)),
+        '@size' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => ByteSizeMarkup::create($unformatted_size), fn() => format_size($unformatted_size)),
       ]);
     }
     $unformatted_extensions = NULL;

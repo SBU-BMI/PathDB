@@ -14,15 +14,14 @@ class DisallowTrailingCommaInDeclarationSniff implements Sniff
 
 	public const CODE_DISALLOWED_TRAILING_COMMA = 'DisallowedTrailingComma';
 
-	/** @var bool */
-	public $onlySingleLine = false;
+	public bool $onlySingleLine = false;
 
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$functionTokenCodes;
+		return TokenHelper::FUNCTION_TOKEN_CODES;
 	}
 
 	/**
@@ -40,7 +39,7 @@ class DisallowTrailingCommaInDeclarationSniff implements Sniff
 			$phpcsFile,
 			T_WHITESPACE,
 			$parenthesisCloserPointer - 1,
-			$parenthesisOpenerPointer
+			$parenthesisOpenerPointer,
 		);
 
 		if ($tokens[$pointerBeforeParenthesisCloser]['code'] !== T_COMMA) {
@@ -54,7 +53,7 @@ class DisallowTrailingCommaInDeclarationSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Trailing comma after the last parameter in function declaration is disallowed.',
 			$pointerBeforeParenthesisCloser,
-			self::CODE_DISALLOWED_TRAILING_COMMA
+			self::CODE_DISALLOWED_TRAILING_COMMA,
 		);
 
 		if (!$fix) {
@@ -62,7 +61,7 @@ class DisallowTrailingCommaInDeclarationSniff implements Sniff
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->replaceToken($pointerBeforeParenthesisCloser, '');
+		FixerHelper::replace($phpcsFile, $pointerBeforeParenthesisCloser, '');
 
 		if ($tokens[$pointerBeforeParenthesisCloser]['line'] === $tokens[$parenthesisCloserPointer]['line']) {
 			FixerHelper::removeBetween($phpcsFile, $pointerBeforeParenthesisCloser, $parenthesisCloserPointer);

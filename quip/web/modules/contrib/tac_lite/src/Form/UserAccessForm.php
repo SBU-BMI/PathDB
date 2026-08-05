@@ -15,6 +15,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class UserAccessForm extends ConfigFormBase {
 
   /**
+   * The user id.
+   *
+   * @var string|int|null
+   */
+  protected $uid;
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -29,7 +36,7 @@ class UserAccessForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, UserInterface $user = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?UserInterface $user = NULL) {
     if (!$user) {
       throw new NotFoundHttpException();
     }
@@ -39,7 +46,7 @@ class UserAccessForm extends ConfigFormBase {
     $config = \Drupal::config('tac_lite.settings');
     $vids = $config->get('tac_lite_categories');
     $schemes = $config->get('tac_lite_schemes');
-    if (count($vids)) {
+    if ($vids) {
       for ($i = 1; $i <= $schemes; $i++) {
         $config = SchemeForm::tacLiteConfig($i);
         if ($config['name']) {

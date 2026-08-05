@@ -112,7 +112,13 @@ interface ExternalAuthInterface {
    *   The module providing external authentication.
    * @param \Drupal\user\UserInterface $account
    *   The existing Drupal account to link.
+   * @param mixed $authmap_data
+   *   Additional data to be stored in the authmap entry.
+   *
+   * @return bool
+   *   Whether the account was linked to.
+   *   Returns FALSE if the account was already linked, TRUE otherwise.
    */
-  public function linkExistingAccount(string $authname, string $provider, UserInterface $account);
+  public function linkExistingAccount(string $authname, string $provider, UserInterface $account, $authmap_data = NULL);
 
 }

@@ -1,0 +1,11 @@
+uuid: cc9ff1de-e298-4221-a14f-0c6a61205e69
+langcode: en
+status: true
+dependencies:
+  module:
+    - bulk_update_fields
+id: bulk_update_fields_on_ldap_server
+label: 'Bulk Update LDAP Server Fields'
+type: ldap_server
+plugin: bulk_update_fields_action_base
+configuration: {  }

@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\TypeHints;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use SlevomatCodingStandard\Helpers\TypeHintHelper;
 use function array_keys;
@@ -30,7 +31,7 @@ class ParameterTypeHintSpacingSniff implements Sniff
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$functionTokenCodes;
+		return TokenHelper::FUNCTION_TOKEN_CODES;
 	}
 
 	/**
@@ -44,8 +45,6 @@ class ParameterTypeHintSpacingSniff implements Sniff
 		$parametersStartPointer = $tokens[$functionPointer]['parenthesis_opener'] + 1;
 		$parametersEndPointer = $tokens[$functionPointer]['parenthesis_closer'] - 1;
 
-		$typeHintTokenCodes = TokenHelper::getTypeHintTokenCodes();
-
 		for ($i = $parametersStartPointer; $i <= $parametersEndPointer; $i++) {
 			if ($tokens[$i]['code'] !== T_VARIABLE) {
 				continue;
@@ -55,22 +54,18 @@ class ParameterTypeHintSpacingSniff implements Sniff
 			$parameterName = $tokens[$parameterPointer]['content'];
 
 			$parameterStartPointer = TokenHelper::findPrevious($phpcsFile, T_COMMA, $parameterPointer - 1, $parametersStartPointer);
-			if ($parameterStartPointer === null) {
-				$parameterStartPointer = $parametersStartPointer;
-			}
+			$parameterStartPointer ??= $parametersStartPointer;
 
 			$parameterEndPointer = TokenHelper::findNext($phpcsFile, T_COMMA, $parameterPointer + 1, $parametersEndPointer + 1);
-			if ($parameterEndPointer === null) {
-				$parameterEndPointer = $parametersEndPointer;
-			}
+			$parameterEndPointer ??= $parametersEndPointer;
 
 			$attributeCloserPointer = TokenHelper::findPrevious($phpcsFile, T_ATTRIBUTE_END, $parameterPointer - 1, $parameterStartPointer);
 
 			$typeHintEndPointer = TokenHelper::findPrevious(
 				$phpcsFile,
-				$typeHintTokenCodes,
+				TokenHelper::TYPE_HINT_TOKEN_CODES,
 				$parameterPointer - 1,
-				$attributeCloserPointer ?? $parameterStartPointer
+				$attributeCloserPointer ?? $parameterStartPointer,
 			);
 			if ($typeHintEndPointer === null) {
 				continue;
@@ -87,35 +82,35 @@ class ParameterTypeHintSpacingSniff implements Sniff
 				$phpcsFile,
 				array_keys($nextTokenNames),
 				$typeHintEndPointer + 1,
-				$parameterEndPointer + 1
+				$parameterEndPointer + 1,
 			);
 
 			if ($tokens[$typeHintEndPointer + 1]['code'] !== T_WHITESPACE) {
 				$fix = $phpcsFile->addFixableError(
 					sprintf(
 						'There must be exactly one space between parameter type hint and %s.',
-						$nextTokenNames[$tokens[$nextTokenPointer]['code']]
+						$nextTokenNames[$tokens[$nextTokenPointer]['code']],
 					),
 					$typeHintEndPointer,
-					self::CODE_NO_SPACE_BETWEEN_TYPE_HINT_AND_PARAMETER
+					self::CODE_NO_SPACE_BETWEEN_TYPE_HINT_AND_PARAMETER,
 				);
 				if ($fix) {
 					$phpcsFile->fixer->beginChangeset();
-					$phpcsFile->fixer->addContent($typeHintEndPointer, ' ');
+					FixerHelper::add($phpcsFile, $typeHintEndPointer, ' ');
 					$phpcsFile->fixer->endChangeset();
 				}
 			} elseif ($tokens[$typeHintEndPointer + 1]['content'] !== ' ') {
 				$fix = $phpcsFile->addFixableError(
 					sprintf(
 						'There must be exactly one space between parameter type hint and %s.',
-						$nextTokenNames[$tokens[$nextTokenPointer]['code']]
+						$nextTokenNames[$tokens[$nextTokenPointer]['code']],
 					),
 					$typeHintEndPointer,
-					self::CODE_MULTIPLE_SPACES_BETWEEN_TYPE_HINT_AND_PARAMETER
+					self::CODE_MULTIPLE_SPACES_BETWEEN_TYPE_HINT_AND_PARAMETER,
 				);
 				if ($fix) {
 					$phpcsFile->fixer->beginChangeset();
-					$phpcsFile->fixer->replaceToken($typeHintEndPointer + 1, ' ');
+					FixerHelper::replace($phpcsFile, $typeHintEndPointer + 1, ' ');
 					$phpcsFile->fixer->endChangeset();
 				}
 			}
@@ -136,17 +131,17 @@ class ParameterTypeHintSpacingSniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				sprintf(
 					'There must be no whitespace between parameter type hint nullability symbol and parameter type hint of parameter %s.',
-					$parameterName
+					$parameterName,
 				),
 				$typeHintStartPointer,
-				self::CODE_WHITESPACE_AFTER_NULLABILITY_SYMBOL
+				self::CODE_WHITESPACE_AFTER_NULLABILITY_SYMBOL,
 			);
 			if (!$fix) {
 				continue;
 			}
 
 			$phpcsFile->fixer->beginChangeset();
-			$phpcsFile->fixer->replaceToken($nullabilitySymbolPointer + 1, '');
+			FixerHelper::replace($phpcsFile, $nullabilitySymbolPointer + 1, '');
 			$phpcsFile->fixer->endChangeset();
 		}
 	}

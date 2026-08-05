@@ -13,7 +13,6 @@ use SlevomatCodingStandard\Helpers\SuppressHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use Throwable;
 use function array_key_exists;
-use function array_merge;
 use function in_array;
 use function sprintf;
 use const T_BITWISE_OR;
@@ -59,7 +58,7 @@ class ReferenceThrowableOnlySniff implements Sniff
 			$resolvedName = NamespaceHelper::resolveClassName(
 				$phpcsFile,
 				$referencedName->getNameAsReferencedInFile(),
-				$referencedName->getStartPointer()
+				$referencedName->getStartPointer(),
 			);
 			if ($resolvedName !== '\\Exception') {
 				continue;
@@ -72,8 +71,8 @@ class ReferenceThrowableOnlySniff implements Sniff
 			if ($tokens[$previousPointer]['code'] === T_BITWISE_OR) {
 				$previousPointer = TokenHelper::findPreviousExcluding(
 					$phpcsFile,
-					array_merge(TokenHelper::$ineffectiveTokenCodes, TokenHelper::getNameTokenCodes(), [T_BITWISE_OR]),
-					$previousPointer - 1
+					[...TokenHelper::INEFFECTIVE_TOKEN_CODES, ...TokenHelper::NAME_TOKEN_CODES, T_BITWISE_OR],
+					$previousPointer - 1,
 				);
 			}
 			if ($tokens[$previousPointer]['code'] === T_OPEN_PARENTHESIS) {
@@ -90,7 +89,7 @@ class ReferenceThrowableOnlySniff implements Sniff
 					&& SuppressHelper::isSniffSuppressed(
 						$phpcsFile,
 						$openParenthesisOpenerPointer,
-						sprintf('%s.%s', self::NAME, self::CODE_REFERENCED_GENERAL_EXCEPTION)
+						sprintf('%s.%s', self::NAME, self::CODE_REFERENCED_GENERAL_EXCEPTION),
 					)
 				) {
 					continue;
@@ -100,7 +99,7 @@ class ReferenceThrowableOnlySniff implements Sniff
 			$fix = $phpcsFile->addFixableError(
 				$message,
 				$referencedName->getStartPointer(),
-				self::CODE_REFERENCED_GENERAL_EXCEPTION
+				self::CODE_REFERENCED_GENERAL_EXCEPTION,
 			);
 			if (!$fix) {
 				continue;

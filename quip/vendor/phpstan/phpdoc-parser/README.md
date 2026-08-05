@@ -13,9 +13,69 @@ For the complete list of supported PHPDoc features check out PHPStan documentati
 
 * [PHPDoc Basics](https://phpstan.org/writing-php-code/phpdocs-basics) (list of PHPDoc tags)
 * [PHPDoc Types](https://phpstan.org/writing-php-code/phpdoc-types) (list of PHPDoc types)
-* [phpdoc-parser API Reference](https://phpstan.github.io/phpdoc-parser/1.23.x/namespace-PHPStan.PhpDocParser.html) with all the AST node types etc.
+* [phpdoc-parser API Reference](https://phpstan.github.io/phpdoc-parser/2.3.x/namespace-PHPStan.PhpDocParser.html) with all the AST node types etc.
 
-This parser also supports parsing [Doctrine Annotations](https://github.com/doctrine/annotations). The AST nodes live in the [PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine namespace](https://phpstan.github.io/phpdoc-parser/1.23.x/namespace-PHPStan.PhpDocParser.Ast.PhpDoc.Doctrine.html). The support needs to be turned on by setting `bool $parseDoctrineAnnotations` to `true` in `Lexer` and `PhpDocParser` class constructors.
+This parser also supports parsing [Doctrine Annotations](https://github.com/doctrine/annotations). The AST nodes live in the [PHPStan\PhpDocParser\Ast\PhpDoc\Doctrine namespace](https://phpstan.github.io/phpdoc-parser/2.1.x/namespace-PHPStan.PhpDocParser.Ast.PhpDoc.Doctrine.html).
+
+## Features
+
+### Supported type syntax
+
+The parser supports a rich type system including:
+
+- Basic types: `string`, `int`, `bool`, `null`, `self`, `static`, `$this`, etc.
+- Nullable types: `?string`
+- Union and intersection types: `string|int`, `Foo&Bar`
+- Generic types with variance: `array<string>`, `Collection<covariant T>`
+- Array shapes: `array{name: string, age: int, ...}`
+- Object shapes: `object{name: string, age: int}`
+- Callable/closure types: `callable(string): bool`, `Closure(int): void`
+- Conditional types: `($input is string ? string : int)`
+- Offset access types: `T[K]`
+- Constant type expressions: `self::CONST*`, `123`, `'string'`
+
+### Constant expression parsing
+
+Constant expressions used in PHPDoc tags are parsed via `ConstExprParser`:
+
+- Scalar values: integers, floats, strings, `true`, `false`, `null`
+- Arrays: `{1, 2, 'key' => 'value'}`
+- Class constant fetches: `ClassName::CONSTANT`
+
+### AST node traversal
+
+The library provides a visitor-based traversal system (inspired by [nikic/PHP-Parser](https://github.com/nikic/PHP-Parser)) for reading and transforming the AST.
+
+```php
+use PHPStan\PhpDocParser\Ast\AbstractNodeVisitor;
+use PHPStan\PhpDocParser\Ast\Node;
+use PHPStan\PhpDocParser\Ast\NodeTraverser;
+use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+
+$visitor = new class extends AbstractNodeVisitor {
+    public function enterNode(Node $node) {
+        if ($node instanceof IdentifierTypeNode) {
+            // inspect or transform the node
+        }
+        return $node;
+    }
+};
+
+$traverser = new NodeTraverser([$visitor]);
+$traverser->traverse([$phpDocNode]);
+```
+
+The `NodeTraverser` supports `DONT_TRAVERSE_CHILDREN`, `STOP_TRAVERSAL`, `REMOVE_NODE`, and `DONT_TRAVERSE_CURRENT_AND_CHILDREN` control constants. A built-in `CloningVisitor` is included for creating deep copies of the AST (used by the format-preserving printer).
+
+### Node attributes
+
+Nodes can carry attributes such as line numbers, token indexes, and comments. Enable them via `ParserConfig`:
+
+```php
+$config = new ParserConfig(usedAttributes: ['lines' => true, 'indexes' => true, 'comments' => true]);
+```
+
+These attributes are required for the format-preserving printer and can also be used for mapping AST nodes back to source positions.
 
 ## Installation
 
@@ -34,6 +94,7 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
+use PHPStan\PhpDocParser\ParserConfig;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
@@ -41,10 +102,11 @@ use PHPStan\PhpDocParser\Parser\TypeParser;
 
 // basic setup
 
-$lexer = new Lexer();
-$constExprParser = new ConstExprParser();
-$typeParser = new TypeParser($constExprParser);
-$phpDocParser = new PhpDocParser($typeParser, $constExprParser);
+$config = new ParserConfig(usedAttributes: []);
+$lexer = new Lexer($config);
+$constExprParser = new ConstExprParser($config);
+$typeParser = new TypeParser($config, $constExprParser);
+$phpDocParser = new PhpDocParser($config, $typeParser, $constExprParser);
 
 // parsing and reading a PHPDoc string
 
@@ -72,6 +134,7 @@ use PHPStan\PhpDocParser\Ast\NodeVisitor\CloningVisitor;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
+use PHPStan\PhpDocParser\ParserConfig;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
@@ -80,12 +143,11 @@ use PHPStan\PhpDocParser\Printer\Printer;
 
 // basic setup with enabled required lexer attributes
 
-$usedAttributes = ['lines' => true, 'indexes' => true];
-
-$lexer = new Lexer();
-$constExprParser = new ConstExprParser(true, true, $usedAttributes);
-$typeParser = new TypeParser($constExprParser, true, $usedAttributes);
-$phpDocParser = new PhpDocParser($typeParser, $constExprParser, true, true, $usedAttributes);
+$config = new ParserConfig(usedAttributes: ['lines' => true, 'indexes' => true, 'comments' => true]);
+$lexer = new Lexer($config);
+$constExprParser = new ConstExprParser($config);
+$typeParser = new TypeParser($config, $constExprParser);
+$phpDocParser = new PhpDocParser($config, $typeParser, $constExprParser);
 
 $tokens = new TokenIterator($lexer->tokenize('/** @param Lorem $a */'));
 $phpDocNode = $phpDocParser->parse($tokens); // PhpDocNode

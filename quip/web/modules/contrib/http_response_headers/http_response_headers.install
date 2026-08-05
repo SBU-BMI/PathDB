@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\http_response_headers\Entity\ResponseHeaderInterface;
 
 /**
@@ -8,20 +10,54 @@ use Drupal\http_response_headers\Entity\ResponseHeaderInterface;
 function http_response_headers_requirements($phase) {
   $requirements = [];
   if ($phase == 'runtime') {
-    $entity_manager = \Drupal::entityTypeManager()->getStorage('response_header');
     // Report response headers that should be configured.
-    $content_security_policy = $entity_manager->load('content_security_policy');
-    if (!isset($content_security_policy) || !($content_security_policy instanceof ResponseHeaderInterface) || empty($content_security_policy->get('value'))) {
+    if (!http_response_headers_csp_configured()) {
       $requirements['response_header_security_policy'] = [
         'title' => t('Content Security Policy'),
         'value' => t('Not configured'),
         'description' => t("It is highly recommended to set a secure Content Security Policy.
         See the <a href=':help'>help page</a> for more information.", [':help' => '/admin/help/http_response_headers']),
-        'severity' => REQUIREMENT_WARNING,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => RequirementSeverity::Warning, fn() => REQUIREMENT_WARNING),
       ];
     }
   }
   return $requirements;
+}
+
+/**
+ * Checks if a Content Security Policy is configured.
+ *
+ * @return bool
+ *   TRUE if a CSP is configured, FALSE otherwise.
+ */
+function http_response_headers_csp_configured() {
+  // Is a CSP configured from http_response_headers?
+  $entity_manager = \Drupal::entityTypeManager()->getStorage('response_header');
+  $content_security_policy = $entity_manager->load('content_security_policy');
+  if (isset($content_security_policy) && ($content_security_policy instanceof ResponseHeaderInterface) && !empty($content_security_policy->get('value'))) {
+    return TRUE;
+  }
+
+  $module_handler = \Drupal::moduleHandler();
+
+  // Is a CSP configured from the CSP module?
+  if ($module_handler->moduleExists('csp')) {
+    $csp_config = \Drupal::config('csp.settings');
+    if (!empty($csp_config->get('enforce.enable')) || !empty($csp_config->get('report-only.enable'))) {
+      return TRUE;
+    }
+  }
+
+  // Is a CSP configured from Security Kit?
+  if ($module_handler->moduleExists('seckit')) {
+    $seckit_config = \Drupal::config('seckit.settings')->get('seckit_xss.csp');
+    if (!empty($seckit_config['checkbox'])) {
+      return TRUE;
+    }
+  }
+
+  // No CSP is configured.
+  return FALSE;
 }
 
 /**

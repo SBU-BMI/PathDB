@@ -2,7 +2,6 @@
 
 namespace Drupal\bootstrap\Plugin\Alter;
 
-use Composer\Semver\Comparator;
 use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Plugin\PreprocessManager;
 use Drupal\Core\Theme\Registry;

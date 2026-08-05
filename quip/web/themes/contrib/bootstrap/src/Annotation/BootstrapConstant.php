@@ -29,7 +29,7 @@ class BootstrapConstant extends AnnotationBase {
 
     // Handle classes.
     if (strpos($string, '::') !== FALSE) {
-      list($class, $constant) = explode('::', $string);
+      [$class, $constant] = explode('::', $string);
       try {
         $reflection = new \ReflectionClass($class);
         if ($reflection->hasConstant($constant)) {

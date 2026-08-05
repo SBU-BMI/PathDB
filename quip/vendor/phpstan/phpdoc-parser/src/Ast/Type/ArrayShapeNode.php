@@ -16,34 +16,49 @@ class ArrayShapeNode implements TypeNode
 	use NodeAttributes;
 
 	/** @var ArrayShapeItemNode[] */
-	public $items;
+	public array $items;
 
-	/** @var bool */
-	public $sealed;
+	public bool $sealed;
 
 	/** @var self::KIND_* */
 	public $kind;
 
-	/** @var ArrayShapeUnsealedTypeNode|null */
-	public $unsealedType;
+	public ?ArrayShapeUnsealedTypeNode $unsealedType = null;
 
 	/**
 	 * @param ArrayShapeItemNode[] $items
 	 * @param self::KIND_* $kind
 	 */
-	public function __construct(
+	private function __construct(
 		array $items,
 		bool $sealed = true,
-		string $kind = self::KIND_ARRAY,
-		?ArrayShapeUnsealedTypeNode $unsealedType = null
+		?ArrayShapeUnsealedTypeNode $unsealedType = null,
+		string $kind = self::KIND_ARRAY
 	)
 	{
 		$this->items = $items;
 		$this->sealed = $sealed;
-		$this->kind = $kind;
 		$this->unsealedType = $unsealedType;
+		$this->kind = $kind;
 	}
 
+	/**
+	 * @param ArrayShapeItemNode[] $items
+	 * @param self::KIND_* $kind
+	 */
+	public static function createSealed(array $items, string $kind = self::KIND_ARRAY): self
+	{
+		return new self($items, true, null, $kind);
+	}
+
+	/**
+	 * @param ArrayShapeItemNode[] $items
+	 * @param self::KIND_* $kind
+	 */
+	public static function createUnsealed(array $items, ?ArrayShapeUnsealedTypeNode $unsealedType, string $kind = self::KIND_ARRAY): self
+	{
+		return new self($items, false, $unsealedType, $kind);
+	}
 
 	public function __toString(): string
 	{
@@ -54,6 +69,20 @@ class ArrayShapeNode implements TypeNode
 		}
 
 		return $this->kind . '{' . implode(', ', $items) . '}';
+	}
+
+	/**
+	 * @param array<string, mixed> $properties
+	 */
+	public static function __set_state(array $properties): self
+	{
+		$instance = new self($properties['items'], $properties['sealed'], $properties['unsealedType'], $properties['kind']);
+		if (isset($properties['attributes'])) {
+			foreach ($properties['attributes'] as $key => $value) {
+				$instance->setAttribute($key, $value);
+			}
+		}
+		return $instance;
 	}
 
 }

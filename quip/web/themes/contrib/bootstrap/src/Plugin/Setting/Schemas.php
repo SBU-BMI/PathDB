@@ -133,7 +133,7 @@ class Schemas extends SettingBase {
     $theme = Bootstrap::getTheme($theme_name);
 
     // Reconstruct the update plugin that is being applied.
-    list($provider, $plugin_id) = explode(':', $update_id);
+    [$provider, $plugin_id] = explode(':', $update_id);
     $provider = Bootstrap::getTheme($provider);
 
     /* @type \Drupal\bootstrap\Plugin\Update\UpdateInterface $update */

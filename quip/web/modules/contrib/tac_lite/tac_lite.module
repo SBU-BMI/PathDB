@@ -24,16 +24,14 @@ function tac_lite_help($route_name, RouteMatchInterface $route_match) {
     // Main module help for the block module.
     case 'help.page.tac_lite':
       $admin_taclite = Url::fromRoute('tac_lite.administration');
-      $admin_tac_lite_url = Link::fromTextAndUrl(t('administer -> people -> access control by taxonomy'), $admin_taclite);
+      $admin_tac_lite_url = Link::fromTextAndUrl(t('administer -> people -> access control by taxonomy'), $admin_taclite)->toString();
       $output = '<p>' . t('Taxonomy Access Control Lite allows you to restrict access to site content. It uses a simple scheme based on Taxonomy, Users and Roles.') . '</p>';
       $output .= '<p>' . t("This module leverages Drupal's node_access table allows this module to grant permission to view, update, and delete nodes.  To control which users can <em>create</em> new nodes, use Drupal's role based permissions.") . '</p>';
       $output .= '<p>' . t("It is important to understand that this module <em>grants</em> privileges, as opposed to <em>revoking</em> privileges.  So, use Drupal's built-in permissions to hide content from certain roles, then use this module to show the content.  This module cannot hide content that the user is allowed to see based on their existing privileges.") . '</p>';
       $output .= '<p>' . t('There are several steps required to set up Taxonomy Access Control Lite.') . '</p>';
       $output .= '<ol>';
       $output .= '<li>' . t("Define one or more vocabularies whose terms will control which users have access. For example, you could define a vocabulary called 'Privacy' with terms 'Public' and 'Private'.") . '</li>';
-      $output .= '<li>' . t('Tell this module which vocabularies control privacy :url', [
-        ':url' => $admin_tac_lite_url,
-      ]) . '</li>';
+      $output .= '<li>' . t("Tell this module which vocabularies control privacy") . " " . $admin_tac_lite_url . '</li>';
       $output .= '<li>' . t('Configure one or more <em>schemes</em>.   simple site may need only one scheme which grants view permission.  A more complex site might require additional schemes for update and delete.  Each scheme associates roles and terms.  Users will be granted priviliges based on their role and the terms with which nodes are tagged.') . '</li>';
       $output .= '<li>' . t('When settings are correct, <a href=:url>rebuild node_access permissions</a>.', [
         ':url' => Url::fromRoute('node.configure_rebuild_confirm')->toString(),
@@ -261,6 +259,9 @@ function tac_lite_query_term_access_alter(AlterableInterface $query) {
     $or->condition($primary_table . '.tid', $tids, 'IN');
     $or->condition('tac_td.vid', $vids, 'NOT IN');
     $query->condition($or);
+
+    // Prevent duplicates records.
+    $query->distinct();
 
     _tac_lite_apply_cache_contexts_to_render_context($visibility_scheme_ids);
   }

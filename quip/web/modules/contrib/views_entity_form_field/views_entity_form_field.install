@@ -15,7 +15,7 @@ function views_entity_form_field_update_8001() {
   $tables = [];
 
   $views_storage = \Drupal::entityTypeManager()->getStorage('view');
-  foreach ($views_storage->loadMultiple() as $view_id => $view) {
+  foreach ($views_storage->loadMultiple() as $view) {
     /** @var \Drupal\views\Entity\View $view */
     $updated = FALSE;
     foreach (array_keys($view->get('display')) as $display_id) {

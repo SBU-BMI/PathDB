@@ -3,6 +3,7 @@ behaviour
 Berdir
 disp
 fago
+fcid
 flagcount
 Flaggable
 flaggable

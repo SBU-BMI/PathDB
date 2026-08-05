@@ -4,7 +4,7 @@
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2024 PHPCSStandards and contributors
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Util\Common;
@@ -59,27 +59,27 @@ final class EscapeshellcmdTest extends TestCase
     {
         return [
             'Command is empty string'                                        => [
-                'text'     => '',
+                'command'  => '',
                 'expected' => '',
             ],
             'Command is simple string'                                       => [
-                'text'     => 'csslint',
+                'command'  => 'csslint',
                 'expected' => 'csslint',
             ],
             'Command containing characters which PHP escapes'                => [
-                'text'        => '&#;`|*?~<>^()[]{}$\,%!',
+                'command'     => '&#;`|*?~<>^()[]{}$\,%!',
                 'expected'    => '\&\#\;\`\|\*\?\~\<\>\^\(\)\[\]\{\}\$\\\\,%!',
                 'expectedWin' => '^&^#^;^`^|^*^?^~^<^>^^^(^)^[^]^{^}^$^\,^%^!',
             ],
             // @link https://github.com/squizlabs/PHP_CodeSniffer/pull/3214
             'Command containing spaces, which can cause problems on Windows' => [
-                'text'        => 'C:\Program Files\nodejs\csslint.cmd',
+                'command'     => 'C:\Program Files\nodejs\csslint.cmd',
                 'expected'    => 'C:\\\\Program Files\\\\nodejs\\\\csslint.cmd',
                 'expectedWin' => 'C:^\Program^ Files^\nodejs^\csslint.cmd',
             ],
             // @link https://github.com/php/doc-en/pull/511
             'Command containing spaces with additional arguments'            => [
-                'text'        => 'php -f ./~home/path to/file.php',
+                'command'     => 'php -f ./~home/path to/file.php',
                 'expected'    => 'php -f ./\~home/path to/file.php',
                 'expectedWin' => 'php^ -f^ ./^~home/path^ to/file.php',
             ],

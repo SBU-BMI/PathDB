@@ -4,7 +4,7 @@
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2024 PHPCSStandards and contributors
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Ruleset;
@@ -23,7 +23,7 @@ final class ProcessRuleInvalidTypeTest extends AbstractRulesetTestCase
 
 
     /**
-     * Test displaying an informative error message when an invalid type is given.
+     * Test displaying an error when an invalid type is given.
      *
      * @return void
      */
@@ -32,7 +32,7 @@ final class ProcessRuleInvalidTypeTest extends AbstractRulesetTestCase
         $standard = __DIR__.'/ProcessRuleInvalidTypeTest.xml';
         $config   = new ConfigDouble(["--standard=$standard"]);
 
-        $message = 'Message type "notice" is invalid; must be "error" or "warning"';
+        $message = 'ERROR: Message type "notice" for "Generic.Files.ByteOrderMark" is invalid; must be "error" or "warning".'.PHP_EOL.PHP_EOL;
         $this->expectRuntimeExceptionMessage($message);
 
         new Ruleset($config);

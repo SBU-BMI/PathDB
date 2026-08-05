@@ -96,7 +96,7 @@ class DeprecationErrorHandler
     public static function collectDeprecations($outputFile)
     {
         $deprecations = [];
-        $previousErrorHandler = set_error_handler(function ($type, $msg, $file, $line, $context = []) use (&$deprecations, &$previousErrorHandler) {
+        $previousErrorHandler = set_error_handler(static function ($type, $msg, $file, $line, $context = []) use (&$deprecations, &$previousErrorHandler) {
             if (\E_USER_DEPRECATED !== $type && \E_DEPRECATED !== $type && (\E_WARNING !== $type || false === strpos($msg, '" targeting switch is equivalent to "break'))) {
                 if ($previousErrorHandler) {
                     return $previousErrorHandler($type, $msg, $file, $line, $context);
@@ -119,7 +119,7 @@ class DeprecationErrorHandler
             return null;
         });
 
-        register_shutdown_function(function () use ($outputFile, &$deprecations) {
+        register_shutdown_function(static function () use ($outputFile, &$deprecations) {
             file_put_contents($outputFile, serialize($deprecations));
         });
     }
@@ -169,6 +169,13 @@ class DeprecationErrorHandler
             echo "\n".ucfirst($group).' '.$deprecation->toString();
 
             exit(1);
+        }
+
+        if (\PHP_VERSION_ID >= 80500 && \in_array($msg, [
+            'The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)',
+            'The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary)',
+        ], true)) {
+            return null;
         }
 
         if ('legacy' === $group) {
@@ -304,13 +311,13 @@ class DeprecationErrorHandler
      */
     private function displayDeprecations($groups, $configuration)
     {
-        $cmp = function ($a, $b) {
+        $cmp = static function ($a, $b) {
             return $b->count() - $a->count();
         };
 
         if ($configuration->shouldWriteToLogFile()) {
             if (false === $handle = @fopen($file = $configuration->getLogFile(), 'a')) {
-                throw new \InvalidArgumentException(sprintf('The configured log file "%s" is not writeable.', $file));
+                throw new \InvalidArgumentException(\sprintf('The configured log file "%s" is not writeable.', $file));
             }
         } else {
             $handle = fopen('php://output', 'w');
@@ -318,7 +325,7 @@ class DeprecationErrorHandler
 
         foreach ($groups as $group) {
             if ($this->deprecationGroups[$group]->count()) {
-                $deprecationGroupMessage = sprintf(
+                $deprecationGroupMessage = \sprintf(
                     '%s deprecation notices (%d)',
                     \in_array($group, ['direct', 'indirect', 'self'], true) ? "Remaining $group" : ucfirst($group),
                     $this->deprecationGroups[$group]->count()
@@ -337,7 +344,7 @@ class DeprecationErrorHandler
                 uasort($notices, $cmp);
 
                 foreach ($notices as $msg => $notice) {
-                    fwrite($handle, sprintf("\n  %sx: %s\n", $notice->count(), $msg));
+                    fwrite($handle, \sprintf("\n  %sx: %s\n", $notice->count(), $msg));
 
                     $countsByCaller = $notice->getCountsByCaller();
                     arsort($countsByCaller);
@@ -349,7 +356,7 @@ class DeprecationErrorHandler
                                 fwrite($handle, "    ...\n");
                                 break;
                             }
-                            fwrite($handle, sprintf("    %dx in %s\n", $count, preg_replace('/(.*)\\\\(.*?::.*?)$/', '$2 from $1', $method)));
+                            fwrite($handle, \sprintf("    %dx in %s\n", $count, preg_replace('/(.*)\\\\(.*?::.*?)$/', '$2 from $1', $method)));
                         }
                     }
                 }
@@ -392,7 +399,7 @@ class DeprecationErrorHandler
                     $frame['object']->getConvertWarningsToExceptions()
                 );
             } elseif (ErrorHandler::class === $eh && $frame['object'] instanceof TestCase) {
-                return function (int $errorNumber, string $errorString, string $errorFile, int $errorLine) {
+                return static function (int $errorNumber, string $errorString, string $errorFile, int $errorLine) {
                     ErrorHandler::instance()($errorNumber, $errorString, $errorFile, $errorLine);
 
                     return true;
@@ -400,7 +407,7 @@ class DeprecationErrorHandler
             }
         }
 
-        return function () { return false; };
+        return static function () { return false; };
     }
 
     /**

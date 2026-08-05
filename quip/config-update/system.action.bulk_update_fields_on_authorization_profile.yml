@@ -1,0 +1,11 @@
+uuid: a3ec7b14-64dd-472b-88a2-ff94f09e9ec2
+langcode: en
+status: true
+dependencies:
+  module:
+    - bulk_update_fields
+id: bulk_update_fields_on_authorization_profile
+label: 'Bulk Update Authorization profile Fields'
+type: authorization_profile
+plugin: bulk_update_fields_action_base
+configuration: {  }

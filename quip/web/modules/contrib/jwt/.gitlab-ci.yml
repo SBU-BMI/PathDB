@@ -10,11 +10,30 @@ include:
       - '/includes/include.drupalci.main.yml'
       - '/includes/include.drupalci.variables.yml'
       - '/includes/include.drupalci.workflows.yml'
+
 #
 # Start custom overrides.
 #
 variables:
    SKIP_ESLINT: '1'
+   # Test current major (Drupal 11) - this is now the default
+   OPT_IN_TEST_CURRENT: 1
+   # Test previous major (Drupal 10)
+   OPT_IN_TEST_PREVIOUS_MAJOR: 1
+   # Test next major (Drupal 12 when development starts)
+   OPT_IN_TEST_NEXT_MAJOR: 1
+
+
+composer (D9):
+  extends: .composer-base
+  variables:
+    DRUPAL_CORE: "9.5.11"
+    PHP_VERSION: "8.2"
+    PHP_IMAGE_VARIANT: "apache"
+
+phpunit (D9):
+  extends: phpunit
+  needs: [composer (D9)]
 
 #
 # Linting jobs are passing so any issue that breaks them should fix them.

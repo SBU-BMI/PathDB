@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\views_bulk_operations\Plugin\Action;
 
 use Drupal\Core\Action\Attribute\Action;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\user\UserInterface;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,12 +35,12 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
    *   The plugin Id.
    * @param mixed $plugin_definition
    *   Plugin definition.
-   * @param \Drupal\views_bulk_operations\Plugin\Action\Drupal\Core\Session\AccountInterface $currentUser
+   * @param \Drupal\Core\Session\AccountInterface $currentUser
    *   The current user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   Module handler service.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory object.
+   * @param \Drupal\Core\Config\ImmutableConfig $userConfig
+   *   User settings config object.
    */
   public function __construct(
     array $configuration,
@@ -45,10 +48,9 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
     $plugin_definition,
     protected readonly AccountInterface $currentUser,
     protected readonly ModuleHandlerInterface $moduleHandler,
-    ConfigFactoryInterface $config_factory,
+    protected readonly ImmutableConfig $userConfig,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->userConfig = $config_factory->get('user.settings');
   }
 
   /**
@@ -61,15 +63,15 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
       $plugin_definition,
       $container->get('current_user'),
       $container->get('module_handler'),
-      $container->get('config.factory')
+      $container->get('config.factory')->get('user.settings')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function execute($account = NULL) {
-    if ($account->id() === $this->currentUser->id() && (empty($this->context['list']) || \count($this->context['list']) > 1)) {
+  public function execute(?UserInterface $account = NULL): void {
+    if ($account->id() === $this->currentUser->id() && (\count($this->context['list']) === 0 || \count($this->context['list']) > 1)) {
       $this->messenger()->addError($this->t('The current user account cannot be canceled in a batch operation. Select your account only or cancel it from your account page.'));
     }
     elseif (\intval($account->id()) === 1) {
@@ -79,7 +81,7 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
     }
     else {
       // Allow other modules to act.
-      if ($this->configuration['user_cancel_method'] != 'user_cancel_delete') {
+      if ($this->configuration['user_cancel_method'] !== 'user_cancel_delete') {
         $this->moduleHandler->invokeAll('user_cancel', [
           $this->configuration,
           $account,
@@ -103,7 +105,7 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
       ];
 
       // After cancelling account, ensure that user is logged out.
-      if ($account->id() == \Drupal::currentUser()->id()) {
+      if ($account->id() === $this->currentUser->id()) {
         // Batch API stores data in the session, so use the finished operation
         // to manipulate the current user's session id.
         $batch['finished'] = '_user_cancel_session_regenerate';

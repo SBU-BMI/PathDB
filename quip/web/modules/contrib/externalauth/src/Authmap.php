@@ -31,6 +31,8 @@ class Authmap implements AuthmapInterface {
    * {@inheritdoc}
    */
   public function save(UserInterface $account, string $provider, string $authname, $data = NULL) {
+    ExternalAuthValidation::validateAuthmapData($provider, $authname);
+
     if (!is_scalar($data)) {
       $data = serialize($data);
     }

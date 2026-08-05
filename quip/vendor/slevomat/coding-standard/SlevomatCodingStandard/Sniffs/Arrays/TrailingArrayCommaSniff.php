@@ -5,6 +5,7 @@ namespace SlevomatCodingStandard\Sniffs\Arrays;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SlevomatCodingStandard\Helpers\ArrayHelper;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use function in_array;
@@ -17,15 +18,14 @@ class TrailingArrayCommaSniff implements Sniff
 
 	public const CODE_MISSING_TRAILING_COMMA = 'MissingTrailingComma';
 
-	/** @var bool|null */
-	public $enableAfterHeredoc = null;
+	public ?bool $enableAfterHeredoc = null;
 
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$arrayTokenCodes;
+		return TokenHelper::ARRAY_TOKEN_CODES;
 	}
 
 	/**
@@ -66,14 +66,14 @@ class TrailingArrayCommaSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Multi-line arrays must have a trailing comma after the last element.',
 			$pointerPreviousToClose,
-			self::CODE_MISSING_TRAILING_COMMA
+			self::CODE_MISSING_TRAILING_COMMA,
 		);
 		if (!$fix) {
 			return;
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->addContent($pointerPreviousToClose, ',');
+		FixerHelper::add($phpcsFile, $pointerPreviousToClose, ',');
 		$phpcsFile->fixer->endChangeset();
 	}
 

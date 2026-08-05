@@ -1,0 +1,97 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.index.test_node_index
+  module:
+    - search_api
+    - views_bulk_operations
+id: views_bulk_operations_search_api_test
+label: 'VBO Search API Test'
+module: views
+description: ''
+tag: ''
+base_table: search_api_index_test_node_index
+base_field: search_api_id
+display:
+  default:
+    display_plugin: default
+    id: default
+    display_title: Master
+    position: 0
+    display_options:
+      access:
+        type: none
+        options: {  }
+      cache:
+        type: none
+        options: {  }
+      query:
+        type: search_api_query
+        options:
+          bypass_access: false
+          skip_access: false
+          preserve_facet_query_args: false
+      exposed_form:
+        type: basic
+        options: {  }
+      pager:
+        type: full
+        options:
+          items_per_page: 10
+          offset: 0
+          id: 0
+          total_pages: null
+      style:
+        type: table
+      row:
+        type: fields
+      fields:
+        search_api_id:
+          id: search_api_id
+          table: search_api_index_test_node_index
+          field: search_api_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Search API ID'
+          plugin_id: standard
+        views_bulk_operations_bulk_form:
+          id: views_bulk_operations_bulk_form
+          table: views
+          field: views_bulk_operations_bulk_form
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Views bulk operations'
+          batch: false
+          batch_size: 10
+          form_step: true
+          buttons: true
+          action_title: Action
+          clear_on_exposed: true
+          selected_actions:
+            - action_id: views_bulk_operations_simple_test_action
+          plugin_id: views_bulk_operations_bulk_form
+      filters: {  }
+      sorts:
+        search_api_id:
+          id: search_api_id
+          table: search_api_index_test_node_index
+          field: search_api_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          plugin_id: search_api
+      title: 'VBO Search API Test'
+      header: {  }
+      footer: {  }
+      empty: {  }
+      relationships: {  }
+      arguments: {  }
+      display_extenders: {  }
+    cache_metadata:
+      max-age: -1
+      contexts: {  }
+      tags: {  }

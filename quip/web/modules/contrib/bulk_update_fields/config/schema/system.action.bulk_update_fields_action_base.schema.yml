@@ -1,0 +1,19 @@
+system.action.bulk_update_fields_action_base:
+  type: config_entity
+  label: 'Bulk Update Fields to Another Value'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: string
+      label: 'Label'
+    type:
+      type: string
+      label: 'Type'
+    plugin:
+      type: string
+      label: 'Plugin'
+    configuration:
+      type: action_configuration_default
+      label: 'Action configuration'

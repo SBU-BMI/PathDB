@@ -101,16 +101,7 @@ function moderated_content_bulk_publish_theme($existing, $type, $theme, $path) {
  */
 function moderated_content_bulk_publish_toolbar() {
   $config = Drupal::config('moderated_content_bulk_publish.settings');
-  // Set cache dependencies.
-  $items['admin_toolbar_langswitch'] = [
-    '#cache' => [
-      'contexts' => [
-        'languages:language_interface',
-        'url',
-      ],
-      'tags' => $config->getCacheTags(),
-    ],
-  ];
+  $items = [];
 
   if ($config->get('disable_toolbar_language_switcher')) {
     return $items;
@@ -137,6 +128,17 @@ function moderated_content_bulk_publish_toolbar() {
           ->toString(),
       ];
     }
+
+    // Set cache dependencies.
+    $items['admin_toolbar_langswitch'] = [
+      '#cache' => [
+        'contexts' => [
+          'languages:language_interface',
+          'url',
+        ],
+        'tags' => $config->getCacheTags(),
+      ],
+    ];
 
     // Build toolbar item and tray.
     $items['admin_toolbar_langswitch'] += [

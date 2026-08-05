@@ -14,3 +14,4 @@ services:
     arguments: ['@user.data', '@users_jwt.memory_cache', '@cache_tags.invalidator']
   users_jwt.memory_cache:
     class: Drupal\Core\Cache\MemoryCache\MemoryCache
+    arguments: ['@datetime.time']

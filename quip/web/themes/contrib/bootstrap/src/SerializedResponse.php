@@ -95,7 +95,7 @@ class SerializedResponse extends Response {
   /**
    * {@inheritdoc}
    */
-  public function __construct($content = '', $status = 200, array $headers = [], Request $request = NULL) {
+  public function __construct($content = '', $status = 200, array $headers = [], ?Request $request = NULL) {
     parent::__construct($content, $status, $headers);
     $this->request = $request;
 
@@ -119,12 +119,12 @@ class SerializedResponse extends Response {
    *
    * @param \GuzzleHttp\Psr7\Response $response
    *   A Guzzle Response object.
-   * @param \GuzzleHttp\Psr7\Request $request
+   * @param \GuzzleHttp\Psr7\Request|null $request
    *   Optional. The Guzzle Request object associated with the response.
    *
    * @return static
    */
-  public static function createFromGuzzleResponse(GuzzleResponse $response, GuzzleRequest $request = NULL) {
+  public static function createFromGuzzleResponse(GuzzleResponse $response, ?GuzzleRequest $request = NULL) {
     // In order to actually cache any request or response body contents, they
     // must be extracted from the stream before it's stored in the database.
     return new static($response->getBody(TRUE)->getContents(), $response->getStatusCode(), $response->getHeaders(), static::createRequestFromGuzzleRequest($request));
@@ -135,12 +135,12 @@ class SerializedResponse extends Response {
    *
    * @param \Exception $exception
    *   The exception thrown.
-   * @param \GuzzleHttp\Psr7\Request $request
+   * @param \GuzzleHttp\Psr7\Request|null $request
    *   Optional. The Guzzle Request object associated with the response.
    *
    * @return static
    */
-  public static function createFromException(\Exception $exception, GuzzleRequest $request = NULL) {
+  public static function createFromException(\Exception $exception, ?GuzzleRequest $request = NULL) {
     return new static($exception->getMessage(), $exception->getCode() ?: 500, [], static::createRequestFromGuzzleRequest($request));
   }
 

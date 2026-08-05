@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_bulk_operations\Unit;
 
 use Drupal\Core\Messenger\Messenger;
@@ -7,13 +9,16 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslationManager;
 use Drupal\Tests\UnitTestCase;
 use Drupal\views_bulk_operations\ViewsBulkOperationsBatch;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @coversDefaultClass \Drupal\views_bulk_operations\ViewsBulkOperationsBatch
- * @group views_bulk_operations
+ * Batch processing methods test.
  */
-class ViewsBulkOperationsBatchTest extends UnitTestCase {
+#[CoversClass(ViewsBulkOperationsBatch::class)]
+#[Group('views_bulk_operations')]
+final class ViewsBulkOperationsBatchTest extends UnitTestCase {
 
   /**
    * Modules to install.
@@ -24,10 +29,8 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
 
   /**
    * Messages storage.
-   *
-   * @var string[]|null
    */
-  private $messages = NULL;
+  private ?string $messages = NULL;
 
   /**
    * Messenger service.
@@ -44,7 +47,7 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
 
     // Mock translation manager.
     $translation_manager = $this->createPartialMock(TranslationManager::class, ['translateString']);
-    $translation_manager->expects($this->any())
+    $translation_manager->expects(self::any())
       ->method('translateString')
       ->willReturnCallback(function (TranslatableMarkup $translated_string) {
         return \strtr($translated_string->getUntranslatedString(), $translated_string->getOptions());
@@ -52,9 +55,9 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
 
     $container->set('string_translation', $translation_manager);
 
-    // Mock messanger.
+    // Mock messenger.
     $this->messenger = $this->createMock(Messenger::class);
-    $this->messenger->expects($this->any())
+    $this->messenger->expects(self::any())
       ->method('addMessage')
       ->willReturnCallback(function ($message, $type, $repeat) {
         if ($this->messages === NULL) {
@@ -64,7 +67,7 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
           $this->messages .= ' | ' . (string) $message;
         }
       });
-    $this->messenger->expects($this->any())
+    $this->messenger->expects(self::any())
       ->method('all')
       ->willReturnCallback(function () {
         $messages = $this->messages;
@@ -79,8 +82,6 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
 
   /**
    * Tests the getBatch() method.
-   *
-   * @covers ::getBatch
    */
   public function testGetBatch(): void {
     $data = [
@@ -90,15 +91,13 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
       'finished_callback' => [ViewsBulkOperationsBatch::class, 'finished'],
     ];
     $batch = ViewsBulkOperationsBatch::getBatch($data);
-    $this->assertArrayHasKey('title', $batch);
-    $this->assertArrayHasKey('operations', $batch);
-    $this->assertArrayHasKey('finished', $batch);
+    self::assertArrayHasKey('title', $batch);
+    self::assertArrayHasKey('operations', $batch);
+    self::assertArrayHasKey('finished', $batch);
   }
 
   /**
    * Tests the finished() method.
-   *
-   * @covers ::finished
    */
   public function testFinished(): void {
     $results = [
@@ -111,7 +110,7 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
       ],
     ];
     ViewsBulkOperationsBatch::finished(TRUE, $results, []);
-    $this->assertEquals('Some operation (2)', $this->messenger->all());
+    self::assertEquals('Some operation (2)', $this->messenger->all());
 
     $results = [
       'operations' => [
@@ -129,7 +128,7 @@ class ViewsBulkOperationsBatchTest extends UnitTestCase {
     ];
 
     ViewsBulkOperationsBatch::finished(TRUE, $results, []);
-    $this->assertEquals('Some operation1 (1) | Some operation2 (1)', $this->messenger->all());
+    self::assertEquals('Some operation1 (1) | Some operation2 (1)', $this->messenger->all());
   }
 
 }

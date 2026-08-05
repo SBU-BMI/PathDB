@@ -1,4 +1,12 @@
 services:
+  logger.channel.css_editor:
+    parent: logger.channel_base
+    arguments: ['css_editor']
+
+  css_editor.css_generator:
+    class: Drupal\css_editor\CssEditorService
+    arguments: ['@config.factory', '@file_system', '@logger.channel.css_editor']
+
   theme.negotiator.css_editor:
     class: Drupal\css_editor\Theme\CssEditorThemeNegotiator
     tags:

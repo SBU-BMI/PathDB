@@ -6,7 +6,7 @@ use Drupal\bootstrap\Utility\Crypt;
 use Drupal\Component\Render\MarkupInterface;
 
 /**
- * Class CdnAssets.
+ * Class CdnAssets is the providers API.
  */
 class CdnAssets {
 
@@ -60,7 +60,7 @@ class CdnAssets {
       $minified = ['css' => !!$minified, 'js' => !!$minified];
     }
     foreach (['css', 'js'] as $type) {
-      $assets = array_merge($assets, $this->get($type, isset($minified[$type]) ? $minified[$type] : NULL));
+      $assets = array_merge($assets, $this->get($type, $minified[$type] ?? NULL));
     }
     return $assets;
   }
@@ -200,7 +200,7 @@ class CdnAssets {
     uksort($themes, [$this, 'sortThemes']);
 
     // Post process the themes to fill in any missing assets.
-    $bootstrap = isset($themes['bootstrap']) ? $themes['bootstrap'] : new static();
+    $bootstrap = $themes['bootstrap'] ?? new static();
     foreach (array_keys($themes) as $theme) {
       // The example Bootstrap theme are just overrides, it requires the main
       // bootstrap library CSS to be loaded first.
@@ -305,7 +305,7 @@ class CdnAssets {
           // with the actual algorithm used. This is likely because the field,
           // while a valid base64 encoded hash, isn't specifically intended for
           // use as an SRI integrity attribute value.
-          list($algorithm, $hash) = Crypt::parseSriIntegrity($integrity);
+          [$algorithm, $hash] = Crypt::parseSriIntegrity($integrity);
 
           // Ensure the algorithm and hash are valid.
           if (Crypt::checkBase64HashAlgorithm($algorithm, $hash, TRUE)) {

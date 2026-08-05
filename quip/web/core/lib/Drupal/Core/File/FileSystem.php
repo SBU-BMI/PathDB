@@ -314,6 +314,13 @@ class FileSystem implements FileSystemInterface {
    * {@inheritdoc}
    */
   public function delete($path) {
+    if (is_link($path)) {
+      // See https://bugs.php.net/52176.
+      if (!($this->unlink($path) || '\\' !== \DIRECTORY_SEPARATOR || $this->rmdir($path)) && file_exists($path)) {
+        throw new FileException("Failed to unlink symlink '$path'.");
+      }
+      return TRUE;
+    }
     if (is_file($path)) {
       if (!$this->unlink($path)) {
         throw new FileException("Failed to unlink file '$path'.");
@@ -340,15 +347,28 @@ class FileSystem implements FileSystemInterface {
    * {@inheritdoc}
    */
   public function deleteRecursive($path, ?callable $callback = NULL) {
+    // Resolve stream wrapper URIs to local paths so that is_link() can
+    // detect symlinks and prevent traversal outside the target directory.
+    // Remote stream wrappers return FALSE from realpath(), in which case
+    // the original URI is kept since is_link() does not work with stream
+    // wrapper URIs.
+    if ($this->streamWrapperManager->isValidUri($path)) {
+      $realpath = $this->realpath($path);
+      if ($realpath !== FALSE) {
+        $path = $realpath;
+      }
+    }
+
     if ($callback) {
       call_user_func($callback, $path);
     }
 
-    if (!file_exists($path)) {
+    // Allow broken links to be removed.
+    if (!file_exists($path) && !is_link($path)) {
       return TRUE;
     }
 
-    if (is_dir($path)) {
+    if (is_dir($path) && !is_link($path)) {
       $dir = dir($path);
       while (($entry = $dir->read()) !== FALSE) {
         if ($entry == '.' || $entry == '..') {

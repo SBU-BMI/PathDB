@@ -50,7 +50,7 @@ class UsersKeyForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $key_id = NULL, UserInterface $user = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $key_id = NULL, ?UserInterface $user = NULL) {
     if (!$user) {
       return $form;
     }

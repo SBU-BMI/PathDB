@@ -437,12 +437,20 @@ class IndexAddFieldsForm extends EntityForm implements TrustedCallbackInterface 
           }
         }
 
-        // Remove hidden properties right away so we don't even show an "Expand"
-        // link in case all sub-properties are hidden.
+        // Remove hidden properties as well as those that can neither be
+        // expanded nor indexed right away so we don't even show an "Expand"
+        // link when it won't actually list any nested items.
         foreach ($nested_properties as $nested_key => $nested_property) {
+          $nested_property = $this->fieldsHelper->getInnerProperty($nested_property);
           if (
-            $nested_property instanceof ProcessorPropertyInterface
-            && $nested_property->isHidden()
+            (
+              $nested_property instanceof ProcessorPropertyInterface
+              && $nested_property->isHidden()
+            )
+            || (
+              !($nested_property instanceof ComplexDataDefinitionInterface)
+              && empty($type_mapping[$nested_property->getDataType()])
+            )
           ) {
             unset($nested_properties[$nested_key]);
           }
@@ -517,7 +525,20 @@ class IndexAddFieldsForm extends EntityForm implements TrustedCallbackInterface 
       $is_active = $key === $active_item;
       if ($nested_properties || $is_active) {
         $link_url = clone $base_url;
-        $query_base['property_path'] = $is_active ? $parent_path : $this_path;
+        if ($is_active) {
+          $link_path = $parent_path;
+        }
+        else {
+          $link_path = $this_path;
+          // Auto-expand single-child items.
+          if (count($nested_properties) === 1) {
+            $nested_property = $this->fieldsHelper->getInnerProperty(reset($nested_properties));
+            if ($nested_property instanceof ComplexDataDefinitionInterface) {
+              $link_path .= ':' . key($nested_properties);
+            }
+          }
+        }
+        $query_base['property_path'] = $link_path;
         $link_url->setOption('query', $query_base);
         $link = [
           '#type' => 'link',

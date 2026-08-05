@@ -99,6 +99,9 @@ class JwtTranscoder implements JwtTranscoderInterface {
     if (!$jwt_class) {
       $jwt_class = JWT::class;
     }
+    if (property_exists($jwt_class, 'leeway')) {
+      $jwt_class::$leeway = 300;
+    }
     $this->transcoder = new $jwt_class();
     if ($key) {
       $this->setKey($key);

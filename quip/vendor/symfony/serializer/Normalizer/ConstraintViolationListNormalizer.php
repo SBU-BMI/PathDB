@@ -62,7 +62,11 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
         $violations = [];
         $messages = [];
         foreach ($object as $violation) {
-            $propertyPath = $this->nameConverter ? $this->nameConverter->normalize($violation->getPropertyPath(), null, $format, $context) : $violation->getPropertyPath();
+            $propertyPath = $violation->getPropertyPath();
+
+            if (null !== $this->nameConverter) {
+                $propertyPath = $this->normalizePropertyPath($propertyPath, \is_object($violation->getRoot()) ? \get_class($violation->getRoot()) : null, $format, $context);
+            }
 
             $violationEntry = [
                 'propertyPath' => $propertyPath,
@@ -71,7 +75,7 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
                 'parameters' => $violation->getParameters(),
             ];
             if (null !== $code = $violation->getCode()) {
-                $violationEntry['type'] = sprintf('urn:uuid:%s', $code);
+                $violationEntry['type'] = \sprintf('urn:uuid:%s', $code);
             }
 
             $constraint = $violation->getConstraint();
@@ -87,7 +91,7 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
 
             $violations[] = $violationEntry;
 
-            $prefix = $propertyPath ? sprintf('%s: ', $propertyPath) : '';
+            $prefix = $propertyPath ? \sprintf('%s: ', $propertyPath) : '';
             $messages[] = $prefix.$violation->getMessage();
         }
 
@@ -106,6 +110,48 @@ class ConstraintViolationListNormalizer implements NormalizerInterface, Cacheabl
         }
 
         return $result + ['violations' => $violations];
+    }
+
+    private function normalizePropertyPath(string $propertyPath, ?string $class, ?string $format, array $context): string
+    {
+        if (!str_contains($propertyPath, '.')) {
+            return $this->nameConverter->normalize($propertyPath, $class, $format, $context);
+        }
+
+        $result = [];
+        $currentClass = $class;
+
+        foreach (explode('.', $propertyPath) as $segment) {
+            $subscript = '';
+            $propertyName = $segment;
+            if (false !== $bracketPos = strpos($segment, '[')) {
+                $propertyName = substr($segment, 0, $bracketPos);
+                $subscript = substr($segment, $bracketPos);
+            }
+
+            $result[] = $this->nameConverter->normalize($propertyName, $currentClass, $format, $context).$subscript;
+
+            $currentClass = $this->getPropertyClassFromReflection($currentClass, $propertyName);
+        }
+
+        return implode('.', $result);
+    }
+
+    private function getPropertyClassFromReflection(?string $class, string $property): ?string
+    {
+        if (null === $class) {
+            return null;
+        }
+
+        try {
+            $type = (new \ReflectionProperty($class, $property))->getType();
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                return $type->getName();
+            }
+        } catch (\ReflectionException) {
+        }
+
+        return null;
     }
 
     /**

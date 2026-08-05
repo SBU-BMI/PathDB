@@ -4,22 +4,23 @@ namespace Drupal\search_api\Plugin\search_api\processor;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\search_api\Attribute\SearchApiProcessor;
 use Drupal\search_api\Plugin\PluginFormTrait;
 use Drupal\search_api\Processor\ProcessorPluginBase;
 use Drupal\search_api\Utility\Utility;
 
 /**
  * Adds a boost based on a number field value.
- *
- * @SearchApiProcessor(
- *   id = "number_field_boost",
- *   label = @Translation("Number field-based boosting"),
- *   description = @Translation("Adds a boost to indexed items based on the value of a numeric field."),
- *   stages = {
- *     "preprocess_index" = 0,
- *   }
- * )
  */
+#[SearchApiProcessor(
+  id: 'number_field_boost',
+  label: new TranslatableMarkup('Number field-based boosting'),
+  description: new TranslatableMarkup('Adds a boost to indexed items based on the value of a numeric field.'),
+  stages: [
+    'preprocess_index' => 0,
+  ],
+)]
 class NumberFieldBoost extends ProcessorPluginBase implements PluginFormInterface {
 
   use PluginFormTrait;
@@ -97,7 +98,7 @@ class NumberFieldBoost extends ProcessorPluginBase implements PluginFormInterfac
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
     $ignore = Utility::formatBoostFactor(0);
-    foreach ($values['boosts'] as $field_id => $settings) {
+    foreach ($values['boosts'] ?? [] as $field_id => $settings) {
       if (!$settings['boost_factor'] || $settings['boost_factor'] === $ignore) {
         unset($values['boosts'][$field_id]);
       }
@@ -133,7 +134,7 @@ class NumberFieldBoost extends ProcessorPluginBase implements PluginFormInterfac
               }
               // Make sure the value is never negative.
               $value = max($value, 0);
-              $item->setBoost($item->getBoost() * (double) $value * (double) $settings['boost_factor']);
+              $item->setBoost($item->getBoost() * (float) $value * (float) $settings['boost_factor']);
             }
           }
         }

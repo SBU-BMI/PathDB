@@ -16,6 +16,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface;
+use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -30,6 +31,7 @@ use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\external_entities\Entity\Query\External\Query as ExternalEntitiesQuery;
 use Drupal\field\FieldConfigInterface;
 use Drupal\field\FieldStorageConfigInterface;
+use Drupal\search_api\Attribute\SearchApiDatasource;
 use Drupal\search_api\Datasource\DatasourcePluginBase;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\LoggerTrait;
@@ -41,12 +43,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Represents a datasource which exposes the content entities.
- *
- * @SearchApiDatasource(
- *   id = "entity",
- *   deriver = "Drupal\search_api\Plugin\search_api\datasource\ContentEntityDeriver"
- * )
  */
+#[SearchApiDatasource(
+  id: 'entity',
+  deriver: ContentEntityDeriver::class,
+)]
 class ContentEntity extends DatasourcePluginBase implements PluginFormInterface {
 
   use LoggerTrait;
@@ -477,7 +478,12 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
     // confusion.
     foreach ($properties as $key => $property) {
       if (!$property->isComputed() || $key === 'path') {
-        if ($property->getFieldStorageDefinition()->hasCustomStorage()) {
+        try {
+          if ($property->getFieldStorageDefinition()->hasCustomStorage()) {
+            unset($properties[$key]);
+          }
+        }
+        catch (FieldException) {
           unset($properties[$key]);
         }
       }
@@ -735,7 +741,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
   /**
    * {@inheritdoc}
    */
-  public function getItemAccessResult(ComplexDataInterface $item, AccountInterface $account = NULL) {
+  public function getItemAccessResult(ComplexDataInterface $item, ?AccountInterface $account = NULL) {
     $entity = $this->getEntity($item);
     if ($entity) {
       return $this->getEntityTypeManager()
@@ -809,7 +815,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
    *   In case both bundles and languages are specified, they are combined with
    *   OR.
    */
-  public function getPartialItemIds($page = NULL, array $bundles = NULL, array $languages = NULL) {
+  public function getPartialItemIds($page = NULL, ?array $bundles = NULL, ?array $languages = NULL) {
     // These would be pretty pointless calls, but for the sake of completeness
     // we should check for them and return early. (Otherwise makes the rest of
     // the code more complicated.)
@@ -1133,7 +1139,7 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
   /**
    * {@inheritdoc}
    */
-  public function getAffectedItemsForEntityChange(EntityInterface $entity, array $foreign_entity_relationship_map, EntityInterface $original_entity = NULL): array {
+  public function getAffectedItemsForEntityChange(EntityInterface $entity, array $foreign_entity_relationship_map, ?EntityInterface $original_entity = NULL): array {
     if (!($entity instanceof ContentEntityInterface)) {
       return [];
     }
@@ -1184,8 +1190,13 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
         catch (\Throwable $e) {
           // We don't want to catch all PHP \Error objects thrown, but just the
           // ones caused by #2893747.
-          if (!($e instanceof \Exception)
-              && (get_class($e) !== \Error::class || $e->getMessage() !== 'Call to a member function getColumns() on bool')) {
+          if (
+            !($e instanceof \Exception)
+            && (
+              get_class($e) !== \Error::class
+              || !str_starts_with($e->getMessage(), 'Call to a member function getColumns() on')
+            )
+          ) {
             throw $e;
           }
           $vars = [
@@ -1212,8 +1223,14 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
         }
       }
     }
+    $ids_to_reindex = array_keys($ids_to_reindex);
 
-    return array_keys($ids_to_reindex);
+    if ($ids_to_reindex) {
+      $combined_ids = array_map($this->createCombinedId(...), $ids_to_reindex);
+      $this->getIndex()->registerUnreliableItemIds($combined_ids);
+    }
+
+    return $ids_to_reindex;
   }
 
   /**
@@ -1272,7 +1289,14 @@ class ContentEntity extends DatasourcePluginBase implements PluginFormInterface 
   }
 
   /**
-   * {@inheritdoc}
+   * Retrieves all indexes that are configured to index the given entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity for which to check.
+   *
+   * @return \Drupal\search_api\IndexInterface[]
+   *   All indexes that are configured to index the given entity (using this
+   *   datasource class).
    */
   public static function getIndexesForEntity(ContentEntityInterface $entity) {
     return \Drupal::getContainer()

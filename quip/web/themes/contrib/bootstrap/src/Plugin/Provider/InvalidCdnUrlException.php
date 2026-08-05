@@ -3,6 +3,6 @@
 namespace Drupal\bootstrap\Plugin\Provider;
 
 /**
- * Class InvalidCdnUrlException.
+ * Class InvalidCdnUrlException for aesthetics and future considerations.
  */
 class InvalidCdnUrlException extends \RuntimeException {}

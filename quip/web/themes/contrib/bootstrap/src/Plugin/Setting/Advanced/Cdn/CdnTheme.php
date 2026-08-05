@@ -70,7 +70,7 @@ class CdnTheme extends CdnProviderBase {
   public function processDeprecatedValues(array $values, array $deprecated) {
     // @todo Remove deprecated setting support in a future release.
     $deprecated = "cdn_{$this->getProvider()->getPluginId()}_theme";
-    return isset($values[$deprecated]) ? $values[$deprecated] : NULL;
+    return $values[$deprecated] ?? NULL;
   }
 
 }

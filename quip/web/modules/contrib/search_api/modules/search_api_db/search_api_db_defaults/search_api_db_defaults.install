@@ -5,14 +5,20 @@
  * Install, update and uninstall functions for the DB Search Defaults module.
  */
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
 use Drupal\search_api\IndexListBuilder;
 
 /**
  * Implements hook_requirements().
  */
+#[LegacyRequirementsHook]
 function search_api_db_defaults_requirements($phase) {
   $requirements = [];
 
+  // @todo Once we depend on Drupal 11.2, move this code to
+  //   SearchApiDbDefaultsInstallRequirements::getRequirements().
   if ($phase == 'install') {
     // In case this is installed at the same time as the Search API module
     // itself, the class autoloader will not be able to find the
@@ -22,10 +28,16 @@ function search_api_db_defaults_requirements($phase) {
       require_once $search_api_path . '/src/IndexListBuilder.php';
     }
 
+    $severity_error = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.2',
+      fn () => RequirementSeverity::Error,
+      fn () => REQUIREMENT_ERROR,
+    );
     $errors = IndexListBuilder::checkDefaultsModuleCanBeInstalled();
     foreach ($errors as $type => $error) {
       $requirements["search_api_db_defaults:$type"] = [
-        'severity' => REQUIREMENT_ERROR,
+        'severity' => $severity_error,
         'description' => $error,
       ];
     }

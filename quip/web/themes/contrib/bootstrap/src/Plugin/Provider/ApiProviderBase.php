@@ -197,11 +197,14 @@ abstract class ApiProviderBase extends ProviderBase {
       $mapped['3.4.3'] = '3.4.0';
       $mapped['3.4.4'] = '3.4.0';
       $mapped['3.4.5'] = '3.4.0';
+      $mapped['3.4.6'] = '3.4.0';
+      $mapped['3.4.7'] = '3.4.0';
+      $mapped['3.4.8'] = '3.4.0';
       // This version doesn't exist.
       $mapped['3.1.1'] = '3.2.0';
     }
 
-    return isset($mapped[$version]) ? $mapped[$version] : $version;
+    return $mapped[$version] ?? $version;
   }
 
   /**
@@ -214,13 +217,13 @@ abstract class ApiProviderBase extends ProviderBase {
    *   should also include the version path prefix as well.
    * @param string $version
    *   A specific version to use.
-   * @param \Drupal\bootstrap\Plugin\Provider\CdnAssets $assets
+   * @param \Drupal\bootstrap\Plugin\Provider\CdnAssets|null $assets
    *   An existing CdnAssets object, if chaining multiple requests together.
    *
    * @return \Drupal\bootstrap\Plugin\Provider\CdnAssets
    *   A CdnAssets object containing the necessary assets.
    */
-  protected function parseAssets(array $data, $library, $version, CdnAssets $assets = NULL) {
+  protected function parseAssets(array $data, $library, $version, ?CdnAssets $assets = NULL) {
     if (!isset($assets)) {
       $assets = new CdnAssets();
     }
@@ -309,25 +312,25 @@ abstract class ApiProviderBase extends ProviderBase {
    *   The library to request.
    * @param string $version
    *   The version to request.
-   * @param \Drupal\bootstrap\Plugin\Provider\CdnAssets $assets
+   * @param \Drupal\bootstrap\Plugin\Provider\CdnAssets|null $assets
    *   An existing CdnAssets object, if chaining multiple requests together.
    *
    * @return \Drupal\bootstrap\Plugin\Provider\CdnAssets
    *   The CdnAssets provided by the API.
    */
-  protected function requestApiAssets($library, $version, CdnAssets $assets = NULL) {
+  protected function requestApiAssets($library, $version, ?CdnAssets $assets = NULL) {
     $url = $this->getApiAssetsUrl($library, $version);
 
     if (strpos($url, 'bootswatch')) {
       // Workaround for leveraging bootswatch which doesn't need recompiling.
       $url = str_replace('entreprise7pro-bootswatch', 'bootswatch', $url);
     }
-    else if (strpos($url, 'entreprise7pro-boot')) {
+    elseif (strpos($url, 'entreprise7pro-boot')) {
       // Force an upgrade for everyone using older versions of the bootstrap library.
       if (version_compare($version, '3.4.1', '<=')) {
-        // Fix CVE-2024-6485 see release https://github.com/entreprise7pro/bootstrap/releases/tag/v3.4.5.
-        // 3.4.5 is compatible with jQuery 1,2,3 and 4, good D10 and D11.
-        $version = '3.4.5';
+        // Fix CVE-2024-6485 see release https://github.com/entreprise7pro/bootstrap/releases/tag/v3.4.8.
+        // 3.4.8 is compatible with jQuery 1,2,3 and 4, good D10 and D11.
+        $version = '3.4.8';
       }
     }
 

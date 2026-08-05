@@ -5,6 +5,7 @@ namespace SlevomatCodingStandard\Sniffs\ControlStructures;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use SlevomatCodingStandard\Helpers\AttributeHelper;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use const T_ANON_CLASS;
 use const T_ATTRIBUTE;
@@ -18,6 +19,7 @@ use const T_INLINE_ELSE;
 use const T_INLINE_THEN;
 use const T_NEW;
 use const T_OPEN_PARENTHESIS;
+use const T_READONLY;
 use const T_SEMICOLON;
 
 class NewWithParenthesesSniff implements Sniff
@@ -49,7 +51,7 @@ class NewWithParenthesesSniff implements Sniff
 			$nextPointer = AttributeHelper::getAttributeTarget($phpcsFile, $nextPointer);
 		}
 
-		if ($tokens[$nextPointer]['code'] === T_ANON_CLASS) {
+		if ($tokens[$nextPointer]['code'] === T_ANON_CLASS || $tokens[$nextPointer]['code'] === T_READONLY) {
 			return;
 		}
 
@@ -73,7 +75,7 @@ class NewWithParenthesesSniff implements Sniff
 					T_CLOSE_PARENTHESIS,
 					T_DOUBLE_ARROW,
 				],
-				$shouldBeOpenParenthesisPointer
+				$shouldBeOpenParenthesisPointer,
 			);
 
 			if (
@@ -97,7 +99,7 @@ class NewWithParenthesesSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Usage of "new" without parentheses is disallowed.',
 			$newPointer,
-			self::CODE_MISSING_PARENTHESES
+			self::CODE_MISSING_PARENTHESES,
 		);
 		if (!$fix) {
 			return;
@@ -107,7 +109,7 @@ class NewWithParenthesesSniff implements Sniff
 		$classNameEndPointer = TokenHelper::findPreviousEffective($phpcsFile, $shouldBeOpenParenthesisPointer - 1);
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->addContent($classNameEndPointer, '()');
+		FixerHelper::add($phpcsFile, $classNameEndPointer, '()');
 		$phpcsFile->fixer->endChangeset();
 	}
 

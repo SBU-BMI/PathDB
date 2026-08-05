@@ -26,6 +26,7 @@ final class ExplicitBucketHistogramAggregation implements AggregationInterface
     ) {
     }
 
+    #[\Override]
     public function initialize(): ExplicitBucketHistogramSummary
     {
         return new ExplicitBucketHistogramSummary(
@@ -39,7 +40,9 @@ final class ExplicitBucketHistogramAggregation implements AggregationInterface
 
     /**
      * @param ExplicitBucketHistogramSummary $summary
+     * @psalm-suppress InvalidArrayOffset
      */
+    #[\Override]
     public function record($summary, $value, AttributesInterface $attributes, ContextInterface $context, int $timestamp): void
     {
         $boundariesCount = count($this->boundaries);
@@ -56,6 +59,7 @@ final class ExplicitBucketHistogramAggregation implements AggregationInterface
      * @param ExplicitBucketHistogramSummary $left
      * @param ExplicitBucketHistogramSummary $right
      */
+    #[\Override]
     public function merge($left, $right): ExplicitBucketHistogramSummary
     {
         $count = $left->count + $right->count;
@@ -80,6 +84,7 @@ final class ExplicitBucketHistogramAggregation implements AggregationInterface
      * @param ExplicitBucketHistogramSummary $left
      * @param ExplicitBucketHistogramSummary $right
      */
+    #[\Override]
     public function diff($left, $right): ExplicitBucketHistogramSummary
     {
         $count = -$left->count + $right->count;
@@ -103,6 +108,7 @@ final class ExplicitBucketHistogramAggregation implements AggregationInterface
     /**
      * @param array<ExplicitBucketHistogramSummary> $summaries
      */
+    #[\Override]
     public function toData(
         array $attributes,
         array $summaries,

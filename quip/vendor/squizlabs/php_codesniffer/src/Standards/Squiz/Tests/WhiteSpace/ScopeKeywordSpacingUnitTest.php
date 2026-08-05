@@ -4,7 +4,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Squiz\Tests\WhiteSpace;
@@ -58,6 +58,22 @@ final class ScopeKeywordSpacingUnitTest extends AbstractSniffUnitTest
                 140 => 3,
                 145 => 1,
                 149 => 1,
+                152 => 1,
+                155 => 1,
+                158 => 1,
+                162 => 1,
+                163 => 1,
+                166 => 1,
+                167 => 1,
+                179 => 1,
+                186 => 1,
+                187 => 1,
+                188 => 1,
+                193 => 2,
+                197 => 1,
+                198 => 3,
+                199 => 2,
+                208 => 2,
             ];
 
         case 'ScopeKeywordSpacingUnitTest.3.inc':

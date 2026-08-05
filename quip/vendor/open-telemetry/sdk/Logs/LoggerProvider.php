@@ -6,6 +6,7 @@ namespace OpenTelemetry\SDK\Logs;
 
 use OpenTelemetry\API\Logs\LoggerInterface;
 use OpenTelemetry\API\Logs\NoopLogger;
+use OpenTelemetry\API\Metrics\MeterProviderInterface;
 use OpenTelemetry\SDK\Common\Future\CancellationInterface;
 use OpenTelemetry\SDK\Common\Instrumentation\InstrumentationScopeFactoryInterface;
 use OpenTelemetry\SDK\Common\InstrumentationScope\Configurator;
@@ -26,11 +27,13 @@ class LoggerProvider implements LoggerProviderInterface
         private readonly InstrumentationScopeFactoryInterface $instrumentationScopeFactory,
         ?ResourceInfo $resource = null,
         private ?Configurator $configurator = null,
+        ?MeterProviderInterface $meterProvider = null,
     ) {
         $this->loggerSharedState = new LoggerSharedState(
             $resource ?? ResourceInfoFactory::defaultResource(),
             (new LogRecordLimitsBuilder())->build(),
-            $processor
+            $processor,
+            $meterProvider,
         );
         $this->loggers = new WeakMap();
     }
@@ -38,6 +41,7 @@ class LoggerProvider implements LoggerProviderInterface
     /**
      * @see https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/sdk.md#logger-creation
      */
+    #[\Override]
     public function getLogger(string $name, ?string $version = null, ?string $schemaUrl = null, iterable $attributes = []): LoggerInterface
     {
         if ($this->loggerSharedState->hasShutdown()) {
@@ -50,11 +54,13 @@ class LoggerProvider implements LoggerProviderInterface
         return $logger;
     }
 
+    #[\Override]
     public function shutdown(?CancellationInterface $cancellation = null): bool
     {
         return $this->loggerSharedState->shutdown($cancellation);
     }
 
+    #[\Override]
     public function forceFlush(?CancellationInterface $cancellation = null): bool
     {
         return $this->loggerSharedState->forceFlush($cancellation);
@@ -70,6 +76,7 @@ class LoggerProvider implements LoggerProviderInterface
      * reconfigure all loggers created from the provider.
      * @experimental
      */
+    #[\Override]
     public function updateConfigurator(Configurator $configurator): void
     {
         $this->configurator = $configurator;

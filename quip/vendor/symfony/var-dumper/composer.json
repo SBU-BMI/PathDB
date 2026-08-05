@@ -21,13 +21,12 @@
         "symfony/polyfill-mbstring": "~1.0"
     },
     "require-dev": {
-        "ext-iconv": "*",
         "symfony/console": "^5.4|^6.0|^7.0",
         "symfony/error-handler": "^6.3|^7.0",
         "symfony/http-kernel": "^5.4|^6.0|^7.0",
         "symfony/process": "^5.4|^6.0|^7.0",
         "symfony/uid": "^5.4|^6.0|^7.0",
-        "twig/twig": "^2.13|^3.0.4"
+        "twig/twig": "^2.13|^3.0.4|^4.0"
     },
     "conflict": {
         "symfony/console": "<5.4"

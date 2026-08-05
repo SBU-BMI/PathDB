@@ -3,12 +3,13 @@
  * Tests for the \PHP_CodeSniffer\Filters\GitModified class.
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
- * @copyright 2023 PHPCSStandards Contributors
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @copyright 2023 PHPCSStandards and contributors
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Filters;
 
+use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Filters\GitModified;
 use PHP_CodeSniffer\Tests\Core\Filters\AbstractFilterTestCase;
 use RecursiveArrayIterator;
@@ -45,7 +46,7 @@ final class GitModifiedTest extends AbstractFilterTestCase
             ->method('exec')
             ->willReturn(['autoload.php']);
 
-        $this->assertEquals([$rootFile], $this->getFilteredResultsAsArray($mockObj));
+        $this->assertSame([$rootFile], $this->getFilteredResultsAsArray($mockObj));
 
     }//end testFileNamePassesAsBasePathWillTranslateToDirname()
 
@@ -76,7 +77,7 @@ final class GitModifiedTest extends AbstractFilterTestCase
             ->method('exec')
             ->willReturn($outputGitModified);
 
-        $this->assertEquals($expectedOutput, $this->getFilteredResultsAsArray($mockObj));
+        $this->assertSame($expectedOutput, $this->getFilteredResultsAsArray($mockObj));
 
     }//end testAcceptOnlyGitModified()
 
@@ -219,11 +220,15 @@ final class GitModifiedTest extends AbstractFilterTestCase
             $this->markTestSkipped('Not a git repository');
         }
 
+        if (Config::getExecutablePath('git') === null) {
+            $this->markTestSkipped('git command not available');
+        }
+
         $fakeDI = new RecursiveArrayIterator(self::getFakeFileList());
         $filter = new GitModified($fakeDI, '/', self::$config, self::$ruleset);
 
         $reflMethod = new ReflectionMethod($filter, 'exec');
-        $reflMethod->setAccessible(true);
+        (PHP_VERSION_ID < 80100) && $reflMethod->setAccessible(true);
         $result = $reflMethod->invoke($filter, $cmd);
 
         $this->assertSame($expected, $result);

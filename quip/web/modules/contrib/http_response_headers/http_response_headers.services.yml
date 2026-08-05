@@ -4,3 +4,7 @@ services:
     arguments: ['@entity_type.manager', '@context.handler', '@context.repository']
     tags:
       - { name: 'event_subscriber' }
+
+  Drupal\http_response_headers\Hook\HttpResponseHeadersHooks:
+    class: Drupal\http_response_headers\Hook\HttpResponseHeadersHooks
+    autowire: true

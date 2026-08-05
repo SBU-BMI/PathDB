@@ -16,6 +16,8 @@ use Composer\DependencyResolver\PoolOptimizer;
 use Composer\DependencyResolver\Pool;
 use Composer\DependencyResolver\PoolBuilder;
 use Composer\DependencyResolver\Request;
+use Composer\DependencyResolver\FilterListPoolFilter;
+use Composer\DependencyResolver\SecurityAdvisoryPoolFilter;
 use Composer\EventDispatcher\EventDispatcher;
 use Composer\Advisory\SecurityAdvisory;
 use Composer\Advisory\PartialSecurityAdvisory;
@@ -227,56 +229,73 @@ class RepositorySet
 
     /**
      * @param string[] $packageNames
-     * @return ($allowPartialAdvisories is true ? array<string, array<PartialSecurityAdvisory|SecurityAdvisory>> : array<string, array<SecurityAdvisory>>)
+     * @return ($allowPartialAdvisories is true ? array{advisories: array<string, array<PartialSecurityAdvisory|SecurityAdvisory>>, unreachableRepos: array<string>} : array{advisories: array<string, array<SecurityAdvisory>>, unreachableRepos: array<string>})
      */
-    public function getSecurityAdvisories(array $packageNames, bool $allowPartialAdvisories = false): array
+    public function getSecurityAdvisories(array $packageNames, bool $allowPartialAdvisories, bool $ignoreUnreachable = false): array
     {
         $map = [];
         foreach ($packageNames as $name) {
             $map[$name] = new MatchAllConstraint();
         }
 
-        return $this->getSecurityAdvisoriesForConstraints($map, $allowPartialAdvisories);
+        $unreachableRepos = [];
+        $advisories = $this->getSecurityAdvisoriesForConstraints($map, $allowPartialAdvisories, $ignoreUnreachable, $unreachableRepos);
+
+        return ['advisories' => $advisories, 'unreachableRepos' => $unreachableRepos];
     }
 
     /**
      * @param PackageInterface[] $packages
-     * @return ($allowPartialAdvisories is true ? array<string, array<PartialSecurityAdvisory|SecurityAdvisory>> : array<string, array<SecurityAdvisory>>)
+     * @return ($allowPartialAdvisories is true ? array{advisories: array<string, array<PartialSecurityAdvisory|SecurityAdvisory>>, unreachableRepos: array<string>} : array{advisories: array<string, array<SecurityAdvisory>>, unreachableRepos: array<string>})
      */
-    public function getMatchingSecurityAdvisories(array $packages, bool $allowPartialAdvisories = false): array
+    public function getMatchingSecurityAdvisories(array $packages, bool $allowPartialAdvisories = false, bool $ignoreUnreachable = false): array
     {
-        $map = [];
+        $constraintsByName = [];
         foreach ($packages as $package) {
             // ignore root alias versions as they are not actual package versions and should not matter when it comes to vulnerabilities
             if ($package instanceof AliasPackage && $package->isRootPackageAlias()) {
                 continue;
             }
-            if (isset($map[$package->getName()])) {
-                $map[$package->getName()] = new MultiConstraint([new Constraint('=', $package->getVersion()), $map[$package->getName()]], false);
-            } else {
-                $map[$package->getName()] = new Constraint('=', $package->getVersion());
-            }
+            // key by version so duplicate versions collapse and the resulting OR constraint stays flat
+            // (nesting one MultiConstraint per version produces trees deep enough to blow the stack, see composer/semver#177)
+            $constraintsByName[$package->getName()][$package->getVersion()] = new Constraint('=', $package->getVersion());
         }
 
-        return $this->getSecurityAdvisoriesForConstraints($map, $allowPartialAdvisories);
+        $map = [];
+        foreach ($constraintsByName as $name => $constraints) {
+            $map[$name] = MultiConstraint::create(array_values($constraints), false);
+        }
+
+        $unreachableRepos = [];
+        $advisories = $this->getSecurityAdvisoriesForConstraints($map, $allowPartialAdvisories, $ignoreUnreachable, $unreachableRepos);
+
+        return ['advisories' => $advisories, 'unreachableRepos' => $unreachableRepos];
     }
 
     /**
      * @param array<string, ConstraintInterface> $packageConstraintMap
+     * @param array<string> &$unreachableRepos Array to store messages about unreachable repositories
      * @return ($allowPartialAdvisories is true ? array<string, array<PartialSecurityAdvisory|SecurityAdvisory>> : array<string, array<SecurityAdvisory>>)
      */
-    private function getSecurityAdvisoriesForConstraints(array $packageConstraintMap, bool $allowPartialAdvisories): array
+    private function getSecurityAdvisoriesForConstraints(array $packageConstraintMap, bool $allowPartialAdvisories, bool $ignoreUnreachable = false, array &$unreachableRepos = []): array
     {
         $repoAdvisories = [];
         foreach ($this->repositories as $repository) {
-            if (!$repository instanceof AdvisoryProviderInterface || !$repository->hasSecurityAdvisories()) {
-                continue;
-            }
+            try {
+                if (!$repository instanceof AdvisoryProviderInterface || !$repository->hasSecurityAdvisories()) {
+                    continue;
+                }
 
-            $repoAdvisories[] = $repository->getSecurityAdvisories($packageConstraintMap, $allowPartialAdvisories)['advisories'];
+                $repoAdvisories[] = $repository->getSecurityAdvisories($packageConstraintMap, $allowPartialAdvisories)['advisories'];
+            } catch (\Composer\Downloader\TransportException $e) {
+                if (!$ignoreUnreachable) {
+                    throw $e;
+                }
+                $unreachableRepos[] = $e->getMessage();
+            }
         }
 
-        $advisories = array_merge_recursive([], ...$repoAdvisories);
+        $advisories = count($repoAdvisories) > 0 ? array_merge_recursive([], ...$repoAdvisories) : [];
         ksort($advisories);
 
         return $advisories;
@@ -315,9 +334,9 @@ class RepositorySet
      * @param list<string>      $ignoredTypes Packages of those types are ignored
      * @param list<string>|null $allowedTypes Only packages of those types are allowed if set to non-null
      */
-    public function createPool(Request $request, IOInterface $io, ?EventDispatcher $eventDispatcher = null, ?PoolOptimizer $poolOptimizer = null, array $ignoredTypes = [], ?array $allowedTypes = null): Pool
+    public function createPool(Request $request, IOInterface $io, ?EventDispatcher $eventDispatcher = null, ?PoolOptimizer $poolOptimizer = null, array $ignoredTypes = [], ?array $allowedTypes = null, ?SecurityAdvisoryPoolFilter $securityAdvisoryPoolFilter = null, ?FilterListPoolFilter $filterListPoolFilter = null): Pool
     {
-        $poolBuilder = new PoolBuilder($this->acceptableStabilities, $this->stabilityFlags, $this->rootAliases, $this->rootReferences, $io, $eventDispatcher, $poolOptimizer, $this->temporaryConstraints);
+        $poolBuilder = new PoolBuilder($this->acceptableStabilities, $this->stabilityFlags, $this->rootAliases, $this->rootReferences, $io, $eventDispatcher, $poolOptimizer, $this->temporaryConstraints, $securityAdvisoryPoolFilter, $filterListPoolFilter);
         $poolBuilder->setIgnoredTypes($ignoredTypes);
         $poolBuilder->setAllowedTypes($allowedTypes);
 

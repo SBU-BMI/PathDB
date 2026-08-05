@@ -1,0 +1,25 @@
+uuid: a1d7d569-4440-454e-96c7-a0d76efcfd99
+langcode: en
+status: true
+dependencies:
+  module:
+    - basic_auth
+    - jwt
+    - menu_link_content
+    - serialization
+    - user
+id: entity.menu_link_content
+plugin_id: 'entity:menu_link_content'
+granularity: resource
+configuration:
+  methods:
+    - GET
+    - POST
+    - DELETE
+    - PATCH
+  formats:
+    - json
+  authentication:
+    - basic_auth
+    - jwt_auth
+    - cookie

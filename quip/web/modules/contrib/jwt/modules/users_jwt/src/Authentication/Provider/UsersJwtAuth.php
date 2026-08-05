@@ -66,13 +66,16 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
    * @param string|null $jwt_class
    *   The JWT library class.
    */
-  public function __construct(UsersJwtKeyRepositoryInterface $key_repository, EntityTypeManagerInterface $entity_type_manager, Settings $settings, LoggerChannelFactoryInterface $logger_factory, string $jwt_class = NULL) {
+  public function __construct(UsersJwtKeyRepositoryInterface $key_repository, EntityTypeManagerInterface $entity_type_manager, Settings $settings, LoggerChannelFactoryInterface $logger_factory, ?string $jwt_class = NULL) {
     $this->keyRepository = $key_repository;
     $this->entityTypeManager = $entity_type_manager;
     $this->settings = $settings;
     $this->loggerFactory = $logger_factory;
     if (!$jwt_class) {
       $jwt_class = JWT::class;
+    }
+    if (property_exists($jwt_class, 'leeway')) {
+      $jwt_class::$leeway = 300;
     }
     $this->transcoder = new $jwt_class();
   }
@@ -192,7 +195,7 @@ class UsersJwtAuth implements AuthenticationProviderInterface {
    * @return null
    *   NULL to be returned instead of a user.
    */
-  protected function debugLog($cause, \Exception $e = NULL, \StdClass $payload = NULL, UsersKey $key = NULL, UserInterface $user = NULL) {
+  protected function debugLog($cause, ?\Exception $e = NULL, ?\StdClass $payload = NULL, ?UsersKey $key = NULL, ?UserInterface $user = NULL) {
     if ($this->settings::get('jwt.debug_log')) {
       $this->loggerFactory->get('users_jwt')
         ->error('Error authenticating with a JWT "%cause". Exception: "%exception" Payload: "%payload" Key: "%key" User: "%user"', [

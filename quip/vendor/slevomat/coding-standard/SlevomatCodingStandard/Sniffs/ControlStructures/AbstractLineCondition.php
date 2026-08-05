@@ -4,7 +4,6 @@ namespace SlevomatCodingStandard\Sniffs\ControlStructures;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
-use SlevomatCodingStandard\Helpers\IndentationHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use function array_key_exists;
@@ -26,7 +25,7 @@ abstract class AbstractLineCondition implements Sniff
 	protected const DO_CONTROL_STRUCTURE = 'do';
 
 	/** @var list<string> */
-	public $checkedControlStructures = [
+	public array $checkedControlStructures = [
 		self::IF_CONTROL_STRUCTURE,
 		self::WHILE_CONTROL_STRUCTURE,
 		self::DO_CONTROL_STRUCTURE,
@@ -108,7 +107,7 @@ abstract class AbstractLineCondition implements Sniff
 	{
 		$firstPointerOnLine = TokenHelper::findFirstTokenOnLine($phpcsFile, $pointer);
 
-		return IndentationHelper::convertTabsToSpaces($phpcsFile, TokenHelper::getContent($phpcsFile, $firstPointerOnLine, $pointer));
+		return TokenHelper::getContent($phpcsFile, $firstPointerOnLine, $pointer);
 	}
 
 	protected function getCondition(File $phpcsFile, int $parenthesisOpenerPointer, int $parenthesisCloserPointer): string

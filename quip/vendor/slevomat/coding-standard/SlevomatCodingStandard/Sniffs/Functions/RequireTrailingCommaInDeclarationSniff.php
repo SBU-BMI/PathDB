@@ -4,6 +4,7 @@ namespace SlevomatCodingStandard\Sniffs\Functions;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use const T_COMMA;
@@ -13,15 +14,14 @@ class RequireTrailingCommaInDeclarationSniff implements Sniff
 
 	public const CODE_MISSING_TRAILING_COMMA = 'MissingTrailingComma';
 
-	/** @var bool|null */
-	public $enable = null;
+	public ?bool $enable = null;
 
 	/**
 	 * @return array<int, (int|string)>
 	 */
 	public function register(): array
 	{
-		return TokenHelper::$functionTokenCodes;
+		return TokenHelper::FUNCTION_TOKEN_CODES;
 	}
 
 	/**
@@ -48,7 +48,7 @@ class RequireTrailingCommaInDeclarationSniff implements Sniff
 		$pointerBeforeParenthesisCloser = TokenHelper::findPreviousEffective(
 			$phpcsFile,
 			$parenthesisCloserPointer - 1,
-			$parenthesisOpenerPointer
+			$parenthesisOpenerPointer,
 		);
 
 		if ($pointerBeforeParenthesisCloser === $parenthesisOpenerPointer) {
@@ -62,7 +62,7 @@ class RequireTrailingCommaInDeclarationSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Multi-line function declaration must have a trailing comma after the last parameter.',
 			$pointerBeforeParenthesisCloser,
-			self::CODE_MISSING_TRAILING_COMMA
+			self::CODE_MISSING_TRAILING_COMMA,
 		);
 
 		if (!$fix) {
@@ -70,7 +70,7 @@ class RequireTrailingCommaInDeclarationSniff implements Sniff
 		}
 
 		$phpcsFile->fixer->beginChangeset();
-		$phpcsFile->fixer->addContent($pointerBeforeParenthesisCloser, ',');
+		FixerHelper::add($phpcsFile, $pointerBeforeParenthesisCloser, ',');
 		$phpcsFile->fixer->endChangeset();
 	}
 

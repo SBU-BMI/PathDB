@@ -118,9 +118,9 @@ class Deprecation
             return;
         }
 
-        set_error_handler(function () {});
+        set_error_handler(static function () {});
         try {
-            $parsedMsg = unserialize($this->message);
+            $parsedMsg = unserialize($this->message, ['allowed_classes' => false]);
         } finally {
             restore_error_handler();
         }
@@ -351,7 +351,7 @@ class Deprecation
             }
         }
 
-        throw new \RuntimeException(sprintf('No vendors found for path "%s".', $path));
+        throw new \RuntimeException(\sprintf('No vendors found for path "%s".', $path));
     }
 
     /**
@@ -374,6 +374,10 @@ class Deprecation
                         $loader = require $v.'/autoload.php';
                         $paths = self::addSourcePathsFromPrefixes(
                             array_merge($loader->getPrefixes(), $loader->getPrefixesPsr4()),
+                            $paths
+                        );
+                        $paths = self::addSourcePathsFromPrefixes(
+                            ['fallback' => $loader->getFallbackDirs(), 'fallback_psr4' => $loader->getFallbackDirsPsr4()],
                             $paths
                         );
                     }
@@ -437,7 +441,9 @@ class Deprecation
     {
         $exception = new \Exception($this->message);
         $reflection = new \ReflectionProperty($exception, 'trace');
-        $reflection->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $reflection->setAccessible(true);
+        }
         $reflection->setValue($exception, $this->trace);
 
         return ($this->originatesFromAnObject() ? 'deprecation triggered by '.$this->originatingClass().'::'.$this->originatingMethod().":\n" : '')

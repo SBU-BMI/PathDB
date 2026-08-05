@@ -8,25 +8,30 @@ namespace SlevomatCodingStandard\Helpers;
 class Attribute
 {
 
-	/** @var int */
-	private $attributePointer;
+	private int $attributePointer;
 
-	/** @var string */
-	private $name;
+	private string $name;
 
-	/** @var int */
-	private $startPointer;
+	private string $fullyQualifiedName;
 
-	/** @var int */
-	private $endPointer;
+	private int $startPointer;
 
-	/** @var string|null */
-	private $content;
+	private int $endPointer;
 
-	public function __construct(int $attributePointer, string $name, int $startPointer, int $endPointer, ?string $content = null)
+	private ?string $content = null;
+
+	public function __construct(
+		int $attributePointer,
+		string $name,
+		string $fullyQualifiedName,
+		int $startPointer,
+		int $endPointer,
+		?string $content = null
+	)
 	{
 		$this->attributePointer = $attributePointer;
 		$this->name = $name;
+		$this->fullyQualifiedName = $fullyQualifiedName;
 		$this->startPointer = $startPointer;
 		$this->endPointer = $endPointer;
 		$this->content = $content;
@@ -40,6 +45,11 @@ class Attribute
 	public function getName(): string
 	{
 		return $this->name;
+	}
+
+	public function getFullyQualifiedName(): string
+	{
+		return $this->fullyQualifiedName;
 	}
 
 	public function getStartPointer(): int

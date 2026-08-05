@@ -24,7 +24,7 @@ class NodePreviewFormSelect extends FormBase {
     // Backlink.
     $options = $form->backlink->getProperty('options', []);
 
-    $form->backlink->addClass(isset($options['attributes']['class']) ? $options['attributes']['class'] : []);
+    $form->backlink->addClass($options['attributes']['class'] ?? []);
     $form->backlink->addClass(['btn', 'btn-info', 'pull-left']);
     $form->backlink->setButtonSize();
     $form->backlink->setIcon(Bootstrap::glyphicon('chevron-left'));

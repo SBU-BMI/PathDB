@@ -23,7 +23,6 @@ use Composer\Util\HttpDownloader;
 use Composer\Util\Platform;
 use Composer\Util\ProcessExecutor;
 use Composer\Util\Svn as SvnUtil;
-use React\Promise\CancellablePromiseInterface;
 use Symfony\Component\Process\Process;
 
 /**
@@ -134,7 +133,7 @@ class VersionGuesser
      */
     private function guessGitVersion(array $packageConfig, string $path): array
     {
-        GitUtil::cleanEnv();
+        GitUtil::cleanEnv($this->process);
         $commit = null;
         $version = null;
         $prettyVersion = null;
@@ -198,9 +197,9 @@ class VersionGuesser
         }
 
         if (null === $commit) {
-            $command = array_merge(['git', 'log', '--pretty=%H', '-n1', 'HEAD'], GitUtil::getNoShowSignatureFlags($this->process));
+            $command = GitUtil::buildRevListCommand($this->process, array_merge(['--format=%H', '-n1', 'HEAD'], GitUtil::getNoShowSignatureFlags($this->process)));
             if (0 === $this->process->execute($command, $output, $path)) {
-                $commit = trim($output) ?: null;
+                $commit = trim(GitUtil::parseRevListOutput($output, $this->process)) ?: null;
             }
         }
 

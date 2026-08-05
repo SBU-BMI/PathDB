@@ -4,18 +4,26 @@ declare(strict_types=1);
 
 namespace OpenTelemetry\API\Instrumentation;
 
+/**
+ * @deprecated environment variables should be accessed using {@link \OpenTelemetry\API\Configuration\ConfigEnv\EnvComponentLoader}s.
+ *
+ * @phan-suppress PhanDeprecatedInterface
+ */
 class ConfigurationResolver implements ConfigurationResolverInterface
 {
+    #[\Override]
     public function has(string $name): bool
     {
         return $this->getVariable($name) !== null;
     }
 
+    #[\Override]
     public function getString(string $name): ?string
     {
         return $this->getVariable($name);
     }
 
+    #[\Override]
     public function getBoolean(string $name): ?bool
     {
         $value = $this->getVariable($name);
@@ -26,6 +34,7 @@ class ConfigurationResolver implements ConfigurationResolverInterface
         return ($value === 'true');
     }
 
+    #[\Override]
     public function getInt(string $name): ?int
     {
         $value = $this->getVariable($name);
@@ -40,6 +49,7 @@ class ConfigurationResolver implements ConfigurationResolverInterface
         return (int) $value;
     }
 
+    #[\Override]
     public function getList(string $name): array
     {
         $value = $this->getVariable($name);

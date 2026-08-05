@@ -23,9 +23,9 @@ Reports empty functions body and requires at least a comment inside.
 
 Disallows long functions. This sniff provides the following setting:
 
-* `includeComments`: should comments be included in the count (default value is false).
-* `includeWhitespace`: should empty lines be included in the count (default value is false).
-* `maxLinesLength`: specifies max allowed function lines length (default value is 20).
+* `includeComments` (default: `false`): should comments be included in the count.
+* `includeWhitespace` (default: `false`): should empty lines be included in the count.
+* `maxLinesLength` (default: `20`): specifies max allowed function lines length.
 
 #### SlevomatCodingStandard.Functions.RequireArrowFunction 🔧
 
@@ -33,7 +33,7 @@ Requires arrow functions.
 
 Sniff provides the following settings:
 
-* `allowNested` (defaults to `true`)
+* `allowNested` (default: `true`)
 * `enable`: either to enable or not this sniff. By default, it is enabled for PHP versions 7.4 or higher.
 
 #### SlevomatCodingStandard.Functions.RequireMultiLineCall 🔧
@@ -51,7 +51,7 @@ Enforces function call to be on a single line.
 Sniff provides the following settings:
 
 * `maxLineLength`: specifies max allowed line length. If call would fit on it, it's enforced. Use 0 value to enforce for all calls, regardless of length.
-* `ignoreWithComplexParameter` (defaults to `true`): ignores calls with arrays, closures, arrow functions and nested calls.
+* `ignoreWithComplexParameter` (default: `true`): ignores calls with arrays, closures, arrow functions and nested calls.
 
 #### SlevomatCodingStandard.Functions.DisallowNamedArguments
 
@@ -130,6 +130,10 @@ Looks for unused inherited variables passed to closure via `use`.
 #### SlevomatCodingStandard.Functions.UnusedParameter 🚧
 
 Looks for unused parameters.
+
+This sniff provides the following setting:
+
+* `allowedParameterPatterns`: allows to configure which parameters are always allowed, even if unused. This is an array of regular expressions (PCRE) with delimiters, but without the leading `$` from variable names. (For example, use `[/^_/]` to allow parameters that start with an underscore, like `$_unused`.)
 
 #### SlevomatCodingStandard.Functions.UselessParameterDefaultValue 🚧
 

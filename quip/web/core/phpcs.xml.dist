@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- cspell:ignore Openercase -->
 <ruleset name="drupal_core">
   <arg name="extensions" value="engine,inc,install,module,php,profile,test,theme,yml"/>
   <description>Default PHP CodeSniffer configuration for Drupal core.</description>
@@ -33,8 +34,6 @@
     <!-- Sniff for these errors: ArrayClosingIndentation, ArrayIndentation, CommaLastItem -->
     <exclude name="Drupal.Arrays.Array.LongLineDeclaration"/>
   </rule>
-  <rule ref="Drupal.CSS.ClassDefinitionNameSpacing"/>
-  <rule ref="Drupal.CSS.ColourDefinition"/>
   <rule ref="Drupal.Classes.ClassCreateInstance"/>
   <rule ref="Drupal.Classes.ClassDeclaration"/>
   <rule ref="Drupal.Classes.ClassFileName"/>
@@ -187,15 +186,13 @@
   <rule ref="Generic.PHP.LowerCaseKeyword"/>
   <rule ref="Generic.PHP.UpperCaseConstant"/>
   <rule ref="Generic.WhiteSpace.DisallowTabIndent"/>
+  <rule ref="Generic.WhiteSpace.LanguageConstructSpacing"/>
 
   <!-- Internal sniffs -->
   <rule ref="Internal.NoCodeFound">
     <!-- No PHP code in *.yml -->
     <exclude-pattern>*.yml</exclude-pattern>
   </rule>
-
-  <!-- MySource sniffs -->
-  <rule ref="MySource.Debug.DebugCode"/>
 
   <!-- PEAR sniffs -->
   <rule ref="PEAR.Files.IncludingFile"/>
@@ -247,6 +244,7 @@
        Drupal.Classes.PropertyDeclaration. -->
     <exclude name="PSR2.Classes.PropertyDeclaration.Underscore"/>
   </rule>
+  <rule ref="PSR2.ControlStructures.SwitchDeclaration.WrongOpenercase"/>
   <rule ref="PSR2.Namespaces.NamespaceDeclaration"/>
   <rule ref="PSR2.Namespaces.UseDeclaration"/>
 
@@ -397,7 +395,6 @@
       <property name="spacing" value="1"/>
     </properties>
   </rule>
-  <rule ref="Squiz.WhiteSpace.LanguageConstructSpacing"/>
   <rule ref="Squiz.WhiteSpace.OperatorSpacing">
     <properties>
       <property name="ignoreNewlines" value="true"/>

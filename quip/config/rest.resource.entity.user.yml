@@ -1,0 +1,21 @@
+uuid: 1cbf7915-652f-4db3-a537-dd26ed2bd003
+langcode: en
+status: true
+dependencies:
+  module:
+    - basic_auth
+    - jwt
+    - serialization
+    - user
+id: entity.user
+plugin_id: 'entity:user'
+granularity: resource
+configuration:
+  methods:
+    - GET
+  formats:
+    - json
+  authentication:
+    - basic_auth
+    - jwt_auth
+    - cookie

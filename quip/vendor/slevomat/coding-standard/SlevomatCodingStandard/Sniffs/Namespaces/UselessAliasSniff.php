@@ -59,7 +59,7 @@ class UselessAliasSniff implements Sniff
 				$fix = $phpcsFile->addFixableError(
 					sprintf('Useless alias "%s" for use of "%s".', $useStatement->getAlias(), $useStatement->getFullyQualifiedTypeName()),
 					$useStatement->getPointer(),
-					self::CODE_USELESS_ALIAS
+					self::CODE_USELESS_ALIAS,
 				);
 
 				if (!$fix) {
@@ -67,7 +67,7 @@ class UselessAliasSniff implements Sniff
 				}
 
 				$asPointer = TokenHelper::findNext($phpcsFile, T_AS, $useStatement->getPointer() + 1);
-				$nameEndPointer = TokenHelper::findPrevious($phpcsFile, TokenHelper::getOnlyNameTokenCodes(), $asPointer - 1);
+				$nameEndPointer = TokenHelper::findPrevious($phpcsFile, TokenHelper::ONLY_NAME_TOKEN_CODES, $asPointer - 1);
 				$useSemicolonPointer = TokenHelper::findNext($phpcsFile, T_SEMICOLON, $asPointer + 1);
 
 				$phpcsFile->fixer->beginChangeset();

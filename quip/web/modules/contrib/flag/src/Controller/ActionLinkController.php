@@ -4,6 +4,7 @@ namespace Drupal\flag\Controller;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -157,6 +158,10 @@ class ActionLinkController implements ContainerInjectionInterface {
     // Create a new JQuery Replace command to update the link display.
     $replace = new ReplaceCommand($selector, $this->renderer->renderInIsolation($link));
     $response->addCommand($replace);
+
+    // Put the focus back on the link.
+    $focus = new InvokeCommand($selector . '>a', 'focus');
+    $response->addCommand($focus);
 
     // Push a message pulsing command onto the stack.
     $pulse = new ActionLinkFlashCommand($selector, $message);

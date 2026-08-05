@@ -24,11 +24,8 @@ use Drupal\Core\Access\AccessResult;
  *   confirm = TRUE,
  * )
  */
-//only need to add "implements" keywords below if we are goign to add configuration forms to the confirmation step.... not the case here!
-class PinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase implements ViewsBulkOperationsPreconfigurationInterface, PluginFormInterface*/
-{
-    
-    
+// Only need to add "implements" keywords below if we are going to add configuration forms to the confirmation step.
+class PinContentAction extends ActionBase {
 
   /**
    * {@inheritdoc}
@@ -115,7 +112,7 @@ class PinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase
    * Submit handler for the action configuration form.
    *
    * If not implemented, the cleaned form values will be
-   * passed direclty to the action $configuration parameter.
+   * passed directly to the action $configuration parameter.
    *
    * @param array $form
    *   Form array.
@@ -134,7 +131,7 @@ class PinContentAction extends ActionBase/*extends ViewsBulkOperationsActionBase
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if ($object->getEntityTypeId() === 'node') {
       $moderation_info = \Drupal::service('content_moderation.moderation_information');
       // Moderated Entities will return AccessResult::forbidden for attemps

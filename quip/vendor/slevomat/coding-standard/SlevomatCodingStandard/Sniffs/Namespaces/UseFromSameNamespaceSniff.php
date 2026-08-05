@@ -42,9 +42,7 @@ class UseFromSameNamespaceSniff implements Sniff
 		}
 
 		$namespaceName = NamespaceHelper::findCurrentNamespaceName($phpcsFile, $usePointer);
-		if ($namespaceName === null) {
-			$namespaceName = '';
-		}
+		$namespaceName ??= '';
 
 		$usedTypeName = UseStatementHelper::getFullyQualifiedTypeNameFromUse($phpcsFile, $usePointer);
 		if (!StringHelper::startsWith($usedTypeName, $namespaceName)) {
@@ -67,7 +65,7 @@ class UseFromSameNamespaceSniff implements Sniff
 
 		$fix = $phpcsFile->addFixableError(sprintf(
 			'Use %s is from the same namespace – that is prohibited.',
-			$usedTypeName
+			$usedTypeName,
 		), $usePointer, self::CODE_USE_FROM_SAME_NAMESPACE);
 		if (!$fix) {
 			return;

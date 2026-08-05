@@ -1,0 +1,39 @@
+jwt_oauth_ccf.token:
+  path: '/oauth2/token'
+  defaults:
+    _controller: '\Drupal\jwt_oauth_ccf\Controller\TokenController::token'
+    _title: 'OAuth token'
+  methods: [POST]
+  requirements:
+    # The client authenticates with its client_id/client_secret in the request
+    # body (or a Basic header), so the route itself is open to anonymous.
+    _access: 'TRUE'
+  options:
+    no_cache: 'TRUE'
+
+jwt_oauth_ccf.client_list:
+  path: '/user/{user}/oauth-clients'
+  defaults:
+    _controller: '\Drupal\jwt_oauth_ccf\Controller\ClientListController::listClients'
+    _title: 'OAuth clients'
+  requirements:
+    user: '\d+'
+    _jwt_oauth_ccf_manage_access: 'TRUE'
+
+jwt_oauth_ccf.client_generate:
+  path: '/user/{user}/oauth-clients/generate'
+  defaults:
+    _form: '\Drupal\jwt_oauth_ccf\Form\GenerateClientForm'
+    _title: 'Generate OAuth client credentials'
+  requirements:
+    user: '\d+'
+    _jwt_oauth_ccf_manage_access: 'TRUE'
+
+jwt_oauth_ccf.client_delete:
+  path: '/user/{user}/oauth-clients/{client_id}/delete'
+  defaults:
+    _form: '\Drupal\jwt_oauth_ccf\Form\ClientDeleteForm'
+    _title: 'Delete OAuth client credential'
+  requirements:
+    user: '\d+'
+    _jwt_oauth_ccf_manage_access: 'TRUE'

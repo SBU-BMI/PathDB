@@ -2,19 +2,21 @@
 
 namespace Drupal\bulk_update_fields\Form;
 
-use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeWidgetBase;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\SessionManagerInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Routing\RouteBuilderInterface;
+use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeWidgetBase;
 use Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * BulkUpdateFieldsForm.
+ * Provides a form for bulk updating fields on multiple entities.
  */
 class BulkUpdateFieldsForm extends FormBase {
 
@@ -60,6 +62,27 @@ class BulkUpdateFieldsForm extends FormBase {
   protected $routeBuilder;
 
   /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Plugin manager.
+   *
+   * @var \Drupal\Core\Plugin\DefaultPluginManager
+   */
+  protected $pluginManager;
+
+  /**
+   * The entity to bulk update.
+   * 
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  private $entity;
+
+  /**
    * Constructs a \Drupal\bulk_update_fields\Form\BulkUpdateFieldsForm.
    *
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
@@ -70,12 +93,18 @@ class BulkUpdateFieldsForm extends FormBase {
    *   User.
    * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
    *   Route.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   Module handler.
+   * @param \Drupal\Core\Plugin\DefaultPluginManager $plugin_manager
+   *   Plugin manager.
    */
-  public function __construct(PrivateTempStoreFactory $temp_store_factory, SessionManagerInterface $session_manager, AccountInterface $current_user, RouteBuilderInterface $route_builder) {
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, SessionManagerInterface $session_manager, AccountInterface $current_user, RouteBuilderInterface $route_builder, ModuleHandlerInterface $module_handler, DefaultPluginManager $plugin_manager) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->sessionManager = $session_manager;
     $this->currentUser = $current_user;
     $this->routeBuilder = $route_builder;
+    $this->moduleHandler = $module_handler;
+    $this->pluginManager = $plugin_manager;
   }
 
   /**
@@ -86,7 +115,9 @@ class BulkUpdateFieldsForm extends FormBase {
       $container->get('tempstore.private'),
       $container->get('session_manager'),
       $container->get('current_user'),
-      $container->get('router.builder')
+      $container->get('router.builder'),
+      $container->get('module_handler'),
+      $container->get('plugin.manager.field.widget')
     );
   }
 
@@ -182,7 +213,7 @@ class BulkUpdateFieldsForm extends FormBase {
           ->get($this->currentUser->id());
         $options = [];
         // Exclude some base fields.
-        // TODO add date fields and revision log.
+        // @todo add date fields and revision log.
         $excluded_base_fields = [
           'nid',
           'uuid',
@@ -206,15 +237,15 @@ class BulkUpdateFieldsForm extends FormBase {
         ];
         $excluded_fields = $this->config('bulk_update_fields.settings')->get('exclude') ?? [];
         // Make it possible to bulk update 'Generate automatic URL alias'.
-        // @todo: add code to remove 'URL alias'.
-        if (\Drupal::moduleHandler()->moduleExists('pathauto')) {
+        // @todo add code to remove 'URL alias'.
+        if ($this->moduleHandler->moduleExists('pathauto')) {
           if (($key = array_search('path', $excluded_base_fields)) !== FALSE) {
             unset($excluded_base_fields[$key]);
           }
         }
 
         foreach ($this->userInput['entities'] as $index => $entity) {
-          $langcode = explode(':',$index)[1];
+          $langcode = explode(':', $index)[1];
           $entity = $entity->getTranslation($langcode);
           $this->entity = $entity;
           $fields = $entity->getFieldDefinitions();
@@ -240,7 +271,7 @@ class BulkUpdateFieldsForm extends FormBase {
 
       case 2:
         foreach ($this->userInput['entities'] as $index => $entity) {
-          $langcode = explode(':',$index)[1];
+          $langcode = explode(':', $index)[1];
           $entity = $entity->getTranslation($langcode);
           $this->entity = $entity;
           foreach ($this->userInput['fields'] as $field_name) {
@@ -248,19 +279,17 @@ class BulkUpdateFieldsForm extends FormBase {
             $temp_form_state = new FormState();
             $temp_form_state->setFormObject($form_state->getFormObject());
             if ($field = $entity->getFieldDefinition($field_name)) {
-              // TODO Dates fields are incorrect due to TODOs below.
+              // @todo Dates fields are incorrect due to @todo s below.
               if ($field->getType() == 'datetime') {
-                $type = \Drupal::service('plugin.manager.field.widget');
-                $plugin_definition = $type->getDefinition('datetime_default');
+                $plugin_definition = $this->pluginManager->getDefinition('datetime_default');
                 $widget = new DateTimeWidgetBase('datetime', $plugin_definition, $entity->get($field_name)->getFieldDefinition(), [], []);
                 $form['#parents'] = [];
                 $form['default_value_input'][$field_name] = $widget->form($entity->get($field_name), $form, $form_state);
               }
               elseif ($field->getType() == 'entity_reference_revisions') {
-                // TODO - allow other types of entity_reference_revisions
+                // @todo allow other types of entity_reference_revisions
                 // currently paragraphs only.
-                $type = \Drupal::service('plugin.manager.field.widget');
-                $plugin_definition = $type->getDefinition('paragraphs');
+                $plugin_definition = $this->pluginManager->getDefinition('paragraphs');
                 $widget = new ParagraphsWidget('paragraphs', $plugin_definition, $entity->get($field_name)->getFieldDefinition(), [], []);
                 $form['#parents'] = [];
                 $form['default_value_input'][$field_name] = $widget->form($entity->get($field_name), $form, $form_state);
@@ -270,11 +299,7 @@ class BulkUpdateFieldsForm extends FormBase {
                 }
               }
               else {
-                // TODO
-                // I cannot figure out how to get a form element for only a
-                // field. Maybe someone else can.
-                // TODO Doing it this way does not allow for feild labels on
-                // textarea widgets.
+                // @todo Implement field form elements for other field types.
                 $form[$field_name] = $entity->get($field_name)->defaultValuesForm($temp_form_element, $temp_form_state);
               }
             }
@@ -307,7 +332,7 @@ class BulkUpdateFieldsForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // TODO.
+    // @todo .
   }
 
 }

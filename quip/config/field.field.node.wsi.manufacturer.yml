@@ -1,0 +1,19 @@
+uuid: 8f232d46-8639-46c6-a5ab-32fc2e40a2b5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.manufacturer
+    - node.type.wsi
+id: node.wsi.manufacturer
+field_name: manufacturer
+entity_type: node
+bundle: wsi
+label: Manufacturer
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

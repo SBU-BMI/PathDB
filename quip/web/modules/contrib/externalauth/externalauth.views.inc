@@ -83,6 +83,7 @@ function externalauth_views_data(): array {
       'help' => t('Provide a link to delete the @label entry.', ['@label' => 'authmap']),
       'field' => [
         'id' => 'authmap_link_delete',
+        'additional fields' => ['uid', 'provider'],
       ],
     ],
   ];

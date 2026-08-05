@@ -20,7 +20,7 @@ class Bootstrap extends PluginBase implements AllowedHtmlInterface {
   /**
    * {@inheritdoc}
    */
-  public function allowedHtmlTags(ParserInterface $parser, ActiveTheme $activeTheme = NULL) {
+  public function allowedHtmlTags(ParserInterface $parser, ?ActiveTheme $activeTheme = NULL) {
     return [
       '*' => [
         'data-complete-text' => TRUE,

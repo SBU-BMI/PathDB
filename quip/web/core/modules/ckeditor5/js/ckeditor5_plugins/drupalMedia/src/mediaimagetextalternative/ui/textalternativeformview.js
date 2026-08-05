@@ -9,12 +9,11 @@ import {
   View,
   ViewCollection,
   createLabeledInputText,
-  injectCssTransitionDisabler,
   submitHandler,
   Template,
 } from 'ckeditor5/src/ui';
 import { FocusTracker, KeystrokeHandler } from 'ckeditor5/src/utils';
-import { icons } from 'ckeditor5/src/core';
+import { IconCheck, IconCancel } from '@ckeditor/ckeditor5-icons';
 
 export default class TextAlternativeFormView extends View {
   /**
@@ -50,7 +49,7 @@ export default class TextAlternativeFormView extends View {
      */
     this.saveButtonView = this._createButton(
       Drupal.t('Save'),
-      icons.check,
+      IconCheck,
       'ck-button-save',
     );
     this.saveButtonView.type = 'submit';
@@ -60,7 +59,7 @@ export default class TextAlternativeFormView extends View {
      */
     this.cancelButtonView = this._createButton(
       Drupal.t('Cancel'),
-      icons.cancel,
+      IconCancel,
       'ck-button-cancel',
       'cancel',
     );
@@ -104,8 +103,6 @@ export default class TextAlternativeFormView extends View {
         this.cancelButtonView,
       ],
     });
-
-    injectCssTransitionDisabler(this);
   }
 
   /**

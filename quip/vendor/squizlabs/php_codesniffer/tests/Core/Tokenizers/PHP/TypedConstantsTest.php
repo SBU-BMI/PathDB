@@ -9,7 +9,7 @@
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2024 PHPCSStandards and contributors
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/HEAD/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Tests\Core\Tokenizers\PHP;
@@ -271,7 +271,7 @@ final class TypedConstantsTest extends AbstractTokenizerTestCase
      *
      * @see testTypedConstant()
      *
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string|array<int|string>>>
      */
     public static function dataNullableTypedConstant()
     {
@@ -386,7 +386,7 @@ final class TypedConstantsTest extends AbstractTokenizerTestCase
      *
      * @see testTypedConstant()
      *
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string|array<int|string>>>
      */
     public static function dataUnionTypedConstant()
     {
@@ -475,7 +475,7 @@ final class TypedConstantsTest extends AbstractTokenizerTestCase
      *
      * @see testTypedConstant()
      *
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string|array<int|string>>>
      */
     public static function dataIntersectionTypedConstant()
     {
@@ -520,7 +520,7 @@ final class TypedConstantsTest extends AbstractTokenizerTestCase
      *
      * @see testTypedConstant()
      *
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string|array<int|string>>>
      */
     public static function dataDNFTypedConstant()
     {

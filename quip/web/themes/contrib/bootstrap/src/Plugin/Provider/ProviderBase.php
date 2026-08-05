@@ -105,8 +105,8 @@ class ProviderBase extends PluginBase implements ProviderInterface {
 
     // Retrieve the cached value or build it if necessary.
     $framework = $this->cacheGet('library', $hash, [], function () use ($framework, $data) {
-      $version = isset($data['version']) ? $data['version'] : NULL;
-      $theme = isset($data['theme']) ? $data['theme'] : NULL;
+      $version = $data['version'] ?? NULL;
+      $theme = $data['theme'] ?? NULL;
       $assets = $this->getCdnAssets($version, $theme)->toLibraryArray($data['min']);
 
       // Immediately return if there are no theme CDN assets to use.
@@ -142,7 +142,7 @@ class ProviderBase extends PluginBase implements ProviderInterface {
    *   provided, the entire contents of $name will be returned.
    * @param mixed $default
    *   Optional. The default value to return if $key is not set.
-   * @param callable $builder
+   * @param callable|null $builder
    *   Optional. If provided, a builder will be invoked when there is no cache
    *   currently set. The return value of the build will be used to set the
    *   cached value, provided there are no CDN Provider exceptions generated.
@@ -152,7 +152,7 @@ class ProviderBase extends PluginBase implements ProviderInterface {
    * @return mixed
    *   The cached value if it's set or the value supplied to $default if not.
    */
-  protected function cacheGet($type, $key = NULL, $default = NULL, callable $builder = NULL) {
+  protected function cacheGet($type, $key = NULL, $default = NULL, ?callable $builder = NULL) {
     $ttl = $this->getCacheTtl($type);
     $never = $ttl === static::TTL_NEVER;
     $forever = $ttl === static::TTL_FOREVER;

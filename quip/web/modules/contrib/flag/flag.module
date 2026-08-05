@@ -453,6 +453,12 @@ function flag_entity_view_alter(&$build, EntityInterface $entity, EntityViewDisp
       $build['#contextual_links'][$entity_type]['metadata']['flag_keys'] = implode(',', $flag_keys);
     }
   }
+
+  // Enable placeholder on entity links to avoid them being cached with the
+  // entity view mode.
+  if (isset($build['links']['#lazy_builder'])) {
+    $build['links']['#create_placeholder'] = TRUE;
+  }
 }
 
 /**

@@ -19,6 +19,7 @@ use function json_encode;
 use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
 use function lcfirst;
+use OpenTelemetry\API\Behavior\LogsMessagesTrait;
 use OpenTelemetry\SDK\Common\Export\TransportInterface;
 use function property_exists;
 use function sprintf;
@@ -30,6 +31,8 @@ use function ucwords;
  */
 final class ProtobufSerializer
 {
+    use LogsMessagesTrait;
+
     private function __construct(private readonly string $contentType)
     {
     }
@@ -73,8 +76,8 @@ final class ProtobufSerializer
         // @phpstan-ignore-next-line
         return match ($this->contentType) {
             ContentTypes::PROTOBUF => $message->serializeToString(),
-            ContentTypes::JSON => self::postProcessJsonEnumValues($message, $message->serializeToJsonString()),
-            ContentTypes::NDJSON => self::postProcessJsonEnumValues($message, $message->serializeToJsonString()) . "\n",
+            ContentTypes::JSON => self::serializeToJsonString($message),
+            ContentTypes::NDJSON => self::serializeToJsonString($message) . "\n",
         };
     }
 
@@ -92,27 +95,39 @@ final class ProtobufSerializer
     }
 
     /**
-     * Workaround until protobuf exposes `FormatEnumsAsIntegers` option.
-     *
      * [JSON Protobuf Encoding](https://opentelemetry.io/docs/specs/otlp/#json-protobuf-encoding):
      * > Values of enum fields MUST be encoded as integer values.
      *
      * @see https://github.com/open-telemetry/opentelemetry-php/issues/978
      * @see https://github.com/protocolbuffers/protobuf/pull/12707
      */
-    private static function postProcessJsonEnumValues(Message $message, string $payload): string
+    private static function serializeToJsonString(Message $message): string
     {
+        // @phan-suppress-next-line PhanUndeclaredClassReference
+        if (\class_exists(\Google\Protobuf\PrintOptions::class)) {
+            try {
+                /** @psalm-suppress TooManyArguments @phan-suppress-next-line PhanParamTooManyInternal,PhanUndeclaredClassConstant */
+                return $message->serializeToJsonString(\Google\Protobuf\PrintOptions::ALWAYS_PRINT_ENUMS_AS_INTS);
+            } catch (\TypeError) {
+                // google/protobuf ^4.31 w/ ext-protobuf <4.31 installed
+            }
+        }
+
+        $payload = $message->serializeToJsonString();
         $pool = DescriptorPool::getGeneratedPool();
         $desc = $pool->getDescriptorByClassName($message::class);
         if (!$desc instanceof Descriptor) {
             return $payload;
         }
 
-        $data = json_decode($payload);
+        $data = json_decode((string) $payload);
         unset($payload);
         self::traverseDescriptor($data, $desc);
 
-        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        assert($encoded !== false);
+
+        return $encoded;
     }
 
     private static function traverseDescriptor(object $data, Descriptor $desc): void

@@ -6,9 +6,9 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Session\SessionManagerInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Update Fields.
@@ -112,7 +112,7 @@ class BulkUpdateFieldsActionBase extends ActionBase implements ContainerFactoryP
   public function executeMultiple(array $entities) {
     $ids = [];
     foreach ($entities as $entity) {
-      $ids[$entity->id() .':' . $entity->language()->getId()] = $entity;
+      $ids[$entity->id() . ':' . $entity->language()->getId()] = $entity;
     }
     $this->tempStoreFactory->get('bulk_update_fields_ids')
       ->set($this->currentUser->id(), $ids);

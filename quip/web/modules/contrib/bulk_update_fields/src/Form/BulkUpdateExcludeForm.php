@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class BulkUpdateExcludeForm.
+ * Provides a configuration form for excluding fields from bulk updates.
  */
 class BulkUpdateExcludeForm extends ConfigFormBase {
 
@@ -154,8 +154,17 @@ class BulkUpdateExcludeForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $checked_values = [];
+    foreach ($form_state->getValue('table') as $key => $value) {
+
+      if ($value) {
+        $checked_values[$key] = $value;
+      }
+
+    }
+
     $this->config('bulk_update_fields.settings')
-      ->set('exclude', $form_state->getValue('table'))
+      ->set('exclude', $checked_values)
       ->save();
   }
 

@@ -8,7 +8,7 @@ core_version_requirement: ^8 || ^9 || ^10
 dependencies:
   - tac_lite:tac_lite
 
-# Information added by Drupal.org packaging script on 2023-08-15
-version: '8.x-1.7'
+# Information added by Drupal.org packaging script on 2026-02-18
+version: '8.x-1.9'
 project: 'tac_lite'
-datestamp: 1692120911
+datestamp: 1771378098

@@ -40,7 +40,7 @@ class RequireAttributeAfterDocCommentSniff implements Sniff
 		$docCommentOpenerPointer = TokenHelper::findNextExcluding(
 			$phpcsFile,
 			T_WHITESPACE,
-			$tokens[$attributeOpenerPointer]['attribute_closer'] + 1
+			$tokens[$attributeOpenerPointer]['attribute_closer'] + 1,
 		);
 
 		if ($tokens[$docCommentOpenerPointer]['code'] !== T_DOC_COMMENT_OPEN_TAG) {
@@ -67,7 +67,7 @@ class RequireAttributeAfterDocCommentSniff implements Sniff
 		$fix = $phpcsFile->addFixableError(
 			'Attribute should be placed after documentation comment.',
 			$attributeOpenerPointer,
-			self::CODE_ATTRIBUTE_BEFORE_DOC_COMMENT
+			self::CODE_ATTRIBUTE_BEFORE_DOC_COMMENT,
 		);
 
 		if (!$fix) {
@@ -76,7 +76,7 @@ class RequireAttributeAfterDocCommentSniff implements Sniff
 
 		$phpcsFile->fixer->beginChangeset();
 
-		$phpcsFile->fixer->addContentBefore($attributeStartPointer, $docComment);
+		FixerHelper::addBefore($phpcsFile, $attributeStartPointer, $docComment);
 
 		FixerHelper::removeBetweenIncluding($phpcsFile, $docCommentStartPointer, $docCommentEndPointer);
 

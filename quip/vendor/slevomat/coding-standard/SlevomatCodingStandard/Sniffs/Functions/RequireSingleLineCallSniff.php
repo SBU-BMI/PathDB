@@ -32,11 +32,9 @@ class RequireSingleLineCallSniff extends AbstractLineCall
 
 	public const CODE_REQUIRED_SINGLE_LINE_CALL = 'RequiredSingleLineCall';
 
-	/** @var int */
-	public $maxLineLength = 120;
+	public int $maxLineLength = 120;
 
-	/** @var bool */
-	public $ignoreWithComplexParameter = true;
+	public bool $ignoreWithComplexParameter = true;
 
 	/**
 	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
@@ -65,9 +63,9 @@ class RequireSingleLineCallSniff extends AbstractLineCall
 
 		if (TokenHelper::findNext(
 			$phpcsFile,
-			array_merge(TokenHelper::$inlineCommentTokenCodes, Tokens::$heredocTokens),
+			array_merge(TokenHelper::INLINE_COMMENT_TOKEN_CODES, Tokens::$heredocTokens),
 			$parenthesisOpenerPointer + 1,
-			$parenthesisCloserPointer
+			$parenthesisCloserPointer,
 		) !== null) {
 			return;
 		}
@@ -88,7 +86,7 @@ class RequireSingleLineCallSniff extends AbstractLineCall
 					$phpcsFile,
 					[T_CLOSURE, T_FN, T_OPEN_SHORT_ARRAY],
 					$parenthesisOpenerPointer + 1,
-					$parenthesisCloserPointer
+					$parenthesisCloserPointer,
 				) !== null
 			) {
 				return;
@@ -96,13 +94,12 @@ class RequireSingleLineCallSniff extends AbstractLineCall
 
 			// Contains inner call
 			$callSearchStartPointer = $parenthesisOpenerPointer + 1;
-			$nameTokenCodes = TokenHelper::getOnlyNameTokenCodes();
 			while (true) {
 				$innerStringPointer = TokenHelper::findNext(
 					$phpcsFile,
-					$nameTokenCodes,
+					TokenHelper::ONLY_NAME_TOKEN_CODES,
 					$callSearchStartPointer,
-					$parenthesisCloserPointer
+					$parenthesisCloserPointer,
 				);
 				if ($innerStringPointer === null) {
 					break;
@@ -150,7 +147,7 @@ class RequireSingleLineCallSniff extends AbstractLineCall
 
 		$phpcsFile->fixer->beginChangeset();
 
-		$phpcsFile->fixer->addContent($parenthesisOpenerPointer, $call);
+		FixerHelper::add($phpcsFile, $parenthesisOpenerPointer, $call);
 
 		FixerHelper::removeBetween($phpcsFile, $parenthesisOpenerPointer, $parenthesisCloserPointer);
 

@@ -1,0 +1,8 @@
+services:
+  jwt_oauth_ccf.client_repository:
+    class: Drupal\jwt_oauth_ccf\ClientCredentialRepository
+    arguments: ['@user.data', '@password_generator', '@datetime.time']
+  jwt_oauth_ccf.access_checker:
+    class: Drupal\jwt_oauth_ccf\Access\ManageClientsAccessCheck
+    tags:
+      - { name: access_check, applies_to: _jwt_oauth_ccf_manage_access }

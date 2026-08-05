@@ -64,7 +64,7 @@ class JwtAuth implements AuthenticationProviderInterface {
     JwtTranscoderInterface $transcoder,
     EventDispatcherInterface $event_dispatcher,
     Settings $settings,
-    LoggerChannelInterface $logger
+    LoggerChannelInterface $logger,
   ) {
     $this->transcoder = $transcoder;
     $this->eventDispatcher = $event_dispatcher;
@@ -102,13 +102,7 @@ class JwtAuth implements AuthenticationProviderInterface {
 
     $valid = new JwtAuthValidEvent($jwt);
     $this->eventDispatcher->dispatch($valid, JwtAuthEvents::VALID);
-    $user = $valid->getUser();
-
-    if (!$user) {
-      return NULL;
-    }
-
-    return $user;
+    return $valid->getAccount();
   }
 
   /**
@@ -165,7 +159,7 @@ class JwtAuth implements AuthenticationProviderInterface {
    * @return null
    *   NULL to be returned instead of a user.
    */
-  protected function debugLog($cause, \Exception $e = NULL, \StdClass $payload = NULL) {
+  protected function debugLog($cause, ?\Exception $e = NULL, ?\StdClass $payload = NULL) {
     if ($this->settings::get('jwt.debug_log')) {
       $this->loggerChannel
         ->error('Error authenticating with a JWT "%cause". Exception: "%exception" Payload: "%payload"', [

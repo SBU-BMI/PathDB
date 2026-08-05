@@ -4,6 +4,7 @@ namespace Drupal\Tests\search_api\Kernel\Views;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\MemoryBackend;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\entity_test\Entity\EntityTestMulRevChanged;
 use Drupal\KernelTests\KernelTestBase;
@@ -11,15 +12,14 @@ use Drupal\search_api\Entity\Index;
 use Drupal\Tests\search_api\Kernel\TestTimeService;
 use Drupal\views\Tests\AssertViewsCacheTagsTrait;
 use Drupal\views\ViewExecutable;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Search API caching plugins for Views.
  *
  * @group search_api
  */
+#[RunTestsInSeparateProcesses]
 class ViewsDisplayCachingTest extends KernelTestBase {
 
   use AssertViewsCacheTagsTrait;
@@ -48,7 +48,7 @@ class ViewsDisplayCachingTest extends KernelTestBase {
   /**
    * The cache backend used for testing.
    *
-   * @var \Drupal\Tests\search_api\Kernel\Views\TestMemoryBackend
+   * @var \Drupal\Core\Cache\MemoryBackend
    */
   protected $cache;
 
@@ -98,6 +98,11 @@ class ViewsDisplayCachingTest extends KernelTestBase {
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->viewExecutableFactory = $this->container->get('views.executable');
 
+    // Re-save the test view to ensure it has the correct cache metadata set.
+    $this->entityTypeManager->getStorage('view')
+      ->load('search_api_test_cache')
+      ->save();
+
     // Use the test search index from the search_api_test_db module.
     $this->index = Index::load('database_search_index');
 
@@ -105,16 +110,13 @@ class ViewsDisplayCachingTest extends KernelTestBase {
     // we can test time based caching.
     $this->time = new TestTimeService();
     $this->container->set('datetime.time', $this->time);
-    $this->cache = new TestMemoryBackend();
+    $this->cache = new MemoryBackend($this->time);
     $this->container->set('cache.data', $this->cache);
     // Starting with Drupal 10.3, the cache tags invalidator uses an internal
     // list of cache bins, to which we need to add our cache.
-    // @todo Remove "if" once we depend on Drupal 10.3.
-    if (version_compare(\Drupal::VERSION, '10.3', '>=')) {
-      /** @var \Drupal\Core\Cache\CacheTagsInvalidator $invalidator */
-      $invalidator = $this->container->get('cache_tags.invalidator');
-      $invalidator->addBin($this->cache);
-    }
+    /** @var \Drupal\Core\Cache\CacheTagsInvalidator $invalidator */
+    $invalidator = $this->container->get('cache_tags.invalidator');
+    $invalidator->addBin($this->cache);
 
     // Create some demo content and index it.
     $this->createDemoContent();
@@ -145,16 +147,13 @@ class ViewsDisplayCachingTest extends KernelTestBase {
     $this->assertViewsResultsCacheNotPopulated($view);
 
     // Drupal 10.3 added a new cache tag to all forms.
-    // @todo Remove condition once we depend on Drupal 10.3.
-    if (version_compare(\Drupal::VERSION, '10.3', '>=')) {
-      $expected_cache_tags[] = 'CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form';
-    }
+    $expected_cache_tags[] = 'CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form';
 
     // Execute the search and assert the cacheability metadata.
     $this->assertViewsCacheability($view, $expected_cache_tags, $expected_cache_contexts, $expected_max_age);
 
-    // AssertViewsCache() destroys the view, get a fresh copy to continue the
-    // test.
+    // assertViewsCacheability() destroys the view, get a fresh copy to continue
+    // the test.
     $view = $this->getView('search_api_test_cache', $display_id);
 
     // The query has been executed. The query should now be cached if the test
@@ -245,10 +244,12 @@ class ViewsDisplayCachingTest extends KernelTestBase {
       // When using 'time' based caching, pretend to be more than 1 hour in the
       // future.
       case 'time':
-        // @todo Only the second call is needed once we depend on Drupal 10.3.
-        $this->cache->setRequestTime($this->cache->getRequestTime() + 3700);
+      case 'time_tag':
         $this->time->advanceTime(3700);
         break;
+
+      default:
+        assert(FALSE);
     }
   }
 
@@ -275,8 +276,9 @@ class ViewsDisplayCachingTest extends KernelTestBase {
   protected function getView($id, $display_id) {
     /** @var \Drupal\views\ViewEntityInterface $view */
     $view = $this->entityTypeManager->getStorage('view')->load($id);
+    /** @var \Drupal\views\ViewExecutable $executable */
     $executable = $this->viewExecutableFactory->get($view);
-    $executable->setDisplay($display_id);
+    $this->assertTrue($executable->setDisplay($display_id));
     $executable->setExposedInput(['search_api_fulltext' => 'Glaive']);
     return $executable;
   }
@@ -347,8 +349,13 @@ class ViewsDisplayCachingTest extends KernelTestBase {
         // Cache tags for index and view config are included at the query level,
         // so should still be present even when disabling caching.
         [
+          // The cache should be invalidated when either index or view are
+          // modified.
           'config:search_api.index.database_search_index',
           'config:views.view.search_api_test_cache',
+          // The view shows an entity, so it should be invalidated when that
+          // entity changes.
+          'entity_test_mulrev_changed:1',
           // Caches should also be invalidated if any items on the index are
           // indexed or deleted.
           'search_api_list:database_search_index',
@@ -394,9 +401,39 @@ class ViewsDisplayCachingTest extends KernelTestBase {
         'time',
         [
           // The cache should be invalidated when either index or view are
+          // modified, not otherwise.
+          'config:search_api.index.database_search_index',
+          'config:views.view.search_api_test_cache',
+          // Even though the cache should not be invalidated when items are
+          // indexed or deleted, the cache tag should still be set on the Views
+          // render array.
+          'search_api_list:database_search_index',
+        ],
+        // No specific cache contexts are expected to be present.
+        [],
+        // It is expected that the cache max-age is set to 1 hour.
+        3600,
+        // It is expected that views results can be cached.
+        TRUE,
+      ],
+
+      // Test case using time and tag based caching. This should provide
+      // relevant cache tags so that the results can be cached, but be
+      // invalidated whenever relevant changes occur or after a predefined
+      // time period.
+      [
+        'time_tag',
+        [
+          // The cache should be invalidated when either index or view are
           // modified.
           'config:search_api.index.database_search_index',
           'config:views.view.search_api_test_cache',
+          // The view shows an entity, so it should be invalidated when that
+          // entity changes.
+          'entity_test_mulrev_changed:1',
+          // Caches should also be invalidated if any items on the index are
+          // indexed or deleted.
+          'search_api_list:database_search_index',
         ],
         // No specific cache contexts are expected to be present.
         [],
@@ -406,100 +443,6 @@ class ViewsDisplayCachingTest extends KernelTestBase {
         TRUE,
       ],
     ];
-  }
-
-  /**
-   * Asserts a view's result & render cache items' cache tags.
-   *
-   * This methods uses a full view object in order to render the view.
-   *
-   * Overridden from AssertViewsCacheTagsTrait to fix a test failure.
-   *
-   * @param \Drupal\views\ViewExecutable $view
-   *   The view to test, must have caching enabled.
-   * @param null|string[] $expected_results_cache
-   *   NULL when expecting no results cache item, a set of cache tags expected
-   *   to be set on the results cache item otherwise.
-   * @param bool $views_caching_is_enabled
-   *   Whether to expect an output cache item. If TRUE, the cache tags must
-   *   match those in $expected_render_array_cache_tags.
-   * @param string[] $expected_render_array_cache_tags
-   *   A set of cache tags expected to be set on the built view's render array.
-   *
-   * @return array
-   *   The render array.
-   *
-   * @see \Drupal\views\Tests\AssertViewsCacheTagsTrait::assertViewsCacheTags()
-   */
-  protected function assertViewsCacheTags(ViewExecutable $view, $expected_results_cache, $views_caching_is_enabled, array $expected_render_array_cache_tags) {
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
-    /** @var \Drupal\Core\Render\RenderCacheInterface $render_cache */
-    $render_cache = \Drupal::service('render_cache');
-
-    $build = $view->buildRenderable();
-    $original = $build;
-
-    // Ensure the current request is a GET request so that render caching is
-    // active for direct rendering of views, just like for actual requests.
-    /** @var \Symfony\Component\HttpFoundation\RequestStack $request_stack */
-    $request_stack = \Drupal::service('request_stack');
-    $request = Request::createFromGlobals();
-    $request->server->set('REQUEST_TIME', \Drupal::time()->getRequestTime());
-    $request->setSession(new Session(new MockArraySessionStorage()));
-    $view->setRequest($request);
-    $request_stack->push($request);
-    $renderer->renderRoot($build);
-
-    // Check render array cache tags.
-    sort($expected_render_array_cache_tags);
-
-    // @todo The following line is the change necessary to make the test pass.
-    sort($build['#cache']['tags']);
-
-    $this->assertEqualsCanonicalizing($expected_render_array_cache_tags, $build['#cache']['tags']);
-
-    if ($views_caching_is_enabled) {
-      // Check Views render cache item cache tags.
-      /** @var \Drupal\views\Plugin\views\cache\CachePluginBase $cache_plugin */
-      $cache_plugin = $view->display_handler->getPlugin('cache');
-
-      // Results cache.
-
-      // Ensure that the views query is built.
-      $view->build();
-      $results_cache_item = \Drupal::cache('data')->get($cache_plugin->generateResultsKey());
-      if (is_array($expected_results_cache)) {
-        $this->assertNotEmpty($results_cache_item, 'Results cache item found.');
-        if ($results_cache_item) {
-          $this->assertEqualsCanonicalizing($expected_results_cache, $results_cache_item->tags);
-        }
-      }
-      else {
-        $this->assertNull($results_cache_item, 'Results cache item not found.');
-      }
-
-      // Check Views render cache item cache tags.
-      $original['#cache'] += ['contexts' => []];
-      $original['#cache']['contexts'] = Cache::mergeContexts($original['#cache']['contexts'], $this->container->getParameter('renderer.config')['required_cache_contexts']);
-
-      $render_cache_item = $render_cache->get($original);
-      if ($views_caching_is_enabled === TRUE) {
-        $this->assertNotEmpty($render_cache_item, 'Render cache item found.');
-        if ($render_cache_item) {
-          $this->assertEqualsCanonicalizing($expected_render_array_cache_tags, $render_cache_item['#cache']['tags']);
-        }
-      }
-      else {
-        $this->assertNull($render_cache_item, 'Render cache item not found.');
-      }
-    }
-
-    $view->destroy();
-
-    $request_stack->pop();
-
-    return $build;
   }
 
 }

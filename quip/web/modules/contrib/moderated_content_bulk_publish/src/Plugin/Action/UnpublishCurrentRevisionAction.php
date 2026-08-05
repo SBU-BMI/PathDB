@@ -2,14 +2,13 @@
 
 namespace Drupal\moderated_content_bulk_publish\Plugin\Action;
 
-//use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
-//use Drupal\views_bulk_operations\Action\ViewsBulkOperationsPreconfigurationInterface;
 use Drupal\node\NodeInterface;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\moderated_content_bulk_publish\AdminModeration;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Access\AccessResult;
 
 /**
@@ -25,11 +24,7 @@ use Drupal\Core\Access\AccessResult;
  *   confirm = TRUE,
  * )
  */
-//only need to add "implements" keywords below if we are goign to add configuration forms to the confirmation step.... not the case here!
-class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperationsActionBase implements ViewsBulkOperationsPreconfigurationInterface, PluginFormInterface*/
-{
-    
-    
+class UnpublishCurrentRevisionAction extends ActionBase {
 
   /**
    * {@inheritdoc}
@@ -56,8 +51,16 @@ class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperat
       \Drupal::logger('moderated_content_bulk_publish')->notice("Executing unpublish latest revision of ".$entity->label());
 
       $adminModeration = new AdminModeration($entity, NodeInterface::NOT_PUBLISHED);
-      $entity = $adminModeration->unpublish();
+      $error_message = '';
+      $markup = '';
+      $entity = $adminModeration->unpublish($error_message, $markup);
 
+      if (!isset($entity) && !empty($error_message)) {
+        \Drupal::Messenger()->addWarning(mb_convert_encoding($error_message, 'UTF-8'));
+        $htmlelement = Markup::create($markup);
+        \Drupal::Messenger()->addWarning($htmlelement);
+        return $error_message;
+      }
       //check if published
       if ($entity->isPublished()){
         $msg = "Something went wrong, the entity must be unpublished by this point.  Review your content moderation configuration make sure you have archive state which sets current revision and a draft state and try again.";
@@ -119,7 +122,7 @@ class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperat
    * Submit handler for the action configuration form.
    *
    * If not implemented, the cleaned form values will be
-   * passed direclty to the action $configuration parameter.
+   * passed directly to the action $configuration parameter.
    *
    * @param array $form
    *   Form array.
@@ -138,7 +141,7 @@ class UnpublishCurrentRevisionAction extends ActionBase/*extends ViewsBulkOperat
  /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     if ($object->getEntityTypeId() === 'node' || $object->getEntityTypeId() === 'media') {
       $moderation_info = \Drupal::service('content_moderation.moderation_information');
       // Moderated Entities will return AccessResult::forbidden for attemps

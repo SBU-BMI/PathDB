@@ -99,7 +99,9 @@ class LanguageTest extends TokenKernelTestBase {
       $this->container->get('config.factory'),
       $this->container->get('module_handler'),
       $this->container->get('language.config_factory_override'),
-      $this->container->get('request_stack')
+      $this->container->get('request_stack'),
+      $this->container->get('cache.bootstrap')
+
     );
     $this->container->set('language_manager', $this->languageManager);
 
@@ -165,7 +167,7 @@ class LanguageTest extends TokenKernelTestBase {
    *
    * @see testLanguageTokenReplacement()
    */
-  public function languageTokenReplacementDataProvider() {
+  public static function languageTokenReplacementDataProvider() {
     return [
       [
         // Test the replacement of the name of the site default language.
@@ -240,7 +242,7 @@ class LanguageTest extends TokenKernelTestBase {
    *
    * @see testCurrentPageLanguageTokenReplacement()
    */
-  public function currentPageLanguageTokenReplacementDataProvider() {
+  public static function currentPageLanguageTokenReplacementDataProvider() {
     return [
       [
         // Test the replacement of the language name token, taken from the

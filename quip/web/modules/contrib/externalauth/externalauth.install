@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Database\Database;
+use Drupal\externalauth\ExternalAuthStorageLimits;
 
 /**
  * Implements hook_install().
@@ -32,14 +33,14 @@ function externalauth_schema(): array {
       'provider' => [
         'description' => 'The name of the authentication provider providing the authname',
         'type' => 'varchar_ascii',
-        'length' => 128,
+        'length' => ExternalAuthStorageLimits::AUTHMAP_PROVIDER_MAX_LENGTH,
         'not null' => TRUE,
         'default' => '',
       ],
       'authname' => [
         'description' => 'Unique authentication name provided by authentication provider',
         'type' => 'varchar',
-        'length' => 128,
+        'length' => ExternalAuthStorageLimits::AUTHMAP_AUTHNAME_MAX_LENGTH,
         'not null' => TRUE,
         'default' => '',
       ],

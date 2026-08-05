@@ -6,6 +6,8 @@ use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use SlevomatCodingStandard\Helpers\AnnotationHelper;
+use SlevomatCodingStandard\Helpers\AttributeHelper;
+use SlevomatCodingStandard\Helpers\DocCommentHelper;
 use SlevomatCodingStandard\Helpers\SuppressHelper;
 use function sprintf;
 use function strtolower;
@@ -37,15 +39,23 @@ class DisallowMixedTypeHintSniff implements Sniff
 		if (SuppressHelper::isSniffSuppressed(
 			$phpcsFile,
 			$docCommentOpenPointer,
-			$this->getSniffName(self::CODE_DISALLOWED_MIXED_TYPE_HINT)
+			$this->getSniffName(self::CODE_DISALLOWED_MIXED_TYPE_HINT),
 		)) {
+			return;
+		}
+
+		$docCommentOwnerPointer = DocCommentHelper::findDocCommentOwnerPointer($phpcsFile, $docCommentOpenPointer);
+
+		if (
+			$docCommentOwnerPointer !== null
+			&& AttributeHelper::hasAttribute($phpcsFile, $docCommentOwnerPointer, '\Override')
+		) {
 			return;
 		}
 
 		$annotations = AnnotationHelper::getAnnotations($phpcsFile, $docCommentOpenPointer);
 
 		foreach ($annotations as $annotation) {
-			/** @var list<IdentifierTypeNode> $identifierTypeNodes */
 			$identifierTypeNodes = AnnotationHelper::getAnnotationNodesByType($annotation->getNode(), IdentifierTypeNode::class);
 
 			foreach ($identifierTypeNodes as $typeHintNode) {
@@ -58,7 +68,7 @@ class DisallowMixedTypeHintSniff implements Sniff
 				$phpcsFile->addError(
 					'Usage of "mixed" type hint is disallowed.',
 					$annotation->getStartPointer(),
-					self::CODE_DISALLOWED_MIXED_TYPE_HINT
+					self::CODE_DISALLOWED_MIXED_TYPE_HINT,
 				);
 			}
 		}

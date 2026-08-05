@@ -118,25 +118,6 @@ class LinkTypeFieldEntryTest extends FlagTestBase {
   }
 
   /**
-   * Test the flag field entry plugin UI.
-   */
-  public function doFlagUiFieldPlugin() {
-    $this->drupalGet('admin/structure/flags/add');
-    $this->submitForm([], 'Continue');
-
-    // Update the flag.
-    $edit = [
-      'link_type' => 'field_entry',
-    ];
-    $this->drupalPostAjaxForm(NULL, $edit, 'link_type');
-
-    // Check confirm form field entry.
-    $this->assertSession()->responseContains('Flag confirmation message');
-    $this->assertSession()->responseContains('Enter flagging details message');
-    $this->assertSession()->responseContains('Unflag confirmation message');
-  }
-
-  /**
    * Create a node type and flag.
    */
   public function doCreateFlag() {

@@ -2,11 +2,11 @@
 
 namespace Drupal\bulk_update_fields;
 
-use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\paragraphs\Entity\Paragraph;
 
 /**
- * BulkUpdateFields.
+ * Provides functionality to bulk update fields in entities.
  */
 class BulkUpdateFields {
 
@@ -118,7 +118,7 @@ class BulkUpdateFields {
     }
     if ($update) {
       // setNewRevision method exists on user but throws an error if called.
-      // TODO?: Do other entity types need revisions set?
+      // @todo ?: Do other entity types need revisions set?
       if ($entity->getEntityTypeId() == 'node' && method_exists($entity, 'setNewRevision')) {
         $entity->setNewRevision();
         $entity->setRevisionUserId(\Drupal::currentUser()->id());

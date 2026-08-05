@@ -13,7 +13,7 @@ use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
- * Class CdnAsset.
+ * Class CdnAsset facilitates bootswatch theme selection as well as version.
  */
 class CdnAsset {
 
@@ -165,17 +165,17 @@ class CdnAsset {
       // Workaround for leveraging bootswatch which doesn't need recompiling.
       $url = str_replace('entreprise7pro-bootswatch', 'bootswatch', $url);
     }
-    else if (strpos($url, 'entreprise7pro-boot')) {
+    elseif (strpos($url, 'entreprise7pro-boot')) {
       // Force an upgrade for everyone using older versions of the bootstrap library.
       if (version_compare($version, '3.4.1', '<=')) {
-        // Fix CVE-2024-6485 see release https://github.com/entreprise7pro/bootstrap/releases/tag/v3.4.5.
-        // 3.4.5 is compatible with jQuery 1,2,3 and 4, good D10 and D11.
-        $version = '3.4.5';
+        // Fix CVE-2024-6485 see release https://github.com/entreprise7pro/bootstrap/releases/tag/v3.4.6.
+        // 3.4.8 is compatible with jQuery 1,2,3 and 4, good D10 and D11.
+        $version = '3.4.8';
       }
     }
 
     // Extract the necessary data from the file.
-    list($path, $theme, $minified, $type) = static::extractParts($url);
+    [$path, $theme, $minified, $type] = static::extractParts($url);
 
     // @todo Remove once PHP 5.5 is no longer supported (use array access).
     $major = substr(Bootstrap::FRAMEWORK_VERSION, 0, 1);
@@ -198,7 +198,7 @@ class CdnAsset {
     }
     // Other (e.g. bootswatch theme).
     else {
-      $bootswatchThemes = isset(static::$bootswatchThemes[$major]) ? static::$bootswatchThemes[$major] : [];
+      $bootswatchThemes = static::$bootswatchThemes[$major] ?? [];
       if (!$theme || ($theme && !in_array($theme, $bootswatchThemes))) {
         $theme = in_array($path, $bootswatchThemes) ? $path : 'bootstrap';
       }
@@ -236,6 +236,7 @@ class CdnAsset {
    *   The URL to parse.
    *
    * @return array
+   *   Url parts.
    */
   protected static function extractParts($url) {
     preg_match(static::VALID_FILE_REGEXP, $url, $matches);
@@ -259,7 +260,7 @@ class CdnAsset {
     if (preg_match(static::INVALID_FILE_REGEXP, $url)) {
       return FALSE;
     }
-    list($path, $example, $minified, $type) = static::extractParts($url);
+    [$path, $example, $minified, $type] = static::extractParts($url);
     return $path && $type;
   }
 
@@ -331,6 +332,7 @@ class CdnAsset {
    * Retrieves the type of CDN asset this is (e.g. css or js).
    *
    * @return string
+   *   The type of CDN.
    */
   public function getType() {
     return $this->type;
@@ -340,6 +342,7 @@ class CdnAsset {
    * Retrieves the absolute URL this CDN asset represents.
    *
    * @return string
+   *   The absolute URL for this asset.
    */
   public function getUrl() {
     return $this->url;
@@ -349,6 +352,7 @@ class CdnAsset {
    * Retrieves the version this CDN asset is associated with, if any.
    *
    * @return string
+   *   The version of this CDN asset.
    */
   public function getVersion() {
     return $this->version;

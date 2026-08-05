@@ -193,7 +193,7 @@ class ErrorHandler
             $traceReflector->setValue($e, $trace);
             $e->file = $file ?? $e->file;
             $e->line = $line ?? $e->line;
-        }, null, new class() extends \Exception {
+        }, null, new class extends \Exception {
         });
         $this->debug = $debug;
     }
@@ -435,7 +435,7 @@ class ErrorHandler
                 return true;
             }
         } else {
-            if (PHP_VERSION_ID < 80303 && str_contains($message, '@anonymous')) {
+            if (\PHP_VERSION_ID < 80303 && str_contains($message, '@anonymous')) {
                 $backtrace = debug_backtrace(false, 5);
 
                 for ($i = 1; isset($backtrace[$i]); ++$i) {
@@ -451,7 +451,7 @@ class ErrorHandler
                 }
             }
 
-            if (false !== strpos($message, "@anonymous\0")) {
+            if (str_contains($message, "@anonymous\0")) {
                 $message = $this->parseAnonymousClass($message);
                 $logMessage = $this->levels[$type].': '.$message;
             }
@@ -599,7 +599,7 @@ class ErrorHandler
         }
         if (!$handler) {
             if (null === $error && $exitCode = self::$exitCode) {
-                register_shutdown_function('register_shutdown_function', function () use ($exitCode) { exit($exitCode); });
+                register_shutdown_function('register_shutdown_function', static function () use ($exitCode) { exit($exitCode); });
             }
 
             return;
@@ -638,7 +638,7 @@ class ErrorHandler
         }
 
         if ($exit && $exitCode = self::$exitCode) {
-            register_shutdown_function('register_shutdown_function', function () use ($exitCode) { exit($exitCode); });
+            register_shutdown_function('register_shutdown_function', static function () use ($exitCode) { exit($exitCode); });
         }
     }
 

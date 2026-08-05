@@ -51,7 +51,8 @@ class Renderer
         "TryStatement",
         "WhileStatement",
         "WithStatement",
-        "MethodDefinition"
+        "MethodDefinition",
+        "BlockStatement"
     );
     
     /**
@@ -200,6 +201,10 @@ class Renderer
                 $code .= $codeRight;
             break;
             case "BlockStatement":
+                $code .= trim($this->renderStatementBlock(
+                    $node, $node->getBody(), true, false, true, true
+                ));
+            break;
             case "ClassBody":
             case "Program":
                 $code .= $this->renderStatementBlock(
@@ -299,6 +304,7 @@ class Renderer
                     $code .= " as " . $this->renderNode($exported);
                 }
                 $code .= " from " . $this->renderNode($node->getSource());
+                $code .= $this->renderImportAttributes($node);
             break;
             case "ExportDefaultDeclaration":
                 $declaration = $node->getDeclaration();
@@ -326,6 +332,7 @@ class Renderer
                                  "from " .
                                  $this->renderNode($source);
                     }
+                    $code .= $this->renderImportAttributes($node);
                 }
             break;
             case "ExportSpecifier":
@@ -406,9 +413,15 @@ class Renderer
                          $this->renderStatementBlock($node, $node->getBody(), true);
             break;
             case "ImportExpression":
+                $options = $node->getOptions();
                 $code .= "import(" .
                          $this->renderOpts->sirb .
                          $this->renderNode($node->getSource()) .
+                         (
+                            $options ?
+                            "," . $this->renderOpts->sao . $this->renderNode($options) :
+                            ""
+                         ) .
                          $this->renderOpts->sirb .
                          ")";
             break;
@@ -438,6 +451,12 @@ class Renderer
                                  true
                              );
                 }
+            break;
+            case "ImportAttribute":
+                $code .= $this->renderNode($node->getKey()) .
+                         ":" .
+                         $this->renderOpts->sao .
+                         $this->renderNode($node->getValue());
             break;
             case "ImportDeclaration":
                 $code .= "import ";
@@ -472,6 +491,7 @@ class Renderer
                     $code .= implode($sep, $parts) . " from ";
                 }
                 $code .= $this->renderNode($node->getSource());
+                $code .= $this->renderImportAttributes($node);
             break;
             case "ImportDefaultSpecifier":
                 $code .= $this->renderNode($node->getLocal());
@@ -1104,7 +1124,7 @@ class Renderer
      * 
      * @param Syntax\Node\Node  $node             Node
      * @param bool              $leading          False to render trailing comments
-     * @param bool|null         $blockContent     This paramater can have 3 values:
+     * @param bool|null         $blockContent     This parameter can have 3 values:
      *                                            - null: the node is not a block
      *                                            - false: the node is an empty block
      *                                            - true: the node is a block with content
@@ -1169,6 +1189,29 @@ class Renderer
                 $refNode = $comment;
                 $lastFormatted = $format;
             }
+        }
+        return $code;
+    }
+
+    /**
+     * Render import attributes of the given node
+     * 
+     * @param Syntax\Node\Node  $node Node
+     * 
+     * @return string
+     */
+    protected function renderImportAttributes($node)
+    {
+        $code = "";
+        if (count($node->getAttributes())) {
+            $code .= " with" .
+                     $this->renderOpts->sao .
+                     "{" .
+                     $this->joinNodes(
+                        $node->getAttributes(),
+                        "," . $this->renderOpts->sao
+                     ) .
+                     "}";
         }
         return $code;
     }
