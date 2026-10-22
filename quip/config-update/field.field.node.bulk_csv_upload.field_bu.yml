@@ -1,0 +1,27 @@
+uuid: 88a31f2b-fe55-432c-b551-70bed9844211
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_bu
+    - node.type.bulk_csv_upload
+id: node.bulk_csv_upload.field_bu
+field_name: field_bu
+entity_type: node
+bundle: bulk_csv_upload
+label: 'Bulk Upload'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      bulk_csv_upload: bulk_csv_upload
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

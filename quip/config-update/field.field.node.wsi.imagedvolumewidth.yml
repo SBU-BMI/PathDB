@@ -1,0 +1,23 @@
+uuid: f1fcb2bc-3f2b-4e74-9c5d-dec537c4bdd4
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.imagedvolumewidth
+    - node.type.wsi
+id: node.wsi.imagedvolumewidth
+field_name: imagedvolumewidth
+entity_type: node
+bundle: wsi
+label: 'Imaged​ Volume ​Width'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

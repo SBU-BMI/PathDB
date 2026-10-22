@@ -1,0 +1,104 @@
+uuid: a61bc3ff-878c-497d-a09d-73aad114c70e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.bulk_csv_upload.field_bu
+    - field.field.node.bulk_csv_upload.field_csvfile
+    - field.field.node.bulk_csv_upload.field_log
+    - field.field.node.bulk_csv_upload.field_mappings
+    - field.field.node.bulk_csv_upload.field_number_of_images
+    - field.field.node.bulk_csv_upload.field_processed_images
+    - field.field.node.bulk_csv_upload.field_remaining_images
+    - field.field.node.bulk_csv_upload.field_target_collection
+    - field.field.node.bulk_csv_upload.field_upload_status
+    - node.type.bulk_csv_upload
+  module:
+    - file
+    - user
+id: node.bulk_csv_upload.default
+targetEntityType: node
+bundle: bulk_csv_upload
+mode: default
+content:
+  field_bu:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 110
+    region: content
+  field_csvfile:
+    type: file_default
+    label: inline
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    weight: 107
+    region: content
+  field_log:
+    type: basic_string
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    weight: 108
+    region: content
+  field_mappings:
+    type: file_default
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    weight: 109
+    region: content
+  field_number_of_images:
+    type: number_integer
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  field_processed_images:
+    type: number_integer
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  field_remaining_images:
+    type: number_integer
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 104
+    region: content
+  field_target_collection:
+    type: entity_reference_label
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 105
+    region: content
+  field_upload_status:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 106
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  search_api_excerpt: true

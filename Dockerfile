@@ -15,6 +15,8 @@ RUN dnf install -y php php-cli php-common php-fpm php-mysqlnd php-pecl-uploadpro
     php-devel httpd telnet openssl mod_ssl procps-ng sudo
 COPY mariadb.repo /etc/yum.repos.d/mariadb.repo
 RUN dnf install -y MariaDB-server MariaDB-client git
+RUN dnf install -y php-pecl-apcu
+
 # download Drupal management tools
 WORKDIR /build
 RUN wget https://getcomposer.org/installer && php installer && rm -f installer && mv composer.phar /usr/local/bin/composer

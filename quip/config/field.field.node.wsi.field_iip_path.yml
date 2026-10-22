@@ -1,0 +1,19 @@
+uuid: db4cc90f-3623-4b78-ac5f-880c8aa78256
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_iip_path
+    - node.type.wsi
+id: node.wsi.field_iip_path
+field_name: field_iip_path
+entity_type: node
+bundle: wsi
+label: iip_path
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

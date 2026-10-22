@@ -1,0 +1,8 @@
+status: 1
+pattern: '[node:field_wsi:target_id]'
+escape: false
+dependencies:
+  config:
+    - node.type.map
+new_content_behavior: 1
+php: 0
