@@ -156,7 +156,8 @@ class TranslateEntityAggregatedFieldProcessorTest extends UnitTestCase {
       $this->entityTypeManager,
       $this->configManager,
       $this->entityFieldManager,
-      $this->entityTypeBundleInfo
+      $this->entityTypeBundleInfo,
+      $this->entityDefinitionUpdateManager
     );
   }
 

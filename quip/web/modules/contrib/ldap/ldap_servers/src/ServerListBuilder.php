@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\ldap_servers;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ldap_servers\Entity\Server;
@@ -30,15 +31,13 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
    *   Entity type.
-   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
-   *   Entity storage.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
    * @param \Drupal\ldap_servers\LdapBridgeInterface $ldap_bridge
    *   LDAP Bridge.
    */
-  final public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, LdapBridgeInterface $ldap_bridge) {
-    $this->entityTypeId = $entity_type->id();
-    $this->storage = $storage;
-    $this->entityType = $entity_type;
+  final public function __construct(EntityTypeInterface $entity_type, EntityTypeManagerInterface $entity_type_manager, LdapBridgeInterface $ldap_bridge) {
+    parent::__construct($entity_type, $entity_type_manager->getStorage($entity_type->id()));
     $this->ldapBridge = $ldap_bridge;
   }
 
@@ -48,7 +47,7 @@ class ServerListBuilder extends ConfigEntityListBuilder {
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     return new self(
       $entity_type,
-      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('entity_type.manager'),
       $container->get('ldap.bridge')
     );
   }
@@ -144,13 +143,15 @@ class ServerListBuilder extends ConfigEntityListBuilder {
    *
    * @param \Drupal\Core\Entity\EntityInterface|\Drupal\ldap_servers\ServerInterface $entity
    *   Entity interface.
+   * @param \Drupal\Core\Cache\CacheableMetadata|null $cacheability
+   *   Cacheability metadata for the operations.
    *
    * @return array
    *   Available operations in dropdown.
    */
-  public function getOperations(EntityInterface $entity): array {
+  public function getOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL): array {
     /** @var \Drupal\ldap_servers\ServerInterface $entity */
-    $operations = $this->getDefaultOperations($entity);
+    $operations = $this->getDefaultOperations($entity, $cacheability);
     if (!isset($operations['test'])) {
       $operations['test'] = [
         'title' => $this->t('Test'),

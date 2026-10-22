@@ -7,15 +7,15 @@ namespace Drupal\Tests\ldap_servers\Unit;
 use Drupal\ldap_servers\Form\ServerTestForm;
 use Drupal\ldap_servers\LdapBridge;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Ldap\Exception\LdapException;
 
 /**
  * Class LdapBridgeTest.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class ServerTestFormTest extends UnitTestCase {
 
   /**
@@ -24,13 +24,6 @@ class ServerTestFormTest extends UnitTestCase {
    * @var \Drupal\ldap_servers\Form\ServerTestForm
    */
   protected $form;
-
-  /**
-   * The entity storage.
-   *
-   * @var \Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $entityStorage;
 
   /**
    * The server.
@@ -52,13 +45,6 @@ class ServerTestFormTest extends UnitTestCase {
    * @var \Prophecy\Prophecy\ObjectProphecy
    */
   protected $entityTypeManager;
-
-  /**
-   * The server storage.
-   *
-   * @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface
-   */
-  protected $serverStorage;
 
   /**
    * The ldap bridge.
@@ -94,8 +80,8 @@ class ServerTestFormTest extends UnitTestCase {
     $this->entityTypeManager = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
     $container->set('entity_type.manager', $this->entityTypeManager->reveal());
 
-    $this->entityStorage = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $this->entityTypeManager->getStorage('ldap_server')->willReturn($this->entityStorage->reveal());
+    $server_storage = $this->createMock('Drupal\Core\Config\Entity\ConfigEntityStorageInterface');
+    $this->entityTypeManager->getStorage('ldap_server')->willReturn($server_storage);
 
     $config_factory = $this->prophesize('Drupal\Core\Config\ConfigFactoryInterface');
     $container->set('config.factory', $config_factory->reveal());
@@ -117,9 +103,6 @@ class ServerTestFormTest extends UnitTestCase {
 
     $entity_type_repository = $this->prophesize('Drupal\Core\Entity\EntityTypeRepository');
     $container->set('entity_type.repository', $entity_type_repository->reveal());
-
-    $this->serverStorage = $this->createMock('Drupal\Core\Config\Entity\ConfigEntityStorageInterface');
-    $this->entityTypeManager->getStorage('ldap_server')->willReturn($this->serverStorage);
 
     \Drupal::setContainer($container);
 
@@ -455,7 +438,7 @@ class ServerTestFormTest extends UnitTestCase {
    * Tests validateForm when the server is invalid.
    */
   public function testValidateFormServerIsInvalid(): void {
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn(NULL);
@@ -480,7 +463,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('get')
       ->with('grp_object_cat')
       ->willReturn('NotOpenLDAP');
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -598,7 +581,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('get')
       ->with('grp_object_cat')
       ->willReturn('NotOpenLDAP');
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -685,7 +668,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('get')
       ->with('grp_object_cat')
       ->willReturn('groupofnames');
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -798,7 +781,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('id')
       ->willReturn('example_server');
 
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -889,7 +872,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('id')
       ->willReturn('example_server');
 
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -944,7 +927,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('get')
       ->with('grp_object_cat')
       ->willReturn('NotOpenLDAP');
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -1051,7 +1034,7 @@ class ServerTestFormTest extends UnitTestCase {
       ->method('get')
       ->with('grp_object_cat')
       ->willReturn('NotOpenLDAP');
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);
@@ -1190,7 +1173,7 @@ class ServerTestFormTest extends UnitTestCase {
     $this->server->expects($this->exactly(2))
       ->method('isGroupUserMembershipAttributeInUse')
       ->willReturn(TRUE);
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example_server')
       ->willReturn($this->server);

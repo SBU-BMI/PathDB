@@ -2,6 +2,8 @@
 
 namespace Drupal\bootstrap\Plugin\Setting\Components\Region;
 
+use Drupal\bootstrap\Bootstrap;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\bootstrap\Plugin\Setting\SettingBase;
 use Drupal\bootstrap\Utility\Element;
 use Drupal\Core\Form\FormStateInterface;
@@ -59,7 +61,7 @@ class RegionWells extends SettingBase {
       'well well-lg' => t('.well-lg (large)'),
     ];
     // Create dynamic well settings for each region.
-    $regions = system_region_list($this->theme->getName());
+    $regions = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => Bootstrap::service('theme_handler')->getTheme($this->theme->getName())->listAllRegions(), fn() => system_region_list($this->theme->getName()));
     foreach ($regions as $name => $title) {
       if (in_array($name, ['page_top', 'page_bottom'])) {
         continue;

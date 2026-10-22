@@ -6,21 +6,22 @@ namespace Drupal\Tests\ldap_authentication\Unit;
 
 use Drupal\ldap_authentication\AuthenticationServers;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Authentication servers test.
- *
- * @group ldap_authentication
- * @coversDefaultClass \Drupal\ldap_authentication\AuthenticationServers
  */
+#[Group('ldap_authentication')]
+#[CoversClass(AuthenticationServers::class)]
 class AuthenticationServersTest extends UnitTestCase {
 
   /**
-   * Server storage.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface|\PHPUnit\Framework\MockObject\MockObject
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
-  protected $serverStorage;
+  protected $entityTypeManager;
 
   /**
    * Config.
@@ -42,12 +43,11 @@ class AuthenticationServersTest extends UnitTestCase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->serverStorage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
-    $entity_type_manager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
-    $entity_type_manager->expects($this->once())
-      ->method('getStorage')
+    $server_storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
+    $this->entityTypeManager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->entityTypeManager->method('getStorage')
       ->with('ldap_server')
-      ->willReturn($this->serverStorage);
+      ->willReturn($server_storage);
 
     $this->config = $this->createMock('Drupal\Core\Config\ImmutableConfig');
     $config_factory = $this->createMock('Drupal\Core\Config\ConfigFactoryInterface');
@@ -56,7 +56,7 @@ class AuthenticationServersTest extends UnitTestCase {
       ->with('ldap_authentication.settings')
       ->willReturn($this->config);
 
-    $this->service = new AuthenticationServers($entity_type_manager, $config_factory);
+    $this->service = new AuthenticationServers($this->entityTypeManager, $config_factory);
   }
 
   /**
@@ -75,7 +75,8 @@ class AuthenticationServersTest extends UnitTestCase {
     $entity_query->expects($this->once())
       ->method('execute')
       ->willReturn([]);
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')
+      ->expects($this->once())
       ->method('getQuery')
       ->willReturn($entity_query);
 
@@ -105,7 +106,8 @@ class AuthenticationServersTest extends UnitTestCase {
     $entity_query->expects($this->once())
       ->method('execute')
       ->willReturn(['server1' => 'server1']);
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')
+      ->expects($this->once())
       ->method('getQuery')
       ->willReturn($entity_query);
 

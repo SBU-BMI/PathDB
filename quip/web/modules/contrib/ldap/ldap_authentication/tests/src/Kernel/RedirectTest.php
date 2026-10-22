@@ -6,12 +6,14 @@ namespace Drupal\Tests\ldap_authentication\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_authentication\Controller\LdapHelpRedirect;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Redirect tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class RedirectTest extends KernelTestBase {
 
   /**

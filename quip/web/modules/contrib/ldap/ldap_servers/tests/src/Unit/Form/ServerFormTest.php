@@ -7,12 +7,15 @@ namespace Drupal\Tests\ldap_servers\Unit\Form;
 use Drupal\ldap_servers\Form\ServerForm;
 use Drupal\ldap_servers\ServerInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @coversDefaultClass \Drupal\ldap_servers\Form\ServerForm
- * @group ldap_servers
+ * Tests ServerForm.
  */
+#[CoversClass(ServerForm::class)]
+#[Group('ldap_servers')]
 class ServerFormTest extends UnitTestCase {
 
   /**
@@ -94,7 +97,7 @@ class ServerFormTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getFormId
+   * Tests getFormId().
    */
   public function testGetFormId(): void {
     $this->server->expects($this->once())
@@ -112,7 +115,7 @@ class ServerFormTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::form
+   * Tests form().
    */
   public function testForm(): void {
     $this->server->expects($this->exactly(2))

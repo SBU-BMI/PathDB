@@ -141,7 +141,7 @@ class ProcessorPluginBase extends PluginBase implements ProcessorInterface, Cach
     EntityAccessControlHandlerInterface $access,
   ): void {
     foreach ($entities as $id => $entity) {
-      $access_result = $access->access($entity, 'view', return_as_object: TRUE);
+      $access_result = $access->access($entity, 'view label', return_as_object: TRUE);
       $facet->addCacheableDependency($access_result);
       if (!$access_result->isAllowed()) {
         unset($entities[$id]);

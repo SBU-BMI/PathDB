@@ -7,7 +7,7 @@ hidden: true
 dependencies:
   - drupal:views_bulk_operations
 
-# Information added by Drupal.org packaging script on 2026-07-16
-version: '4.4.7'
+# Information added by Drupal.org packaging script on 2026-10-01
+version: '4.4.9'
 project: 'views_bulk_operations'
-datestamp: 1784189104
+datestamp: 1790863783

@@ -2,6 +2,7 @@
 
 namespace Drupal\bootstrap\Plugin\Preprocess;
 
+use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Utility\Variables;
 use Drupal\Component\Utility\Html;
 
@@ -20,7 +21,7 @@ class BootstrapModal extends PreprocessBase implements PreprocessInterface {
   protected function preprocessVariables(Variables $variables) {
     // Immediately log an error and return if Bootstrap modals are not enabled.
     if (!$this->theme->getSetting('modal_enabled')) {
-      \Drupal::logger('bootstrap')->error(t('Bootstrap modals are not enabled.'));
+      Bootstrap::service('logger.factory')->get('bootstrap')->error(t('Bootstrap modals are not enabled.'));
       return;
     }
 

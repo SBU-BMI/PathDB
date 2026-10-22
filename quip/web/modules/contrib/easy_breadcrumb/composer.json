@@ -19,5 +19,10 @@
   "support": {
     "issues": "https://www.drupal.org/project/issues/easy_breadcrumb",
     "source": "https://git.drupalcode.org/project/easy_breadcrumb"
+  },
+  "require-dev": {
+    "drupal/cva": "^1",
+    "drupal/mercury": "^1.0.5",
+    "drush/drush":"^13"
   }
 }

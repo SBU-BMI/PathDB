@@ -212,7 +212,7 @@ class SettingBase extends PluginBase implements SettingInterface {
             'target' => '_blank',
           ],
         ], $form_state);
-        $links[] = (string) $link->renderPlain();
+        $links[] = (string) $link->renderInIsolation();
       }
       if (!empty($links)) {
         $description .= '<br>';

@@ -47,13 +47,32 @@ include:
 # Docs at https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml
 ################
 variables:
-  _PHPUNIT_EXTRA: --verbose
   OPT_IN_TEST_PREVIOUS_MAJOR: 1
   OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
   OPT_IN_TEST_CURRENT: 1
-  # OPT_IN_TEST_MAX_PHP: 1 php8.3-ldap is not avaliable in debian bookworm.
+  OPT_IN_TEST_MAX_PHP: 1
+  RUN_JOB_UPGRADE_STATUS: 0
+
+.phpunit-base:
+  before_script:
+    # Ubuntu DrupalCI images do not ship PHP source, and their
+    # docker-php-ext-configure wraps `pecl bundle` (LDAP is not PECL).
+    - apt-get update
+    - apt-get install -y --no-install-recommends $PHPIZE_DEPS libldap2-dev
+    - |
+      set -e
+      PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION.".".PHP_RELEASE_VERSION;')"
+      curl -fsSL "https://github.com/php/php-src/archive/refs/tags/php-${PHP_VERSION}.tar.gz" -o /tmp/php-src.tar.gz
+      mkdir -p /tmp/php-src
+      tar -zxf /tmp/php-src.tar.gz -C /tmp/php-src --strip-components=1
+      cd /tmp/php-src/ext/ldap
+      phpize
+      ./configure --with-libdir=lib/x86_64-linux-gnu
+      make -j"$(nproc)"
+      make install
+    - docker-php-ext-enable ldap
 
 composer (authorization dev):
   extends: .composer-base
@@ -81,40 +100,10 @@ phpunit (externalauth dev):
   needs:
     - "composer (externalauth dev)"
 
-phpunit:
+upgrade status:
+  allow_failure: true
   rules:
-    - when: on_success
-  needs:
-    - "composer"
-  before_script:
-    - apt-get update
-    - apt-get install -y --no-install-recommends $PHPIZE_DEPS
-    - apt-get install -y libldap2-dev
-    - rm -rf /var/lib/apt/lists/*
-    - docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/
-    - docker-php-ext-install ldap
-    - docker-php-ext-enable ldap
-
-phpunit (next minor):
-  extends: phpunit
-  rules:
-    - when: on_success
-  needs:
-    - "composer (next minor)"
-
-phpunit (previous minor):
-  extends: phpunit
-  rules:
-    - when: on_success
-  needs:
-    - "composer (previous minor)"
-
-phpunit (previous major):
-  extends: phpunit
-  rules:
-    - when: on_success
-  needs:
-    - "composer (previous major)"
+    - when: manual
 
 ###################################################################################
 #

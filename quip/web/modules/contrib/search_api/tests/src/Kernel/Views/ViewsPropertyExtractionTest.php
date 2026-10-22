@@ -420,7 +420,7 @@ class ViewsPropertyExtractionTest extends KernelTestBase {
     $values = [$row];
     $field->preRender($values);
 
-    // Test the getItems method which applies delta options
+    // Test the getItems method which applies delta options.
     $items = $field->getItems($row);
     $actual_values = array_map(function ($item) {
       return $item['value'];

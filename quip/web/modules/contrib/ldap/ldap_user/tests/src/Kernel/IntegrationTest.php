@@ -6,12 +6,14 @@ namespace Drupal\Tests\ldap_user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Integration tests for ldap_user.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class IntegrationTest extends KernelTestBase {
 
   /**

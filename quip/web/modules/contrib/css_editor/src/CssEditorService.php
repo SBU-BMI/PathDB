@@ -3,6 +3,7 @@
 namespace Drupal\css_editor;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Psr\Log\LoggerInterface;
 
@@ -83,7 +84,7 @@ class CssEditorService {
 
     // Save CSS data to file.
     try {
-      $this->fileSystem->saveData($css, $file, FileSystemInterface::EXISTS_REPLACE);
+      $this->fileSystem->saveData($css, $file, FileExists::Replace);
       $this->fileSystem->chmod($file);
 
       // Update config with file path.

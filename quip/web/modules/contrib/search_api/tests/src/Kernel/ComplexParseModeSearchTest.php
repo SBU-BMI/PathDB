@@ -38,6 +38,8 @@ class ComplexParseModeSearchTest extends KernelTestBase {
    *
    * We do not touch index config anymore, but some shared fixtures may carry
    * optional keys not covered by schema in older branches.
+   *
+   * @var bool
    */
   protected $strictConfigSchema = FALSE;
 

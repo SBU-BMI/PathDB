@@ -11,14 +11,14 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\ldap_servers\Controller\DebugController;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Tests the DebugController class.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class DebugControllerTest extends UnitTestCase {
 
   use ProphecyTrait;

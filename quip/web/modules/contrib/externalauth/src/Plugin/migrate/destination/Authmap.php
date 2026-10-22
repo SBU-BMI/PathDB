@@ -11,11 +11,17 @@ use Drupal\user\UserStorageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Drupal 8 authmap destination.
+ * Saves migrated external authentication names to the authmap table.
  *
  * @MigrateDestination(
  *   id = "authmap"
  * )
+ *
+ * @deprecated in externalauth:2.0.14 and is removed from externalauth:2.2.0.
+ *   Implement a custom migrate destination plugin calling
+ *   \Drupal\externalauth\AuthmapInterface::save() instead.
+ *
+ * @see https://www.drupal.org/node/3618043
  */
 class Authmap extends DestinationBase implements ContainerFactoryPluginInterface {
 
@@ -50,6 +56,7 @@ class Authmap extends DestinationBase implements ContainerFactoryPluginInterface
    *   The user storage.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, AuthmapInterface $authmap, UserStorageInterface $user_storage) {
+    @trigger_error(__CLASS__ . ' is deprecated in externalauth:2.0.14 and is removed from externalauth:2.2.0. Implement a custom migrate destination plugin calling \Drupal\externalauth\AuthmapInterface::save() instead. See https://www.drupal.org/node/3618043', E_USER_DEPRECATED);
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
     $this->authmap = $authmap;
     $this->userStorage = $user_storage;

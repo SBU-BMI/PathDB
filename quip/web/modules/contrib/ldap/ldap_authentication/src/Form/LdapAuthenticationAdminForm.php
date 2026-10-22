@@ -27,13 +27,6 @@ final class LdapAuthenticationAdminForm extends ConfigFormBase {
   protected $moduleHandler;
 
   /**
-   * Storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $storage;
-
-  /**
    * Entity Type Manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -76,12 +69,12 @@ final class LdapAuthenticationAdminForm extends ConfigFormBase {
       parent::__construct($config_factory, $config_type_manager);
     }
     else {
+      // @phpstan-ignore-next-line
       parent::__construct($config_factory);
     }
 
-    $this->moduleHandler = $module_handler;
+    $this->moduleHandler     = $module_handler;
     $this->entityTypeManager = $entity_type_manager;
-    $this->storage = $entity_type_manager->getStorage('ldap_server');
   }
 
   /**
@@ -103,7 +96,7 @@ final class LdapAuthenticationAdminForm extends ConfigFormBase {
     $config = $this->config('ldap_authentication.settings');
 
     /** @var \Drupal\ldap_servers\Entity\Server[] $servers */
-    $servers = $this->storage->loadMultiple();
+    $servers = $this->entityTypeManager->getStorage('ldap_server')->loadMultiple();
     $authenticationServers = [];
     foreach ($servers as $sid => $ldap_server) {
       $authenticationServers[$sid] = sprintf(

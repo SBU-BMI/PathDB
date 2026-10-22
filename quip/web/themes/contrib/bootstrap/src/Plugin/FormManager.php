@@ -17,9 +17,9 @@ class FormManager extends PluginManager {
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Form', 'Drupal\bootstrap\Plugin\Form\FormInterface', 'Drupal\bootstrap\Annotation\BootstrapForm');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':form', $this->getCacheTags());
   }
 
 }

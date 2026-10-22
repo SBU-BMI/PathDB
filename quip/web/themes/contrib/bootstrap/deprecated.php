@@ -468,7 +468,7 @@ function _bootstrap_glyphicons_supported() {
  *   $icon = Bootstrap::glyphicon($name, ['#markup' => $default]);
  *   $icon_attributes = isset($icon['#attributes']) ? $icon['#attributes'] : [];
  *   unset($icon['#attributes']);
- *   $icon = (string) Element::createStandalone($icon)->setAttributes($attributes)->setAttributes($icon_attributes)->renderPlain();
+ *   $icon = (string) Element::createStandalone($icon)->setAttributes($attributes)->setAttributes($icon_attributes)->renderInIsolation();
  * @endcode
  *
  * @see \Drupal\bootstrap\Bootstrap::glyphicon()
@@ -479,7 +479,7 @@ function _bootstrap_icon($name, $default = NULL, array $attributes = []) {
   $icon = Bootstrap::glyphicon($name, ['#markup' => $default]);
   $icon_attributes = $icon['#attributes'] ?? [];
   unset($icon['#attributes']);
-  return (string) Element::createStandalone($icon)->setAttributes($attributes)->setAttributes($icon_attributes)->renderPlain();
+  return (string) Element::createStandalone($icon)->setAttributes($attributes)->setAttributes($icon_attributes)->renderInIsolation();
 }
 
 /**

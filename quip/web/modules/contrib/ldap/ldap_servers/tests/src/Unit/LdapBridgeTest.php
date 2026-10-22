@@ -6,13 +6,13 @@ namespace Drupal\Tests\ldap_servers\Unit;
 
 use Drupal\ldap_servers\LdapBridge;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Tests LdapBridge.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class LdapBridgeTest extends UnitTestCase {
 
   /**
@@ -37,11 +37,11 @@ class LdapBridgeTest extends UnitTestCase {
   protected $logger;
 
   /**
-   * The entity storage.
+   * The entity type manager.
    *
    * @var \Prophecy\Prophecy\ObjectProphecy
    */
-  protected $entityStorage;
+  protected $entityTypeManager;
 
   /**
    * {@inheritdoc}
@@ -53,16 +53,14 @@ class LdapBridgeTest extends UnitTestCase {
     $string_translation = $this->getStringTranslationStub();
     $this->container->set('string_translation', $string_translation);
 
-    $entity_type_manager = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
-    $this->container->set('entity_type.manager', $entity_type_manager->reveal());
-    $this->entityStorage = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $entity_type_manager->getStorage('ldap_server')->willReturn($this->entityStorage->reveal());
+    $this->entityTypeManager = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->container->set('entity_type.manager', $this->entityTypeManager->reveal());
 
     $this->logger = $this->createMock('Psr\Log\LoggerInterface');
 
     $this->ldapBridge = new LdapBridge(
       $this->logger,
-      $entity_type_manager->reveal()
+      $this->entityTypeManager->reveal()
     );
   }
 
@@ -94,10 +92,13 @@ class LdapBridgeTest extends UnitTestCase {
       ->willReturn(30)
       ->shouldBeCalled($this->exactly(2));
 
-    $this->entityStorage
+    $entity_storage = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
+    $entity_storage
       ->load($server_id)
       ->willReturn($server->reveal())
       ->shouldBeCalled($this->once());
+    $this->entityTypeManager->getStorage('ldap_server')
+      ->willReturn($entity_storage->reveal());
 
     $this->ldapBridge->setServerById($server_id);
   }

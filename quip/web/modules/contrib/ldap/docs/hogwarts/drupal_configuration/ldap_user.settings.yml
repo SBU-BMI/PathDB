@@ -8,11 +8,18 @@ ldapEntryProvisionTriggers:
   ldap_on_login: ldap_on_login
   ldap_on_delete: ldap_on_delete
   drupal_on_manual_creation: drupal_on_manual_creation
+orphanedIncludeDisabledUsers: false
 orphanedDrupalAcctBehavior: ldap_user_orphan_email
+orphanedDrupalAcctReportingInbox: ''
 orphanedCheckQty: 100
+orphanedAccountCheckInterval: always
 userConflictResolve: resolve
 manualAccountConflict: conflict_show_option
 acctCreation: ldap_behavior
+disableAdminPasswordField: false
+userUpdateCronQuery: example_query
+userUpdateCronInterval: always
+userUpdateOnly: false
 ldapUserSyncMappings:
   drupal:
     field-mail:
@@ -57,7 +64,7 @@ ldapUserSyncMappings:
       user_attr: user_tokens
       convert: false
       direction: ldap
-      user_tokens: 'cn=[property.name],ou=people,dc=hogwarts,dc=edu '
+      user_tokens: 'cn=[property.name],ou=people,dc=hogwarts,dc=edu'
       config_module: ldap_user
       prov_module: ldap_user
       enabled: true
@@ -97,7 +104,7 @@ ldapUserSyncMappings:
       enabled: true
       prov_events:
         - create_ldap_entry
-    'userPassword':
+    userPassword:
       ldap_attr: '[userPassword]'
       user_attr: '[password.user-only]'
       convert: false
@@ -108,6 +115,3 @@ ldapUserSyncMappings:
       enabled: true
       prov_events:
         - sync_to_ldap_entry
-orphanedAccountCheckInterval: always
-userUpdateCronQuery: example_query
-userUpdateCronInterval: always

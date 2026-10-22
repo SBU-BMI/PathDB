@@ -12,16 +12,17 @@ use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
 use Drupal\ldap_user\Plugin\Validation\Constraint\LdapProtectedUserFieldConstraint;
 use Drupal\ldap_user\Plugin\Validation\Constraint\LdapProtectedUserFieldConstraintValidator;
 use Drupal\Tests\UnitTestCase;
+use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\user\UserStorageInterface;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Extended from core tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
 class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
 
   /**
@@ -59,18 +60,21 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
   }
 
   /**
-   * Test validation.
+   * Runs the validator against field items.
    *
-   * @dataProvider providerTestValidate
+   * @param \Drupal\Core\Field\FieldItemListInterface|null $items
+   *   Field items to validate.
+   * @param string|null|false $name
+   *   Field name expected in a violation, or FALSE if none is expected.
    */
-  public function testValidate($items, $expected_violation, $name = FALSE): void {
+  protected function validate($items, $name = FALSE): void {
     $constraint = new LdapProtectedUserFieldConstraint();
 
     // If a violation is expected, then the context's addViolation method will
     // be called, otherwise it should not be called.
     $context = $this->createMock(ExecutionContextInterface::class);
 
-    if ($expected_violation) {
+    if ($name !== FALSE) {
       $context->expects($this->once())
         ->method('addViolation')
         ->with($constraint->message, ['%name' => $name]);
@@ -86,11 +90,9 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
   }
 
   /**
-   * Data provider for ::testValidate().
+   * Test validation.
    */
-  public function providerTestValidate(): array {
-    $cases = [];
-
+  public function testValidate(): void {
     // Case 0: Empty user should be ignored.
     $field_definition = $this->createMock(FieldDefinitionInterface::class);
     $items = $this->createMock(FieldItemListInterface::class);
@@ -100,11 +102,11 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $items->expects($this->once())
       ->method('getEntity')
       ->willReturn(NULL);
-    $cases[] = [$items, FALSE];
+    $this->validate($items);
 
     // Case 1: Account flagged to skip protected user should be ignored.
     $field_definition = $this->createMock(FieldDefinitionInterface::class);
-    $account = $this->createMock(UserInterface::class);
+    $account = $this->createMock(User::class);
     $account->_skipProtectedUserFieldConstraint = TRUE;
     $items = $this->createMock(FieldItemListInterface::class);
     $items->expects($this->once())
@@ -113,7 +115,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $items->expects($this->once())
       ->method('getEntity')
       ->willReturn($account);
-    $cases[] = [$items, FALSE];
+    $this->validate($items);
 
     // Case 2: New user should be ignored.
     $field_definition = $this->createMock(FieldDefinitionInterface::class);
@@ -128,7 +130,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $items->expects($this->once())
       ->method('getEntity')
       ->willReturn($account);
-    $cases[] = [$items, FALSE];
+    $this->validate($items);
 
     // Case 3: Non-password fields that have not changed should be ignored.
     $field_definition = $this->createMock(FieldDefinitionInterface::class);
@@ -152,7 +154,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $items->expects($this->once())
       ->method('getValue')
       ->willReturn('unchanged-value');
-    $cases[] = [$items, FALSE];
+    $this->validate($items);
 
     // Case 4: Password field with no value set should be ignored.
     $field_definition = $this->createMock(FieldDefinitionInterface::class);
@@ -163,7 +165,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $account->expects($this->once())
       ->method('isNew')
       ->willReturn(FALSE);
-    $account->expects($this->exactly(2))
+    $account->expects($this->once())
       ->method('id')
       ->willReturn('current-user');
     $items = $this->createMock(FieldItemListInterface::class);
@@ -173,7 +175,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $items->expects($this->once())
       ->method('getEntity')
       ->willReturn($account);
-    $cases[] = [$items, FALSE];
+    $this->validate($items);
 
     // Case 5: Non-password field changed, user wrong current password.
     $field_definition = $this->createMock(FieldDefinitionInterface::class);
@@ -187,11 +189,9 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $account
       ->method('id')
       ->willReturn('current-user');
-    $pass = new \stdClass();
-    $pass->existing = 'existing';
     $account->expects($this->once())
-      ->method('get')
-      ->willReturn($pass);
+      ->method('checkExistingPassword')
+      ->willReturn(FALSE);
     $items = $this->createMock(FieldItemListInterface::class);
     $items
       ->method('getFieldDefinition')
@@ -202,9 +202,7 @@ class ProtectedUserFieldConstraintValidatorTest extends UnitTestCase {
     $items
       ->method('getValue')
       ->willReturn('changed-value');
-    $cases[] = [$items, TRUE, NULL];
-
-    return $cases;
+    $this->validate($items, NULL);
   }
 
   /**

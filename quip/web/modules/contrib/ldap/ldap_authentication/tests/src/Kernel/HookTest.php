@@ -7,12 +7,14 @@ namespace Drupal\Tests\ldap_authentication\Kernel;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the hooks in the module file.
- *
- * @group ldap_authentication
  */
+#[Group('ldap_authentication')]
+#[RunTestsInSeparateProcesses]
 class HookTest extends EntityKernelTestBase {
 
   /**

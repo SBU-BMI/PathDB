@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ldap_authorization\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once __DIR__ . '/../../../ldap_authorization.module';
@@ -14,6 +15,7 @@ require_once __DIR__ . '/../../../ldap_authorization.module';
  *
  * @package Drupal\Tests\ldap_authorization\Unit
  */
+#[CoversFunction('ldap_authorization_help')]
 class HookHelpTest extends UnitTestCase {
 
   /**
@@ -40,8 +42,6 @@ class HookHelpTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authorization_help
    */
   public function testHookHelp(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');

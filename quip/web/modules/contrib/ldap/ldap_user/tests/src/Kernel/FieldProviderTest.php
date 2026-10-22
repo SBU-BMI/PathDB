@@ -8,12 +8,14 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_user\FieldProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Field Provider tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class FieldProviderTest extends KernelTestBase implements LdapUserAttributesInterface {
 
   /**
@@ -161,6 +163,49 @@ class FieldProviderTest extends KernelTestBase implements LdapUserAttributesInte
     $processor->loadAttributes(LdapUserAttributesInterface::PROVISION_TO_DRUPAL, $this->server);
     $data = $processor->getAttributesSyncedOnEvent(LdapUserAttributesInterface::EVENT_SYNC_TO_DRUPAL_USER);
     self::assertEquals('[cn]@example.com', $data['[property.mail]']->getLdapAttribute());
+  }
+
+  /**
+   * Sequence mapping keys are integers; Mapping requires string IDs.
+   */
+  public function testUserDefinedMappingsWithIntegerIds(): void {
+    $container = \Drupal::getContainer();
+    $config_factory = $container->get('config.factory');
+    $config = $config_factory->getEditable('ldap_user.settings');
+    $config
+      ->set('ldapUserSyncMappings', [
+        'drupal' => [
+          [
+            'ldap_attr' => '[cn]',
+            'user_attr' => '[field.test_field]',
+            'convert' => FALSE,
+            'user_tokens' => '',
+            'config_module' => 'ldap_user',
+            'prov_module' => 'ldap_user',
+            'prov_events' => [
+              self::EVENT_CREATE_DRUPAL_USER,
+            ],
+          ],
+        ],
+      ])
+      ->set('drupalAcctProvisionTriggers', [
+        'drupal_on_login' => 'drupal_on_login',
+        'drupal_on_update_create' => 'drupal_on_update_create',
+      ])
+      ->save();
+    $processor = new FieldProvider(
+      $config_factory,
+      $container->get('entity_type.manager'),
+      $container->get('module_handler'),
+      $container->get('entity_field.manager')
+    );
+
+    $processor->loadAttributes(LdapUserAttributesInterface::PROVISION_TO_DRUPAL, $this->server);
+    $data = $processor->getConfigurableAttributesSyncedOnEvent(LdapUserAttributesInterface::EVENT_CREATE_DRUPAL_USER);
+    $mapping = $data['[field.test_field]'];
+    self::assertSame('0', $mapping->getId());
+    self::assertEquals('[field.test_field]', $mapping->getDrupalAttribute());
+    self::assertEquals('[cn]', $mapping->getLdapAttribute());
   }
 
 }

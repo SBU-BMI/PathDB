@@ -2,6 +2,8 @@
 
 namespace Drupal\bootstrap;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\ThemeSettingsProvider;
 use Drupal\bootstrap\Plugin\Setting\DeprecatedSettingInterface;
 use Drupal\Core\Theme\ThemeSettings as CoreThemeSettings;
 use Drupal\Component\Utility\DiffArray;
@@ -51,7 +53,7 @@ class ThemeSettings extends Config {
    * {@inheritdoc}
    */
   public function __construct(Theme $theme) {
-    parent::__construct($theme->getName() . '.settings', \Drupal::service('config.storage'), \Drupal::service('event_dispatcher'), \Drupal::service('config.typed'));
+    parent::__construct($theme->getName() . '.settings', Bootstrap::service('config.storage'), Bootstrap::service('event_dispatcher'), Bootstrap::service('config.typed'));
     $this->theme = $theme;
 
     // Retrieve the available settings.
@@ -85,7 +87,7 @@ class ThemeSettings extends Config {
     }
 
     // Retrieve the global settings from configuration.
-    $this->defaults = \Drupal::config('system.theme.global')->get();
+    $this->defaults = Bootstrap::service('config.factory')->get('system.theme.global')->get();
 
     // Retrieve the theme setting plugin discovery defaults (code).
     foreach ($this->settings as $name => $deprecatedSetting) {
@@ -246,11 +248,11 @@ class ThemeSettings extends Config {
   public function getThemeConfig(Theme $theme, $active_theme = FALSE) {
     $config = new CoreThemeSettings($theme->getName());
     /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
-    $file_url_generator = \Drupal::service('file_url_generator');
+    $file_url_generator = Bootstrap::service('file_url_generator');
 
     // Retrieve configured theme-specific settings, if any.
     try {
-      if ($theme_settings = \Drupal::config($theme->getName() . '.settings')->get()) {
+      if ($theme_settings = Bootstrap::service('config.factory')->get($theme->getName() . '.settings')->get()) {
         // Remove schemas if not the active theme.
         if (!$active_theme) {
           unset($theme_settings['schemas']);
@@ -265,7 +267,7 @@ class ThemeSettings extends Config {
     // global setting and set the value to NULL.
     $info = $theme->getInfo();
     if (!empty($info['features'])) {
-      foreach (_system_default_theme_features() as $feature) {
+      foreach (DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.3.0', fn() => ThemeSettingsProvider::DEFAULT_THEME_FEATURES, fn() => _system_default_theme_features()) as $feature) {
         if (!in_array($feature, $info['features'])) {
           $config->set('features.' . $feature, NULL);
         }

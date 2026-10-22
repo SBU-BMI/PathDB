@@ -307,7 +307,23 @@ class LdapEntryProvisionSubscriber implements EventSubscriberInterface, LdapUser
           $dn = $value;
         }
         else {
-          $attributes[$ldap_attribute_name][] = $value;
+          if (strpos($ldap_attribute_name, ':') === FALSE) {
+            // The additive case is kept for compatibility with setups
+            // that relied on it while this feature was incorrect.
+            $attributes[$ldap_attribute_name][] = $value;
+          }
+          else {
+            [$prefix, $suffix] = explode(':', $ldap_attribute_name);
+            if (is_numeric($suffix)) {
+              $attributes[$prefix][$suffix] = $value;
+            }
+            else {
+              $this->logger->warning(
+                'Parsing error on @attribute',
+                ['@attribute' => $ldap_attribute_name]
+              );
+            }
+          }
         }
       }
     }

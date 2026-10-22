@@ -130,4 +130,32 @@ final class ViewsBulkOperationsActionProcessorTest extends ViewsBulkOperationsKe
     $this->assertNodeStatuses($vbo_data['list'], $vbo_data['exclude_mode']);
   }
 
+  /**
+   * Tests that total_rows reflects the selection, not the whole view.
+   *
+   * @see https://www.drupal.org/project/views_bulk_operations/issues/3615520
+   */
+  public function testViewsBulkOperationsActionProcessorTotalRowsScoping(): void {
+    $vbo_data = [
+      'view_id' => 'views_bulk_operations_test',
+      'action_id' => 'views_bulk_operations_advanced_test_action',
+      'preconfiguration' => [
+        'test_preconfig' => 'test',
+        'test_config' => 'unpublish',
+      ],
+    ];
+
+    $selection = [0, 5];
+    $vbo_data['list'] = $this->getResultsList($vbo_data, $selection);
+    $vbo_data += self::VBO_DEFAULTS;
+
+    $processor = $this->container->get('views_bulk_operations.processor');
+    $processor->initialize($vbo_data);
+    $processor->populateQueue($vbo_data);
+
+    $view = (new \ReflectionProperty($processor, 'view'))->getValue($processor);
+
+    self::assertEquals(\count($selection), $view->total_rows);
+  }
+
 }

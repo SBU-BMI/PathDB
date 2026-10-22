@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ldap_user\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once __DIR__ . '/../../../ldap_user.install';
@@ -14,6 +15,11 @@ require_once __DIR__ . '/../../../ldap_user.install';
  *
  * @package Drupal\Tests\ldap_user\Unit
  */
+#[CoversFunction('ldap_user_module_preinstall')]
+#[CoversFunction('ldap_user_update_8401')]
+#[CoversFunction('ldap_user_update_8402')]
+#[CoversFunction('ldap_user_update_8407')]
+#[CoversFunction('ldap_user_update_8408')]
 class InstallTest extends UnitTestCase {
 
   /**
@@ -39,8 +45,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_module_preinstall().
-   *
-   * @coversFunction ::ldap_user_module_preinstall
    */
   public function testModulePreinstall(): void {
     require_once __DIR__ . '/../../../ldap_user.module';
@@ -86,8 +90,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8401().
-   *
-   * @coversFunction ::ldap_user_update_8401
    */
   public function testHookUpdate8401(): void {
 
@@ -109,8 +111,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8402().
-   *
-   * @coversFunction ::ldap_user_update_8402
    */
   public function testHookUpdate8402(): void {
 
@@ -139,8 +139,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8407().
-   *
-   * @coversFunction ::ldap_user_update_8407
    */
   public function testHookUpdate8407(): void {
 
@@ -173,8 +171,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8408().
-   *
-   * @coversFunction ::ldap_user_update_8408
    */
   public function testHookUpdate8408NoServer(): void {
     $settings = $this->createMock('Drupal\Core\Config\Config');
@@ -211,8 +207,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8408().
-   *
-   * @coversFunction ::ldap_user_update_8408
    */
   public function testHookUpdate8408Behavior(): void {
     $settings = $this->createMock('Drupal\Core\Config\Config');
@@ -235,8 +229,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8408().
-   *
-   * @coversFunction ::ldap_user_update_8408
    */
   public function testHookUpdate8408UpdateUserAttr(): void {
     $settings = $this->createMock('Drupal\Core\Config\Config');
@@ -288,8 +280,6 @@ class InstallTest extends UnitTestCase {
 
   /**
    * Test ldap_user_update_8408().
-   *
-   * @coversFunction ::ldap_user_update_8408
    */
   public function testHookUpdate8408UpdateAccountNameAttr(): void {
     $settings = $this->createMock('Drupal\Core\Config\Config');

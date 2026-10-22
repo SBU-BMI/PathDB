@@ -138,6 +138,7 @@ trait SearchApiFieldTrait {
    *
    * @see shouldLimitValues()
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName
   public $limit_values;
 
   /**
@@ -412,7 +413,7 @@ trait SearchApiFieldTrait {
       $field_id = $this->definition['search_api field'];
     }
     $this->addRetrievedProperty($combined_property_path, $field_id);
-    if ($this->options['link_to_item']) {
+    if (!empty($this->options['link_to_item'])) {
       // @todo We don't actually know which object we need, might be from this
       //   property or any of its parents – depending where the closest entity
       //   ancestor is. To be 100% accurate, we'd have to somehow already
@@ -1279,7 +1280,7 @@ trait SearchApiFieldTrait {
           'value' => $value,
         ];
 
-        if ($this->options['link_to_item']) {
+        if (!empty($this->options['link_to_item'])) {
           $item['make_link'] = TRUE;
           $item['url'] = $this->getItemUrl($values, $i);
         }

@@ -43,7 +43,6 @@ chdir($kernel->getAppRoot());
 // Initialize settings, this requires reflection since its a protected method.
 $request = Request::createFromGlobals();
 $initializeSettings = new \ReflectionMethod($kernel, 'initializeSettings');
-$initializeSettings->setAccessible(TRUE);
 $initializeSettings->invokeArgs($kernel, [$request]);
 
 // Boot the kernel.

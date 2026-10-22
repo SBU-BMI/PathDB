@@ -63,6 +63,7 @@ class ViewsDisplayCachingTest extends KernelTestBase {
   protected static $modules = [
     'entity_test',
     'field',
+    'filter',
     'rest',
     'search_api',
     'search_api_db',

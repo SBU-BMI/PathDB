@@ -6,6 +6,7 @@ namespace Drupal\views_bulk_operations\Plugin\views\field;
 
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\UncacheableDependencyTrait;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
@@ -37,6 +38,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 #[ViewsField("views_bulk_operations_bulk_form")]
 class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDependencyInterface, ContainerFactoryPluginInterface {
 
+  // Lets __wakeup() initialize readonly properties on PHP < 8.4.
+  use DependencySerializationTrait;
   use RedirectDestinationTrait;
   use UncacheableDependencyTrait;
   use UncacheableFieldHandlerTrait;
@@ -290,7 +293,7 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
     // input.
     \ksort($exposed_input);
     foreach ($exposed_input as $name => $value) {
-      if (\is_array($value)) {
+      if (\is_array($value) && \count($value) > 0) {
         $exposed_input[$name] = $this->getExposedInput($value);
       }
     }
@@ -577,6 +580,21 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
   }
 
   /**
+   * Checks whether a bulk form control triggered the current submission.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return bool
+   *   TRUE when the triggering element belongs to this bulk form.
+   */
+  protected function isBulkFormTrigger(FormStateInterface $form_state): bool {
+    $trigger = $form_state->getTriggeringElement();
+
+    return ($trigger['#attributes']['data-vbo'] ?? '') === 'vbo-action';
+  }
+
+  /**
    * Submit handler for the bulk form.
    *
    * @param array $form
@@ -585,62 +603,63 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
    *   The current state of the form.
    */
   public function viewsFormSubmit(array &$form, FormStateInterface $form_state): void {
-    if ($form_state->get('step') === 'views_form_views_form') {
+    if (!$this->isBulkFormTrigger($form_state)) {
+      return;
+    }
 
-      $action_config = $this->options['selected_actions'][$form_state->getValue('action')];
+    $action_config = $this->options['selected_actions'][$form_state->getValue('action')];
 
-      $action = $this->actions[$action_config['action_id']];
+    $action = $this->actions[$action_config['action_id']];
 
-      $this->tempStoreData['action_id'] = $action_config['action_id'];
-      $label_override = $action_config['preconfiguration']['label_override'] ?? '';
-      $this->tempStoreData['action_label'] = $label_override === '' ? (string) $action['label'] : $label_override;
-      $this->tempStoreData['relationship_id'] = $this->options['relationship'];
-      $this->tempStoreData['preconfiguration'] = $action_config['preconfiguration'] ?? [];
-      $this->tempStoreData['clear_on_exposed'] = $this->options['clear_on_exposed'];
-      $this->tempStoreData['confirm_route'] = $action['confirm_form_route_name'];
-      $add_confirmation = $action_config['preconfiguration']['add_confirmation'] ?? FALSE;
-      if ($this->tempStoreData['confirm_route'] === '' && $add_confirmation) {
-        $this->tempStoreData['confirm_route'] = 'views_bulk_operations.confirm';
-      }
+    $this->tempStoreData['action_id'] = $action_config['action_id'];
+    $label_override = $action_config['preconfiguration']['label_override'] ?? '';
+    $this->tempStoreData['action_label'] = $label_override === '' ? (string) $action['label'] : $label_override;
+    $this->tempStoreData['relationship_id'] = $this->options['relationship'];
+    $this->tempStoreData['preconfiguration'] = $action_config['preconfiguration'] ?? [];
+    $this->tempStoreData['clear_on_exposed'] = $this->options['clear_on_exposed'];
+    $this->tempStoreData['confirm_route'] = $action['confirm_form_route_name'];
+    $add_confirmation = $action_config['preconfiguration']['add_confirmation'] ?? FALSE;
+    if ($this->tempStoreData['confirm_route'] === '' && $add_confirmation) {
+      $this->tempStoreData['confirm_route'] = 'views_bulk_operations.confirm';
+    }
 
-      // Update list data with the current page selection.
-      $selected_keys = [];
-      $user_input = $form_state->getUserInput()[$this->options['id']] ?? [];
-      foreach (\array_filter($user_input, static fn ($value) => $value !== 0 && $value !== NULL) as $bulk_form_key) {
-        $selected_keys[$bulk_form_key] = $bulk_form_key;
-      }
+    // Update list data with the current page selection.
+    $selected_keys = [];
+    $user_input = $form_state->getUserInput()[$this->options['id']] ?? [];
+    foreach (\array_filter($user_input, static fn ($value) => $value !== 0 && $value !== NULL) as $bulk_form_key) {
+      $selected_keys[$bulk_form_key] = $bulk_form_key;
+    }
 
-      // Update exclude mode setting.
-      $this->tempStoreData['exclude_mode'] = (bool) $form_state->getValue('select_all');
+    // Update exclude mode setting.
+    $this->tempStoreData['exclude_mode'] = (bool) $form_state->getValue('select_all');
 
-      foreach ($this->tempStoreData['bulk_form_keys'] as $bulk_form_key) {
-        if (
-          (\array_key_exists($bulk_form_key, $selected_keys) && !$this->tempStoreData['exclude_mode']) ||
-          (!\array_key_exists($bulk_form_key, $selected_keys) && $this->tempStoreData['exclude_mode'])
-        ) {
-          $this->tempStoreData['list'][$bulk_form_key] = $this->getListItem($bulk_form_key);
-        }
-        else {
-          unset($this->tempStoreData['list'][$bulk_form_key]);
-        }
-      }
-
-      // Redirect to the next step.
-      if ($this->options['form_step'] && $this->isActionConfigurable($action)) {
-        $redirect_route = 'views_bulk_operations.execute_configurable';
-      }
-      elseif ($this->tempStoreData['confirm_route'] !== '') {
-        $redirect_route = $this->tempStoreData['confirm_route'];
+    foreach ($this->tempStoreData['bulk_form_keys'] as $bulk_form_key) {
+      if (
+        (\array_key_exists($bulk_form_key, $selected_keys) && !$this->tempStoreData['exclude_mode']) ||
+        (!\array_key_exists($bulk_form_key, $selected_keys) && $this->tempStoreData['exclude_mode'])
+      ) {
+        $this->tempStoreData['list'][$bulk_form_key] = $this->getListItem($bulk_form_key);
       }
       else {
-        $redirect_route = 'views_bulk_operations.execute_batch';
+        unset($this->tempStoreData['list'][$bulk_form_key]);
       }
-      $this->setTempstoreData($this->tempStoreData);
-      $form_state->setRedirect($redirect_route, [
-        'view_id' => $this->view->id(),
-        'display_id' => $this->view->current_display,
-      ]);
     }
+
+    // Redirect to the next step.
+    if ($this->options['form_step'] && $this->isActionConfigurable($action)) {
+      $redirect_route = 'views_bulk_operations.execute_configurable';
+    }
+    elseif ($this->tempStoreData['confirm_route'] !== '') {
+      $redirect_route = $this->tempStoreData['confirm_route'];
+    }
+    else {
+      $redirect_route = 'views_bulk_operations.execute_batch';
+    }
+    $this->setTempstoreData($this->tempStoreData);
+    $form_state->setRedirect($redirect_route, [
+      'view_id' => $this->view->id(),
+      'display_id' => $this->view->current_display,
+    ]);
   }
 
   /**
@@ -661,6 +680,10 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
    * {@inheritdoc}
    */
   public function viewsFormValidate(array &$form, FormStateInterface $form_state): void {
+    if (!$this->isBulkFormTrigger($form_state)) {
+      return;
+    }
+
     if ($this->options['buttons']) {
       $trigger = $form_state->getTriggeringElement();
       $action_delta = \end($trigger['#parents']);

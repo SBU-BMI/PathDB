@@ -3,7 +3,6 @@
 namespace Drupal\bootstrap\Plugin\Markdown\AllowedHtml;
 
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Theme\ActiveTheme;
 use Drupal\markdown\Plugin\Markdown\AllowedHtmlInterface;
 use Drupal\markdown\Plugin\Markdown\ParserInterface;
 
@@ -20,7 +19,7 @@ class Bootstrap extends PluginBase implements AllowedHtmlInterface {
   /**
    * {@inheritdoc}
    */
-  public function allowedHtmlTags(ParserInterface $parser, ?ActiveTheme $activeTheme = NULL) {
+  public function allowedHtmlTags(ParserInterface $parser, mixed $activeTheme = NULL): array {
     return [
       '*' => [
         'data-complete-text' => TRUE,

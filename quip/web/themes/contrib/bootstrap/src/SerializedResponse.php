@@ -196,7 +196,7 @@ class SerializedResponse extends Response {
    */
   protected function getSerializer() {
     if (!isset(static::$serializer)) {
-      static::$serializer = $this->format && \Drupal::hasService("serialization.{$this->format}") ? \Drupal::service("serialization.{$this->format}") : FALSE;
+      static::$serializer = $this->format && Bootstrap::hasService("serialization.{$this->format}") ? Bootstrap::service("serialization.{$this->format}") : FALSE;
     }
     return static::$serializer;
   }

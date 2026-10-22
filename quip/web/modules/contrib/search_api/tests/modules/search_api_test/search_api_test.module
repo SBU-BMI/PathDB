@@ -11,7 +11,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\node\NodeInterface;
 
 /**
- * Implement hook_node_grants().
+ * Implements hook_node_grants().
  */
 function search_api_test_node_grants(AccountInterface $account, $op) {
   $grants = [];
@@ -24,7 +24,7 @@ function search_api_test_node_grants(AccountInterface $account, $op) {
 }
 
 /**
- * Implement hook_node_access_records().
+ * Implements hook_node_access_records().
  */
 function search_api_test_node_access_records(NodeInterface $node) {
   $grants = [];

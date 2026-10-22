@@ -4,3 +4,7 @@ services:
     tags:
       - { name: event_subscriber }
     arguments: ['@current_user']
+
+  Drupal\moderated_content_bulk_publish\Hook\ModeratedContentBulkPublishHooks:
+    class: Drupal\moderated_content_bulk_publish\Hook\ModeratedContentBulkPublishHooks
+    autowire: true

@@ -128,7 +128,6 @@ class ContentEntityTrackingManager {
 
     // Compare old and new languages for the entity to identify inserted,
     // updated and deleted translations (and, therefore, search items).
-    $entity_id = $entity->id();
     $new_translations = array_keys($entity->getTranslationLanguages());
     $old_translations = [];
     if (!$new) {

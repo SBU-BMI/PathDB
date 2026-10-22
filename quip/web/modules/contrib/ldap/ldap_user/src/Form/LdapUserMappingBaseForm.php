@@ -95,6 +95,7 @@ abstract class LdapUserMappingBaseForm extends ConfigFormBase implements LdapUse
       parent::__construct($config_factory, $config_type_manager);
     }
     else {
+      // @phpstan-ignore-next-line
       parent::__construct($config_factory);
     }
 

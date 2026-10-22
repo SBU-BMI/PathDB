@@ -2,8 +2,12 @@
 
 /**
  * @file
- * The Easy Breadcrumb module improves the core system breadcrumbs.
+ * The Easy Breadcrumb module improves the core system breadcrumb.
  */
+
+use Drupal\Core\Cache\Cache;
+use Drupal\easy_breadcrumb\EasyBreadcrumbConstants;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_help().
@@ -31,7 +35,7 @@ function easy_breadcrumb_help($route_name) {
       // Adds a link to the Drupal.org documentation pages.
       $output .= t('<p>See the <a href=":documentation">documentation pages</a> on Drupal.org for more information.</p>',
         [
-          ':documentation' => 'https://www.drupal.org/docs/8/improve-the-breadcrumbs',
+          ':documentation' => 'https://www.drupal.org/docs/contributed-modules/easy-breadcrumb',
         ]);
 
       return $output;
@@ -61,5 +65,35 @@ function easy_breadcrumb_preprocess_block(&$variables) {
         'easy_breadcrumb_structured_data_json_ld',
       ];
     }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ *
+ * If the TERM_HIERARCHY configuration option is set, then expire the breadcrumb
+ * cache for all child terms.
+ */
+function easy_breadcrumb_taxonomy_term_update(Term $term) {
+  // Returns early if the TERM_HIERARCHY configuration option is not set.
+  $config = \Drupal::config('easy_breadcrumb.settings');
+  if (!$config->get(EasyBreadcrumbConstants::TERM_HIERARCHY)) {
+    return;
+  }
+
+  /**
+   * @var \Drupal\taxonomy\TermStorageInterface $storage
+   */
+  $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $vid = $term->bundle();
+  $tree = $storage->loadTree($vid, $term->id());
+  $tags = [];
+
+  foreach ($tree as $tree_term) {
+    $tags[] = 'easy_breadcrumb:taxonomy_term:' . $tree_term->tid;
+  }
+
+  if ($tags) {
+    Cache::invalidateTags($tags);
   }
 }

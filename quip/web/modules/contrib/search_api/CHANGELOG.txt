@@ -1,3 +1,10 @@
+Search API 1.42 (2026-10-11):
+-----------------------------
+- ci: #3624636 Fixed failing pipelines.
+- ci: #3616723 Fixed various problems found by static analysis tools.
+- fix: #3564177 Fixed fatal errors caused by disabled indexes in some scenarios.
+- fix: #3195199 Follow-up: Fixed config schema of SearchApiBulkForm.
+
 Search API 1.41 (2026-06-08):
 -----------------------------
 - ci: #3594097 Fixed failing pipelines.

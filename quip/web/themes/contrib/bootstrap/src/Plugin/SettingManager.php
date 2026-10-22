@@ -31,9 +31,9 @@ class SettingManager extends PluginManager {
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Setting', 'Drupal\bootstrap\Plugin\Setting\SettingInterface', 'Drupal\bootstrap\Annotation\BootstrapSetting');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':setting', $this->getCacheTags());
   }
 
   /**

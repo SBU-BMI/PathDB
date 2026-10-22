@@ -6,12 +6,12 @@ namespace Drupal\Tests\ldap_servers\Unit;
 
 use Drupal\ldap_servers\Helper\ConversionHelper;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Conversion helper tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
 class ConversionHelperTest extends UnitTestCase {
 
   /**

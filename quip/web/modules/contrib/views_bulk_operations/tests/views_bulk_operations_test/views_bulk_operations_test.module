@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Support module for testing Views Bulk Operations.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\views_bulk_operations_test\Hook\ViewsBulkOperationsTestHooks;
+
+/**
+ * Implements hook_form_alter().
+ */
+#[LegacyHook]
+function views_bulk_operations_test_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  \Drupal::service(ViewsBulkOperationsTestHooks::class)->formAlter($form, $form_state, $form_id);
+}

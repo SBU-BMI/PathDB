@@ -47,7 +47,7 @@ function hook_ldap_servers_user_cron_needed(): bool {
  * @param array $ldap_entries
  *   LDAP entries as array keyed on lowercase DN of entry with value of array in
  *   format used in ldap_add or ldap_modify function, e.g.:
- *   ['cn=jkool,ou=guest accounts,dc=ad,dc=university,dc=edu' => [
+ *   ['cn=jdoe,ou=guest accounts,dc=ad,dc=university,dc=edu' => [
  *    "attribute1" => array("value"),
  *    "attribute2" => array("value1", "value2"),
  *   ];.
@@ -61,8 +61,8 @@ function hook_ldap_servers_user_cron_needed(): bool {
  *     and Drupal roles; etc this will be array keyed on lowercase DN with
  *     values of objects, e.g.:
  *     ['corresponding_drupal_data'] => [
- *      'cn=jkool,ou=guest accounts,dc=ad,dc=university,dc=edu' => $userA,
- *      'cn=jfun,ou=guest accounts,dc=ad,dc=university,dc=edu' => $userB,
+ *      'cn=jdoe,ou=guest accounts,dc=ad,dc=university,dc=edu' => $userA,
+ *      'cn=hpotter,ou=guest accounts,dc=ad,dc=university,dc=edu' => $userB,
  *     ]
  *    'corresponding_drupal_data_type' => 'user', 'role', etc. If it is 'user',
  *     then $context has the account in the 'account' key.

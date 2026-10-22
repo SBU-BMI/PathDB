@@ -8,16 +8,20 @@ use Drupal\Core\Form\FormState;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_authentication\Controller\LoginValidatorLoginForm;
+use Drupal\ldap_authentication\Controller\LoginValidatorSso;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
+use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Ldap\Entry;
 
 /**
  * Login tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class LoginTest extends KernelTestBase {
 
   /**
@@ -50,6 +54,7 @@ class LoginTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('ldap_server');
     $this->installSchema('externalauth', ['authmap']);
+    $this->installConfig(['ldap_user', 'ldap_authentication']);
     if (version_compare(\Drupal::VERSION, '10.2.0', '<')) {
       $this->installSchema('system', 'sequences');
     }
@@ -148,9 +153,9 @@ class LoginTest extends KernelTestBase {
   }
 
   /**
-   * Test the whitelist.
+   * Test the allowlist.
    */
-  public function testWhiteListPresent(): void {
+  public function testAllowListPresent(): void {
     $this->config('ldap_authentication.settings')
       ->set('allowOnlyIfTextInDn', [
         'hpotter',
@@ -169,9 +174,9 @@ class LoginTest extends KernelTestBase {
   }
 
   /**
-   * Test the whitelist.
+   * Test the allowlist.
    */
-  public function testWhiteListMissing(): void {
+  public function testAllowListMissing(): void {
     $this->config('ldap_authentication.settings')
       ->set('allowOnlyIfTextInDn', [
         'HGRANGER',
@@ -194,12 +199,12 @@ class LoginTest extends KernelTestBase {
   }
 
   /**
-   * Test the blacklist.
+   * Test the blocklist.
    *
    * DN contains "hogwarts", case-insensitive check is made. Error is only
    * shown in exclusive mode (since Drupal could still allow it).
    */
-  public function testBlacklist(): void {
+  public function testBlocklist(): void {
     $this->config('ldap_authentication.settings')
       ->set('excludeIfTextInDn', [
         'Hogwarts',
@@ -219,6 +224,204 @@ class LoginTest extends KernelTestBase {
       ->getStorage('user')
       ->loadMultiple()
     );
+  }
+
+  /**
+   * Existing Drupal users without authmap are associated.
+   */
+  public function testMatchExistingUserWithLdap(): void {
+    $account = User::create([
+      'name' => 'hpotter',
+      'mail' => 'hpotter@example.com',
+      'status' => 1,
+    ]);
+    $account->save();
+
+    $this->config('ldap_user.settings')
+      ->set('userConflictResolve', LdapUserAttributesInterface::USER_CONFLICT_ATTEMPT_RESOLVE)
+      ->save();
+    $this->container->get('config.factory')->reset();
+
+    $form_state = new FormState();
+    $form_state->setValues(['name' => 'hpotter', 'pass' => 'pass']);
+    $state = $this->validator->validateLogin($form_state);
+    self::assertEquals($account->id(), $state->get('uid'));
+    self::assertEquals(
+      'hpotter',
+      $this->container->get('externalauth.authmap')->get((int) $account->id(), 'ldap_user')
+    );
+    self::assertNotNull($this->validator->getDrupalUser());
+  }
+
+  /**
+   * Excluded Drupal accounts cannot authenticate via LDAP.
+   */
+  public function testVerifyUserAllowedSkipsExcluded(): void {
+    $account = User::create([
+      'name' => 'hpotter',
+      'mail' => 'hpotter@example.com',
+      'status' => 1,
+      'ldap_user_ldap_exclude' => 1,
+    ]);
+    $account->save();
+    $this->container->get('externalauth.authmap')
+      ->save($account, 'ldap_user', 'hpotter');
+
+    $form_state = new FormState();
+    $form_state->setValues(['name' => 'hpotter', 'pass' => 'pass']);
+    $this->validator->validateLogin($form_state);
+    self::assertEmpty($form_state->get('uid'));
+  }
+
+  /**
+   * Email addresses are updated from LDAP when configured.
+   */
+  public function testFixOutdatedEmailAddress(): void {
+    $account = User::create([
+      'name' => 'hpotter',
+      'mail' => 'stale@example.com',
+      'status' => 1,
+    ]);
+    $account->save();
+    $this->container->get('externalauth.authmap')
+      ->save($account, 'ldap_user', 'hpotter');
+    $this->config('ldap_authentication.settings')
+      ->set('emailUpdate', 'update')
+      ->save();
+    $this->container->get('config.factory')->reset();
+
+    $form_state = new FormState();
+    $form_state->setValues(['name' => 'hpotter', 'pass' => 'pass']);
+    $this->validator->validateLogin($form_state);
+    $account = $this->container->get('entity_type.manager')
+      ->getStorage('user')
+      ->load($account->id());
+    self::assertEquals('hpotter@example.com', $account->getEmail());
+  }
+
+  /**
+   * Email template fills missing LDAP mail.
+   */
+  public function testEmailTemplateAlways(): void {
+    $this->config('ldap_authentication.settings')
+      ->set('emailTemplate', '@username@hogwarts.edu')
+      ->set('emailTemplateHandling', 'always')
+      ->save();
+    $this->container->get('config.factory')->reset();
+
+    $form_state = new FormState();
+    $form_state->setValues(['name' => 'hpotter', 'pass' => 'pass']);
+    $this->validator->validateLogin($form_state);
+    self::assertGreaterThan(0, $form_state->get('uid'));
+  }
+
+  /**
+   * User-bind method still authenticates with FakeBridge.
+   */
+  public function testBindToServerAsUser(): void {
+    $server = $this->container->get('entity_type.manager')
+      ->getStorage('ldap_server')
+      ->load('test');
+    $server->set('bind_method', 'user');
+    $server->set('user_dn_expression', 'cn=%username,%basedn');
+    $server->save();
+    $this->container->get('config.factory')->reset();
+
+    $form_state = new FormState();
+    $form_state->setValues(['name' => 'hpotter', 'pass' => 'pass']);
+    $state = $this->validator->validateLogin($form_state);
+    self::assertGreaterThan(0, $state->get('uid'));
+  }
+
+  /**
+   * Mixed mode skips LDAP when Drupal already authenticated.
+   */
+  public function testUserAlreadyAuthenticatedMixedMode(): void {
+    $this->config('ldap_authentication.settings')
+      ->set('authenticationMode', 'mixed')
+      ->save();
+    $this->container->get('config.factory')->reset();
+
+    $form_state = new FormState();
+    $form_state->setValues(['name' => 'hpotter', 'pass' => 'pass']);
+    $form_state->set('uid', 5);
+    $state = $this->validator->validateLogin($form_state);
+    self::assertEquals(5, $state->get('uid'));
+  }
+
+  /**
+   * Logged-in credential check uses authmap authname.
+   */
+  public function testValidateCredentialsLoggedIn(): void {
+    $account = User::create([
+      'name' => 'hpotter',
+      'mail' => 'hpotter@example.com',
+      'status' => 1,
+      'pass' => 'pass',
+    ]);
+    $account->save();
+    $this->container->get('externalauth.authmap')
+      ->save($account, 'ldap_user', 'hpotter');
+
+    $result = $this->validator->validateCredentialsLoggedIn($account);
+    self::assertEquals(
+      LoginValidatorLoginForm::AUTHENTICATION_SUCCESS,
+      $result
+    );
+  }
+
+  /**
+   * SSO provisions a Drupal user from the authname.
+   */
+  public function testSsoProcessLoginCreatesUser(): void {
+    $sso = new LoginValidatorSso(
+      $this->container->get('config.factory'),
+      $this->container->get('ldap.detail_log'),
+      $this->container->get('logger.channel.ldap_authentication'),
+      $this->container->get('entity_type.manager'),
+      $this->container->get('module_handler'),
+      $this->container->get('ldap.bridge'),
+      $this->container->get('externalauth.authmap'),
+      $this->container->get('ldap_authentication.servers'),
+      $this->container->get('ldap.user_manager'),
+      $this->container->get('messenger'),
+      $this->container->get('ldap.drupal_user_processor'),
+      $this->container
+    );
+    $sso->setAuthname('hpotter');
+    $sso->processLogin();
+    self::assertNotNull($sso->getDrupalUser());
+    self::assertEquals('hpotter', $sso->getDrupalUser()->getAccountName());
+  }
+
+  /**
+   * SSO with user bind is rejected.
+   */
+  public function testSsoRejectsUserBind(): void {
+    $server = $this->container->get('entity_type.manager')
+      ->getStorage('ldap_server')
+      ->load('test');
+    $server->set('bind_method', 'user');
+    $server->save();
+    $this->container->get('config.factory')->reset();
+
+    $sso = new LoginValidatorSso(
+      $this->container->get('config.factory'),
+      $this->container->get('ldap.detail_log'),
+      $this->container->get('logger.channel.ldap_authentication'),
+      $this->container->get('entity_type.manager'),
+      $this->container->get('module_handler'),
+      $this->container->get('ldap.bridge'),
+      $this->container->get('externalauth.authmap'),
+      $this->container->get('ldap_authentication.servers'),
+      $this->container->get('ldap.user_manager'),
+      $this->container->get('messenger'),
+      $this->container->get('ldap.drupal_user_processor'),
+      $this->container
+    );
+    $sso->setAuthname('hpotter');
+    $sso->processLogin();
+    self::assertNull($sso->getDrupalUser());
   }
 
 }

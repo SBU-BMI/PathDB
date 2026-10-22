@@ -171,7 +171,7 @@ class RenderedItem extends ProcessorPluginBase {
    *
    * @return $this
    */
-  public function setPostRequestIndexing(PostRequestIndexingInterface $post_request_indexing,): static {
+  public function setPostRequestIndexing(PostRequestIndexingInterface $post_request_indexing): static {
     $this->postRequestIndexing = $post_request_indexing;
     return $this;
   }

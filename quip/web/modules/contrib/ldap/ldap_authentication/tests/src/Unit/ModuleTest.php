@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\ldap_authentication\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once __DIR__ . '/../../../ldap_authentication.module';
@@ -14,6 +16,8 @@ require_once __DIR__ . '/../../../ldap_authentication.module';
  *
  * @package Drupal\Tests\ldap_authentication\Unit
  */
+#[Group('ldap_authentication')]
+#[CoversFunction('ldap_authentication_help')]
 class ModuleTest extends UnitTestCase {
 
   /**
@@ -29,13 +33,6 @@ class ModuleTest extends UnitTestCase {
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
-
-  /**
-   * The user storage.
-   *
-   * @var \Drupal\user\UserStorageInterface
-   */
-  protected $userStorage;
 
   /**
    * The entity type manager.
@@ -75,8 +72,6 @@ class ModuleTest extends UnitTestCase {
     $this->entityTypeManager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
     $this->container->set('entity_type.manager', $this->entityTypeManager);
 
-    $this->userStorage = $this->createMock('Drupal\user\UserStorageInterface');
-
     $this->externalAuth = $this->createMock('Drupal\externalauth\AuthmapInterface');
     $this->container->set('externalauth.authmap', $this->externalAuth);
 
@@ -89,8 +84,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testHookHelpRouteHelpPage(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -101,8 +94,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testHookHelpSettingsForm(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -113,8 +104,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testHookHelpRouteNoHelpProvided(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -125,8 +114,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testAlterUserPassForm(): void {
     $form = [
@@ -144,8 +131,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testCoreOverrideUserLoginNotEmpty(): void {
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
@@ -159,8 +144,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testCoreOverrideUserLogin(): void {
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
@@ -183,8 +166,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_authentication_help
    */
   public function testUserPassValidatePasswordResetAllowed(): void {
     $form = [];
@@ -226,7 +207,7 @@ class ModuleTest extends UnitTestCase {
     $this->entityTypeManager->expects($this->once())
       ->method('getStorage')
       ->with('user')
-      ->willReturn($this->userStorage);
+      ->willReturn($this->createMock('Drupal\user\UserStorageInterface'));
 
     ldap_authentication_user_pass_validate($form, $form_state);
   }
@@ -252,12 +233,13 @@ class ModuleTest extends UnitTestCase {
       ->with('ldap_authentication.settings')
       ->willReturn($config);
 
+    $user_storage = $this->createMock('Drupal\user\UserStorageInterface');
     $this->entityTypeManager->expects($this->once())
       ->method('getStorage')
       ->with('user')
-      ->willReturn($this->userStorage);
+      ->willReturn($user_storage);
     $user = $this->createMock('Drupal\user\UserInterface');
-    $this->userStorage->expects($this->once())
+    $user_storage->expects($this->once())
       ->method('loadByProperties')
       ->with(['mail' => 'harry.potter@hogwarts.edu'])
       ->willReturn([$user]);
@@ -288,16 +270,17 @@ class ModuleTest extends UnitTestCase {
       ->with('ldap_authentication.settings')
       ->willReturn($config);
 
+    $user_storage = $this->createMock('Drupal\user\UserStorageInterface');
     $this->entityTypeManager->expects($this->once())
       ->method('getStorage')
       ->with('user')
-      ->willReturn($this->userStorage);
+      ->willReturn($user_storage);
     $user = $this->createMock('Drupal\user\UserInterface');
     $user->expects($this->once())
       ->method('id')
       ->willReturn(2);
 
-    $this->userStorage->expects($this->once())
+    $user_storage->expects($this->once())
       ->method('loadByProperties')
       ->with(['mail' => 'harry.potter@hogwarts.edu'])
       ->willReturn([$user]);
@@ -322,7 +305,7 @@ class ModuleTest extends UnitTestCase {
       ->willReturn('harry.potter@hogwarts.edu');
 
     $config = $this->createMock('Drupal\Core\Config\ImmutableConfig');
-    $config->expects($this->exactly(4))
+    $config->expects($this->exactly(3))
       ->method('get')
       ->willReturnMap([
         ['passwordOption', 'notAllow'],
@@ -334,16 +317,17 @@ class ModuleTest extends UnitTestCase {
       ->with('ldap_authentication.settings')
       ->willReturn($config);
 
+    $user_storage = $this->createMock('Drupal\user\UserStorageInterface');
     $this->entityTypeManager->expects($this->once())
       ->method('getStorage')
       ->with('user')
-      ->willReturn($this->userStorage);
+      ->willReturn($user_storage);
     $user = $this->createMock('Drupal\user\UserInterface');
     $user->expects($this->once())
       ->method('id')
       ->willReturn(2);
 
-    $this->userStorage->expects($this->once())
+    $user_storage->expects($this->once())
       ->method('loadByProperties')
       ->with(['mail' => 'harry.potter@hogwarts.edu'])
       ->willReturn([$user]);
@@ -558,10 +542,15 @@ class ModuleTest extends UnitTestCase {
    * Tests ldap_authentication_form_user_login_block_alter().
    */
   public function testUserLoginBlockAlter(): void {
-    $form = [];
+    $form = [
+      '#validate' => ['::validateAuthentication'],
+    ];
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
 
+    $this->stubLoginFormAlterDependencies();
+
     ldap_authentication_form_user_login_block_alter($form, $form_state);
+    $this->assertLoginFormAlterations($form);
   }
 
   /**
@@ -573,6 +562,16 @@ class ModuleTest extends UnitTestCase {
     ];
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
 
+    $this->stubLoginFormAlterDependencies();
+
+    ldap_authentication_form_user_login_form_alter($form, $form_state, 'form_id');
+    $this->assertLoginFormAlterations($form);
+  }
+
+  /**
+   * Stubs services used by _ldap_authentication_login_form_alter().
+   */
+  private function stubLoginFormAlterDependencies(): void {
     $this->authenticationServers->expects($this->once())
       ->method('authenticationServersAvailable')
       ->willReturn(TRUE);
@@ -590,8 +589,29 @@ class ModuleTest extends UnitTestCase {
       ->method('get')
       ->with('ldap_authentication.settings')
       ->willReturn($config);
+  }
 
-    ldap_authentication_form_user_login_form_alter($form, $form_state, 'form_id');
+  /**
+   * Asserts login form changes from _ldap_authentication_login_form_alter().
+   *
+   * @param array $form
+   *   The altered form.
+   */
+  private function assertLoginFormAlterations(array $form): void {
+    $this->assertSame(
+      'ldap_authentication_core_override_user_login_authenticate_validate',
+      $form['#validate'][0]
+    );
+    $this->assertContains(
+      'ldap_authentication_user_login_authenticate_validate',
+      $form['#validate']
+    );
+    $this->assertEquals('Some custom text', $form['name']['#description']);
+    $this->assertEquals('Different custom text', $form['pass']['#description']);
+    $this->assertContains(
+      'Drupal\ldap_authentication\Routing\EmailTemplateService::checkForEmailTemplate',
+      $form['#submit']
+    );
   }
 
   /**

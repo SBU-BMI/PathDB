@@ -97,7 +97,7 @@ following contents:
 
 namespace Drupal\THEMENAME\Plugin\Alter;
 
-use Drupal\bootstrap\Plugin\Alter\PageAttachments as BootstrapPageAttachements;
+use Drupal\bootstrap\Plugin\Alter\PageAttachments as BootstrapPageAttachments;
 
 /**
  * Implements hook_page_attachments_alter().
@@ -106,7 +106,7 @@ use Drupal\bootstrap\Plugin\Alter\PageAttachments as BootstrapPageAttachements;
  *
  * @BootstrapAlter("page_attachments")
  */
-class PageAttachments extends BootstrapPageAttachements {
+class PageAttachments extends BootstrapPageAttachments {
 
   /**
    * {@inheritdoc}

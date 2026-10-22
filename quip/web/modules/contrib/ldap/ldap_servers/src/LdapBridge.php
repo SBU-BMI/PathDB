@@ -54,11 +54,11 @@ class LdapBridge implements LdapBridgeInterface {
   protected $logger;
 
   /**
-   * Entity Storage.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * Constructor.
@@ -72,16 +72,15 @@ class LdapBridge implements LdapBridgeInterface {
     LoggerInterface $logger,
     EntityTypeManagerInterface $entity_type_manager,
   ) {
-    $this->logger = $logger;
-    $this->entityManager = $entity_type_manager
-      ->getStorage('ldap_server');
+    $this->logger            = $logger;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setServerById(string $sid): void {
-    $server = $this->entityManager->load($sid);
+    $server = $this->entityTypeManager->getStorage('ldap_server')->load($sid);
     /** @var \Drupal\ldap_servers\Entity\Server $server */
     if ($server) {
       $this->setServer($server);
@@ -139,6 +138,37 @@ class LdapBridge implements LdapBridgeInterface {
       }
     }
 
+    $existing_binds = &drupal_static(__FUNCTION__);
+    if (!empty($existing_binds)) {
+      foreach ($existing_binds as $result) {
+        if (isset(
+          $result['bindMethod'],
+          $result['bindDn'],
+          $result['bindPw'],
+          $result['result'],
+          $result['ldap']
+        )) {
+          if (
+            $result['bindMethod'] === $this->bindMethod
+            && $result['bindDn'] === $userDn
+            && $result['bindPw'] === $password
+          ) {
+            $this->ldap = $result['ldap'];
+            return $result['result'];
+          }
+        }
+      }
+    }
+
+    $existing_binds[] = &$existing_bind;
+    $existing_bind = [
+      'bindMethod' => $this->bindMethod,
+      'bindDn' => $userDn,
+      'bindPw' => $password,
+      'result' => FALSE,
+      'ldap' => $this->ldap,
+    ];
+
     try {
       $this->ldap->bind($userDn, $password);
     }
@@ -154,6 +184,7 @@ class LdapBridge implements LdapBridgeInterface {
       ]);
       return FALSE;
     }
+    $existing_bind['result'] = TRUE;
     return TRUE;
   }
 

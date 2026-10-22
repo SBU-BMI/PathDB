@@ -74,6 +74,8 @@ class DrupalBootstrapStyles extends JsDelivr {
     $mapped['3.4.6'] = '3.4.1';
     $mapped['3.4.7'] = '3.4.1';
     $mapped['3.4.8'] = '3.4.1';
+    $mapped['3.4.9'] = '3.4.1';
+    $mapped['3.4.10'] = '3.4.1';
 
     return $mapped[$version] ?? $version;
   }

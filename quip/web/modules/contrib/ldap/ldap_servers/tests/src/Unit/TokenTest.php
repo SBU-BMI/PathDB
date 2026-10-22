@@ -8,15 +8,15 @@ use Drupal\ldap_servers\Helper\ConversionHelper;
 use Drupal\ldap_servers\Logger\LdapDetailLog;
 use Drupal\ldap_servers\Processor\TokenProcessor;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Ldap\Entry;
 
 /**
  * Token tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
 class TokenTest extends UnitTestCase {
 
   /**
@@ -68,8 +68,8 @@ class TokenTest extends UnitTestCase {
    * See http://drupal.org/node/1245736 for test tokens.
    */
   public function testTokenReplacement(): void {
-    $literalValue = $this->processor->ldapEntryReplacementsForDrupalAccount($this->ldapEntry, 'literalvalue');
-    $this->assertEquals('literalvalue', $literalValue);
+    $literalValue = $this->processor->ldapEntryReplacementsForDrupalAccount($this->ldapEntry, 'literal_value');
+    $this->assertEquals('literal_value', $literalValue);
 
     $dn = $this->processor->ldapEntryReplacementsForDrupalAccount($this->ldapEntry, '[dn]');
     $this->assertEquals($this->ldapEntry->getDn(), $dn);

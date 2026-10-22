@@ -28,8 +28,22 @@ class SearchApiBulkForm extends BulkForm {
 
   use SearchApiFieldTrait {
     preRender as traitPreRender;
-    defineOptions as ignoreDefineOptions;
-    buildOptionsForm as ignoreBuildOptionsForm;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defineOptions(): array {
+    // Intentionally overridden to avoid SearchApiFieldTrait implementation.
+    return parent::defineOptions();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
+    // Intentionally overridden to avoid SearchApiFieldTrait implementation.
+    parent::buildOptionsForm($form, $form_state);
   }
 
   /**
@@ -106,7 +120,7 @@ class SearchApiBulkForm extends BulkForm {
 
     // If the view is using a table style, provide a placeholder for a "select
     // all" checkbox.
-    if (($this->view->style_plugin ?? NULL) instanceof Table) {
+    if ($this->view->style_plugin instanceof Table) {
       // Add the tableselect css classes.
       $this->options['element_label_class'] .= 'select-all';
       // Hide the actual label of the field on the table header.

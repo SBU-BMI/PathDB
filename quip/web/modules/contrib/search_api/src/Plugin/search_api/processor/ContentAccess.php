@@ -275,6 +275,7 @@ class ContentAccess extends ProcessorPluginBase {
       }
     }
 
+    // phpcs:disable Drupal.Commenting.InlineComment.SpacingBefore
     // The filter structure we want looks like this:
     //   [belongs to other datasource]
     //   OR
@@ -285,6 +286,7 @@ class ContentAccess extends ProcessorPluginBase {
     //   )
     // If there are no "other" datasources, we don't need the nested OR,
     // however, and can add the inner conditions directly to the query.
+    // phpcs:enable
     if ($unaffected_datasources) {
       $outer_conditions = $query->createAndAddConditionGroup('OR', ['content_access']);
       foreach ($unaffected_datasources as $datasource_id) {

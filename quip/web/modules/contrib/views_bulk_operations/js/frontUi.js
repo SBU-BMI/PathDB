@@ -160,13 +160,23 @@
         success(data) {
           selectionObject.totalCount = data.count;
           $selectionInfo.html(data.selection_info);
-          $summary[0].textContent = Drupal.formatPlural(
-            data.count,
-            'Selected 1 item',
-            'Selected @count items',
-          );
+          if ($summary[0]) {
+            $summary[0].textContent = Drupal.formatPlural(
+              data.count,
+              'Selected 1 item',
+              'Selected @count items',
+            );
+          }
           selectionObject.toggleButtonsState();
           selectionObject.ajaxing = false;
+
+          // This custom success callback replaces Drupal's default one, which
+          // is what normally removes the progress indicator. With the
+          // fullscreen loader enabled it would otherwise stay on screen
+          // forever, so remove it here (mirrors Drupal.Ajax.prototype.success).
+          if (this.progress && this.progress.element) {
+            $(this.progress.element).remove();
+          }
         },
       };
 
@@ -278,15 +288,13 @@
         }
 
         // Also handle checkboxes that may still have different values.
-        $vboForm
-          .find(
-            '.views-field-views-bulk-operations-bulk-form input[type="checkbox"]',
-          )
-          .each(function () {
-            if (this.checked !== value) {
-              this.checked = value;
-            }
-          });
+        $vboForm.find('.js-vbo-checkbox').each(function () {
+          if (this.checked !== value) {
+            this.checked = value;
+          }
+        });
+
+        vboSelection.toggleButtonsState();
 
         // Clear the selection information if exists.
         $vboForm.find('.vbo-info-list-wrapper').each(function () {

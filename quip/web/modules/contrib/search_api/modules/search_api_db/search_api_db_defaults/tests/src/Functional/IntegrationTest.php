@@ -118,12 +118,14 @@ class IntegrationTest extends BrowserTestBase {
     $this->submitForm($edit_enable, 'Install');
 
     $expected_page_title = 'Some required modules must be installed';
-    $expected_success_message = '3 modules have been installed: Database Search Defaults, Database Search, Search API';
     $this->assertSession()->pageTextContains($expected_page_title);
 
     $this->submitForm([], 'Continue');
 
-    $this->assertSession()->pageTextContains($expected_success_message);
+    // Unfortunately, the order in which modules are listed here is not 100%
+    // reliable so we have to use a regular expression.
+    $expected_success_message_regex = '/3 modules have been installed: Database Search Defaults, (Database Search, Search API|Search API, Database Search)/';
+    $this->assertSession()->pageTextMatches($expected_success_message_regex);
 
     $this->rebuildContainer();
 

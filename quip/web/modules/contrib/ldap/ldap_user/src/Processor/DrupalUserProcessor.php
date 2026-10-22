@@ -413,12 +413,10 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     $accountFromPuid = !empty($persistentUid) ? $this->ldapUserManager->getUserAccountFromPuid($persistentUid) : FALSE;
     if ($accountFromPuid) {
       $this->updateExistingAccountByPersistentUid($accountFromPuid);
-    }
-    else {
-      $this->createDrupalUser();
+      return TRUE;
     }
 
-    return TRUE;
+    return $this->createDrupalUser();
   }
 
   /**
@@ -484,15 +482,38 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
     }
 
     $event = new LdapUserLoginEvent($account);
-    $this->eventDispatcher->dispatch($event);
+    $this->eventDispatcher->dispatch($event, LdapUserLoginEvent::EVENT_NAME);
 
     $this->saveAccount();
   }
 
   /**
-   * Create a Drupal user.
+   * Handle Drupal user scheduled update.
+   *
+   * Syncs LDAP attributes onto an existing Drupal account during cron. Unlike
+   * drupalUserLogsIn(), this does not require the authentication provision
+   * trigger and does not dispatch a login event.
+   *
+   * @param \Drupal\user\UserInterface $account
+   *   The Drupal user.
    */
-  private function createDrupalUser(): void {
+  public function drupalUserScheduledUpdate(UserInterface $account): void {
+    $this->account = $account;
+    if ($this->excludeUser($this->account)) {
+      return;
+    }
+
+    $this->syncToDrupalAccount();
+    $this->saveAccount();
+  }
+
+  /**
+   * Create a Drupal user.
+   *
+   * @return bool
+   *   TRUE if the account was saved, FALSE on validation failure.
+   */
+  private function createDrupalUser(): bool {
     $this->account->enforceIsNew();
     $this->applyAttributesToAccountOnCreate();
     $tokens = ['%drupal_username' => $this->account->getAccountName()];
@@ -500,13 +521,13 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
       $this->messenger->addError($this->t('User account creation failed because of invalid, empty derived Drupal username.'));
       $this->logger
         ->error('Failed to create Drupal account %drupal_username because Drupal username could not be derived.', $tokens);
-      return;
+      return FALSE;
     }
     if (!$mail = $this->account->getEmail()) {
       $this->messenger->addError($this->t('User account creation failed because of invalid, empty derived email address.'));
       $this->logger
         ->error('Failed to create Drupal account %drupal_username because email address could not be derived by LDAP User module', $tokens);
-      return;
+      return FALSE;
     }
 
     $users = $this->entityTypeManager->getStorage('user')
@@ -522,10 +543,11 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
         ]
       );
       $this->messenger->addError($this->t('Another user already exists in the system with the same email address. You should contact the system administrator in order to solve this conflict.'));
-      return;
+      return FALSE;
     }
     $this->saveAccount();
     $this->externalAuth->save($this->account, 'ldap_user', $this->account->getAccountName());
+    return TRUE;
   }
 
   /**
@@ -600,8 +622,15 @@ class DrupalUserProcessor implements LdapUserAttributesInterface {
 
       return NULL;
     }
-    // @todo Declare dependency on exif or resolve it.
     $image_type = exif_imagetype($unmanagedFile);
+    if ($image_type === FALSE) {
+      $this->detailLog
+        ->log('Unable to detect image type of @file. Possibly invalid or corrupted image',
+          ['@file' => $unmanagedFile]
+        );
+
+      return NULL;
+    }
     $extension = image_type_to_extension($image_type, FALSE);
     unlink($unmanagedFile);
 

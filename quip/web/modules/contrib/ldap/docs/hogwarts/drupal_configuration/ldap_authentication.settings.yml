@@ -1,16 +1,18 @@
+langcode: en
 sids:
   hogwarts: hogwarts
-authenticationMode: 1
+authenticationMode: mixed
 loginUIUsernameTxt: 'Username LDAP notice text'
 loginUIPasswordTxt: 'Password LDAP notice text'
 ldapUserHelpLinkUrl: 'http://www.example.com/'
 ldapUserHelpLinkText: 'LDAP help link description text'
-emailOption: 3
-emailUpdate: 1
-passwordOption: 2
+emailOption: allow
+emailUpdate: update_notify
+passwordOption: hide
 allowOnlyIfTextInDn: {  }
 excludeIfTextInDn: {  }
-excludeIfNoAuthorizations: 0
+excludeIfNoAuthorizations: false
+skipAdministrators: true
 emailTemplateHandling: if_empty
 emailTemplate: '@username@example.com'
 emailTemplateUsageResolveConflict: true

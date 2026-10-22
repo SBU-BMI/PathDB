@@ -374,7 +374,7 @@ class OrphanProcessor {
           ->load($user['uid']);
         $method = $this->configLdapUser->get('orphanedDrupalAcctBehavior');
         switch ($method) {
-          case 'ldap_user_orphan_email';
+          case 'ldap_user_orphan_email':
             $link = Url::fromRoute('entity.user.edit_form', ['user' => $user['uid']])->setAbsolute();
             $this->emailList[] = $account->getAccountName() . ',' . $account->getEmail() . ',' . $link->toString();
             $account->set('ldap_user_last_checked', time())->save();

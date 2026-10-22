@@ -94,7 +94,7 @@ class TrackingHelper implements TrackingHelperInterface {
     protected EventDispatcherInterface $eventDispatcher,
     protected FieldsHelperInterface $fieldsHelper,
     #[Autowire(service: 'cache.default')]
-    protected CacheBackendInterface $cache
+    protected CacheBackendInterface $cache,
   ) {}
 
   /**

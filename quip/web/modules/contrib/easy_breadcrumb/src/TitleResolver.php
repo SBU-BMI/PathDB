@@ -3,6 +3,7 @@
 namespace Drupal\easy_breadcrumb;
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerResolverInterface;
 use Drupal\Core\Controller\TitleResolver as ControllerTitleResolver;
@@ -14,7 +15,6 @@ use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
-use Symfony\Component\Routing\Route;
 
 /**
  * Resolves page titles for controllers based on various criteria.
@@ -23,24 +23,18 @@ class TitleResolver extends ControllerTitleResolver {
 
   /**
    * The field storage config storage.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManager
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Breadcrumb config object.
-   *
-   * @var \Drupal\Core\Config\Config
    */
-  protected $config;
+  protected Config $config;
 
   /**
    * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
    */
-  protected $languageManager;
+  protected LanguageManagerInterface $languageManager;
 
   /**
    * Constructs a new EntityDisplayRebuilder.
@@ -66,12 +60,27 @@ class TitleResolver extends ControllerTitleResolver {
   }
 
   /**
-   * {@inheritdoc}
+   * Returns a static or dynamic title for the route.
+   *
+   * If the returned title can contain HTML that should not be escaped it should
+   * return a render array, for example:
+   * @code
+   * ['#markup' => 'title', '#allowed_tags' => ['em']]
+   * @endcode
+   * If the method returns a string and it is not marked safe then it will be
+   * auto-escaped.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object passed to the title callback.
+   *
+   * @return string
+   *   The title for the route or an empty string if one is not found.
    */
-  public function getTitle(Request $request, Route $route) {
+  public function getAlternateTitle(Request $request): string {
     $url = Url::fromUri("internal:" . $request->getRequestUri());
     $alternative_title_field = $this->config->get(EasyBreadcrumbConstants::ALTERNATIVE_TITLE_FIELD);
-    // If an alternative title field is set, load the entity if present and use that field.
+    // If an alternative title field is set, load the entity if present and
+    // use that field.
     if ($alternative_title_field) {
       $entity = NULL;
       try {
@@ -99,6 +108,7 @@ class TitleResolver extends ControllerTitleResolver {
       }
     }
 
-    return parent::getTitle($request, $route);
+    return '';
   }
+
 }

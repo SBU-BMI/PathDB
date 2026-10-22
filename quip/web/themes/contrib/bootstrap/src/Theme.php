@@ -351,7 +351,8 @@ class Theme {
     $hash = Crypt::generateBase64HashIdentifier($options, [$mask, $path]);
 
     if (!$cache->has($hash)) {
-      if ($fileSystem = \Drupal::service('file_system')) {
+      $files = [];
+      if ($fileSystem = Bootstrap::service('file_system')) {
         $files = $fileSystem->scanDirectory($path, $mask, $options);
       }
       $cache->set($hash, $files);
@@ -678,7 +679,7 @@ class Theme {
     if (!isset($includes[$include])) {
       $includes[$include] = !!@include_once $include;
       if (!$includes[$include]) {
-        \Drupal::messenger()->addMessage(t('Could not include file: @include', ['@include' => $include]), 'error');
+        Bootstrap::service('messenger')->addMessage(t('Could not include file: @include', ['@include' => $include]), 'error');
       }
     }
     return $includes[$include];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\views_bulk_operations\Plugin\Action;
 
 use Drupal\Core\Action\Attribute\Action;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\TranslatableInterface;
@@ -26,6 +27,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: ''
 )]
 class EntityDeleteAction extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface {
+
+  // Lets __wakeup() initialize readonly properties on PHP < 8.4.
+  use DependencySerializationTrait;
 
   /**
    * Constructs a new EntityDeleteAction object.

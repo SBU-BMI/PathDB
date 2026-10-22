@@ -17,10 +17,8 @@ class EasyBreadcrumbGeneralSettingsForm extends ConfigFormBase {
 
   /**
    * The entity manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * {@inheritdoc}

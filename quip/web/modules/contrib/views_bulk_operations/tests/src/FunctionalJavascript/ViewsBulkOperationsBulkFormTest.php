@@ -158,6 +158,74 @@ final class ViewsBulkOperationsBulkFormTest extends WebDriverTestBase {
   }
 
   /**
+   * Configures a select-all test View with a non-default VBO field ID.
+   */
+  private function configureNonDefaultFieldIdSelectAllTestView(?int $itemsPerPage = NULL): void {
+    $testViewConfig = \Drupal::service('config.factory')->getEditable(
+      'views.view.' . self::TEST_VIEW_ID,
+    );
+    $configData = $testViewConfig->getRawData();
+    $fields = &$configData['display']['default']['display_options']['fields'];
+
+    $bulkFormFieldId = isset($fields['views_bulk_operations_bulk_form'])
+      ? 'views_bulk_operations_bulk_form'
+      : 'views_bulk_operations_bulk_form_1';
+    self::assertArrayHasKey($bulkFormFieldId, $fields);
+    $bulkForm = $fields[$bulkFormFieldId];
+    unset($fields[$bulkFormFieldId]);
+    $bulkForm['id'] = 'views_bulk_operations_bulk_form_1';
+    $bulkForm['show_select_all'] = 'always_show';
+    $fields['views_bulk_operations_bulk_form_1'] = $bulkForm;
+
+    // An unformatted list has no table header checkbox. The all-results control
+    // must therefore select rows through VBO's row-checkbox marker class.
+    $configData['display']['default']['display_options']['style']['type'] = 'default';
+    unset($configData['display']['default']['display_options']['style']['options']);
+    $configData['display']['default']['display_options']['pager']['options']['items_per_page'] = $itemsPerPage
+      ?? $this->testViewParams['items_per_page'];
+
+    $testViewConfig->setData($configData);
+    $testViewConfig->save();
+    $this->drupalGet('/' . $this->testViewParams['path']);
+
+    $this->assertSession->elementExists(
+      'css',
+      '.views-field-views-bulk-operations-bulk-form-1',
+    );
+    $this->assertSession->elementNotExists(
+      'css',
+      '.views-field-views-bulk-operations-bulk-form',
+    );
+  }
+
+  /**
+   * Asserts that every row checkbox is unchecked.
+   *
+   * @param \Behat\Mink\Element\NodeElement[] $rowCheckboxes
+   *   Row checkboxes.
+   */
+  private function assertRowsUnchecked(array $rowCheckboxes): void {
+    foreach ($rowCheckboxes as $rowCheckbox) {
+      self::assertFalse($rowCheckbox->isChecked());
+    }
+  }
+
+  /**
+   * Asserts that every row checkbox is checked.
+   *
+   * @param \Behat\Mink\Element\NodeElement[] $rowCheckboxes
+   *   Row checkboxes.
+   */
+  private function assertRowsChecked(array $rowCheckboxes): void {
+    foreach ($rowCheckboxes as $rowCheckbox) {
+      self::assertTrue(
+        $rowCheckbox->isChecked(),
+        'The all-results control should select every visible row.',
+      );
+    }
+  }
+
+  /**
    * Test if selection persists on view pages.
    */
   private function testSelectionPersists(): void {
@@ -224,6 +292,51 @@ final class ViewsBulkOperationsBulkFormTest extends WebDriverTestBase {
       }
     }
     $this->assertSession->pageTextContains(\sprintf('Test (%s)', \count($selected_ids)));
+
+    // Test select-all on one page with a non-default VBO field ID.
+    $itemCount = count($this->testNodes);
+    $this->configureNonDefaultFieldIdSelectAllTestView($itemCount);
+    $this->assertSession->elementNotExists('css', '.vbo-multipage-selector');
+
+    $rowCheckboxes = $this->page->findAll('css', '.js-vbo-checkbox');
+    self::assertCount($itemCount, $rowCheckboxes);
+    $this->assertRowsUnchecked($rowCheckboxes);
+
+    $this->page->selectFieldOption('action', 'Simple test action');
+    $applyButton = $this->assertSession->buttonExists('Apply to selected items');
+    self::assertTrue($applyButton->hasAttribute('disabled'));
+
+    $selectAll = $this->page->find('css', '.vbo-select-all');
+    self::assertNotNull($selectAll);
+    $selectAll->click();
+
+    $this->assertRowsChecked(
+      $this->page->findAll('css', '.js-vbo-checkbox'),
+    );
+    self::assertFalse($applyButton->hasAttribute('disabled'));
+
+    // Test select-all on multiple pages with a non-default VBO field ID.
+    $this->configureNonDefaultFieldIdSelectAllTestView();
+    $this->assertSession->elementExists('css', '.vbo-multipage-selector');
+
+    $rowCheckboxes = $this->page->findAll('css', '.js-vbo-checkbox');
+    self::assertCount(
+      $this->testViewParams['items_per_page'],
+      $rowCheckboxes,
+    );
+    $this->assertRowsUnchecked($rowCheckboxes);
+
+    $selectAll = $this->page->find('css', '.vbo-select-all');
+    self::assertNotNull($selectAll);
+    $selectAll->click();
+    $this->assertSession->assertWaitOnAjaxRequest();
+
+    $this->assertSession->pageTextContains(
+      sprintf('Selected %d items', count($this->testNodes)),
+    );
+    $this->assertRowsChecked(
+      $this->page->findAll('css', '.js-vbo-checkbox'),
+    );
   }
 
   /**

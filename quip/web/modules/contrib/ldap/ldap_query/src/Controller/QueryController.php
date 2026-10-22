@@ -36,11 +36,11 @@ class QueryController {
   private $query;
 
   /**
-   * Entity Storage.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $storage;
+  protected $entityTypeManager;
 
   /**
    * LDAP Bridge.
@@ -74,9 +74,9 @@ class QueryController {
     LdapBridgeInterface $ldap_bridge,
     LoggerInterface $logger,
   ) {
-    $this->storage = $entity_type_manager->getStorage('ldap_query_entity');
-    $this->ldapBridge = $ldap_bridge;
-    $this->logger = $logger;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->ldapBridge        = $ldap_bridge;
+    $this->logger            = $logger;
   }
 
   /**
@@ -87,7 +87,9 @@ class QueryController {
    */
   public function load(string $id): void {
     $this->qid = $id;
-    $this->query = $this->storage->load($this->qid);
+    $this->query = $this->entityTypeManager
+      ->getStorage('ldap_query_entity')
+      ->load($this->qid);
   }
 
   /**

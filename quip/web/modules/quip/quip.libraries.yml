@@ -1,0 +1,6 @@
+quipinit:
+  version: 1.x
+  js:
+    openseadragon/openseadragon.min.js: {preprocess: false}
+  css:
+  dependencies:

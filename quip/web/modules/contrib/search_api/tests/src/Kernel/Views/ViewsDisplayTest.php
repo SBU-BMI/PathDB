@@ -101,7 +101,8 @@ class ViewsDisplayTest extends KernelTestBase {
   public function testBlockRenderedInCurrentRequest() {
     $this->installConfig('search_api_test_views');
     \Drupal::service('theme_installer')->install(['starterkit_theme']);
-    \Drupal::service('theme_installer')->install(['claro']);
+    $admin_theme = version_compare(\Drupal::VERSION, '11.4-dev', '>=') ? 'default_admin' : 'claro';
+    \Drupal::service('theme_installer')->install([$admin_theme]);
 
     $block = $this->placeBlock('views_block:search_api_test_block_view-block_1', [
       'theme' => 'starterkit_theme',
@@ -115,14 +116,14 @@ class ViewsDisplayTest extends KernelTestBase {
     $this->assertEquals('views_block:search_api_test_block_view__block_1', $display->getPluginId());
 
     $theme = $this->createMock(ActiveTheme::class);
-    $theme->method('getName')->willReturn('claro', 'starterkit_theme');
+    $theme->method('getName')->willReturn($admin_theme, 'starterkit_theme');
     $theme_manager = $this->createMock(ThemeManagerInterface::class);
     $theme_manager->method('getActiveTheme')->willReturn($theme);
     $display->setThemeManager($theme_manager);
 
-    // In the first call, active theme will be reported as "claro", so block
-    // would not be rendered; in the second call, with theme "starterkit_theme", it
-    // should be.
+    // In the first call, active theme will be reported as the admin theme, so
+    // the block would not be rendered; in the second call, with theme
+    // "starterkit_theme", it should be.
     $this->assertFalse($display->isRenderedInCurrentRequest());
     $this->assertTrue($display->isRenderedInCurrentRequest());
   }

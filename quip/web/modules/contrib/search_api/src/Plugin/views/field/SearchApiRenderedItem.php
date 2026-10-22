@@ -90,7 +90,10 @@ class SearchApiRenderedItem extends FieldPluginBase {
       }
 
       foreach ($bundles as $bundle_id => $bundle_label) {
-        $title = $this->t('View mode for datasource %datasource, bundle %bundle', ['%datasource' => $datasource_label, '%bundle' => $bundle_label]);
+        $title = $this->t('View mode for datasource %datasource, bundle %bundle', [
+          '%datasource' => $datasource_label,
+          '%bundle' => $bundle_label,
+        ]);
         $view_modes = $datasource->getViewModes($bundle_id);
         if (!$view_modes) {
           $form['view_modes'][$datasource_id][$bundle_id] = [

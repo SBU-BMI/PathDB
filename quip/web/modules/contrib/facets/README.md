@@ -24,8 +24,7 @@ Submit bug reports and feature suggestions, or track changes in the
 
 ## Requirements
 
-No other modules are required; we're supporting Drupal Core's search as a
-source for creating facets.
+Search API is required. Facets supports Search API displays as facet sources.
 
 
 ## Recommended Modules

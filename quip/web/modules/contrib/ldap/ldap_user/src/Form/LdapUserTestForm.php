@@ -21,13 +21,6 @@ use function in_array;
 final class LdapUserTestForm extends FormBase implements LdapUserAttributesInterface {
 
   /**
-   * Sync Trigger Options.
-   *
-   * @var array
-   */
-  private static $syncTriggerOptions;
-
-  /**
    * Request.
    *
    * @var \Symfony\Component\HttpFoundation\Request|null
@@ -95,15 +88,6 @@ final class LdapUserTestForm extends FormBase implements LdapUserAttributesInter
     $this->entityTypeManager = $entity_type_manager;
     $this->externalAuth = $external_auth;
     $this->drupalUserProcessor = $drupal_user_processor;
-
-    self::$syncTriggerOptions = [
-      self::PROVISION_DRUPAL_USER_ON_USER_UPDATE_CREATE => $this->t('On sync to Drupal user create or update. Requires a server with binding method of "Service Account Bind" or "Anonymous Bind".'),
-      self::PROVISION_DRUPAL_USER_ON_USER_AUTHENTICATION => $this->t('On create or sync to Drupal user when successfully authenticated with LDAP credentials. (Requires LDAP Authentication module).'),
-      self::PROVISION_DRUPAL_USER_ON_USER_ON_MANUAL_CREATION => $this->t('On manual creation of Drupal user from admin/people/create and "Create corresponding LDAP entry" is checked'),
-      self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE => $this->t('On creation or sync of an LDAP entry when a Drupal account is created or updated. Only applied to accounts with a status of approved.'),
-      self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION => $this->t('On creation or sync of an LDAP entry when a user authenticates.'),
-      self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE => $this->t('On deletion of an LDAP entry when the corresponding Drupal Account is deleted.  This only applies when the LDAP entry was provisioned by Drupal by the LDAP User module.'),
-    ];
   }
 
   /**
@@ -147,7 +131,7 @@ final class LdapUserTestForm extends FormBase implements LdapUserAttributesInter
       '#type' => 'radios',
       '#title' => $this->t('Actions/Event Handler to Test'),
       '#default_value' => $this->request->query->get('action'),
-      '#options' => self::$syncTriggerOptions,
+      '#options' => $this->getSyncTriggerOptions(),
       '#required' => TRUE,
     ];
 
@@ -209,7 +193,7 @@ final class LdapUserTestForm extends FormBase implements LdapUserAttributesInter
     }
 
     $account = ['name' => $username];
-    $sync_trigger_description = self::$syncTriggerOptions[$selected_action];
+    $sync_trigger_description = $this->getSyncTriggerOptions()[$selected_action];
     foreach ([self::PROVISION_TO_DRUPAL, self::PROVISION_TO_LDAP] as $direction) {
       if ($this->provisionEnabled($direction, $selected_action)) {
         if ($direction === self::PROVISION_TO_DRUPAL) {
@@ -241,6 +225,23 @@ final class LdapUserTestForm extends FormBase implements LdapUserAttributesInter
 
     $form_state->set('ldap_user_test_data', $results);
     $form_state->setRebuild();
+  }
+
+  /**
+   * Returns labels for LDAP user provisioning trigger radios.
+   *
+   * @return array
+   *   Trigger IDs keyed to translated descriptions.
+   */
+  private function getSyncTriggerOptions(): array {
+    return [
+      self::PROVISION_DRUPAL_USER_ON_USER_UPDATE_CREATE => $this->t('On sync to Drupal user create or update. Requires a server with binding method of "Service Account Bind" or "Anonymous Bind".'),
+      self::PROVISION_DRUPAL_USER_ON_USER_AUTHENTICATION => $this->t('On create or sync to Drupal user when successfully authenticated with LDAP credentials. (Requires LDAP Authentication module).'),
+      self::PROVISION_DRUPAL_USER_ON_USER_ON_MANUAL_CREATION => $this->t('On manual creation of Drupal user from admin/people/create and "Create corresponding LDAP entry" is checked'),
+      self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_UPDATE_CREATE => $this->t('On creation or sync of an LDAP entry when a Drupal account is created or updated. Only applied to accounts with a status of approved.'),
+      self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_AUTHENTICATION => $this->t('On creation or sync of an LDAP entry when a user authenticates.'),
+      self::PROVISION_LDAP_ENTRY_ON_USER_ON_USER_DELETE => $this->t('On deletion of an LDAP entry when the corresponding Drupal Account is deleted.  This only applies when the LDAP entry was provisioned by Drupal by the LDAP User module.'),
+    ];
   }
 
   /**

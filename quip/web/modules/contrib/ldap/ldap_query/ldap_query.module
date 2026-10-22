@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -27,8 +28,11 @@ function ldap_query_help($route_name, RouteMatchInterface $route_match) {
 /**
  * Implements hook_entity_operation().
  */
-function ldap_query_entity_operation(EntityInterface $entity): array {
+function ldap_query_entity_operation(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL): array {
   $operations = [];
+  if ($cacheability !== NULL) {
+    $cacheability->addCacheContexts(['user.permissions']);
+  }
   if (\Drupal::currentUser()->hasPermission('administer ldap')) {
     if ($entity->getEntityType()->id() === 'ldap_query_entity') {
       $operations['query_test'] = [

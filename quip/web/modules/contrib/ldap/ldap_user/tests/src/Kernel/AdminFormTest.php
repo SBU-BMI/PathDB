@@ -6,12 +6,14 @@ use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_user\Form\LdapUserAdminForm;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Admin Form test.
- *
- * @group ldap_user
  */
+#[Group('ldap_user')]
+#[RunTestsInSeparateProcesses]
 class AdminFormTest extends KernelTestBase {
 
   /**

@@ -10,13 +10,14 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\ldap_authentication\Access\UserHelpTabAccess;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * User help tab access test.
- *
- * @group ldap_authentication
- * @coversDefaultClass \Drupal\ldap_authentication\Access\UserHelpTabAccess
  */
+#[Group('ldap_authentication')]
+#[CoversClass(UserHelpTabAccess::class)]
 class UserHelpTabAccessTest extends UnitTestCase {
 
   /**
@@ -95,9 +96,6 @@ class UserHelpTabAccessTest extends UnitTestCase {
 
   /**
    * Test access.
-   *
-   * @covers ::access
-   * @covers ::accessLdapHelpTab
    */
   public function testAccessTrue(): void {
 
@@ -121,9 +119,6 @@ class UserHelpTabAccessTest extends UnitTestCase {
 
   /**
    * Test access.
-   *
-   * @covers ::access
-   * @covers ::accessLdapHelpTab
    */
   public function testAccessFalse(): void {
 
@@ -138,9 +133,6 @@ class UserHelpTabAccessTest extends UnitTestCase {
 
   /**
    * Test access.
-   *
-   * @covers ::access
-   * @covers ::accessLdapHelpTab
    */
   public function testAccessAnonymous(): void {
 
@@ -159,8 +151,6 @@ class UserHelpTabAccessTest extends UnitTestCase {
 
   /**
    * Test constructor.
-   *
-   * @covers ::__construct
    */
   public function testConstructor(): void {
     $access = new UserHelpTabAccess($this->configFactory, $this->user, $this->externalAuth);

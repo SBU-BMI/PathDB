@@ -46,7 +46,7 @@ class ResultRow extends ViewsResultRow {
     'search_api_excerpt' => 'getExcerpt',
   ];
 
-  // @codingStandardsIgnoreStart PSR2.Classes.PropertyDeclaration.Underscore
+  // phpcs:disable Drupal.NamingConventions.ValidVariableName.LowerCamelName
 
   /**
    * The Search API result item for this row.
@@ -78,7 +78,7 @@ class ResultRow extends ViewsResultRow {
    */
   public $_relationship_parent_indices = [];
 
-  // @codingStandardsIgnoreEnd
+  // phpcs:enable
 
   /**
    * Implements the magic __isset() method to lazy-load certain properties.

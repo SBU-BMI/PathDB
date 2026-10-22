@@ -30,11 +30,11 @@ class FakeBridge implements LdapBridgeInterface {
   protected $logger;
 
   /**
-   * Entity Storage.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * Bind result.
@@ -52,15 +52,15 @@ class FakeBridge implements LdapBridgeInterface {
    *   Entity type manager.
    */
   public function __construct(LoggerInterface $logger, EntityTypeManagerInterface $entity_type_manager) {
-    $this->logger = $logger;
-    $this->entityManager = $entity_type_manager->getStorage('ldap_server');
+    $this->logger            = $logger;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setServerById(string $sid): void {
-    $server = $this->entityManager->load($sid);
+    $server = $this->entityTypeManager->getStorage('ldap_server')->load($sid);
     /** @var \Drupal\ldap_servers\Entity\Server $server */
     if ($server) {
       $this->setServer($server);

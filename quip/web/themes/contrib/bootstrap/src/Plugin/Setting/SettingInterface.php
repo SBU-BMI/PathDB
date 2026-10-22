@@ -158,8 +158,8 @@ interface SettingInterface extends PluginInspectionInterface, FormInterface {
    *   An array of deprecated Setting objects indicating this setting replaced
    *   theirs, keyed by deprecated setting name.
    *
-   * @return string
-   *   The setting's deprecated value.
+   * @return mixed
+   *   The setting's deprecated value, or NULL when no value can be migrated.
    */
   public function processDeprecatedValues(array $values, array $deprecated);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ldap_servers\Unit;
 
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once __DIR__ . '/../../../ldap_servers.module';
@@ -14,6 +15,8 @@ require_once __DIR__ . '/../../../ldap_servers.module';
  *
  * @package Drupal\Tests\ldap_servers\Unit
  */
+#[CoversFunction('ldap_servers_help')]
+#[CoversFunction('ldap_servers_user_login')]
 class ModuleTest extends UnitTestCase {
 
   /**
@@ -40,8 +43,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_servers_help
    */
   public function testHookHelpRouteHelpPage(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -52,8 +53,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_servers_help
    */
   public function testHookHelpRouteServerCollection(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -64,8 +63,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_servers_help
    */
   public function testHookHelpRouteServerEditForm(): void {
     $server = $this->createMock('Drupal\ldap_servers\Entity\Server');
@@ -80,8 +77,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_servers_help
    */
   public function testHookHelpRouteNoHelpProvided(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -92,8 +87,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_user_login().
-   *
-   * @coversFunction ::ldap_servers_user_login
    */
   public function testHookUserLogout(): void {
     $default_cache = $this->createMock('Drupal\Core\Cache\CacheBackendInterface');

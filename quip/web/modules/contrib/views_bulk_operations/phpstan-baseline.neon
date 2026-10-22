@@ -35,3 +35,11 @@ parameters:
 			identifier: varTag.type
 			count: 1
 			path: views_bulk_operations.install
+
+		# Deliberately untyped: this fixture overrides execute() without a
+		# return type to test that ReturnTypeDeprecationTrait detects it.
+		-
+			message: '#^Method Drupal\\Tests\\views_bulk_operations\\Unit\\ReturnTypeDeprecationTraitTestChild\:\:execute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: tests/src/Unit/ReturnTypeDeprecationTraitTest.php

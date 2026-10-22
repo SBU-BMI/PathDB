@@ -34,7 +34,7 @@ class IndexingBatchHelper implements IndexingBatchHelperInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function createBatch(
     IndexInterface $index,
@@ -75,7 +75,7 @@ class IndexingBatchHelper implements IndexingBatchHelperInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function process(
     IndexInterface $index,
@@ -172,7 +172,7 @@ class IndexingBatchHelper implements IndexingBatchHelperInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function finish(
     bool $success,

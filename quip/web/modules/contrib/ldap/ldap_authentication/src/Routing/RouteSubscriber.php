@@ -33,16 +33,27 @@ class RouteSubscriber extends RouteSubscriberBase {
    */
   public static function validateResetPasswordAllowed(): AccessResultInterface {
     $config = \Drupal::config('ldap_authentication.settings');
-    if (\Drupal::currentUser()->isAnonymous()) {
-      if ($config->get('authenticationMode') === 'mixed') {
-        return AccessResult::allowed();
-      }
+    $user = \Drupal::currentUser();
 
-      // Hide reset password for anonymous users if LDAP-only authentication and
-      // password updates are disabled, otherwise show.
-      if ($config->get('passwordOption') === 'allow') {
-        return AccessResult::allowed();
+    if ($user->isAuthenticated()) {
+      /** @var \Drupal\externalauth\Authmap $authmap */
+      $authmap = \Drupal::service('externalauth.authmap');
+      $authname = $authmap->get((int) $user->id(), 'ldap_user');
+
+      if ($authname) {
+        // It's an LDAP account so access will be denied.
+        return AccessResult::forbidden();
       }
+    }
+
+    if ($config->get('authenticationMode') === 'mixed') {
+      return AccessResult::allowed();
+    }
+
+    // Hide reset password for users if LDAP-only authentication and
+    // password updates are disabled, otherwise show.
+    if ($config->get('passwordOption') === 'allow') {
+      return AccessResult::allowed();
     }
 
     return AccessResult::forbidden();

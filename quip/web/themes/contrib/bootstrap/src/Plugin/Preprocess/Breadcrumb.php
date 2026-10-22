@@ -2,6 +2,7 @@
 
 namespace Drupal\bootstrap\Plugin\Preprocess;
 
+use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Utility\Variables;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
@@ -23,7 +24,7 @@ class Breadcrumb extends PreprocessBase implements PreprocessInterface {
 
     // Determine if breadcrumbs should be displayed.
     $breadcrumb_visibility = $this->theme->getSetting('breadcrumb');
-    if (($breadcrumb_visibility == 0 || ($breadcrumb_visibility == 2 && \Drupal::service('router.admin_context')->isAdminRoute())) || empty($breadcrumb)) {
+    if (($breadcrumb_visibility == 0 || ($breadcrumb_visibility == 2 && Bootstrap::service('router.admin_context')->isAdminRoute())) || empty($breadcrumb)) {
       $breadcrumb = [];
       return;
     }
@@ -40,9 +41,9 @@ class Breadcrumb extends PreprocessBase implements PreprocessInterface {
     }
 
     if ($this->theme->getSetting('breadcrumb_title') && !empty($breadcrumb)) {
-      $request = \Drupal::request();
-      $route_match = \Drupal::routeMatch();
-      $page_title = \Drupal::service('title_resolver')->getTitle($request, $route_match->getRouteObject());
+      $request = Bootstrap::service('request_stack')->getCurrentRequest();
+      $route_match = Bootstrap::service('current_route_match');
+      $page_title = Bootstrap::service('title_resolver')->getTitle($request, $route_match->getRouteObject());
       if (!empty($page_title)) {
         $breadcrumb[] = [
           'text' => $page_title,

@@ -3,7 +3,6 @@
 namespace Drupal\bootstrap\Plugin\Preprocess;
 
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
-use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Utility\Variables;
 use Drupal\Component\Render\FormattableMarkup;
@@ -38,7 +37,7 @@ class FileUploadHelp extends PreprocessBase implements PreprocessInterface {
         $descriptions[] = t('Unlimited number of files can be uploaded to this field.');
       }
       else {
-        $descriptions[] = \Drupal::translation()->formatPlural($cardinality, 'One file only.', 'Maximum @count files.');
+        $descriptions[] = Bootstrap::service('string_translation')->formatPlural($cardinality, 'One file only.', 'Maximum @count files.');
       }
     }
 
@@ -55,7 +54,7 @@ class FileUploadHelp extends PreprocessBase implements PreprocessInterface {
     }
     if ($unformatted_size) {
       $descriptions[] = t('@size limit.', [
-        '@size' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => ByteSizeMarkup::create($unformatted_size), fn() => format_size($unformatted_size)),
+        '@size' => ByteSizeMarkup::create($unformatted_size),
       ]);
     }
     $unformatted_extensions = NULL;

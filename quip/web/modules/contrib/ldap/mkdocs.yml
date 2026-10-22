@@ -1,0 +1,89 @@
+site_name: LDAP
+repo_url: https://git.drupalcode.org/project/ldap
+site_url: https://project.pages.drupalcode.org/ldap
+theme:
+  name: material
+  logo: logo.png
+  features:
+    - navigation.footer
+    - navigation.instant
+    - content.code.annotate
+    - content.code.copy
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - codehilite:
+      linenums: true
+  - def_list
+  - footnotes
+  - md_in_html
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.details
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji ''
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg ''
+  - pymdownx.highlight:
+      linenums: true
+      extend_pygments_lang:
+        - name: php
+          lang: php
+          options:
+            startinline: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format ''
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - toc:
+      permalink: '#'
+      baselevel: 1
+
+extra_css:
+  - css/extra.css
+
+nav:
+  - Home: index.md
+  - Get started:
+      - Installation: getting-started/install.md
+      - Configure a server: getting-started/servers.md
+      - Debugging: getting-started/debugging.md
+  - Features:
+      - Authentication: features/authentication.md
+      - User sync: features/user-sync.md
+      - Authorization: features/authorization.md
+      - Queries and Views: features/query.md
+      - Tokens: features/tokens.md
+  - Develop:
+      - Architecture: develop/architecture.md
+      - Hooks and events: develop/hooks.md
+      - Testing: develop/testing.md
+      - Hogwarts directory: develop/hogwarts.md

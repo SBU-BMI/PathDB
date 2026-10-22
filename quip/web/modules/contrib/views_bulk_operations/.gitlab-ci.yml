@@ -27,3 +27,28 @@ variables:
   OPT_IN_TEST_PREVIOUS_MAJOR: '1'
   OPT_IN_TEST_MAX_PHP: "1"
   _CSPELL_WORDS: 'nullsafe'
+  _AUTORUN_NEXT_MINOR: 'push-and-schedule'
+
+################
+# run-tests.sh on Drupal 10 doesn't discover #[Group]-only test classes
+# (#3497431), use the plain phpunit binary instead.
+################
+phpunit (previous major):
+  variables:
+    _PHPUNIT_CONCURRENT: '0'
+
+################
+# All uses of ReturnTypeDeprecationTrait must be removed by the next major.
+################
+check_vbo_5_deprecations:
+  stage: validate
+  needs: []
+  script:
+    - |
+      if grep -rn "deprecateMissingReturnType" src/ --exclude=ReturnTypeDeprecationTrait.php; then
+        echo "The next major requires strict native return types - remove the calls above."
+        exit 1
+      fi
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "5.0.x"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "5.0.x"'

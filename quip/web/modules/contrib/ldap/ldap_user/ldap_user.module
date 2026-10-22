@@ -196,7 +196,8 @@ function ldap_user_form_user_login_block_alter(&$form, &$form_state) {
 /**
  * Implements hook_form_FORM_ID_alter().
  *
- * Relevant for some contrib modules such as prlp, which add a password
+ * Relevant for some contrib modules such as Password Reset Landing Page
+ * (https://www.drupal.org/project/prlp), which add a password
  * field into the password reset page.
  */
 function ldap_user_form_user_pass_reset_alter(&$form, $form_state) {

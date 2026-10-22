@@ -571,20 +571,35 @@ class Element extends DrupalAttributes {
    */
   public function render() {
     /** @var \Drupal\Core\Render\Renderer $renderer */
-    $renderer = \Drupal::service('renderer');
+    $renderer = Bootstrap::renderer();
     return $renderer->render($this->array);
   }
 
   /**
-   * Renders the final element HTML.
+   * Renders the final element HTML in isolation.
    *
    * @return \Drupal\Component\Render\MarkupInterface
    *   The rendered HTML.
    */
-  public function renderPlain() {
+  public function renderInIsolation() {
     /** @var \Drupal\Core\Render\Renderer $renderer */
-    $renderer = \Drupal::service('renderer');
-    return $renderer->renderPlain($this->array);
+    $renderer = Bootstrap::renderer();
+    return $renderer->renderInIsolation($this->array);
+  }
+
+  /**
+   * Renders the final element HTML in isolation.
+   *
+   * @return \Drupal\Component\Render\MarkupInterface
+   *   The rendered HTML.
+   *
+   * @deprecated in bootstrap:8.x-3.x and is removed from bootstrap:4.0.0.
+   *   Use ::renderInIsolation() instead.
+   *
+   * @see https://www.drupal.org/node/3407994
+   */
+  public function renderPlain() {
+    return $this->renderInIsolation();
   }
 
   /**
@@ -597,7 +612,7 @@ class Element extends DrupalAttributes {
    */
   public function renderRoot() {
     /** @var \Drupal\Core\Render\Renderer $renderer */
-    $renderer = \Drupal::service('renderer');
+    $renderer = Bootstrap::renderer();
     return $renderer->renderRoot($this->array);
   }
 
@@ -682,7 +697,7 @@ class Element extends DrupalAttributes {
       $form_state->setError($this->array, $message);
     }
     else {
-      \Drupal::messenger()->addMessage($message, 'error');
+      Bootstrap::service('messenger')->addMessage($message, 'error');
     }
     return $this;
   }
@@ -814,7 +829,7 @@ class Element extends DrupalAttributes {
     // it can be later passed to Unicode::isSimple() if needed.
     $description = $this->hasProperty('description') ? $this->getProperty('description') : FALSE;
     if (static::isRenderArray($description)) {
-      $description = static::createStandalone($description)->renderPlain();
+      $description = static::createStandalone($description)->renderInIsolation();
     }
 
     if (

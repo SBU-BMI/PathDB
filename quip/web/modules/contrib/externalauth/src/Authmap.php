@@ -106,15 +106,17 @@ class Authmap implements AuthmapInterface {
    * {@inheritdoc}
    */
   public function getUid(string $authname, string $provider) {
-    $authname = $this->connection->select('authmap', 'am')
-      ->fields('am', ['uid'])
+    $row = $this->connection->select('authmap', 'am')
+      ->fields('am', ['uid', 'authname', 'provider'])
       ->condition('authname', $authname)
       ->condition('provider', $provider)
       ->range(0, 1)
       ->execute()
       ->fetchObject();
-    if ($authname) {
-      return $authname->uid;
+    // Defense-in-depth: reject the result unless the stored authname and
+    // provider are byte-for-byte identical to the supplied values.
+    if ($row && $row->authname === $authname && $row->provider === $provider) {
+      return $row->uid;
     }
     return FALSE;
   }

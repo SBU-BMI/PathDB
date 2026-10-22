@@ -22,7 +22,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   type = "select",
  *   weight = 1,
  *   title = @Translation("Available Versions"),
- *   description = @Translation("The length of time to cache the CDN verions before requesting them from the API again."),
+ *   description = @Translation("The length of time to cache the CDN versions before requesting them from the API again."),
  *   defaultValue = \Drupal\bootstrap\Plugin\Provider\ProviderInterface::TTL_ONE_WEEK,
  *   groups = {
  *     "cdn" = @Translation("CDN (Content Delivery Network)"),

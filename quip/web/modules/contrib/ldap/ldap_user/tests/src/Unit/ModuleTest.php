@@ -6,6 +6,7 @@ namespace Drupal\Tests\ldap_user\Unit;
 
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 require_once __DIR__ . '/../../../ldap_user.module';
@@ -15,6 +16,19 @@ require_once __DIR__ . '/../../../ldap_user.module';
  *
  * @package Drupal\Tests\ldap_user\Unit
  */
+#[CoversFunction('ldap_user_cron')]
+#[CoversFunction('ldap_user_help')]
+#[CoversFunction('ldap_user_module_implements_alter')]
+#[CoversFunction('ldap_user_user_login')]
+#[CoversFunction('ldap_user_user_insert')]
+#[CoversFunction('ldap_user_user_update')]
+#[CoversFunction('ldap_user_user_delete')]
+#[CoversFunction('ldap_user_form_user_login_block_alter')]
+#[CoversFunction('ldap_user_form_user_pass_reset_alter')]
+#[CoversFunction('ldap_user_form_user_login_form_alter')]
+#[CoversFunction('ldap_user_form_user_form_alter')]
+#[CoversFunction('ldap_user_form_password_policy_password_tab_alter')]
+#[CoversFunction('ldap_user_grab_password_validate')]
 class ModuleTest extends UnitTestCase {
 
   /**
@@ -41,8 +55,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test ldap_user_cron().
-   *
-   * @coversFunction ::ldap_user_cron
    */
   public function testLdapUserCron(): void {
     $settings = $this->createMock('Drupal\Core\Config\ImmutableConfig');
@@ -115,8 +127,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_help().
-   *
-   * @coversFunction ::ldap_user_help
    */
   public function testHookHelpRouteHelpPage(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
@@ -127,8 +137,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_module_implements_alter().
-   *
-   * @coversFunction ::ldap_user_module_implements_alter
    */
   public function testHookModuleImplementsAlter(): void {
 
@@ -149,8 +157,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_user_login().
-   *
-   * @coversFunction ::ldap_user_user_login
    */
   public function testHookUserLogin(): void {
 
@@ -168,8 +174,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_user_insert().
-   *
-   * @coversFunction ::ldap_user_user_insert
    */
   public function testHookUserInsert(): void {
     $account = $this->createMock('Drupal\user\Entity\User');
@@ -204,8 +208,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_user_update().
-   *
-   * @coversFunction ::ldap_user_user_update
    */
   public function testHookUserUpdate(): void {
     $account = $this->createMock('Drupal\user\Entity\User');
@@ -222,8 +224,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_user_delete().
-   *
-   * @coversFunction ::ldap_user_user_delete
    */
   public function testHookUserDelete(): void {
     $account = $this->createMock('Drupal\user\Entity\User');
@@ -281,8 +281,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_form_FORM_ID_alter().
-   *
-   * @coversFunction ::ldap_user_form_user_login_block_alter
    */
   public function testLdapUserFormUserLoginBlockAlter(): void {
     $form = [
@@ -300,8 +298,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_form_FORM_ID_alter().
-   *
-   * @coversFunction ::ldap_user_form_user_pass_reset_alter
    */
   public function testLdapUserFormUserPassResetAlter(): void {
     $form = [
@@ -319,8 +315,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_form_FORM_ID_alter().
-   *
-   * @coversFunction ::ldap_user_form_user_login_form_alter
    */
   public function testLdapUserFormUserLoginFormAlter(): void {
     $form = [
@@ -338,8 +332,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_form_FORM_ID_alter().
-   *
-   * @coversFunction ::ldap_user_form_user_form_alter
    */
   public function testLdapUserFormUserFormAlter(): void {
     $form = [
@@ -357,8 +349,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test hook_form_FORM_ID_alter().
-   *
-   * @coversFunction ::ldap_user_form_password_policy_password_tab_alter
    */
   public function testLdapUserFormPasswordPolicyPasswordTabAlter(): void {
     $form = [
@@ -376,8 +366,6 @@ class ModuleTest extends UnitTestCase {
 
   /**
    * Test ldap_user_grab_password_validate().
-   *
-   * @covers ::ldap_user_grab_password_validate
    */
   public function testLdapUserGrabPasswordValidateLogonForm(): void {
     $form_state = $this->createMock('Drupal\Core\Form\FormState');

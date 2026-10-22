@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\ldap_user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 require_once __DIR__ . '/../../../ldap_user.install';
 
 /**
  * Tests the installation of the module.
- *
- * @group ldap_user
  */
+#[Group('ldap_user')]
+#[RunTestsInSeparateProcesses]
 class InstallTest extends KernelTestBase {
 
   /**

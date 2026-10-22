@@ -4,7 +4,9 @@
  * Theme override to display a region.
  *
  * Available variables:
- * - content: The content for this region, typically blocks.
+ * - content: The content for this region, typically blocks: either a rendered
+ *   string or (with newer core) a render array of blocks keyed by block ID,
+ *   so test emptiness on the rendered output rather than content itself.
  * - attributes: HTML attributes for the region div.
  * - region: The name of the region variable as defined in the theme's
  *   .info.yml file.
@@ -20,8 +22,17 @@
     'region-' ~ region|clean_class,
   ]
 %}
-{% if content %}
+{#
+  Render first: the blocks may all render empty. Capture the output with
+  set/endset rather than the render filter, which before Drupal 11.2.5 casts
+  the Markup object core provides as content to a plain string that then
+  gets escaped.
+  @see https://www.drupal.org/project/drupal/issues/3178202
+  @see https://www.drupal.org/project/bootstrap/issues/3628721
+#}
+{% set rendered %}{{ content }}{% endset %}
+{% if rendered|trim is not empty %}
   <div{{ attributes.addClass(classes) }}>
-    {{ content }}
+    {{ rendered }}
   </div>
 {% endif %}

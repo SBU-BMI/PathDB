@@ -42,13 +42,11 @@ class LdapGroupManager extends LdapBaseManager {
    *   Currently set groups.
    * @param array $or_filters
    *   Filters before diving deeper.
-   * @param int $level
-   *   Last relevant nesting level.
    *
    * @return array
    *   Nested group filters.
    */
-  private function getNestedGroupDnFilters(array $all_group_dns, array $or_filters, int $level): array {
+  private function getNestedGroupDnFilters(array $all_group_dns, array $or_filters): array {
     // Example 1: (|(cn=group1)(cn=group2))
     // Example 2: (|(dn=cn=group1,ou=blah...)(dn=cn=group2,ou=blah...))
     $or_filter = sprintf('(|(%s))', implode(')(', $or_filters));
@@ -66,10 +64,8 @@ class LdapGroupManager extends LdapBaseManager {
         ]);
         continue;
       }
-      if ($level < self::LDAP_QUERY_RECURSION_LIMIT && $ldap_result->count() > 0) {
-        $tested_group_ids = [];
-        $this->groupMembershipsFromEntryRecursive($ldap_result, $all_group_dns, $tested_group_ids, $level + 1, self::LDAP_QUERY_RECURSION_LIMIT);
-      }
+      $tested_group_ids = [];
+      $this->groupMembershipsFromEntryRecursive($ldap_result, $all_group_dns, $tested_group_ids, 1, self::LDAP_QUERY_RECURSION_LIMIT);
     }
     return $all_group_dns;
   }
@@ -516,7 +512,6 @@ class LdapGroupManager extends LdapBaseManager {
       return [];
     }
 
-    $level = 0;
     $all_group_dns = [];
     $members_group_dns = $ldap_entry->getAttribute($group_attribute, FALSE);
     $orFilters = [];
@@ -534,7 +529,7 @@ class LdapGroupManager extends LdapBaseManager {
     }
 
     if ($this->server->get('grp_nested') && count($orFilters)) {
-      $all_group_dns = $this->getNestedGroupDnFilters($all_group_dns, $orFilters, $level);
+      $all_group_dns = $this->getNestedGroupDnFilters($all_group_dns, $orFilters);
     }
 
     return $all_group_dns;
@@ -561,7 +556,6 @@ class LdapGroupManager extends LdapBaseManager {
 
     // Array of dns already tested to avoid excess queries MIXED CASE VALUES.
     $tested_group_ids = [];
-    $level = 0;
 
     if ($this->server->get('grp_memb_attr_match_user_attr') === 'dn') {
       $member_value = $ldap_entry->getDn();
@@ -586,10 +580,8 @@ class LdapGroupManager extends LdapBaseManager {
         continue;
       }
 
-      if ($ldap_result->count() > 0) {
-        $maxLevels = $this->server->get('grp_nested') ? self::LDAP_QUERY_RECURSION_LIMIT : 0;
-        $this->groupMembershipsFromEntryRecursive($ldap_result, $all_group_dns, $tested_group_ids, $level, $maxLevels);
-      }
+      $maxLevels = $this->server->get('grp_nested') ? self::LDAP_QUERY_RECURSION_LIMIT : 1;
+      $this->groupMembershipsFromEntryRecursive($ldap_result, $all_group_dns, $tested_group_ids, 1, $maxLevels);
     }
     return $all_group_dns;
   }
@@ -649,6 +641,12 @@ class LdapGroupManager extends LdapBaseManager {
       }
     }
 
+    // Increase the level here because the deeper query is executed next.
+    $level = $level + 1;
+    if ($level > $max_levels) {
+      return TRUE;
+    }
+
     if (!empty($or_filters)) {
       // Example 1: (|(cn=group1)(cn=group2))
       // Example 2: (|(dn=cn=group1,ou=blah...)(dn=cn=group2,ou=blah...))
@@ -668,15 +666,13 @@ class LdapGroupManager extends LdapBaseManager {
           continue;
         }
 
-        if ($level < $max_levels && $ldap_result->count() > 0) {
-          $this->groupMembershipsFromEntryRecursive(
-            $ldap_result,
-            $all_group_dns,
-            $tested_group_ids,
-            $level + 1,
-            $max_levels
-          );
-        }
+        $this->groupMembershipsFromEntryRecursive(
+          $ldap_result,
+          $all_group_dns,
+          $tested_group_ids,
+          $level,
+          $max_levels
+        );
       }
     }
     return TRUE;

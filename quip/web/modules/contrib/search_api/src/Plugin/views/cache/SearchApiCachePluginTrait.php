@@ -155,6 +155,9 @@ trait SearchApiCachePluginTrait {
     // restore them afterwards. (In 99% of cases both values will just be
     // $this->view but better to be extra-careful.)
     $search_api_query = $query->getSearchApiQuery();
+    if (!$search_api_query) {
+      return;
+    }
     $view_in_query = $search_api_query->setOption('search_api_view', NULL);
     $view_in_query_original = $search_api_query->getOriginalQuery()->setOption('search_api_view', NULL);
 

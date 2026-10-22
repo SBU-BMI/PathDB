@@ -7,7 +7,6 @@ namespace Drupal\views_bulk_operations\Drush\Commands;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\user\UserStorageInterface;
 use Drupal\views\Views;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsActionCompletedTrait;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionManager;
@@ -30,11 +29,6 @@ final class ViewsBulkOperationsCommands extends DrushCommands {
   use AutowireTrait;
 
   /**
-   * The user storage.
-   */
-  protected UserStorageInterface $userStorage;
-
-  /**
    * ViewsBulkOperationsCommands object constructor.
    *
    * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
@@ -48,12 +42,11 @@ final class ViewsBulkOperationsCommands extends DrushCommands {
    */
   public function __construct(
     private readonly AccountProxyInterface $currentUser,
-    EntityTypeManagerInterface $entityTypeManager,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly ViewsBulkOperationsViewDataInterface $viewData,
     private readonly ViewsBulkOperationsActionManager $actionManager,
   ) {
     parent::__construct();
-    $this->userStorage = $entityTypeManager->getStorage('user');
   }
 
   /**
@@ -132,7 +125,7 @@ final class ViewsBulkOperationsCommands extends DrushCommands {
 
     // Login as the provided user, as drush 9+ doesn't support the
     // --user parameter. Default: user 1.
-    $account = $this->userStorage->load($options['user-id']);
+    $account = $this->entityTypeManager->getStorage('user')->load($options['user-id']);
     $this->currentUser->setAccount($account);
 
     // Initialize the view to check if parameters are correct.

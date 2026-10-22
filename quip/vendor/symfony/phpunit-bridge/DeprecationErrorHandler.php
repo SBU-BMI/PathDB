@@ -171,13 +171,6 @@ class DeprecationErrorHandler
             exit(1);
         }
 
-        if (\PHP_VERSION_ID >= 80500 && \in_array($msg, [
-            'The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)',
-            'The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary)',
-        ], true)) {
-            return null;
-        }
-
         if ('legacy' === $group) {
             $this->deprecationGroups[$group]->addNotice();
         } elseif ($deprecation->originatesFromAnObject()) {
@@ -377,8 +370,12 @@ class DeprecationErrorHandler
                 $eh = self::$errorHandler = UtilErrorHandler::class;
             } elseif (method_exists(ErrorHandler::class, '__invoke')) {
                 $eh = self::$errorHandler = ErrorHandler::class;
-            } else {
+            } elseif (method_exists(UtilErrorHandler::class, 'handleError')) {
                 return self::$errorHandler = 'PHPUnit\Util\ErrorHandler::handleError';
+            } else {
+                // PHPUnit is not loadable in this process, so there is no handler to
+                // delegate to; leave the error to PHP
+                return static function () { return false; };
             }
         }
 

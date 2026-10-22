@@ -16,7 +16,7 @@ use Drupal\bootstrap\Plugin\Setting\DeprecatedSettingInterface;
 use Drupal\bootstrap\Plugin\Setting\SettingInterface;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
-use Drupal\Core\Serialization\Yaml;
+use Drupal\Component\Serialization\Yaml;
 
 $kernel = require_once __DIR__ . '/bootstrap.php';
 

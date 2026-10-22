@@ -17,31 +17,23 @@ class EasyBreadcrumbStructuredDataJsonLd implements ContainerInjectionInterface 
 
   /**
    * The Easy Breadcrumb builder.
-   *
-   * @var \Drupal\easy_breadcrumb\EasyBreadcrumbBuilder
    */
-  protected $easyBreadcrumbBuilder;
+  protected EasyBreadcrumbBuilder $easyBreadcrumbBuilder;
 
   /**
    * The config factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * The route match.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
    */
-  protected $routeMatch;
+  protected RouteMatchInterface $routeMatch;
 
   /**
    * The module handler to invoke the alter hook.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
-  protected $moduleHandler;
+  protected ModuleHandlerInterface $moduleHandler;
 
   /**
    * EasyBreadcrumbStructuredDataJsonLd constructor.

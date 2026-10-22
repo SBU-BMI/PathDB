@@ -22,12 +22,25 @@ trait ViewsBulkOperationsTempstoreTrait {
   protected string $tempStoreName;
 
   /**
-   * Initialize the current view tempstore object.
+   * Gets the current view tempstore object, initializing it if needed.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the tempstore isn't initialized yet and either
+   *   $view_id or $display_id is NULL.
    */
   protected function getTempstore(?string $view_id = NULL, ?string $display_id = NULL): PrivateTempStore {
-    if ($this->viewTempstore === NULL) {
-      $this->tempStoreName = 'views_bulk_operations_' . $view_id . '_' . $display_id;
-      $this->viewTempstore = $this->tempStoreFactory->get($this->tempStoreName);
+    if ($this->viewTempstore === NULL && ($view_id === NULL || $display_id === NULL)) {
+      throw new \InvalidArgumentException('Both $view_id and $display_id must be provided when initializing the tempstore.');
+    }
+
+    // Only recompute the tempstore name when both IDs are given.
+    // Calls with NULL args reuse the already-initialized tempstore.
+    if ($view_id !== NULL && $display_id !== NULL) {
+      $tempStoreName = 'views_bulk_operations_' . $view_id . '_' . $display_id;
+      if ($this->viewTempstore === NULL || $this->tempStoreName !== $tempStoreName) {
+        $this->tempStoreName = $tempStoreName;
+        $this->viewTempstore = $this->tempStoreFactory->get($this->tempStoreName);
+      }
     }
     return $this->viewTempstore;
   }

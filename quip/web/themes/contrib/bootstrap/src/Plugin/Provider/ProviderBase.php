@@ -209,6 +209,8 @@ class ProviderBase extends PluginBase implements ProviderInterface {
     $assets = [];
 
     // Convert the deprecated array structure into a proper CdnAssets object.
+    // This compatibility bridge is intentionally retained until Bootstrap 4.x.
+    // @phpstan-ignore-next-line
     $data = $this->getAssets();
     foreach (['css', 'js'] as $type) {
       if (isset($data[$type])) {
@@ -324,8 +326,8 @@ class ProviderBase extends PluginBase implements ProviderInterface {
     return [
       'ttl' => $this->getCacheTtl(static::CACHE_LIBRARY),
       'min' => [
-        'css' => !!\Drupal::config('system.performance')->get('css.preprocess'),
-        'js' => !!\Drupal::config('system.performance')->get('js.preprocess'),
+        'css' => !!Bootstrap::service('config.factory')->get('system.performance')->get('css.preprocess'),
+        'js' => !!Bootstrap::service('config.factory')->get('system.performance')->get('js.preprocess'),
       ],
       'provider' => $this->pluginId,
       'version' => $version,
@@ -449,7 +451,7 @@ class ProviderBase extends PluginBase implements ProviderInterface {
    */
   protected function getKeyValue() {
     if (!isset($this->keyValue)) {
-      $this->keyValue = \Drupal::keyValue($this->getCacheId());
+      $this->keyValue = Bootstrap::keyValue($this->getCacheId());
     }
     return $this->keyValue;
   }
@@ -462,7 +464,7 @@ class ProviderBase extends PluginBase implements ProviderInterface {
    */
   protected function getKeyValueExpirable() {
     if (!isset($this->keyValueExpirable)) {
-      $this->keyValueExpirable = \Drupal::keyValueExpirable($this->getCacheId());
+      $this->keyValueExpirable = Bootstrap::keyValueExpirable($this->getCacheId());
     }
     return $this->keyValueExpirable;
   }
@@ -530,7 +532,7 @@ class ProviderBase extends PluginBase implements ProviderInterface {
     // Invalidate library info if this provider is the one currently used.
     if ($this->theme->getCdnProvider()->getPluginId() === $this->pluginId) {
       /** @var \Drupal\Core\Cache\CacheTagsInvalidatorInterface $invalidator */
-      $invalidator = \Drupal::service('cache_tags.invalidator');
+      $invalidator = Bootstrap::service('cache_tags.invalidator');
       $invalidator->invalidateTags(['library_info']);
     }
   }
@@ -649,7 +651,7 @@ class ProviderBase extends PluginBase implements ProviderInterface {
         $fileSystem->prepareDirectory($provider_path, $options);
       }
       else {
-        \Drupal::service('file_system')->prepareDirectory($provider_path, $options);
+        Bootstrap::service('file_system')->prepareDirectory($provider_path, $options);
       }
 
       // Use manually imported API data, if it exists.

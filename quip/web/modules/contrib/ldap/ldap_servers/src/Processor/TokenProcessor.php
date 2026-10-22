@@ -197,7 +197,7 @@ class TokenProcessor {
    *   Entry.
    * @param string $required_token
    *   What was given as replacement pattern. For example 'dn', 'mail:0',
-   *   'mail:last', or 'guid:0;tobase64'.
+   *   'mail:last', or 'guid:0;base64_encode'.
    */
   private function processLdapTokenKey(Entry $entry, string $required_token): void {
     // Trailing period to allow for empty value.

@@ -6,6 +6,7 @@ namespace Drupal\views_bulk_operations\Plugin\Action;
 
 use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -25,6 +26,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: 'user'
 )]
 class CancelUserAction extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
+
+  // Lets __wakeup() initialize readonly properties on PHP < 8.4.
+  use DependencySerializationTrait;
 
   /**
    * Object constructor.

@@ -6,14 +6,15 @@ namespace Drupal\Tests\ldap_authentication\Unit\Plugin\Derivative;
 
 use Drupal\ldap_authentication\Plugin\Derivative\DynamicUserHelpLink;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Dynamic user help link test.
- *
- * @group ldap_authentication
- * @coversDefaultClass \Drupal\ldap_authentication\Plugin\Derivative\DynamicUserHelpLink
  */
+#[Group('ldap_authentication')]
+#[CoversClass(DynamicUserHelpLink::class)]
 class DynamicUserHelpLinkTest extends UnitTestCase {
 
   /**
@@ -39,8 +40,6 @@ class DynamicUserHelpLinkTest extends UnitTestCase {
 
   /**
    * {@inheritdoc}
-   *
-   * @covers ::create
    */
   protected function setUp(): void {
     parent::setUp();
@@ -57,8 +56,6 @@ class DynamicUserHelpLinkTest extends UnitTestCase {
 
   /**
    * Test getDerivativeDefinitions.
-   *
-   * @covers ::getDerivativeDefinitions
    */
   public function testGetDerivativeDefinitions(): void {
     $this->configFactory->expects($this->once())
@@ -84,12 +81,15 @@ class DynamicUserHelpLinkTest extends UnitTestCase {
 
   /**
    * Test create.
-   *
-   * @covers ::create
-   * @covers ::__construct
    */
   public function testCreate(): void {
+    $this->configFactory->expects($this->once())
+      ->method('get')
+      ->with('ldap_authentication.settings')
+      ->willReturn($this->config);
+
     $derivative = DynamicUserHelpLink::create(\Drupal::getContainer(), 'dynamic_user_help_link');
+    $this->assertInstanceOf(DynamicUserHelpLink::class, $derivative);
   }
 
 }

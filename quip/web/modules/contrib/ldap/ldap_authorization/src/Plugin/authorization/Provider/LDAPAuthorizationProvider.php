@@ -336,34 +336,37 @@ class LDAPAuthorizationProvider extends ProviderPluginBase {
    */
   public function filterProposals(array $proposedLdapAuthorizations, array $providerMapping): array {
     $filtered_proposals = [];
-    foreach ($proposedLdapAuthorizations as $key => $value) {
-      if ($providerMapping['is_regex']) {
-        $pattern = $providerMapping['query'];
-        try {
-          if (preg_match($pattern, $value, $matches)) {
-            // If there is a sub-pattern then return the first one.
-            // Named sub-patterns not supported.
-            if (count($matches) > 1) {
-              $filtered_proposals[$key] = $matches[1];
-            }
-            elseif (count($matches) === 1) {
-              $filtered_proposals[$key] = $matches[0];
-            }
-            else {
-              // @todo I do not think this line can be executed.
-              $filtered_proposals[$key] = $value;
-            }
+    if ($providerMapping['is_regex']) {
+      $pattern = $providerMapping['query'];
+      if (@preg_match($pattern, '') === FALSE) {
+        $this->logger
+          ->error('Error in matching regular expression @regex',
+            ['@regex' => $pattern]
+          );
+        return [];
+      }
+      foreach ($proposedLdapAuthorizations as $key => $value) {
+        if (preg_match($pattern, $value, $matches)) {
+          // If there is a sub-pattern then return the first one.
+          // Named sub-patterns not supported.
+          if (count($matches) > 1) {
+            $filtered_proposals[$key] = $matches[1];
+          }
+          elseif (count($matches) === 1) {
+            $filtered_proposals[$key] = $matches[0];
+          }
+          else {
+            // @todo I do not think this line can be executed.
+            $filtered_proposals[$key] = $value;
           }
         }
-        catch (\Exception $e) {
-          $this->logger
-            ->error('Error in matching regular expression @regex',
-              ['@regex' => $pattern]
-            );
-        }
       }
-      elseif (mb_strtolower($value) === mb_strtolower($providerMapping['query'])) {
-        $filtered_proposals[$key] = $value;
+    }
+    else {
+      foreach ($proposedLdapAuthorizations as $key => $value) {
+        if (mb_strtolower($value) === mb_strtolower($providerMapping['query'])) {
+          $filtered_proposals[$key] = $value;
+        }
       }
     }
     return $filtered_proposals;

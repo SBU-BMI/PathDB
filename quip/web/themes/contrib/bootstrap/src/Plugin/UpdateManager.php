@@ -18,20 +18,15 @@ class UpdateManager extends PluginManager {
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
+    parent::__construct($theme, 'Plugin/Update', 'Drupal\bootstrap\Plugin\Update\UpdateInterface', 'Drupal\bootstrap\Annotation\BootstrapUpdate');
+
     // Unlike other plugins in this base theme, this one should only discover
     // update plugins that are unique to its own theme to avoid plugin ID
     // collision (e.g. base and sub-theme both implement an update plugin
     // with the id "8001").
     $this->namespaces = new \ArrayObject(['Drupal\\' . $theme->getName() => [DRUPAL_ROOT . '/' . $theme->getPath() . '/src']]);
-
-    $this->theme = $theme;
-    $this->subdir = 'Plugin/Update';
-    $this->pluginDefinitionAnnotationName = 'Drupal\bootstrap\Annotation\BootstrapUpdate';
-    $this->pluginInterface = 'Drupal\bootstrap\Plugin\Update\UpdateInterface';
-    $this->themeHandler = \Drupal::service('theme_handler');
-    $this->themeManager = \Drupal::service('theme.manager');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':update', $this->getCacheTags());
   }
 
   /**

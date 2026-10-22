@@ -7,12 +7,14 @@ use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Orphan processor test.
- *
- * @group ldap_user
  */
+#[Group('ldap_user')]
+#[RunTestsInSeparateProcesses]
 class OrphanProcessorTest extends EntityKernelTestBase {
 
   /**

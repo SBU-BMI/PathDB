@@ -2,6 +2,7 @@
 
 namespace Drupal\bootstrap\Plugin\Preprocess;
 
+use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Utility\Variables;
 
 /**
@@ -32,7 +33,7 @@ class Table extends PreprocessBase {
 
     // Responsive.
     $responsive = $variables->getContext('responsive', $this->theme->getSetting('table_responsive'));
-    $variables['responsive'] = $responsive == -1 ? !\Drupal::service('router.admin_context')->isAdminRoute() : !!(int) $responsive;
+    $variables['responsive'] = $responsive == -1 ? !Bootstrap::service('router.admin_context')->isAdminRoute() : !!(int) $responsive;
   }
 
 }

@@ -13,11 +13,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 class AuthenticationServers {
 
   /**
-   * Entity Storage.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $storage;
+  protected $entityTypeManager;
 
   /**
    * Config.
@@ -35,8 +35,8 @@ class AuthenticationServers {
    *   Config factory.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory) {
-    $this->storage = $entity_type_manager->getStorage('ldap_server');
-    $this->config = $config_factory->get('ldap_authentication.settings');
+    $this->entityTypeManager = $entity_type_manager;
+    $this->config            = $config_factory->get('ldap_authentication.settings');
   }
 
   /**
@@ -61,7 +61,8 @@ class AuthenticationServers {
    */
   public function getAvailableAuthenticationServers(): array {
     /** @var array $available_servers */
-    $available_servers = $this->storage
+    $available_servers = $this->entityTypeManager
+      ->getStorage('ldap_server')
       ->getQuery()
       ->accessCheck(FALSE)
       ->condition('status', 1)

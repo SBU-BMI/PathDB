@@ -11,6 +11,7 @@ use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Utility\Utility;
 use Drupal\search_api_test_extraction\Plugin\search_api\processor\TestAddPropertiesProcessor;
+use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -102,7 +103,7 @@ class FieldValuesExtractionTest extends KernelTestBase {
     ]);
     $this->entities[2]->save();
 
-    user_role_grant_permissions('anonymous', ['view test entity']);
+    Role::load(Role::ANONYMOUS_ID)->grantPermission('view test entity')->save();
 
     User::create([
       'id' => $this->entities[0],
@@ -311,7 +312,7 @@ class FieldValuesExtractionTest extends KernelTestBase {
   public function testNestedComplexFieldValuesExtraction() {
     // Complex data definition structure.
 
-    // phpcs:disable Drupal.Commenting.InlineComment.NotCapital
+    // phpcs:disable Drupal.Commenting.InlineComment.NotCapital,Drupal.Commenting.InlineComment.SpacingBefore
     // data => ListDataDefinition (list) [
     //   itemDefinition => ComplexDataDefinition (map) [
     //     propertyDefinitions => [

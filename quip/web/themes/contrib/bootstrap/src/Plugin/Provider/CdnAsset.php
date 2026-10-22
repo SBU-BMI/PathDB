@@ -8,7 +8,6 @@ use Drupal\bootstrap\Utility\Unicode;
 use Drupal\Component\Render\HtmlEscapedText;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Component\Utility\ToStringTrait;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -17,9 +16,15 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  */
 class CdnAsset {
 
+  /**
+   *
+   */
+  public function __toString(): string {
+    return (string) $this->render();
+  }
+
   use StringTranslationTrait;
   use DependencySerializationTrait;
-  use ToStringTrait;
 
   /**
    * Invalid asset regular expression.
@@ -168,9 +173,10 @@ class CdnAsset {
     elseif (strpos($url, 'entreprise7pro-boot')) {
       // Force an upgrade for everyone using older versions of the bootstrap library.
       if (version_compare($version, '3.4.1', '<=')) {
-        // Fix CVE-2024-6485 see release https://github.com/entreprise7pro/bootstrap/releases/tag/v3.4.6.
-        // 3.4.8 is compatible with jQuery 1,2,3 and 4, good D10 and D11.
-        $version = '3.4.8';
+        // Fix CVE-2024-6485 see release https://github.com/entreprise7pro/bootstrap/releases/tag/v3.4.10.
+        // Fix GHSA-v5fj-6x9j-fhjm https://github.com/entreprise7pro/bootstrap/security/advisories/GHSA-v5fj-6x9j-fhjm see latest.
+        // 3.4.10 is compatible with jQuery 1,2,3 and 4, good D10 and D11 and D12.
+        $version = '3.4.10';
       }
     }
 

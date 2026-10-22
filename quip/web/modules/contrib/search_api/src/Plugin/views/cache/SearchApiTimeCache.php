@@ -31,7 +31,7 @@ class SearchApiTimeCache extends Time {
   use SearchApiCachePluginTrait;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getCacheTags(): array {
     // The time-based cache ignores all tag-based invalidation except if the

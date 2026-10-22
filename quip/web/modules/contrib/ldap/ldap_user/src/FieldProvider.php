@@ -150,8 +150,8 @@ class FieldProvider implements LdapUserAttributesInterface {
         $label = $this->attributes[$mapping['user_attr']]->getLabel();
       }
       $prepared_mapping = new Mapping(
-        $id,
-        $label ?? $id,
+        (string) $id,
+        $label ?? (string) $id,
         TRUE,
         TRUE,
         $mapping['prov_events'],

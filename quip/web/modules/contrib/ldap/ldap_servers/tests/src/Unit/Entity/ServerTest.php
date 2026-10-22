@@ -6,13 +6,13 @@ namespace Drupal\Tests\ldap_servers\Unit\Entity;
 
 use Drupal\ldap_servers\Entity\Server;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Server entity tests.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class ServerTest extends UnitTestCase {
 
   /**

@@ -19,9 +19,9 @@ class PrerenderManager extends PluginManager implements TrustedCallbackInterface
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Prerender', 'Drupal\bootstrap\Plugin\Prerender\PrerenderInterface', 'Drupal\bootstrap\Annotation\BootstrapPrerender');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':prerender', $this->getCacheTags());
   }
 
   /**

@@ -373,6 +373,14 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       $built_query->condition($base_field_alias, $base_field_values, 'IN');
     }
 
+    // The count query is built separately from the row query, so it needs
+    // the same restriction, otherwise get_total_rows reflects the whole
+    // (unfiltered) view instead of the current selection.
+    $count_query = $this->view->build_info['count_query'] ?? NULL;
+    if ($count_query instanceof SelectInterface) {
+      $count_query->condition($base_field_alias, $base_field_values, 'IN');
+    }
+
     // Use a different pager ID so we don't break the real pager.
     // @todo Check if we can use something else to set this value.
     $pager = $this->view->getPager();

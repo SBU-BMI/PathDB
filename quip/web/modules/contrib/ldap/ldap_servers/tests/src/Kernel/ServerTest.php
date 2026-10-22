@@ -6,13 +6,15 @@ namespace Drupal\Tests\ldap_servers\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ldap_servers\Entity\Server;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Ldap\Entry;
 
 /**
  * Server tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class ServerTest extends KernelTestBase {
 
   /**
@@ -96,7 +98,7 @@ class ServerTest extends KernelTestBase {
       'student' => [0 => 1],
       'gpa' => [0 => '3.8'],
       'probation' => [0 => 1],
-      'password' => [0 => 'goodpwd'],
+      'password' => [0 => 'good_password'],
     ]);
 
     self::assertEquals('hpotter', $this->server->deriveUsernameFromLdapResponse($userOpenLdap));

@@ -38,7 +38,26 @@ or the markdown files inside the `./docs` directory.
 - [Views](https://www.drupal.org/project/views) _(partial support)_
 - [Webform](https://www.drupal.org/project/webform) _(partial support)_
 
-### 5 Year Evolution (gource)
+### 5 Year Evolution (source)
 https://youtu.be/Cvq6MPJp2dI
 
 [Bootstrap Framework]: https://getbootstrap.com/docs/3.4/
+
+### JavaScript regression tests
+
+Run the dependency-free JavaScript regression suite using Node.js 22:
+
+```bash
+node --test tests/js/*.test.cjs
+```
+
+These tests run the theme's actual JavaScript in isolated contexts with small
+Drupal, jQuery, and DOM test doubles. They cover attributes, Bootstrap plugin
+extension, modal/dialog callbacks, AJAX, autocomplete, dropdowns, tooltips,
+popovers, forms, message markup, progress bars, Views, and batch processing.
+The `js-regression` GitLab CI job runs the same command.
+
+The doubles test integration contracts and behavior, **not** actual browser
+rendering. Keep DrupalCI's existing Nightwatch and PHP tests for real-browser
+and Drupal integration validation; visually smoke-test modal, AJAX and admin
+interactions when changing their implementations.

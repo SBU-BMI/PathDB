@@ -5,7 +5,7 @@ core_version_requirement: ^9.3 || ^10 || ^11
 package: Testing
 hidden: true
 
-# Information added by Drupal.org packaging script on 2024-09-18
-version: '8.x-4.12'
+# Information added by Drupal.org packaging script on 2026-08-30
+version: '8.x-4.13'
 project: 'ldap'
-datestamp: 1726683621
+datestamp: 1788106644

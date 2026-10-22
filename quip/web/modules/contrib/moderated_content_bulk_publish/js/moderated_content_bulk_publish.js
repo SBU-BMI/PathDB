@@ -19,7 +19,7 @@
               var action = $('#edit-action option:selected').text();
               var prompt = Drupal.t('Are you sure you want to ') + action.toLowerCase() + "?<br/><br/>" + titles[0];
               if (cnt > 1) {
-                prompt += "<br/><br/>+ " + (cnt-1) + ' more';
+                prompt += "<br/><br/>" + Drupal.t('+ @count more', {'@count': (cnt-1)});
               }
               // Build a Drupal modal dialog window.
               var content  = '<div><p id="version-confirm-form-text">' + prompt + '</p></div>';

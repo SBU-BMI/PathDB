@@ -33,6 +33,13 @@ class ContentAccessTest extends ProcessorTestBase {
   use ResultsTrait;
 
   /**
+   * {@inheritdoc}
+   */
+  protected static $modules = [
+    'filter',
+  ];
+
+  /**
    * The nodes created for testing.
    *
    * @var \Drupal\node\Entity\Node[]
@@ -140,8 +147,11 @@ class ContentAccessTest extends ProcessorTestBase {
    * Tests searching when content is accessible to all.
    */
   public function testQueryAccessAll() {
-    $permissions = ['access content', 'access comments'];
-    user_role_grant_permissions('anonymous', $permissions);
+    // @todo Use Role::grantPermissions() once we depend on Drupal 11.5.
+    Role::load(Role::ANONYMOUS_ID)
+      ->grantPermission('access content')
+      ->grantPermission('access comments')
+      ->save();
     $this->index->reindex();
     $this->indexItems();
     $this->assertEquals(5, $this->index->getTrackerInstance()->getIndexedItemsCount(), '5 items indexed, as expected.');
@@ -163,7 +173,7 @@ class ContentAccessTest extends ProcessorTestBase {
    * Tests searching when only comments are accessible.
    */
   public function testQueryAccessComments() {
-    user_role_grant_permissions('anonymous', ['access comments']);
+    Role::load(Role::ANONYMOUS_ID)->grantPermission('access comments')->save();
     $this->index->reindex();
     $this->indexItems();
     $this->assertEquals(5, $this->index->getTrackerInstance()->getIndexedItemsCount(), '5 items indexed, as expected.');
@@ -285,7 +295,7 @@ class ContentAccessTest extends ProcessorTestBase {
 
     // After granting the "view any unpublished content", the same query should
     // return all three nodes.
-    user_role_grant_permissions('role', ['view any unpublished content']);
+    Role::load('role')->grantPermission('view any unpublished content')->save();
     $result = $query->getOriginalQuery()->execute();
     $this->assertEquals(3, $result->getResultCount());
   }
@@ -305,7 +315,11 @@ class ContentAccessTest extends ProcessorTestBase {
       $grants_storage->write($node, $grants);
     }
 
-    user_role_grant_permissions('anonymous', ['access content', 'access comments']);
+    // @todo Use Role::grantPermissions() once we depend on Drupal 11.5.
+    Role::load(Role::ANONYMOUS_ID)
+      ->grantPermission('access content')
+      ->grantPermission('access comments')
+      ->save();
     $items = [];
     foreach ($this->comments as $comment) {
       $items[] = [
@@ -434,8 +448,11 @@ class ContentAccessTest extends ProcessorTestBase {
    */
   protected function createUser(array $permissions) {
     $role = Role::create(['id' => 'role', 'label' => 'Role test']);
+    // @todo Use Role::grantPermissions() once we depend on Drupal 11.5.
+    foreach ($permissions as $permission) {
+      $role->grantPermission($permission);
+    }
     $role->save();
-    user_role_grant_permissions($role->id(), $permissions);
 
     $values = [
       'uid' => 2,

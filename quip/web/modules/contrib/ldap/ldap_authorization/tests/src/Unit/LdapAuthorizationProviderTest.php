@@ -7,13 +7,13 @@ namespace Drupal\Tests\ldap_authorization\Unit;
 use Drupal\Core\Form\FormState;
 use Drupal\ldap_authorization\Plugin\authorization\Provider\LDAPAuthorizationProvider;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Authorization provider tests.
- *
- * @group authorization
  */
+#[Group('authorization')]
 class LdapAuthorizationProviderTest extends UnitTestCase {
 
   /**
@@ -31,11 +31,11 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
   protected $profile;
 
   /**
-   * Storage.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
-  protected $storage;
+  protected $entityTypeManager;
 
   /**
    * Messenger.
@@ -83,13 +83,11 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
     $string_translation = $this->getStringTranslationStub();
     $container->set('string_translation', $string_translation);
 
-    $this->storage = $this->createMock('Drupal\Core\Config\Entity\ConfigEntityStorageInterface');
-
-    $entity_type_manager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
-    $entity_type_manager->method('getStorage')
+    $this->entityTypeManager = $this->createMock('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->entityTypeManager->method('getStorage')
       ->with('ldap_server')
-      ->willReturn($this->storage);
-    $container->set('entity_type.manager', $entity_type_manager);
+      ->willReturn($this->createMock('Drupal\Core\Config\Entity\ConfigEntityStorageInterface'));
+    $container->set('entity_type.manager', $this->entityTypeManager);
 
     $this->ldapDrupalUserProcessor = $this->createMock('Drupal\ldap_user\Processor\DrupalUserProcessor');
     $container->set('ldap.drupal_user_processor', $this->ldapDrupalUserProcessor);
@@ -348,7 +346,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
     $this->profile->expects($this->exactly(2))
       ->method('getConsumer')
       ->willReturn($consumer);
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('loadMultiple')
       ->willReturn([]);
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
@@ -372,7 +370,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
       ->method('getConsumer')
       ->willReturn($consumer);
     $server = $this->createMock('Drupal\ldap_servers\Entity\Server');
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('loadMultiple')
       ->willReturn([$server]);
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
@@ -397,7 +395,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
       ->willReturn($consumer);
     $server_a = $this->createMock('Drupal\ldap_servers\Entity\Server');
     $server_b = $this->createMock('Drupal\ldap_servers\Entity\Server');
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('loadMultiple')
       ->willReturn([$server_a, $server_b]);
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
@@ -425,7 +423,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
       ->willReturn(['status' => ['server' => 'server_a']]);
     $server_a = $this->createMock('Drupal\ldap_servers\Entity\Server');
     $server_b = $this->createMock('Drupal\ldap_servers\Entity\Server');
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('loadMultiple')
       ->willReturn(['server_a' => $server_a, 'server_b' => $server_b]);
     $form_state = $this->createMock('Drupal\Core\Form\FormStateInterface');
@@ -490,7 +488,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
     $server_a->expects($this->once())
       ->method('status')
       ->willReturn(FALSE);
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('server_a')
       ->willReturn($server_a);
@@ -526,7 +524,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
     $server_a->expects($this->once())
       ->method('status')
       ->willReturn(TRUE);
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('server_a')
       ->willReturn($server_a);
@@ -573,7 +571,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
     $server_a->expects($this->once())
       ->method('status')
       ->willReturn(TRUE);
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('server_a')
       ->willReturn($server_a);
@@ -636,7 +634,7 @@ class LdapAuthorizationProviderTest extends UnitTestCase {
     $server_a->expects($this->once())
       ->method('status')
       ->willReturn(TRUE);
-    $this->storage->expects($this->once())
+    $this->entityTypeManager->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('server_a')
       ->willReturn($server_a);

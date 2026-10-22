@@ -32,9 +32,9 @@ class ProviderManager extends PluginManager implements FallbackPluginManagerInte
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Provider', 'Drupal\bootstrap\Plugin\Provider\ProviderInterface', 'Drupal\bootstrap\Annotation\BootstrapProvider');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':provider', $this->getCacheTags());
   }
 
   /**
@@ -67,6 +67,9 @@ class ProviderManager extends PluginManager implements FallbackPluginManagerInte
     parent::processDefinition($definition, $plugin_id);
     /** @var \Drupal\bootstrap\Plugin\Provider\ProviderInterface $provider */
     $provider = new $definition['class'](['theme' => $this->theme], $plugin_id, $definition);
+    // Legacy provider implementations may still override this deprecated
+    // extension point, so retain the call until Bootstrap 4.x.
+    // @phpstan-ignore-next-line
     $provider->processDefinition($definition, $plugin_id);
   }
 

@@ -6,12 +6,12 @@ namespace Drupal\Tests\ldap_query\Unit;
 
 use Drupal\ldap_query\Plugin\views\query\LdapQuery;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test multidimensional sorting.
- *
- * @group ldap_query
  */
+#[Group('ldap_query')]
 class ViewsSortTest extends UnitTestCase {
 
   /**

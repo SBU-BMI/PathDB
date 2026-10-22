@@ -17,9 +17,9 @@ class PreprocessManager extends PluginManager {
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Preprocess', 'Drupal\bootstrap\Plugin\Preprocess\PreprocessInterface', 'Drupal\bootstrap\Annotation\BootstrapPreprocess');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':preprocess', $this->getCacheTags());
   }
 
 }

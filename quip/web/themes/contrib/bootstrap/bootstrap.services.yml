@@ -1,0 +1,5 @@
+
+services:
+  Drupal\bootstrap\Hook\IconsHooks:
+    class: Drupal\bootstrap\Hook\IconsHooks
+    autowire: true

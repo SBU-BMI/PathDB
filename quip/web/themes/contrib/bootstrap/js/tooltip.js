@@ -41,7 +41,14 @@ var Drupal = Drupal || {};
       var elements = $(context).find('[data-toggle="tooltip"]').toArray();
       for (var i = 0; i < elements.length; i++) {
         var $element = $(elements[i]);
-        var options = $.extend({}, $.fn.tooltip.Constructor.DEFAULTS, $element.data());
+        // Bootstrap rejects sanitizer overrides read directly from data-*.
+        // Apply the same restriction before supplying data as explicit options.
+        // Only strip untrusted data so trusted plugin defaults are preserved.
+        var data = $.extend({}, $element.data());
+        delete data.sanitize;
+        delete data.sanitizeFn;
+        delete data.whiteList;
+        var options = $.extend({}, $.fn.tooltip.Constructor.DEFAULTS, data);
         $element.tooltip(options);
       }
     },

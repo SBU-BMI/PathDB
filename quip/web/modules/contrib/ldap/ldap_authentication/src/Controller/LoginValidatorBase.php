@@ -570,16 +570,20 @@ abstract class LoginValidatorBase implements LdapUserAttributesInterface, LoginV
       $authorizations = $this->authorizationManager->getProcessedAuthorizations();
       $this->authorizationManager->clearAuthorizations();
 
-      $valid_profile = FALSE;
+      if (!$authorizations) {
+        $this->messenger->addWarning($this->t('The site logon is currently not working due to a configuration error. Please see logs for additional details.'));
+        $this->logger->notice('LDAP Authentication is configured to deny users without LDAP Authorization mappings, but 0 LDAP Authorization consumers are configured.');
+        return FALSE;
+      }
+
+      $authorizations_applied = FALSE;
       foreach ($authorizations as $authorization) {
         if (!empty($authorization->getAuthorizationsApplied())) {
-          $valid_profile = TRUE;
+          $authorizations_applied = TRUE;
         }
       }
 
-      if (!$valid_profile) {
-        $this->messenger->addWarning($this->t('The site logon is currently not working due to a configuration error. Please see logs for additional details.'));
-        $this->logger->notice('LDAP Authentication is configured to deny users without LDAP Authorization mappings, but 0 LDAP Authorization consumers are configured.');
+      if (!$authorizations_applied) {
         return FALSE;
       }
 

@@ -17,9 +17,9 @@ class AlterManager extends PluginManager {
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Alter', 'Drupal\bootstrap\Plugin\Alter\AlterInterface', 'Drupal\bootstrap\Annotation\BootstrapAlter');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':alter', $this->getCacheTags());
   }
 
 }

@@ -10,7 +10,8 @@
     "drupal/externalauth": "^2.0"
   },
   "provide": {
-    "ext-ldap": "*"
+    "ext-ldap": "*",
+    "ext-exif": "*"
   },
   "repositories": {
     "drupal": {

@@ -18,6 +18,8 @@ use Drupal\Core\Theme\Registry;
  *
  * @BootstrapAlter("theme_registry")
  */
+// Extending Registry is intentional: this plugin needs protected registry APIs.
+// @phpstan-ignore-next-line
 class ThemeRegistry extends Registry implements AlterInterface {
 
   /**
@@ -33,6 +35,9 @@ class ThemeRegistry extends Registry implements AlterInterface {
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    // Retain the standard plugin constructor signature for the plugin factory.
+    unset($plugin_id, $plugin_definition);
+
     // This is technically a plugin constructor, but because we wish to use the
     // protected methods of the Registry class, we must extend from it. Thus,
     // to properly construct the extended Registry object, we must pass the
@@ -42,18 +47,18 @@ class ThemeRegistry extends Registry implements AlterInterface {
     }
     $this->currentTheme = $configuration['theme'];
     parent::__construct(
-      \Drupal::root(),
-      \Drupal::service('cache.default'),
-      \Drupal::service('lock'),
-      \Drupal::service('module_handler'),
-      \Drupal::service('theme_handler'),
-      \Drupal::service('theme.initialization'),
-      \Drupal::service('cache.bootstrap'),
-      \Drupal::service('extension.list.module'),
-      \Drupal::service('kernel'),
+      DRUPAL_ROOT,
+      Bootstrap::service('cache.default'),
+      Bootstrap::service('lock'),
+      Bootstrap::service('module_handler'),
+      Bootstrap::service('theme_handler'),
+      Bootstrap::service('theme.initialization'),
+      Bootstrap::service('cache.bootstrap'),
+      Bootstrap::service('extension.list.module'),
+      Bootstrap::service('kernel'),
       $this->currentTheme->getName(),
     );
-    $this->setThemeManager(\Drupal::service('theme.manager'));
+    $this->setThemeManager(Bootstrap::service('theme.manager'));
     $this->init();
   }
 

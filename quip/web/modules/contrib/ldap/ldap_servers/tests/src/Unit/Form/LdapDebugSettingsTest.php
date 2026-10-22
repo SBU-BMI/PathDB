@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ldap_servers\Unit\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\ldap_servers\Form\LdapDebugSettings;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -55,11 +57,13 @@ class LdapDebugSettingsTest extends UnitTestCase {
     $logger = $this->createMock('Psr\Log\LoggerInterface');
     $container->set('logger.channel.ldap_servers', $logger);
 
-    $this->configFactory = $this->createMock('Drupal\Core\Config\ConfigFactoryInterface');
+    $this->configFactory = $this->createMock(ConfigFactoryInterface::class);
     $container->set('config.factory', $this->configFactory);
+    $container->set(ConfigFactoryInterface::class, $this->configFactory);
 
-    $this->configTyped = $this->createMock('Drupal\Core\Config\TypedConfigManagerInterface');
+    $this->configTyped = $this->createMock(TypedConfigManagerInterface::class);
     $container->set('config.typed', $this->configTyped);
+    $container->set(TypedConfigManagerInterface::class, $this->configTyped);
 
     \Drupal::setContainer($container);
 

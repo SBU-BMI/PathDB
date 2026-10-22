@@ -89,9 +89,9 @@ class LocalTasksTest extends KernelTestBase {
   /**
    * Asserts integration for local tasks.
    *
-   * @param $route_name
+   * @param string $route_name
    *   Route name to base task building on.
-   * @param $expected_tasks
+   * @param array<int, list<string>> $expected_tasks
    *   A list of tasks groups by level expected at the given route.
    */
   protected function assertLocalTasks(string $route_name, array $expected_tasks): void {

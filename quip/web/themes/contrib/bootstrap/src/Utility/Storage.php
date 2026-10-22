@@ -83,7 +83,7 @@ class Storage extends MemoryStorage implements \Iterator {
     drupal_register_shutdown_function([$this, 'save']);
 
     // Retrieve the cached data.
-    $data = ($cached = \Drupal::cache($bin)->get($this->cid)) && !empty($cached->data) ? $cached->data : [];
+    $data = ($cached = Bootstrap::service('cache.' . $bin)->get($this->cid)) && !empty($cached->data) ? $cached->data : [];
 
     // Set the data.
     $this->setMultiple($data);
@@ -201,7 +201,7 @@ class Storage extends MemoryStorage implements \Iterator {
    */
   public function save() {
     if ($this->changed) {
-      \Drupal::cache($this->bin)->set($this->cid, $this->getAll(), $this->expire, $this->tags);
+      Bootstrap::service('cache.' . $this->bin)->set($this->cid, $this->getAll(), $this->expire, $this->tags);
     }
   }
 

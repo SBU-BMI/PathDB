@@ -6,12 +6,12 @@ namespace Drupal\Tests\ldap_servers\Unit;
 
 use Drupal\ldap_servers\Mapping;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests Mapping class.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class MappingTest extends UnitTestCase {
 
   /**

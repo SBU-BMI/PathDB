@@ -221,7 +221,7 @@ class CdnProvider extends CdnProviderBase {
 
       // FILE_CREATE_DIRECTORY = 1 | FILE_MODIFY_PERMISSIONS = 2.
       $options = 1 | 2;
-      if ($fileSystem = \Drupal::service('file_system')) {
+      if ($fileSystem = Bootstrap::service('file_system')) {
         $fileSystem->prepareDirectory($provider_path, $options);
       }
 
@@ -231,12 +231,12 @@ class CdnProvider extends CdnProviderBase {
       if ($import_data = $form_state->getValue('cdn_provider_import_data', FALSE)) {
         // FILE_EXISTS_REPLACE = 1.
         $replace = 1;
-        if ($fileSystem = \Drupal::service('file_system')) {
+        if ($fileSystem = Bootstrap::service('file_system')) {
           $fileSystem->saveData($import_data, $file, $replace);
         }
       }
       elseif ($file && file_exists($file)) {
-        if ($fileSystem = \Drupal::service('file_system')) {
+        if ($fileSystem = Bootstrap::service('file_system')) {
           $fileSystem->delete($file);
         }
       }
@@ -270,7 +270,7 @@ class CdnProvider extends CdnProviderBase {
         $description_label = $this->t('ERROR');
         $description = $this->t('Unable to reach or parse the data provided by the @title API. Ensure the server this website is hosted on is able to initiate HTTP requests. If the request consistently fails, it is likely that there are certain PHP functions that have been disabled by the hosting provider for security reasons. It is possible to manually copy and paste the contents of the following URL into the "Imported @title data" section below.<br /><br /><a href=":provider_api" target="_blank">:provider_api</a>.', [
           '@title' => $provider->getLabel(),
-          ':provider_api' => $provider->getApi(),
+          ':provider_api' => $provider->getPluginDefinition()['api'],
         ]);
         $group->error = [
           '#markup' => '<div class="alert alert-danger messages error"><strong>' . $description_label . ':</strong> ' . $description . '</div>',

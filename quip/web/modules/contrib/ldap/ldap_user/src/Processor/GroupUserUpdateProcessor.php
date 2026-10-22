@@ -85,13 +85,6 @@ class GroupUserUpdateProcessor {
   protected $ldapServer;
 
   /**
-   * User storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $userStorage;
-
-  /**
    * Authorization service.
    *
    * @var \Drupal\authorization\AuthorizationServiceInterface
@@ -154,8 +147,6 @@ class GroupUserUpdateProcessor {
     $this->ldapServer = $this->entityTypeManager
       ->getStorage('ldap_server')
       ->load($this->config->get('drupalAcctProvisionServer'));
-    $this->userStorage = $this->entityTypeManager
-      ->getStorage('user');
 
     $this->ldapAuthorizationExists = $module_handler->moduleExists('ldap_authorization');
   }
@@ -294,6 +285,13 @@ class GroupUserUpdateProcessor {
           'ldap_user'
         );
         $uid = $this->externalAuth->getUid($username, 'ldap_user');
+        if (!$uid) {
+          $this->logger->error(
+            'Periodic update: Error getting Uid for @name',
+            ['@name' => $username]
+          );
+          return;
+        }
       }
       else {
         $this->logger->error(
@@ -313,11 +311,11 @@ class GroupUserUpdateProcessor {
 
     // User exists and is mapped in authmap.
     /** @var \Drupal\user\Entity\User $drupal_account */
-    $drupal_account = $this->userStorage->load($uid);
-    $this->drupalUserProcessor->drupalUserLogsIn($drupal_account);
+    $drupal_account = $this->entityTypeManager->getStorage('user')->load($uid);
+    $this->drupalUserProcessor->drupalUserScheduledUpdate($drupal_account);
     // Reload since data has changed.
     /** @var \Drupal\user\UserInterface $user */
-    $user = $this->userStorage->load($drupal_account->id());
+    $user = $this->entityTypeManager->getStorage('user')->load($drupal_account->id());
     $this->updateAuthorizations($user);
     $this->detailLog->log(
       'Periodic update: @name updated',

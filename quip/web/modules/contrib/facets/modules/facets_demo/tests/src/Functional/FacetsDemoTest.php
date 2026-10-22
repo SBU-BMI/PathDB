@@ -49,6 +49,7 @@ class FacetsDemoTest extends FacetsTestBase {
    */
   public function testDemoPage() {
     $this->drupalGet('movies');
+    $this->assertSession()->statusCodeEquals(200);
   }
 
 }

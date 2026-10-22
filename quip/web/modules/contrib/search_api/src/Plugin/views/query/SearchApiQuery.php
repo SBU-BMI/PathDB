@@ -796,13 +796,14 @@ class SearchApiQuery extends QueryPluginBase {
    * Gets all the involved entities of the view.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The entities.
    */
   protected function getAllEntities(): array {
     $entities = [];
 
     /** @var \Drupal\search_api\Plugin\views\ResultRow $row */
     foreach ($this->view->result as $row) {
-      $entity_adapter = $row->_object ?? NULL;
+      $entity_adapter = $row->_object;
       if ($entity_adapter instanceof EntityAdapter) {
         $entities[] = $entity_adapter->getEntity();
       }

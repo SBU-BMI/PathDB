@@ -776,6 +776,7 @@ display:
         - jwt_auth
         - cookie
       filename: ''
+      export_filesystem: private
     cache_metadata:
       max-age: -1
       contexts:

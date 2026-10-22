@@ -11,13 +11,15 @@ use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_user\Event\LdapUserLoginEvent;
 use Drupal\ldap_user\EventSubscriber\LdapEntryProvisionSubscriber;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Ldap\Adapter\ExtLdap\EntryManager;
 
 /**
  * Token processor tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class LdapEntryProvisionTest extends KernelTestBase {
 
   use UserCreationTrait {
@@ -108,6 +110,28 @@ class LdapEntryProvisionTest extends KernelTestBase {
               'create_ldap_entry',
             ],
           ],
+          'objectclass_0' => [
+            'ldap_attr' => '[objectclass:0]',
+            'user_attr' => 'inetOrgPerson',
+            'convert' => FALSE,
+            'user_tokens' => '',
+            'config_module' => 'ldap_user',
+            'prov_module' => 'ldap_user',
+            'prov_events' => [
+              'create_ldap_entry',
+            ],
+          ],
+          'objectclass_1' => [
+            'ldap_attr' => '[objectclass:1]',
+            'user_attr' => 'person',
+            'convert' => FALSE,
+            'user_tokens' => '',
+            'config_module' => 'ldap_user',
+            'prov_module' => 'ldap_user',
+            'prov_events' => [
+              'create_ldap_entry',
+            ],
+          ],
         ],
       ])
       ->save();
@@ -152,6 +176,12 @@ class LdapEntryProvisionTest extends KernelTestBase {
           'cn=' . $this->user->getAccountName() . ',ou=people,dc=hogwarts,dc=edu',
           $entry->getDn()
         );
+        self::assertSame(
+          ['inetOrgPerson', 'person'],
+          array_values($entry->getAttribute('objectclass', FALSE))
+        );
+        self::assertNull($entry->getAttribute('objectclass:0', FALSE));
+        self::assertNull($entry->getAttribute('objectclass:1', FALSE));
         return TRUE;
       });
 

@@ -9,8 +9,8 @@ use Drupal\search_api\Entity\Server;
 use Drupal\search_api\Utility\CommandHelper;
 use Drupal\Tests\search_api\Functional\ExampleContentTrait;
 use Drupal\user\Entity\Role;
-use Psr\Log\NullLogger;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Psr\Log\NullLogger;
 
 /**
  * Tests Search API functionality that gets executed by console utilities.
@@ -63,8 +63,9 @@ class CommandHelperTest extends KernelTestBase {
     Role::create([
       'id' => 'anonymous',
       'label' => 'anonymous',
-    ])->save();
-    user_role_grant_permissions('anonymous', ['view test entity']);
+    ])
+      ->grantPermission('view test entity')
+      ->save();
 
     Index::create([
       'name' => 'Test Index',

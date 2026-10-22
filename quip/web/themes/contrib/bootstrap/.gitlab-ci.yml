@@ -61,3 +61,15 @@ phpstan (next minor):
   allow_failure: true
 phpstan (next major):
   allow_failure: true
+
+# Dependency-free regression tests for the theme's JavaScript integrations.
+# Node's built-in test runner exercises the actual JS files with a small
+# Drupal/jQuery browser adapter. No npm install or browser is required.
+js-regression:
+  stage: test
+  image: node:22-alpine
+  before_script: []
+  script:
+    - node --test tests/js/*.test.cjs
+  rules:
+    - when: on_success

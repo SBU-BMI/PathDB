@@ -2,6 +2,9 @@
 
 namespace Drupal\bootstrap\Plugin\Preprocess;
 
+use Drupal\bootstrap\Bootstrap;
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\bootstrap\Utility\Variables;
 use Drupal\Core\Url;
 
@@ -21,7 +24,7 @@ class FilterTips extends PreprocessBase implements PreprocessInterface {
    */
   public function preprocessVariables(Variables $variables) {
     /** @var \Drupal\filter\FilterFormatInterface $current_format */
-    $current_format = \Drupal::routeMatch()->getParameter('filter_format');
+    $current_format = Bootstrap::service('current_route_match')->getParameter('filter_format');
     $current_format_id = $current_format ? $current_format->id() : FALSE;
 
     // Create a place holder for the tabs.
@@ -42,7 +45,7 @@ class FilterTips extends PreprocessBase implements PreprocessInterface {
       ],
     ];
 
-    foreach (filter_formats(\Drupal::currentUser()) as $format_id => $format) {
+    foreach (DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => Bootstrap::service(FilterFormatRepositoryInterface::class)->getFormatsForAccount(Bootstrap::service('current_user')), fn() => filter_formats(Bootstrap::service('current_user'))) as $format_id => $format) {
       // Set the current format ID to the first format.
       if (!$current_format_id) {
         $current_format_id = $format_id;

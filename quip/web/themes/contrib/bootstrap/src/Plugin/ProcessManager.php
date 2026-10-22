@@ -35,9 +35,9 @@ class ProcessManager extends PluginManager {
    * @param \Drupal\bootstrap\Theme $theme
    *   The theme to use for discovery.
    */
+  // @phpstan-ignore pluginManagerSetsCacheBackend.missingCacheBackend (Configured by PluginManager::__construct().)
   public function __construct(Theme $theme) {
     parent::__construct($theme, 'Plugin/Process', 'Drupal\bootstrap\Plugin\Process\ProcessInterface', 'Drupal\bootstrap\Annotation\BootstrapProcess');
-    $this->setCacheBackend(\Drupal::cache('discovery'), 'theme:' . $theme->getName() . ':process', $this->getCacheTags());
   }
 
   /**
@@ -78,6 +78,9 @@ class ProcessManager extends PluginManager {
     }
 
     // Add "form-inline" class to certain element types.
+    // This deprecated protected extension point remains callable for BC until
+    // Bootstrap 4.x.
+    // @phpstan-ignore-next-line
     if ($e->isType(static::getInlineElementTypes())) {
       $e->addClass('form-inline', 'wrapper_attributes');
     }
@@ -172,7 +175,7 @@ class ProcessManager extends PluginManager {
         '#type' => 'html_tag',
         '#tag' => 'span',
         '#attributes' => $input_group_attributes,
-        '#value' => Element::create($prefix)->renderPlain(),
+        '#value' => Element::create($prefix)->renderInIsolation(),
         '#weight' => -1,
       ]);
     }
@@ -181,7 +184,7 @@ class ProcessManager extends PluginManager {
         '#type' => 'html_tag',
         '#tag' => 'span',
         '#attributes' => $input_group_attributes,
-        '#value' => Element::create($suffix)->renderPlain(),
+        '#value' => Element::create($suffix)->renderInIsolation(),
         '#weight' => 1,
       ]);
     }

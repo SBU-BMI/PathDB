@@ -28,7 +28,14 @@ class FakeLdap implements LdapInterface {
    *
    * @var array
    */
-  protected $queryResult;
+  protected $queryResult = [];
+
+  /**
+   * Number of query() calls in this request.
+   *
+   * @var int
+   */
+  protected int $queryCount = 0;
 
   /**
    * Escape response.
@@ -47,7 +54,7 @@ class FakeLdap implements LdapInterface {
   /**
    * {@inheritdoc}
    */
-  public function bind(string $dn = NULL, string $password = NULL): void {
+  public function bind(?string $dn = NULL, ?string $password = NULL): void {
     if ($this->bindException) {
       throw new ConnectionException('Failed connection');
     }
@@ -57,6 +64,7 @@ class FakeLdap implements LdapInterface {
    * {@inheritdoc}
    */
   public function query(string $dn, string $query, array $options = []): QueryInterface {
+    $this->queryCount++;
     $response = new FakeQuery();
     $response->setResult($this->queryResult[$query] ?? new FakeCollection([]));
     return $response;
@@ -94,6 +102,23 @@ class FakeLdap implements LdapInterface {
    */
   public function setQueryResult(array $queryResult): void {
     $this->queryResult = $queryResult;
+  }
+
+  /**
+   * Returns how many times query() has been called.
+   *
+   * @return int
+   *   Query call count.
+   */
+  public function getQueryCount(): int {
+    return $this->queryCount;
+  }
+
+  /**
+   * Resets the query call counter.
+   */
+  public function resetQueryCount(): void {
+    $this->queryCount = 0;
   }
 
   /**

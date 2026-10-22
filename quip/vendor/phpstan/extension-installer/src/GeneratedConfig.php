@@ -21,7 +21,7 @@ final class GeneratedConfig
         0 => 'phpstan/rules.neon',
       ),
     ),
-    'version' => '2.10.2',
+    'version' => '2.10.3',
     'phpstanVersionConstraint' => NULL,
   ),
   'composer/pcre' => 

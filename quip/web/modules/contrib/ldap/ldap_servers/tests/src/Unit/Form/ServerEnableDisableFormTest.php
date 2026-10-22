@@ -10,14 +10,14 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\ldap_servers\Form\ServerEnableDisableForm;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Tests the ServerEnableDisableForm.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class ServerEnableDisableFormTest extends UnitTestCase {
 
   use ProphecyTrait;

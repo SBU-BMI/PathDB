@@ -103,17 +103,19 @@ function ldap_authentication_user_pass_validate(array &$form, FormStateInterface
   $authname = $authmap->get((int) $account->id(), 'ldap_user');
   if ($authname) {
     // It's an LDAP account and hide/disable is on, throw a validation error.
-    if ($config->get('ldapUserHelpLinkUrl')) {
+    $ldap_user_help_link_url = $config->get('ldapUserHelpLinkUrl');
+    if ($ldap_user_help_link_url) {
       $form_state->setErrorByName('name', t(
           'You may not reset your password here. You must reset your password via the directions at <a href=":url">@text</a>.',
           [
-            ':url' => $config->get('ldapUserHelpLinkUrl'),
+            ':url' => $ldap_user_help_link_url,
             '@text' => $config->get('ldapUserHelpLinkText'),
           ])
       );
     }
     else {
-      $form_state->setErrorByName('name', t("You may not reset your password here. You must reset your password via one of your organization's password management sites."));
+      $form_state->setErrorByName('name',
+        t("You may not reset your password here. You must reset your password via one of your organization's password management sites."));
     }
   }
 }
@@ -128,8 +130,8 @@ function ldap_authentication_user_pass_validate(array &$form, FormStateInterface
  * help text.
  */
 function ldap_authentication_form_user_form_alter(&$form, FormStateInterface $form_state) {
-
-  $user = $form_state->getBuildInfo()['callback_object']->getEntity();
+  $build_info = $form_state->getBuildInfo();
+  $user = $build_info['callback_object']->getEntity();
   $config = \Drupal::config('ldap_authentication.settings');
   /** @var \Drupal\externalauth\Authmap $authmap */
   $authmap = \Drupal::service('externalauth.authmap');
@@ -214,7 +216,6 @@ function ldap_authentication_form_user_login_form_alter(&$form, FormStateInterfa
  */
 function ldap_authentication_form_user_login_block_alter(&$form, FormStateInterface $form_state) {
   _ldap_authentication_login_form_alter($form, $form_state, 'user_login_block');
-
 }
 
 /**
@@ -226,7 +227,8 @@ function ldap_authentication_form_user_login_block_alter(&$form, FormStateInterf
  *   The form state.
  */
 function ldap_authentication_user_login_authenticate_validate(array $form, FormStateInterface $form_state) {
-  if ($form_state->getValue('pass') && $form_state->getValue('name')) {
+  $has_pass_and_name = $form_state->getValue('pass') && $form_state->getValue('name');
+  if ($has_pass_and_name) {
     $validator = \Drupal::service('ldap_authentication.login_validator');
     $form_state = $validator->validateLogin($form_state);
   }

@@ -12,13 +12,15 @@ use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Ldap\Entry;
 
 /**
  * Integration tests for LdapAuthorizationProvider.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class LdapAuthorizationProviderIntegrationTest extends EntityKernelTestBase {
 
   /**

@@ -12,15 +12,20 @@ use Drupal\ldap_servers\Entity\Server;
 use Drupal\ldap_servers\LdapUserAttributesInterface;
 use Drupal\ldap_servers_dummy\FakeBridge;
 use Drupal\ldap_servers_dummy\FakeCollection;
+use Drupal\ldap_user\Processor\DrupalUserProcessor;
+use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Ldap\Entry;
 
 /**
  * Tests for the DrupalUserProcessor.
- *
- * @group ldap
- * @coversDefaultClass \Drupal\ldap_user\Processor\DrupalUserProcessor
  */
+#[Group('ldap')]
+#[CoversClass(DrupalUserProcessor::class)]
+#[RunTestsInSeparateProcesses]
 class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAttributesInterface {
 
   /**
@@ -109,6 +114,17 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
             'picture_field' => [
               file_get_contents(__DIR__ . '/../../example.png'),
             ],
+          ],
+        ),
+      ]),
+      '(cn=bad_pic)' => new FakeCollection([
+        new Entry(
+          'cn=bad_pic,ou=people,dc=hogwarts,dc=edu',
+          [
+            'cn' => ['bad_pic'],
+            'uid' => ['124'],
+            'mail' => ['bad_pic@example.com'],
+            'picture_field' => ['this is not an image'],
           ],
         ),
       ]),
@@ -208,6 +224,102 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
   }
 
   /**
+   * Duplicate Drupal email must fail provisioning without creating a user.
+   */
+  public function testProvisioningFailsOnDuplicateEmail(): void {
+    $existing = User::create([
+      'name' => 'local_user',
+      'mail' => 'hpotter@example.com',
+      'status' => 1,
+    ]);
+    $existing->save();
+
+    $result = $this->drupalUserProcessor->createDrupalUserFromLdapEntry([
+      'name' => 'hpotter',
+    ]);
+    self::assertFalse($result);
+    self::assertEmpty(
+      $this->entityTypeManager
+        ->getStorage('user')
+        ->loadByProperties(['name' => 'hpotter'])
+    );
+    self::assertFalse(
+      $this->container->get('externalauth.authmap')->getUid('hpotter', 'ldap_user')
+    );
+    $reloaded = $this->entityTypeManager
+      ->getStorage('user')
+      ->load($existing->id());
+    self::assertEquals('hpotter@example.com', $reloaded->getEmail());
+  }
+
+  /**
+   * Scheduled updates sync existing users without the login trigger.
+   */
+  public function testScheduledUpdateSyncsWithoutAuthenticationTrigger(): void {
+    $result = $this->drupalUserProcessor->createDrupalUserFromLdapEntry(['name' => 'hpotter']);
+    self::assertTrue($result);
+    $user = $this->drupalUserProcessor->getUserAccount();
+    self::assertEquals('hpotter@example.com', $user->getEmail());
+    $uid = (int) $user->id();
+
+    $this->drupalUserProcessor->reset();
+
+    /** @var \Drupal\ldap_servers_dummy\FakeBridge $bridge */
+    $bridge = $this->container->get('ldap.bridge');
+    /** @var \Drupal\ldap_servers_dummy\FakeLdap $ldap */
+    $ldap = $bridge->get();
+    $ldap->setQueryResult([
+      '(cn=hpotter)' => new FakeCollection([
+        new Entry(
+          'cn=hpotter,ou=people,dc=hogwarts,dc=edu',
+          [
+            'cn' => ['hpotter'],
+            'uid' => ['123'],
+            'mail' => ['hpotter-updated@example.com'],
+            'picture_field' => [
+              file_get_contents(__DIR__ . '/../../example.png'),
+            ],
+          ],
+        ),
+      ]),
+    ]);
+    $this->container->get('cache.default')
+      ->invalidateTags(['ldap_servers.user_data']);
+
+    $this->config('ldap_user.settings')
+      ->set('drupalAcctProvisionTriggers', [])
+      ->save();
+
+    $storage = $this->entityTypeManager->getStorage('user');
+    $user = $storage->load($uid);
+    $user->setEmail('stale@example.com')->save();
+    $user = $storage->load($uid);
+    self::assertEquals('stale@example.com', $user->getEmail());
+
+    $this->drupalUserProcessor->reset();
+    $this->drupalUserProcessor->drupalUserLogsIn($user);
+    $user = $storage->load($uid);
+    self::assertEquals('stale@example.com', $user->getEmail());
+
+    $this->drupalUserProcessor->reset();
+    $this->drupalUserProcessor->drupalUserScheduledUpdate($user);
+    $user = $storage->load($uid);
+    self::assertEquals('hpotter-updated@example.com', $user->getEmail());
+  }
+
+  /**
+   * Invalid LDAP picture data must not abort account provisioning.
+   */
+  public function testProvisioningWithInvalidUserPicture(): void {
+    $result = $this->drupalUserProcessor->createDrupalUserFromLdapEntry(['name' => 'bad_pic']);
+    self::assertTrue($result);
+    $user = $this->drupalUserProcessor->getUserAccount();
+    self::assertInstanceOf(UserInterface::class, $user);
+    self::assertEquals('bad_pic@example.com', $user->getEmail());
+    self::assertSame([], $user->get('user_picture')->referencedEntities());
+  }
+
+  /**
    * Test the 'associate' option when provisioning an account.
    */
   public function testLdapAssociateDrupalAccount(): void {
@@ -219,6 +331,18 @@ class DrupalUserProcessorTest extends EntityKernelTestBase implements LdapUserAt
       ->save();
     self::assertEquals(FALSE, $this->drupalUserProcessor->ldapAssociateDrupalAccount('hpotter'));
 
+  }
+
+  /**
+   * Reset clears the in-memory Drupal account.
+   */
+  public function testResetClearsAccount(): void {
+    self::assertTrue(
+      $this->drupalUserProcessor->createDrupalUserFromLdapEntry(['name' => 'hpotter'])
+    );
+    self::assertInstanceOf(UserInterface::class, $this->drupalUserProcessor->getUserAccount());
+    $this->drupalUserProcessor->reset();
+    self::assertNull($this->drupalUserProcessor->getUserAccount());
   }
 
 }

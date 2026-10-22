@@ -5,6 +5,7 @@ namespace Drupal\Tests\search_api\Kernel\Processor;
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
 use Drupal\comment\Entity\CommentType;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\Core\TypedData\DataDefinitionInterface;
@@ -40,9 +41,9 @@ class RenderedItemTest extends ProcessorTestBase {
   /**
    * List of nodes which are published.
    *
-   * @var \Drupal\node\Entity\Node[]
+   * @var array<int, \Drupal\node\Entity\Node>
    */
-  protected $nodes;
+  protected array $nodes = [];
 
   /**
    * {@inheritdoc}
@@ -64,6 +65,18 @@ class RenderedItemTest extends ProcessorTestBase {
    * {@inheritdoc}
    */
   public function setUp($processor = NULL): void {
+    // In Drupal 11.5, the "text_with_summary" type was split into its own
+    // module, so add that to be included.
+    $drupal_115_plus = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.5',
+      fn () => TRUE,
+      fn () => FALSE,
+    );
+    if ($drupal_115_plus) {
+      static::$modules[] = 'text_with_summary';
+    }
+
     parent::setUp('rendered_item');
 
     // Enable the optional "path_alias" entity type as well to make sure the
@@ -88,6 +101,10 @@ class RenderedItemTest extends ProcessorTestBase {
     // Creates node types for testing.
     foreach (['article', 'page'] as $type_id) {
       $this->createContentType(['type' => $type_id]);
+      // @todo Remove once we depend on Drupal 11+.
+      if (!FieldConfig::loadByName('node', $type_id, 'text')) {
+        $this->createBodyField('node', $type_id);
+      }
     }
     CommentType::create([
       'id' => 'comment',
@@ -127,25 +144,25 @@ class RenderedItemTest extends ProcessorTestBase {
       'status' => NodeInterface::PUBLISHED,
       'type' => 'page',
       'title' => '',
-      'body' => ['value' => '', 'summary' => '', 'format' => 'plain_text'],
+      'text' => ['value' => '', 'summary' => '', 'format' => 'plain_text'],
       'uid' => $anonymous_user->id(),
     ];
 
     // Create some test nodes with valid user on it for rendering a picture.
     $node_data['title'] = 'Title for node 1';
-    $node_data['body']['value'] = 'value for node 1';
-    $node_data['body']['summary'] = 'summary for node 1';
+    $node_data['text']['value'] = 'value for node 1';
+    $node_data['text']['summary'] = 'summary for node 1';
     $this->nodes[1] = Node::create($node_data);
     $this->nodes[1]->save();
     $node_data['title'] = 'Title for node 2';
-    $node_data['body']['value'] = 'value for node 2';
-    $node_data['body']['summary'] = 'summary for node 2';
+    $node_data['text']['value'] = 'value for node 2';
+    $node_data['text']['summary'] = 'summary for node 2';
     $this->nodes[2] = Node::create($node_data);
     $this->nodes[2]->save();
     $node_data['type'] = 'article';
     $node_data['title'] = 'Title for node 3';
-    $node_data['body']['value'] = 'value for node 3';
-    $node_data['body']['summary'] = 'summary for node 3';
+    $node_data['text']['value'] = 'value for node 3';
+    $node_data['text']['summary'] = 'summary for node 3';
     $this->nodes[3] = Node::create($node_data);
     $this->nodes[3]->save();
 
@@ -187,9 +204,10 @@ class RenderedItemTest extends ProcessorTestBase {
     // that. Set Claro as the active theme, but make Starterkit the default. The
     // processor should switch to Starterkit to perform the rendering.
     \Drupal::service('theme_installer')->install(['starterkit_theme']);
-    \Drupal::service('theme_installer')->install(['claro']);
+    $claro = $drupal_115_plus ? 'default_admin' : 'claro';
+    \Drupal::service('theme_installer')->install([$claro]);
     \Drupal::configFactory()->getEditable('system.theme')->set('default', 'starterkit_theme')->save();
-    \Drupal::theme()->setActiveTheme(\Drupal::service('theme.initialization')->initTheme('claro'));
+    \Drupal::theme()->setActiveTheme(\Drupal::service('theme.initialization')->initTheme($claro));
 
     // Reload the processor to get the latest services. This is necessary due to
     // the installation of additional themes after the processor was initially
@@ -202,26 +220,28 @@ class RenderedItemTest extends ProcessorTestBase {
    * Creates a field of an body field storage on the specified bundle.
    *
    * Overridden to use field type "text_with_summary" instead of the "text_long"
-   * type used in newer versions of Drupal.
+   * type used in newer versions of Drupal – except if explicitly called with
+   * field name "body" since that might conflict with existing storage
+   * definitions.
    *
    * @param string $entityType
    *   The type of entity the field will be attached to.
    * @param string $bundle
    *   The bundle name of the entity the field will be attached to.
    * @param string $fieldName
-   *   (optional) The name of the field. Defaults to 'body'.
+   *   (optional) The name of the field. Defaults to 'text'.
    * @param string $fieldLabel
-   *   (optional) The label for the field. Defaults to 'Body'.
+   *   (optional) The label for the field. Defaults to 'Text'.
    * @param int $cardinality
    *   (optional) The cardinality of the field. Defaults to 1.
    */
-  protected function createBodyField(string $entityType, string $bundle, string $fieldName = 'body', string $fieldLabel = 'Body', int $cardinality = 1): void {
+  protected function createBodyField(string $entityType, string $bundle, string $fieldName = 'text', string $fieldLabel = 'Text', int $cardinality = 1): void {
     // Look for or add the specified field to the requested entity bundle.
     $fieldStorage = FieldStorageConfig::loadByName($entityType, $fieldName);
     if (!$fieldStorage) {
       FieldStorageConfig::create([
         'field_name' => $fieldName,
-        'type' => 'text_with_summary',
+        'type' => $fieldName === 'body' ? 'text_long' : 'text_with_summary',
         'entity_type' => $entityType,
         'cardinality' => $cardinality,
         'persist_with_no_fields' => TRUE,
@@ -233,25 +253,26 @@ class RenderedItemTest extends ProcessorTestBase {
         'field_storage' => $fieldStorage,
         'bundle' => $bundle,
         'label' => $fieldLabel,
-        'settings' => [
-          'display_summary' => TRUE,
-          'allowed_formats' => [],
-        ],
+        'settings' => $fieldName === 'body'
+          ? []
+          : [
+            'display_summary' => TRUE,
+            'allowed_formats' => [],
+          ],
       ])->save();
 
-      /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
-      $display_repository = \Drupal::service('entity_display.repository');
+      $display_repository = \Drupal::getContainer()->get('entity_display.repository');
 
       // Assign widget settings for the default form mode.
       $display_repository->getFormDisplay($entityType, $bundle)
-        ->setComponent('body', [
+        ->setComponent('text', [
           'type' => 'text_textarea_with_summary',
         ])
         ->save();
 
       // Assign display settings for the 'default' and 'teaser' view modes.
       $display_repository->getViewDisplay($entityType, $bundle)
-        ->setComponent('body', [
+        ->setComponent('text', [
           'label' => 'hidden',
           'type' => 'text_default',
         ])
@@ -262,9 +283,9 @@ class RenderedItemTest extends ProcessorTestBase {
       $view_modes = $display_repository->getViewModes($entityType);
       if (isset($view_modes['teaser'])) {
         $display_repository->getViewDisplay($entityType, $bundle, 'teaser')
-          ->setComponent('body', [
+          ->setComponent('text', [
             'label' => 'hidden',
-            'type' => 'text_summary_or_trimmed',
+            'type' => 'text_trimmed',
           ])
           ->save();
       }
@@ -275,9 +296,50 @@ class RenderedItemTest extends ProcessorTestBase {
    * Tests whether the rendered_item field is correctly filled by the processor.
    */
   public function testAddFieldValues() {
+    $this->installEntitySchema('entity_view_mode');
+
+    $view_mode = EntityViewDisplay::load('node.article.teaser');
+    $content = $view_mode->get('content');
+    $content['text']['type'] = 'text_summary_or_trimmed';
+    $view_mode->set('content', $content);
+    $view_mode->save();
+
+    $content = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      '11.5',
+      fn () => [
+        'created' => [
+          'type' => 'timestamp_ago',
+          'label' => 'hidden',
+          'settings' => [
+            'future_format' => '<strong>Member for</strong> @interval',
+            'past_format' => '<strong>Member for</strong> @interval',
+            'granularity' => 2,
+          ],
+          'third_party_settings' => [],
+          'region' => 'content',
+          'weight' => 0,
+        ],
+      ],
+      fn () => [
+        'member_for' => [
+          'region' => 'content',
+          'weight' => 0,
+        ],
+      ],
+    );
+    EntityViewDisplay::create([
+      'id' => 'user.user.compact',
+      'targetEntityType' => 'user',
+      'bundle' => 'user',
+      'mode' => 'compact',
+      'status' => TRUE,
+      'content' => $content,
+    ])->save();
+
     $this->nodes[4] = $this->nodes[3]->addTranslation('de');
     $this->nodes[4]->set('title', 'Titel für Knoten 4');
-    $this->nodes[4]->set('body', [
+    $this->nodes[4]->set('text', [
       'value' => 'Körper für Knoten 4',
       'summary' => 'Zusammenfassung für Knoten 4',
     ]);
@@ -381,17 +443,17 @@ class RenderedItemTest extends ProcessorTestBase {
     // when the processor was broken, because the schema metadata was also
     // adding it to the output.
     $nid = $node->id();
-    $this->assertStringContainsString('<article', $field_value, 'Node item ' . $nid . ' not rendered in theme Stable.');
+    $this->assertStringContainsString('<article', $field_value, "Node item $nid not rendered in theme Stable.");
     if ($node->bundle() === 'page') {
-      $this->assertStringNotContainsString('>Read more<', $field_value, 'Node item ' . $nid . " rendered in view-mode \"search_index\".");
-      $this->assertStringContainsString('>' . $node->get('body')->getValue()[0]['value'] . '<', $field_value, 'Node item ' . $nid . ' does not have rendered body inside HTML-Tags.');
+      $this->assertStringNotContainsString('>Read more<', $field_value, "Node item $nid rendered in view-mode \"search_index\".");
+      $this->assertStringContainsString('>' . $node->get('text')->getValue()[0]['value'] . '<', $field_value, "Node item $nid does not have rendered body inside HTML tags.");
     }
     else {
-      $this->assertStringContainsString('>Read more<', $field_value, 'Node item ' . $nid . " rendered in view-mode \"teaser\".");
-      $this->assertStringContainsString('>' . $node->get('body')->getValue()[0]['summary'] . '<', $field_value, 'Node item ' . $nid . ' does not have rendered summary inside HTML-Tags.');
+      $this->assertStringContainsString('>Read more<', $field_value, "Node item $nid rendered in view-mode \"teaser\".");
+      $this->assertStringContainsString('>' . $node->get('text')->getValue()[0]['summary'] . '<', $field_value, "Node item $nid does not have rendered summary inside HTML tags.");
     }
-    $this->assertStringContainsString('<h2>', $field_value, 'Node item ' . $nid . ' does not have a rendered title field.');
-    $this->assertStringContainsString('>' . $node->label() . '<', $field_value, 'Node item ' . $nid . ' does not have a rendered title inside HTML-Tags.');
+    $this->assertStringContainsString('<h2>', $field_value, "Node item $nid does not have a rendered title field.");
+    $this->assertStringContainsString('>' . $node->label() . '<', $field_value, "Node item $nid does not have a rendered title inside HTML tags.");
   }
 
   /**
@@ -403,7 +465,7 @@ class RenderedItemTest extends ProcessorTestBase {
    *   The rendered field value.
    */
   protected function checkRenderedUser(UserInterface $user, $field_value) {
-    $this->assertStringContainsString('>Member for<', $field_value);
+    $this->assertStringContainsString('>Member for<', $field_value, "Rendered value for user #{$user->id()}");
   }
 
   /**
@@ -415,7 +477,7 @@ class RenderedItemTest extends ProcessorTestBase {
    *   The rendered field value.
    */
   protected function checkRenderedComment(CommentInterface $comment, $field_value) {
-    $this->assertStringContainsString('>' . $comment->label() . '<', $field_value);
+    $this->assertStringContainsString('>' . $comment->label() . '<', $field_value, "Rendered value for comment #{$comment->id()}");
   }
 
   /**
@@ -563,8 +625,8 @@ class RenderedItemTest extends ProcessorTestBase {
     $this->createContentType(['type' => 'event']);
     $node_data['type'] = 'event';
     $node_data['title'] = 'Title for node 5';
-    $node_data['body']['value'] = 'value for node 5';
-    $node_data['body']['summary'] = 'summary for node 5';
+    $node_data['text']['value'] = 'value for node 5';
+    $node_data['text']['summary'] = 'summary for node 5';
     $this->nodes[5] = Node::create($node_data);
     $this->nodes[5]->save();
 

@@ -6,12 +6,12 @@ namespace Drupal\Tests\ldap_servers\Unit;
 
 use Drupal\ldap_servers\Helper\CredentialsStorage;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Credential storage tests.
- *
- * @group ldap
  */
+#[Group('ldap')]
 class CredentialsStorageTest extends UnitTestCase {
 
   /**

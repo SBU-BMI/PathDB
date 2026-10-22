@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\moderated_content_bulk_publish\FunctionalJavascript;
 
+use Behat\Mink\Element\NodeElement;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\views\Entity\View;
-use Drupal\views\Views;
 use Drupal\node\Entity\Node;
 
 /**
@@ -29,6 +29,9 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     'moderated_content_bulk_publish',
   ];
 
+  /**
+   *
+   */
   protected function setUp(): void {
     parent::setUp();
     $this->getSession()->resizeWindow(1280, 900, 'current');
@@ -98,7 +101,8 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     if (!isset($page_fields['node_bulk_form'])) {
       $page_fields['node_bulk_form'] = [
         'id' => 'node_bulk_form',
-        'table' => $base_table,            // dynamic base table for safety
+      // Dynamic base table for safety.
+        'table' => $base_table,
         'field' => 'node_bulk_form',
         'plugin_id' => 'node_bulk_form',
         'entity_type' => 'node',
@@ -124,12 +128,16 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     }
   }
 
+  /**
+   *
+   */
   public function testSingleDialogOnBulkPublish(): void {
     // Two unpublished nodes.
     $nids = [];
     foreach (['A', 'B'] as $suffix) {
       $node = Node::create([
-        'type' => 'article', // 'article' is available in test installs.
+      // 'article' is available in test installs.
+        'type' => 'article',
         'title' => 'N ' . $suffix,
         'status' => 0,
         'moderation_state' => 'draft',
@@ -185,15 +193,18 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     }
   }
 
-  private function findBulkActionSelect(): \Behat\Mink\Element\NodeElement {
+  /**
+   *
+   */
+  private function findBulkActionSelect(): NodeElement {
     $candidates = [
       'css', '[data-drupal-selector=\'views-form-content-page-1\'] [data-drupal-selector=\'edit-submit\']',
       'css', 'form.views-form select[name="action"]',
       'css', 'form.views-form .views-bulk-actions__item select',
     ];
     for ($i = 0; $i < count($candidates); $i += 2) {
-      $this->assertSession()->waitForElementVisible($candidates[$i], $candidates[$i+1]);
-      $el = $this->getSession()->getPage()->find($candidates[$i], $candidates[$i+1]);
+      $this->assertSession()->waitForElementVisible($candidates[$i], $candidates[$i + 1]);
+      $el = $this->getSession()->getPage()->find($candidates[$i], $candidates[$i + 1]);
       if ($el) {
         return $el;
       }
@@ -201,6 +212,9 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     $this->fail('Bulk action <select> not found by any known selector.');
   }
 
+  /**
+   *
+   */
   private function clickBulkApplyOnce(): void {
     $session = $this->getSession();
     $page = $session->getPage();
@@ -209,7 +223,8 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     // Pick one row + the action that opens your dialog.
     $page->checkField('edit-node-bulk-form-0');
     $assert->elementExists('css', "[data-drupal-selector='edit-action']")
-      ->selectOption('publish_latest'); // or your action value
+    // Or your action value.
+      ->selectOption('publish_latest');
 
     // Target the Apply button.
     $css = "[data-drupal-selector='views-form-content-page-1'] [data-drupal-selector='edit-submit']";
@@ -238,6 +253,9 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     }
   }
 
+  /**
+   *
+   */
   private function waitForModalOpen(int $timeoutMs = 3000): void {
     // Wait for Drupal’s jQuery UI modal to be visible.
     $cond = "(function(){
@@ -251,6 +269,9 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     $this->getSession()->wait($timeoutMs, $cond);
   }
 
+  /**
+   *
+   */
   private function assertExactlyOneDialog(): void {
     // Immediate assertion.
     $this->assertSession()->elementsCount('css', '.ui-dialog', 1);
@@ -259,6 +280,9 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     $this->assertSession()->elementsCount('css', '.ui-dialog', 1);
   }
 
+  /**
+   *
+   */
   private function waitForBatchToFinish(int $timeoutMs = 20000): void {
     $this->getSession()->wait($timeoutMs, "(function(){
       // If a modal is still visible, keep waiting.
@@ -274,6 +298,4 @@ final class AdminContentDialogSingletonTest extends WebDriverTestBase {
     })()");
   }
 
-
 }
-

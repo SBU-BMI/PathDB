@@ -12,7 +12,7 @@ class ConversionHelper {
   /**
    * Undoes the conversion done by escape_dn_value().
    *
-   * Any escape sequence starting with a backslash - hexpair or special
+   * Any escape sequence starting with a backslash - hex pair or special
    * character - will be transformed back to the corresponding character.
    *
    * @param string $value
@@ -89,7 +89,7 @@ class ConversionHelper {
    * @return string
    *   Converted string.
    */
-  public static function convertAttribute(string $value, string $conversion = NULL): string {
+  public static function convertAttribute(string $value, ?string $conversion = NULL): string {
 
     switch ($conversion) {
       case 'base64_encode':

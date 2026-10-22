@@ -4,7 +4,6 @@ namespace Drupal\bootstrap\Plugin\Preprocess;
 
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\file\IconMimeTypes;
-use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\bootstrap\Bootstrap;
 use Drupal\bootstrap\Utility\Element;
 use Drupal\bootstrap\Utility\Variables;
@@ -30,7 +29,7 @@ class FileLink extends PreprocessBase {
     $options = [];
 
     $file = ($variables['file'] instanceof File) ? $variables['file'] : File::load($variables['file']->fid);
-    $url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+    $url = Bootstrap::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
 
     $file_size = $file->getSize();
     $mime_type = $file->getMimeType();
@@ -49,7 +48,7 @@ class FileLink extends PreprocessBase {
     }
 
     // Retrieve the generic mime type from core (mislabeled as "icon_class").
-    $generic_mime_type = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => IconMimeTypes::getIconClass($mime_type), fn() => file_icon_class($mime_type));
+    $generic_mime_type = IconMimeTypes::getIconClass($mime_type);
 
     // Map the generic mime types to an icon and state.
     $mime_map = [
@@ -111,7 +110,7 @@ class FileLink extends PreprocessBase {
     $variables['link'] = Link::fromTextAndUrl($link_text, Url::fromUri($url, $options));
 
     // Add the file size as a variable.
-    $variables->file_size = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => ByteSizeMarkup::create($file_size), fn() => format_size($file_size));
+    $variables->file_size = ByteSizeMarkup::create($file_size);
 
     // Preprocess attributes.
     $this->preprocessAttributes();

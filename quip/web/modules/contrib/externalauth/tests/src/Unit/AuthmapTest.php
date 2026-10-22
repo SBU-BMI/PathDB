@@ -253,7 +253,9 @@ class AuthmapTest extends UnitTestCase {
    */
   public function testGetUid() {
     $actual_data = (object) [
-      "uid" => 2,
+      'uid' => 2,
+      'authname' => 'test_authname',
+      'provider' => 'test_provider',
     ];
 
     $this->statement->expects($this->any())
@@ -261,7 +263,7 @@ class AuthmapTest extends UnitTestCase {
       ->willReturn($actual_data);
 
     $authmap = new Authmap($this->connection);
-    $result = $authmap->getUid(2, "test_provider");
+    $result = $authmap->getUid('test_authname', 'test_provider');
     $this->assertEquals(2, $result);
   }
 

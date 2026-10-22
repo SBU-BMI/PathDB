@@ -10,4 +10,4 @@ attributes: ''
 size_limit: 0
 time_limit: 0
 dereference: 0
-scope: 3
+scope: sub

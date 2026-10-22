@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\ldap_authentication\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the profile update form.
- *
- * @group ldap
  */
+#[Group('ldap')]
+#[RunTestsInSeparateProcesses]
 class LdapAuthenticationProfileUpdateFormTest extends BrowserTestBase {
 
   /**

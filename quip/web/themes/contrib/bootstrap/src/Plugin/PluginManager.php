@@ -61,8 +61,15 @@ class PluginManager extends DefaultPluginManager {
     $this->subdir = $subdir;
     $this->pluginDefinitionAnnotationName = $plugin_definition_annotation_name;
     $this->pluginInterface = $plugin_interface;
-    $this->themeHandler = \Drupal::service('theme_handler');
-    $this->themeManager = \Drupal::service('theme.manager');
+    $this->themeHandler = Bootstrap::service('theme_handler');
+    $this->themeManager = Bootstrap::service('theme.manager');
+
+    $cache_id = strtolower(basename(str_replace('\\', '/', $subdir)));
+    $this->setCacheBackend(
+      Bootstrap::service('cache.discovery'),
+      'theme:' . $theme->getName() . ':' . $cache_id,
+      $this->getCacheTags(),
+    );
   }
 
   /**

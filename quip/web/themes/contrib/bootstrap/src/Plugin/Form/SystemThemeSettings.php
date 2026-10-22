@@ -88,7 +88,7 @@ class SystemThemeSettings extends FormBase implements FormInterface {
 
       // Show a button to reset cached HTTP requests.
       if ($group === 'advanced') {
-        $cache = \Drupal::keyValueExpirable('theme:' . $this->theme->getName() . ':http');
+        $cache = Bootstrap::keyValueExpirable('theme:' . $this->theme->getName() . ':http');
         $count = count($cache->getAll());
         $form[$group]['reset_http_request_cache'] = [
           '#type' => 'item',
@@ -130,7 +130,7 @@ class SystemThemeSettings extends FormBase implements FormInterface {
   public static function submitResetHttpRequestCache(array $form, FormStateInterface $form_state) {
     $form_state->setRebuild();
     $theme = SystemThemeSettings::getTheme(Element::create($form), $form_state);
-    $cache = \Drupal::keyValueExpirable('theme:' . $theme->getName() . ':http');
+    $cache = Bootstrap::keyValueExpirable('theme:' . $theme->getName() . ':http');
     $cache->deleteAll();
   }
 
@@ -241,7 +241,7 @@ class SystemThemeSettings extends FormBase implements FormInterface {
 
       // Invalidate necessary cache tags.
       if ($cache_tags) {
-        \Drupal::service('cache_tags.invalidator')->invalidateTags($cache_tags);
+        Bootstrap::service('cache_tags.invalidator')->invalidateTags($cache_tags);
       }
 
       // Clear our internal theme cache so it can be rebuilt properly.

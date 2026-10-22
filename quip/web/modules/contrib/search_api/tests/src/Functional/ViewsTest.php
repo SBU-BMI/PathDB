@@ -559,6 +559,8 @@ class ViewsTest extends SearchApiBrowserTestBase {
   protected function regressionTest3029582() {
     $yesterday = date('Y-m-d', strtotime('-1DAY'));
 
+    // phpcs:disable Drupal.Commenting.InlineComment.SpacingBefore
+
     // Should result in these filters:
     // [
     //   keywords = 'orange'
@@ -690,6 +692,8 @@ class ViewsTest extends SearchApiBrowserTestBase {
       'strawberry',
       'search-api-test-3029582',
     );
+
+    // phpcs:enable
   }
 
   /**
@@ -895,8 +899,16 @@ class ViewsTest extends SearchApiBrowserTestBase {
    *   (optional) A label for this search, to include in assert messages.
    * @param string $arguments
    *   (optional) A string to append to the search path.
+   * @param string $path
+   *   (optional) The path to the search page.
    */
-  protected function checkResults(array $query, ?array $expected_results = NULL, string $label = 'Search', string $arguments = '', string $path = 'search-api-test'): void {
+  protected function checkResults(
+    array $query,
+    ?array $expected_results = NULL,
+    string $label = 'Search',
+    string $arguments = '',
+    string $path = 'search-api-test',
+  ): void {
     $this->drupalGet($path . '/' . $arguments, ['query' => $query]);
 
     if (isset($expected_results)) {

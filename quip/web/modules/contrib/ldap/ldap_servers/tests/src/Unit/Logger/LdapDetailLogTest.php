@@ -6,13 +6,13 @@ namespace Drupal\Tests\ldap_servers\Unit\Logger;
 
 use Drupal\ldap_servers\Logger\LdapDetailLog;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Tests LdapDetailLog class.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class LdapDetailLogTest extends UnitTestCase {
 
   /**

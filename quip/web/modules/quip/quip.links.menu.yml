@@ -1,0 +1,14 @@
+quip:
+  title: 'Image Review'
+  description: 'Image Review'
+  parent: quip-admin
+  menu_name: quip-admin
+  url: internal:/review
+
+#quip-main:
+#  title: 'Upload and Image'
+#  description: 'Upload and Image'
+#  parent: main
+#  menu_name: main
+#  url: internal:/review
+

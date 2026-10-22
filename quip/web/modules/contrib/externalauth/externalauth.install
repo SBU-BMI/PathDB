@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Database\Database;
+use Drupal\Core\Database\SchemaObjectDoesNotExistException;
 use Drupal\externalauth\ExternalAuthStorageLimits;
 
 /**
@@ -36,6 +37,7 @@ function externalauth_schema(): array {
         'length' => ExternalAuthStorageLimits::AUTHMAP_PROVIDER_MAX_LENGTH,
         'not null' => TRUE,
         'default' => '',
+        'binary' => TRUE,
       ],
       'authname' => [
         'description' => 'Unique authentication name provided by authentication provider',
@@ -43,6 +45,7 @@ function externalauth_schema(): array {
         'length' => ExternalAuthStorageLimits::AUTHMAP_AUTHNAME_MAX_LENGTH,
         'not null' => TRUE,
         'default' => '',
+        'binary' => TRUE,
       ],
       'data' => [
         'description' => 'Extra (serialized) data to store with the authname.',
@@ -101,4 +104,60 @@ function externalauth_update_8102(): void {
 function externalauth_update_8103(): void {
   // Increase module weight to perform the authmap cleanup later.
   module_set_weight('externalauth', 10);
+}
+
+/**
+ * Make authmap authname and provider columns binary-safe.
+ *
+ * Converts both columns from their previous case/accent-insensitive collations
+ * to binary-safe equivalents so that byte-distinct authnames and provider
+ * values are matched exactly by the database.
+ *
+ * NOTE: If your site has existing rows that differ only in case or accents for
+ * the same provider (i.e. were inserted while a ci collation was active and the
+ * unique key was not enforced), this update may fail. Resolve duplicate rows
+ * manually before running this update.
+ */
+function externalauth_update_8104(): void {
+  $schema = \Drupal::service('database')->schema();
+
+  if (!$schema->tableExists('authmap')) {
+    return;
+  }
+
+  // The unique key spans both columns being changed. Drop it first so that
+  // the column-type changes cannot be blocked by index constraints on some
+  // DB backends, then re-add it after both columns are updated.
+  try {
+    $schema->dropUniqueKey('authmap', 'authname_provider');
+  }
+  catch (SchemaObjectDoesNotExistException $e) {
+    // Key did not exist; nothing to drop.
+  }
+
+  // Change authname to a binary-safe string column.
+  $schema->changeField('authmap', 'authname', 'authname', [
+    'description' => 'Unique authentication name provided by authentication provider',
+    'type' => 'varchar',
+    'length' => ExternalAuthStorageLimits::AUTHMAP_AUTHNAME_MAX_LENGTH,
+    'not null' => TRUE,
+    'default' => '',
+    'binary' => TRUE,
+  ]);
+
+  // Change provider to a binary-safe string column so stored values are
+  // matched exactly.
+  $schema->changeField('authmap', 'provider', 'provider', [
+    'description' => 'The name of the authentication provider providing the authname',
+    'type' => 'varchar_ascii',
+    'length' => ExternalAuthStorageLimits::AUTHMAP_PROVIDER_MAX_LENGTH,
+    'not null' => TRUE,
+    'default' => '',
+    'binary' => TRUE,
+  ]);
+
+  // Re-add the unique key now that both columns are binary-safe. The key
+  // itself is structurally identical; only the underlying column collation
+  // has changed.
+  $schema->addUniqueKey('authmap', 'authname_provider', ['authname', 'provider']);
 }

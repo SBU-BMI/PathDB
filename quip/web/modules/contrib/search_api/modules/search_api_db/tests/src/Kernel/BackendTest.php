@@ -350,7 +350,7 @@ class BackendTest extends BackendTestBase {
         $this->assertCount(4, $results[$i]);
       }
 
-      // Check if results are the same
+      // Check if results are the same.
       $this->assertEquals($results[1], $results[2]);
       $this->assertEquals($results[2], $results[3]);
     }
@@ -1574,6 +1574,8 @@ class BackendTest extends BackendTestBase {
     $this->setServerMatchMode($match_mode);
     $this->indexItems($this->indexId);
 
+    // phpcs:disable Drupal.Commenting.InlineComment.NotCapital
+
     $searches = [
       // (foo OR bar) AND (baz OR fux)
       // Count rows combined by UNION (one per matched group) to avoid counting
@@ -1719,7 +1721,7 @@ class BackendTest extends BackendTestBase {
         ],
       ],
       // foo AND (baz NOT "qux quux")
-      // Isolates the (baz NOT "qux quux") branch
+      // Isolates the (baz NOT "qux quux") branch.
       'baz branch isolated' => [
         'keys' => [
           '#conjunction' => 'AND',
@@ -1739,6 +1741,8 @@ class BackendTest extends BackendTestBase {
         ],
       ],
     ];
+
+    // phpcs:enable
 
     foreach ($searches as $search) {
       $results = $this->buildSearch($search['keys'], [], ['name', 'body'])->execute();

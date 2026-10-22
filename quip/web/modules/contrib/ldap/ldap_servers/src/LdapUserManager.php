@@ -191,12 +191,15 @@ class LdapUserManager extends LdapBaseManager {
    * @param string $identifier
    *   User identifier.
    *
-   * @return \Symfony\Component\Ldap\Entry|false
+   * @return \Symfony\Component\Ldap\Entry|null|false
+   *   LDAP entry if found and the identifier matches after sanitization,
+   *   NULL if an entry was found but the identifier does not match, or
+   *   FALSE if the server is unavailable or no entry is found.
    *
-   *   This should go into LdapUserProcessor or LdapUserManager, leaning toward
-   *   the former.
+   * @todo Move this into LdapUserProcessor or keep it on LdapUserManager,
+   *   leaning toward the former.
    */
-  public function getUserDataByIdentifier(string $identifier) {
+  public function getUserDataByIdentifier(string $identifier): Entry|false|null {
     if (!$this->checkAvailability()) {
       return FALSE;
     }
@@ -224,13 +227,16 @@ class LdapUserManager extends LdapBaseManager {
    * @param \Drupal\user\UserInterface $account
    *   Drupal user account.
    *
-   * @return \Symfony\Component\Ldap\Entry|false
-   *   Returns entry or FALSE.
+   * @return \Symfony\Component\Ldap\Entry|null|false
+   *   LDAP entry if found and the identifier matches after sanitization,
+   *   NULL if an entry was found but the identifier does not match, or
+   *   FALSE if the server is unavailable, no authmap identifier exists, or
+   *   no entry is found.
    *
-   *   @todo This should go into LdapUserProcessor or LdapUserManager,
+   * @todo Move this into LdapUserProcessor or keep it on LdapUserManager,
    *   leaning toward the former.
    */
-  public function getUserDataByAccount(UserInterface $account) {
+  public function getUserDataByAccount(UserInterface $account): Entry|false|null {
     if (!$this->checkAvailability()) {
       return FALSE;
     }

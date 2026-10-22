@@ -55,13 +55,6 @@ class IntegrationTest extends SearchApiBrowserTestBase {
   protected $serverId;
 
   /**
-   * A storage instance for indexes.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $indexStorage;
-
-  /**
    * {@inheritdoc}
    */
   protected static $modules = [
@@ -79,7 +72,6 @@ class IntegrationTest extends SearchApiBrowserTestBase {
    */
   public function setUp(): void {
     parent::setUp();
-    $this->indexStorage = \Drupal::entityTypeManager()->getStorage('search_api_index');
 
     $permissions = [
       'administer search_api',
@@ -372,8 +364,8 @@ class IntegrationTest extends SearchApiBrowserTestBase {
 
     $this->submitForm([], 'Save and add fields');
     $this->assertSession()->pageTextContains('The index was successfully saved.');
-    $this->indexStorage->resetCache([$index2_id]);
-    $index = $this->indexStorage->load($index2_id);
+    \Drupal::entityTypeManager()->getStorage('search_api_index')->resetCache([$index2_id]);
+    $index = \Drupal::entityTypeManager()->getStorage('search_api_index')->load($index2_id);
     $this->assertSession()->addressEquals($index->toUrl('add-fields'));
 
     $this->drupalGet('admin/config/search/search-api');
@@ -431,7 +423,7 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     $this->submitForm($edit, 'Save');
 
     /** @var \Drupal\search_api\IndexInterface $index */
-    $index = $this->indexStorage->load($this->indexId);
+    $index = \Drupal::entityTypeManager()->getStorage('search_api_index')->load($this->indexId);
     $remaining = $index->getTrackerInstance()->getRemainingItemsCount();
     $this->assertEquals(0, $remaining, 'Index was not scheduled for re-indexing when saving its server.');
 
@@ -1697,9 +1689,9 @@ class IntegrationTest extends SearchApiBrowserTestBase {
     $this->assertSession()->addressEquals('admin/config/search/search-api');
 
     // Confirm that the index hasn't been deleted.
-    $this->indexStorage->resetCache([$this->indexId]);
+    \Drupal::entityTypeManager()->getStorage('search_api_index')->resetCache([$this->indexId]);
     /** @var \Drupal\search_api\IndexInterface $index */
-    $index = $this->indexStorage->load($this->indexId);
+    $index = \Drupal::entityTypeManager()->getStorage('search_api_index')->load($this->indexId);
     $this->assertInstanceOf(IndexInterface::class, $index, 'The index associated with the server was not deleted.');
     $this->assertFalse($index->status(), 'The index associated with the server was disabled.');
     $this->assertNull($index->getServerId(), 'The index was removed from the server.');
@@ -1716,9 +1708,9 @@ class IntegrationTest extends SearchApiBrowserTestBase {
    */
   protected function getIndex($reset = FALSE) {
     if ($reset) {
-      $this->indexStorage->resetCache([$this->indexId]);
+      \Drupal::entityTypeManager()->getStorage('search_api_index')->resetCache([$this->indexId]);
     }
-    return $this->indexStorage->load($this->indexId);
+    return \Drupal::entityTypeManager()->getStorage('search_api_index')->load($this->indexId);
   }
 
   /**

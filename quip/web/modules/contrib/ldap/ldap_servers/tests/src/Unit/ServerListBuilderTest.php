@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\ldap_servers\Tests\Unit;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\ldap_servers\ServerListBuilder;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Tests Server ListBuilder.
- *
- * @group ldap_servers
  */
+#[Group('ldap_servers')]
 class ServerListBuilderTest extends UnitTestCase {
 
   /**
@@ -30,11 +32,11 @@ class ServerListBuilderTest extends UnitTestCase {
   protected $container;
 
   /**
-   * The server storage.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Prophecy\Prophecy\ObjectProphecy
    */
-  protected $serverStorage;
+  protected $entityTypeManager;
 
   /**
    * The LDAP Bridge.
@@ -53,13 +55,12 @@ class ServerListBuilderTest extends UnitTestCase {
     $string_translation = $this->getStringTranslationStub();
     $this->container->set('string_translation', $string_translation);
 
-    $entity_type_manager = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
-    $this->container->set('entity_type.manager', $entity_type_manager->reveal());
+    $this->entityTypeManager = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->container->set('entity_type.manager', $this->entityTypeManager->reveal());
 
-    $this->serverStorage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
-    $entity_type_manager->getStorage('ldap_server')
-      ->willReturn($this->serverStorage)
-      ->shouldBeCalled($this->once());
+    $server_storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
+    $this->entityTypeManager->getStorage('ldap_server')
+      ->willReturn($server_storage);
 
     $this->ldapBridge = $this->prophesize('Drupal\ldap_servers\LdapBridgeInterface');
     $this->container->set('ldap.bridge', $this->ldapBridge->reveal());
@@ -71,6 +72,16 @@ class ServerListBuilderTest extends UnitTestCase {
       ->willReturn('ldap_server');
     $this->serverListBuilder = ServerListBuilder::createInstance($this->container, $entity_type);
 
+  }
+
+  /**
+   * Stubs entity access() to return an AccessResult object.
+   *
+   * @param \PHPUnit\Framework\MockObject\MockObject $entity
+   *   The entity mock.
+   */
+  protected function stubEntityAccess(MockObject $entity): void {
+    $entity->method('access')->willReturn(AccessResult::neutral());
   }
 
   /**
@@ -95,14 +106,13 @@ class ServerListBuilderTest extends UnitTestCase {
    */
   public function testBuildRow(): void {
     $server = $this->createMock('Drupal\ldap_servers\Entity\Server');
-    $server->expects($this->exactly(3))
-      ->method('id')
+    $this->stubEntityAccess($server);
+    $server->method('id')
       ->willReturn('example');
-    $server->expects($this->once(1))
-      ->method('label')
+    $server->method('label')
       ->willReturn('Example Server');
 
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example')
       ->willReturn($server);
@@ -120,11 +130,10 @@ class ServerListBuilderTest extends UnitTestCase {
       ->method('id')
       ->willReturn('example');
     $server = $this->createMock('Drupal\ldap_servers\Entity\Server');
-    $server->expects($this->exactly(2))
-      ->method('id')
+    $this->stubEntityAccess($server);
+    $server->method('id')
       ->willReturn('example');
-    $server->expects($this->once())
-      ->method('label')
+    $server->method('label')
       ->willReturn('Example Server');
     $translated_markup = $this->createMock('Drupal\Core\StringTranslation\TranslatableMarkup');
     $translated_markup->expects($this->once())
@@ -151,7 +160,7 @@ class ServerListBuilderTest extends UnitTestCase {
         FALSE
       );
 
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example')
       ->willReturn($server);
@@ -185,11 +194,10 @@ class ServerListBuilderTest extends UnitTestCase {
       ->method('id')
       ->willReturn('example');
     $server = $this->createMock('Drupal\ldap_servers\Entity\Server');
-    $server->expects($this->exactly(2))
-      ->method('id')
+    $this->stubEntityAccess($server);
+    $server->method('id')
       ->willReturn('example');
-    $server->expects($this->once())
-      ->method('label')
+    $server->method('label')
       ->willReturn('Example Server');
     $translated_markup = $this->createMock('Drupal\Core\StringTranslation\TranslatableMarkup');
     $translated_markup->expects($this->once())
@@ -216,7 +224,7 @@ class ServerListBuilderTest extends UnitTestCase {
         FALSE
       );
 
-    $this->serverStorage->expects($this->once())
+    $this->entityTypeManager->reveal()->getStorage('ldap_server')->expects($this->once())
       ->method('load')
       ->with('example')
       ->willReturn($server);
@@ -246,8 +254,8 @@ class ServerListBuilderTest extends UnitTestCase {
    */
   public function testGetOperations() {
     $server = $this->createMock('Drupal\ldap_servers\ServerInterface');
-    $server->expects($this->exactly(2))
-      ->method('id')
+    $this->stubEntityAccess($server);
+    $server->method('id')
       ->willReturn('example');
     $server->expects($this->once())
       ->method('get')
